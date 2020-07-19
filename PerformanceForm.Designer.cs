@@ -75,11 +75,11 @@
             // 
             this.label4.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.label4.Location = new System.Drawing.Point(55, 77);
+            this.label4.Location = new System.Drawing.Point(54, 75);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(128, 19);
+            this.label4.Size = new System.Drawing.Size(130, 21);
             this.label4.TabIndex = 22;
             this.label4.Text = "CPU-belastning";
             this.label4.TextAlign = System.Drawing.ContentAlignment.BottomCenter;
@@ -104,11 +104,11 @@
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.label2.Location = new System.Drawing.Point(69, 177);
+            this.label2.Location = new System.Drawing.Point(69, 175);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(101, 19);
+            this.label2.Size = new System.Drawing.Size(101, 21);
             this.label2.TabIndex = 25;
             this.label2.Text = "RAM-minne";
             // 

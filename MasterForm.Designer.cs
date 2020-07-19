@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Optima");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Optima");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MasterForm));
             this.addPlcMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addPlc = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,7 +48,7 @@
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.menuSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.databasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.debugMeny = new System.Windows.Forms.ToolStripMenuItem();
+            this.debugMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.addPlcMenu.SuspendLayout();
@@ -84,11 +84,11 @@
             this.treeView.ImageList = this.imageList;
             this.treeView.Location = new System.Drawing.Point(3, 111);
             this.treeView.Name = "treeView";
-            treeNode2.ContextMenuStrip = this.addPlcMenu;
-            treeNode2.Name = "Optima";
-            treeNode2.Text = "Optima";
+            treeNode1.ContextMenuStrip = this.addPlcMenu;
+            treeNode1.Name = "Optima";
+            treeNode1.Text = "Optima";
             this.treeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
+            treeNode1});
             this.treeView.SelectedImageIndex = 0;
             this.treeView.Size = new System.Drawing.Size(294, 607);
             this.treeView.TabIndex = 0;
@@ -256,7 +256,7 @@
             // 
             this.menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.databasToolStripMenuItem,
-            this.debugMeny});
+            this.debugMenu});
             this.menuSettings.Name = "menuSettings";
             this.menuSettings.Size = new System.Drawing.Size(84, 20);
             this.menuSettings.Text = "Inställningar";
@@ -264,17 +264,17 @@
             // databasToolStripMenuItem
             // 
             this.databasToolStripMenuItem.Name = "databasToolStripMenuItem";
-            this.databasToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.databasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.databasToolStripMenuItem.Text = "Databas";
             this.databasToolStripMenuItem.Click += new System.EventHandler(this.databasToolStripMenuItem_Click);
             // 
-            // debugMeny
+            // debugMenu
             // 
-            this.debugMeny.CheckOnClick = true;
-            this.debugMeny.Name = "debugMeny";
-            this.debugMeny.Size = new System.Drawing.Size(116, 22);
-            this.debugMeny.Text = "Debug";
-            this.debugMeny.CheckedChanged += new System.EventHandler(this.debugMeny_CheckedChanged);
+            this.debugMenu.CheckOnClick = true;
+            this.debugMenu.Name = "debugMenu";
+            this.debugMenu.Size = new System.Drawing.Size(180, 22);
+            this.debugMenu.Text = "Debug";
+            this.debugMenu.CheckedChanged += new System.EventHandler(this.debugMeny_CheckedChanged);
             // 
             // menuQuestion
             // 
@@ -338,7 +338,7 @@
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem menuSettings;
         private System.Windows.Forms.ToolStripMenuItem databasToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem debugMeny;
+        private System.Windows.Forms.ToolStripMenuItem debugMenu;
         private System.Windows.Forms.ToolStripMenuItem menuQuestion;
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.PictureBox pictureBox1;

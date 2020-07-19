@@ -37,6 +37,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 txtDeadband.Text = 0.ToString();
                 txtBitAddress.Text = 0.ToString();
                 comboLogFreq.SelectedItem = "_1s";
+                txtNrOfElements.Text = 1.ToString();
                 comboLogFreq.Text = "_1s";
                 comboDataType.Text = "DataBlock";
                 comboDataType.SelectedItem = "DataBlock";

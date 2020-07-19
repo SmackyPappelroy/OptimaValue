@@ -45,13 +45,14 @@ namespace OptimaValue
 
             SqlForm = new sqlForm();
             SqlForm.FormClosing += SqlForm_FormClosing;
-            debugMeny.Checked = Settings.Default.Debug;
+            debugMenu.Checked = Settings.Default.Debug;
             notifyIcon.Visible = true;
             notifyIcon.Icon = Resources.icons8_gas_idle;
 
             menuStrip.BackColor = UIColors.ForeGroundLayer1;
             menuQuestion.ForeColor = UIColors.HeaderText;
             menuSettings.ForeColor = UIColors.HeaderText;
+            menuSettings.KeepOpenOnDropdownCheck();
 
             menuSettings.ChangeForeColorMenuItem(Color.Black, UIColors.HeaderText);
             menuQuestion.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
@@ -79,7 +80,7 @@ namespace OptimaValue
 
         private void debugMeny_CheckedChanged(object sender, EventArgs e)
         {
-            Settings.Default.Debug = debugMeny.Checked;
+            Settings.Default.Debug = debugMenu.Checked;
             Settings.Default.Save();
         }
 

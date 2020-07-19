@@ -82,17 +82,18 @@
             // txtName
             // 
             this.txtName.AutoSize = true;
-            this.txtName.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtName.Dock = System.Windows.Forms.DockStyle.Left;
             this.txtName.ForeColor = System.Drawing.Color.White;
             this.txtName.Location = new System.Drawing.Point(69, 0);
             this.txtName.Name = "txtName";
-            this.txtName.Size = new System.Drawing.Size(330, 26);
+            this.txtName.Size = new System.Drawing.Size(46, 26);
             this.txtName.TabIndex = 1;
             this.txtName.Text = "txtName";
             this.txtName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // tableLayoutPanel1
             // 
+            this.tableLayoutPanel1.AutoSize = true;
             this.tableLayoutPanel1.ColumnCount = 4;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
@@ -107,7 +108,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(402, 26);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(362, 26);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // statusPicture
@@ -144,10 +145,11 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
             this.ContextMenuStrip = this.contextMenuStrip;
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "SingleTagControl";
-            this.Size = new System.Drawing.Size(402, 26);
+            this.Size = new System.Drawing.Size(362, 26);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.contextMenuStrip.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
@@ -155,6 +157,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.statusPicture)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statsImage)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
