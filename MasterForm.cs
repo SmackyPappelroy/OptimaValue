@@ -11,6 +11,7 @@ namespace OptimaValue
 {
     public partial class MasterForm : Form
     {
+        #region Properties
         private ExtendedPlc activePlc;
         private PlcSettingsControl settingsControl;
         private StatusControl statusControl;
@@ -24,7 +25,9 @@ namespace OptimaValue
         private MyLogger myLogger = new MyLogger();
 
         private bool isSubscribed = false;
+        #endregion
 
+        #region Constructor
         public MasterForm()
         {
             InitializeComponent();
@@ -53,7 +56,111 @@ namespace OptimaValue
             menuSettings.ChangeForeColorMenuItem(Color.Black, UIColors.HeaderText);
             menuQuestion.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
         }
+        #endregion
 
+        #region Form
+        private async void MasterForm_Load(object sender, EventArgs e)
+        {
+            var result = await PlcConfig.TestConnectionSqlAsync();
+            if (!result)
+            {
+                txtStatus.Text = "Misslyckades att ansluta till Sql";
+            }
+            PopulateTree();
+        }
+
+        private void MasterForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Subscribe(false);
+            Master.StopLog(true);
+            startStopButtonVisibilityTimer.Stop();
+            System.Threading.Thread.Sleep(100);
+        }
+
+        private void debugMeny_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.Default.Debug = debugMeny.Checked;
+            Settings.Default.Save();
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            var assemblyVersion = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString();
+            notifyIcon.ShowBalloonTip(5000, $"OptimaValue \nCopyright © 2020 v{assemblyVersion}", "By Hans-Martin Nilsson", ToolTipIcon.None);
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            if (!perFormOpen)
+            {
+                perForm = null;
+                perForm = new PerformanceForm();
+                perForm.FormClosed -= PerForm_FormClosed;
+                perForm.FormClosed += PerForm_FormClosed;
+                perForm.Show();
+                perFormOpen = true;
+            }
+            else
+            {
+                perForm.BringToFront();
+            }
+        }
+
+        private void btnStart_Click(object sender, EventArgs e)
+        {
+            Master.StartLog();
+            if (settingsControl != null)
+            {
+                if (settingsControl.Visible == true)
+                {
+                    settingsControl.Hide();
+                    settingsControl = null;
+                }
+            }
+
+            if (statusControl != null)
+            {
+                if (statusControl.Visible == true)
+                {
+                    statusControl.Hide();
+                    statusControl = null;
+                }
+            }
+            if (tagControl != null)
+            {
+                if (tagControl.Visible == true)
+                {
+                    tagControl.Hide();
+                    tagControl = null;
+                }
+            }
+
+            addPlc.Enabled = false;
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            Master.StopLog(false);
+            addPlc.Enabled = true;
+
+        }
+
+        private void databasToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (IsOpenSqlForm)
+                SqlForm.BringToFront();
+            else
+            {
+                SqlForm = null;
+                SqlForm = new sqlForm();
+                SqlForm.FormClosing += SqlForm_FormClosing;
+                SqlForm.Show();
+                IsOpenSqlForm = true;
+            }
+        }
+        #endregion
+
+        #region Events
         public void Subscribe(bool subscribe)
         {
             if (!isSubscribed && subscribe)
@@ -222,6 +329,7 @@ namespace OptimaValue
             PopulateTree();
             CloseUserControls();
         }
+        #endregion
 
         private void CloseUserControls()
         {
@@ -242,15 +350,7 @@ namespace OptimaValue
             }
         }
 
-        private async void MasterForm_Load(object sender, EventArgs e)
-        {
-            var result = await PlcConfig.TestConnectionSqlAsync();
-            if (!result)
-            {
-                txtStatus.Text = "Misslyckades att ansluta till Sql";
-            }
-            PopulateTree();
-        }
+
 
         private void PopulateTree()
         {
@@ -418,66 +518,11 @@ namespace OptimaValue
             }
         }
 
-        private void btnStart_Click(object sender, EventArgs e)
-        {
-            Master.StartLog();
-            if (settingsControl != null)
-            {
-                if (settingsControl.Visible == true)
-                {
-                    settingsControl.Hide();
-                    settingsControl = null;
-                }
-            }
 
-            if (statusControl != null)
-            {
-                if (statusControl.Visible == true)
-                {
-                    statusControl.Hide();
-                    statusControl = null;
-                }
-            }
-            if (tagControl != null)
-            {
-                if (tagControl.Visible == true)
-                {
-                    tagControl.Hide();
-                    tagControl = null;
-                }
-            }
 
-            addPlc.Enabled = false;
-        }
 
-        private void btnStop_Click(object sender, EventArgs e)
-        {
-            Master.StopLog(false);
-            addPlc.Enabled = true;
 
-        }
 
-        private void MasterForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            Subscribe(false);
-            Master.StopLog(true);
-            startStopButtonVisibilityTimer.Stop();
-            System.Threading.Thread.Sleep(100);
-        }
-
-        private void databasToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (IsOpenSqlForm)
-                SqlForm.BringToFront();
-            else
-            {
-                SqlForm = null;
-                SqlForm = new sqlForm();
-                SqlForm.FormClosing += SqlForm_FormClosing;
-                SqlForm.Show();
-                IsOpenSqlForm = true;
-            }
-        }
 
         private void SqlForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -485,34 +530,7 @@ namespace OptimaValue
             PopulateTree();
         }
 
-        private void debugMeny_CheckedChanged(object sender, EventArgs e)
-        {
-            Settings.Default.Debug = debugMeny.Checked;
-            Settings.Default.Save();
-        }
 
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            var assemblyVersion = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString();
-            notifyIcon.ShowBalloonTip(5000, $"OptimaValue \nCopyright © 2020 v{assemblyVersion}", "By Hans-Martin Nilsson", ToolTipIcon.None);
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-            if (!perFormOpen)
-            {
-                perForm = null;
-                perForm = new PerformanceForm();
-                perForm.FormClosed -= PerForm_FormClosed;
-                perForm.FormClosed += PerForm_FormClosed;
-                perForm.Show();
-                perFormOpen = true;
-            }
-            else
-            {
-                perForm.BringToFront();
-            }
-        }
 
         private void PerForm_FormClosed(object sender, FormClosedEventArgs e)
         {
