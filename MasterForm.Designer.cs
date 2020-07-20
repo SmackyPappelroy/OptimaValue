@@ -41,6 +41,7 @@
             this.txtStatus = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btnStart = new System.Windows.Forms.Button();
             this.btnStop = new System.Windows.Forms.Button();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
@@ -50,7 +51,6 @@
             this.debugMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.btnStart = new System.Windows.Forms.Button();
             this.addPlcMenu.SuspendLayout();
             this.statusPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -178,6 +178,23 @@
             this.panel1.Size = new System.Drawing.Size(294, 102);
             this.panel1.TabIndex = 3;
             // 
+            // btnStart
+            // 
+            this.btnStart.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
+            this.btnStart.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnStart.BackgroundImage")));
+            this.btnStart.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.btnStart.Dock = System.Windows.Forms.DockStyle.Left;
+            this.btnStart.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
+            this.btnStart.FlatAppearance.BorderSize = 0;
+            this.btnStart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnStart.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnStart.Location = new System.Drawing.Point(0, 0);
+            this.btnStart.Name = "btnStart";
+            this.btnStart.Size = new System.Drawing.Size(94, 102);
+            this.btnStart.TabIndex = 9;
+            this.btnStart.UseVisualStyleBackColor = false;
+            this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
+            // 
             // btnStop
             // 
             this.btnStop.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnStop.BackgroundImage")));
@@ -271,22 +288,6 @@
             // 
             this.notifyIcon.Text = "notifyIcon1";
             this.notifyIcon.Visible = true;
-            // 
-            // btnStart
-            // 
-            this.btnStart.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
-            this.btnStart.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnStart.BackgroundImage")));
-            this.btnStart.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.btnStart.Dock = System.Windows.Forms.DockStyle.Left;
-            this.btnStart.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
-            this.btnStart.FlatAppearance.BorderSize = 0;
-            this.btnStart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStart.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnStart.Location = new System.Drawing.Point(0, 0);
-            this.btnStart.Name = "btnStart";
-            this.btnStart.Size = new System.Drawing.Size(94, 102);
-            this.btnStart.TabIndex = 9;
-            this.btnStart.UseVisualStyleBackColor = false;
             // 
             // MasterForm
             // 

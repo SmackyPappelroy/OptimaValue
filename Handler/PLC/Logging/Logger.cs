@@ -199,7 +199,7 @@ namespace OptimaValue
             {
                 int logdiff;
                 if ((int)logTag.logFreq <= 250)
-                    logdiff = 2;
+                    logdiff = 1;
                 else
                     logdiff = 0;
 
@@ -403,9 +403,21 @@ namespace OptimaValue
                                 shouldLog = true;
                             else if (logTag.logType == LogType.TimeOfDay)
                             {
-                                if (DateTime.Now.Hour == logTag.timeOfDay.Hours &&
-                                    DateTime.Now.Minute == logTag.timeOfDay.Minutes &&
-                                    DateTime.Now.Second == logTag.timeOfDay.Seconds)
+                                if (logTag.timeOfDay.Seconds != 0)
+                                {
+                                    if (DateTime.Now.Hour == logTag.timeOfDay.Hours &&
+                                        DateTime.Now.Minute == logTag.timeOfDay.Minutes &&
+                                        DateTime.Now.Second == logTag.timeOfDay.Seconds)
+                                    {
+                                        var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == DateTime.Now.Day);
+                                        if (allOccurencesOfTagInList == null)
+                                        {
+                                            shouldLog = true;
+                                        }
+                                    }
+                                }
+                                else if (DateTime.Now.Hour == logTag.timeOfDay.Hours &&
+                                        DateTime.Now.Minute == logTag.timeOfDay.Minutes)
                                 {
                                     var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == DateTime.Now.Day);
                                     if (allOccurencesOfTagInList == null)

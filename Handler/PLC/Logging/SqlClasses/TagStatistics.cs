@@ -53,10 +53,14 @@ namespace OptimaValue
                 AverageScanTime = "-";
             else
             {
-                totalScanTime = lastScanTime + totalScanTime;
-                var ticks = totalScanTime.Ticks / (NrFailedReadAttempts + nrSuccededReadAttempts);
-                var newTime = new TimeSpan(ticks / 2);
-                AverageScanTime = newTime.ToString(@"mm\:ss\.ffff");
+                var divisor = (NrFailedReadAttempts + nrSuccededReadAttempts - 1);
+                if (divisor > 0)
+                {
+                    var ticks = totalScanTime.Ticks / divisor;
+                    var newTime = new TimeSpan(ticks);
+                    AverageScanTime = newTime.ToString(@"mm\:ss\.ffff");
+                }
+
             }
         }
 
