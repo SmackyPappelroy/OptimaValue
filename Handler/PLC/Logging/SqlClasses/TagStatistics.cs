@@ -32,6 +32,14 @@ namespace OptimaValue
 
         #endregion
 
+        public void ClearScanTime()
+        {
+            lastTimeLogged = DateTime.MinValue;
+            totalScanTime = TimeSpan.FromSeconds(0);
+            NrFailedReadAttempts = 0;
+            NrSuccededReadAttempts = 0;
+        }
+
         private void CalculateScanTime()
         {
             if (lastTimeLogged == DateTime.MinValue)

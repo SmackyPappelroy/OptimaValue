@@ -183,7 +183,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void rensaFelToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            SingleTag.NrFailedReadAttempts = 0;
+            SingleTag.ClearScanTime();
         }
     }
 }
