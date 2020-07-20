@@ -109,6 +109,7 @@
     <Compile Include="Handler\Master.cs" />
     <Compile Include="Handler\PLC\Logging\Logger.cs" />
     <Compile Include="Handler\PLC\Logging\SqlClasses\TagStatistics.cs" />
+    <Compile Include="Handler\PLC\MyPlc\Events\DeleteConfirmationEvent.cs" />
     <Compile Include="Handler\PLC\MyPlc\Graphics\AddTag.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -120,6 +121,12 @@
     </Compile>
     <Compile Include="Handler\PLC\MyPlc\Graphics\AllTagsStatsForm.Designer.cs">
       <DependentUpon>AllTagsStatsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handler\PLC\MyPlc\Graphics\DeletePlcConfirmationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Handler\PLC\MyPlc\Graphics\DeletePlcConfirmationForm.Designer.cs">
+      <DependentUpon>DeletePlcConfirmationForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Handler\PLC\MyPlc\Graphics\PlcSettingsControl.cs">
       <SubType>UserControl</SubType>
@@ -206,6 +213,9 @@
     <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\AllTagsStatsForm.resx">
       <DependentUpon>AllTagsStatsForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\DeletePlcConfirmationForm.resx">
+      <DependentUpon>DeletePlcConfirmationForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\PlcSettingsControl.resx">
       <DependentUpon>PlcSettingsControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -280,7 +290,6 @@
     <None Include="Mina Resurser\Tag\icons8_error_16.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Handler\PLC\MyPlc\Events\" />
     <Folder Include="Properties\DataSources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

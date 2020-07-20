@@ -1,4 +1,5 @@
-﻿using S7.Net;
+﻿using OptimaValue.Handler.PLC.MyPlc.Graphics;
+using S7.Net;
 using System;
 using System.ComponentModel;
 using System.Data.SqlClient;
@@ -18,6 +19,8 @@ namespace OptimaValue.Handler.PLC.Graphics
         public CpuType CpuType;
         private ExtendedPlc MyPlc;
         private bool destroyed = false;
+        private bool DeleteFormOpen = false;
+        private DeletePlcConfirmationForm confirmForm;
 
 
         public PlcSettingsControl(ConnectionStatus conStatus, string plcName, string plcIp,
@@ -48,6 +51,13 @@ namespace OptimaValue.Handler.PLC.Graphics
             }
 
             this.HandleDestroyed += PlcSettingsControl_HandleDestroyed;
+            DeleteConfirmationEvent.DeleteEvent += DeleteConfirmationEvent_DeleteEvent;
+        }
+
+        private void DeleteConfirmationEvent_DeleteEvent(object sender, DeleteEventArgs e)
+        {
+            if (e.Delete)
+                DeletePlc();
         }
 
         private void PlcSettingsControl_HandleDestroyed(object sender, EventArgs e)
@@ -420,6 +430,28 @@ namespace OptimaValue.Handler.PLC.Graphics
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (!DeleteFormOpen)
+            {
+                confirmForm = new DeletePlcConfirmationForm();
+                confirmForm.FormClosed += ConfirmForm_FormClosed;
+                confirmForm.ShowDialog();
+                DeleteFormOpen = true;
+            }
+            else
+            {
+                if (confirmForm != null)
+                    confirmForm.BringToFront();
+            }
+        }
+
+        private void ConfirmForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            DeleteFormOpen = true;
+            confirmForm.FormClosed -= ConfirmForm_FormClosed;
+        }
+
+        private void DeletePlc()
         {
             if (MyPlc != null)
             {
