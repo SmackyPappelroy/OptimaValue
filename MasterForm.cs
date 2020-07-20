@@ -439,6 +439,7 @@ namespace OptimaValue
                     {
                         Parent = contentPanel
                     };
+                    settingsControl.Dock = DockStyle.Fill;
                 }
                 // Plcn finn i databas
                 else
@@ -449,6 +450,7 @@ namespace OptimaValue
                     {
                         Parent = contentPanel
                     };
+                    settingsControl.Dock = DockStyle.Fill;
                 }
                 if (activePlc != null)
                 {
