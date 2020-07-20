@@ -15,6 +15,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             InitializeComponent();
             PlcName = plcName;
             txtPlc.Text = PlcName;
+            lblPlcStatus.Text = $"{PlcName} status";
             txtStatus.Text = string.Empty;
             panelStatus.BackColor = Color.FromArgb(67, 62, 71);
             Subscribe(true);
@@ -50,6 +51,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             txtStatus.Text = string.Empty;
             statusTimer.Stop();
+            errorImage.Visible = false;
         }
 
         private void OnlineStatusEvent_NewMessage(object sender, OnlineStatusEventArgs e)
@@ -90,6 +92,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     if (e.Message != "")
                         statusTimer.Start();
                 }
+                if (e.Status == Status.Error || e.Status == Status.Warning)
+                    errorImage.Visible = true;
             }
             catch (System.ComponentModel.InvalidAsynchronousStateException) { }
 

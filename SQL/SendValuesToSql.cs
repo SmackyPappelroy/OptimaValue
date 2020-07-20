@@ -29,8 +29,8 @@ namespace OptimaValue
                 sqlThread = null;
                 sqlThread = new Thread(SqlCycler);
             }
-
-            sqlThread.Start();
+            if (sqlThread.ThreadState != ThreadState.Running)
+                sqlThread.Start();
         }
 
         private static void SqlCycler()
@@ -248,11 +248,11 @@ namespace OptimaValue
         {
             var tbl = SqlValues.ConvertToDataTable<LogValuesSql>();
 
+            if (tbl.Rows.Count == 0)
+                return;
+
             lock (sqlLock)
             {
-                if (tbl.Rows.Count == 0)
-                    return;
-
                 string connection = PlcConfig.ConnectionString();
 
                 using (SqlConnection con = new SqlConnection(connection))

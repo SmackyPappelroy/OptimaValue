@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Optima");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Optima");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MasterForm));
             this.addPlcMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addPlc = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,6 +51,7 @@
             this.debugMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.errorImage = new System.Windows.Forms.PictureBox();
             this.addPlcMenu.SuspendLayout();
             this.statusPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -58,6 +59,7 @@
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.menuStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).BeginInit();
             this.SuspendLayout();
             // 
             // addPlcMenu
@@ -84,11 +86,11 @@
             this.treeView.ImageList = this.imageList;
             this.treeView.Location = new System.Drawing.Point(3, 111);
             this.treeView.Name = "treeView";
-            treeNode1.ContextMenuStrip = this.addPlcMenu;
-            treeNode1.Name = "Optima";
-            treeNode1.Text = "Optima";
+            treeNode2.ContextMenuStrip = this.addPlcMenu;
+            treeNode2.Name = "Optima";
+            treeNode2.Text = "Optima";
             this.treeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode2});
             this.treeView.SelectedImageIndex = 0;
             this.treeView.Size = new System.Drawing.Size(294, 607);
             this.treeView.TabIndex = 0;
@@ -119,6 +121,7 @@
             // statusPanel
             // 
             this.statusPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
+            this.statusPanel.Controls.Add(this.errorImage);
             this.statusPanel.Controls.Add(this.pictureBox1);
             this.statusPanel.Controls.Add(this.txtStatus);
             this.statusPanel.Controls.Add(this.label4);
@@ -289,6 +292,17 @@
             this.notifyIcon.Text = "notifyIcon1";
             this.notifyIcon.Visible = true;
             // 
+            // errorImage
+            // 
+            this.errorImage.BackColor = System.Drawing.Color.Transparent;
+            this.errorImage.Image = ((System.Drawing.Image)(resources.GetObject("errorImage.Image")));
+            this.errorImage.Location = new System.Drawing.Point(671, 3);
+            this.errorImage.Name = "errorImage";
+            this.errorImage.Size = new System.Drawing.Size(32, 32);
+            this.errorImage.TabIndex = 14;
+            this.errorImage.TabStop = false;
+            this.errorImage.Visible = false;
+            // 
             // MasterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -304,7 +318,7 @@
             this.MaximizeBox = false;
             this.Name = "MasterForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Optima Logger";
+            this.Text = "Optima Value";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MasterForm_FormClosing);
             this.Load += new System.EventHandler(this.MasterForm_Load);
             this.addPlcMenu.ResumeLayout(false);
@@ -316,6 +330,7 @@
             this.tableLayoutPanel2.ResumeLayout(false);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -343,5 +358,6 @@
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button btnStart;
+        private System.Windows.Forms.PictureBox errorImage;
     }
 }

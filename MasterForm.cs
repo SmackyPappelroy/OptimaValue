@@ -253,6 +253,7 @@ namespace OptimaValue
         {
             statusTimer.Stop();
             txtStatus.Text = string.Empty;
+            errorImage.Visible = false;
         }
 
         private void StatusEvent_NewMessage(object sender, StatusEventArgs e)
@@ -275,10 +276,12 @@ namespace OptimaValue
             if (e.Status == Status.Error)
             {
                 notifyIcon.ShowBalloonTip(3000, $"OptimaValue {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}", e.Message, ToolTipIcon.Error);
+                errorImage.Visible = true;
             }
             else if (e.Status == Status.Warning)
             {
                 notifyIcon.ShowBalloonTip(3000, $"OptimaValue {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}", e.Message, ToolTipIcon.Warning);
+                errorImage.Visible = true;
             }
 
             if (!Settings.Default.Debug)

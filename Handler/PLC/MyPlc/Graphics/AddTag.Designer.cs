@@ -263,7 +263,7 @@
             this.txtTimeOfDay.Name = "txtTimeOfDay";
             this.txtTimeOfDay.Size = new System.Drawing.Size(454, 23);
             this.txtTimeOfDay.TabIndex = 7;
-            this.toolTip.SetToolTip(this.txtTimeOfDay, "Tid på dagen taggen ska loggas vid TimeOfDay");
+            this.toolTip.SetToolTip(this.txtTimeOfDay, "Tid på dagen taggen ska loggas vid TimeOfDay [hh:mm:ss]");
             this.txtTimeOfDay.Validating += new System.ComponentModel.CancelEventHandler(this.txtTimeOfDay_Validating);
             // 
             // label4
@@ -439,6 +439,7 @@
             this.tableLayoutPanel1.SetRowSpan(this.btnSave, 3);
             this.btnSave.Size = new System.Drawing.Size(454, 80);
             this.btnSave.TabIndex = 24;
+            this.toolTip.SetToolTip(this.btnSave, "Ändra befintlig tag");
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
@@ -456,6 +457,7 @@
             this.tableLayoutPanel1.SetRowSpan(this.btnNew, 3);
             this.btnNew.Size = new System.Drawing.Size(454, 80);
             this.btnNew.TabIndex = 25;
+            this.toolTip.SetToolTip(this.btnNew, "Skapa ny tag");
             this.btnNew.UseVisualStyleBackColor = true;
             this.btnNew.Click += new System.EventHandler(this.button1_Click);
             // 

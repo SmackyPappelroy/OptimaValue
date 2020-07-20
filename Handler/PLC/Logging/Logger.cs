@@ -132,21 +132,27 @@ namespace OptimaValue
                             try
                             {
                                 MyPlc.ReconnectRetries++;
-                                MyPlc.SendPlcStatusMessage($"Försöker återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Ok);
-                                StatusEvent.RaiseMessage($"Försöker återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Ok);
+
                                 MyPlc.Close();
                                 MyPlc.Open();
                                 if (MyPlc.IsConnected)
                                 {
+                                    MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Ok);
+                                    StatusEvent.RaiseMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Ok);
                                     MyPlc.ConnectionStatus = ConnectionStatus.Connected;
                                     MyPlc.ReconnectRetries = 0;
+                                }
+                                else
+                                {
+                                    MyPlc.SendPlcStatusMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Error);
+                                    StatusEvent.RaiseMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Error);
                                 }
                                 MyPlc.LastReconnect = DateTime.Now;
                             }
                             catch
                             {
-                                MyPlc.SendPlcStatusMessage($"Misslyckades att ansluta till {MyPlc.PlcName}", Status.Error);
-                                StatusEvent.RaiseMessage($"Misslyckades att ansluta till {MyPlc.PlcName}", Status.Error);
+                                MyPlc.SendPlcStatusMessage($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Error);
+                                StatusEvent.RaiseMessage($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Error);
                                 MyPlc.LastReconnect = DateTime.Now;
                             }
                         }
