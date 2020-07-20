@@ -29,7 +29,7 @@ namespace OptimaValue
         public int Id = 0;
 
         public DateTime LastReconnect = DateTime.MinValue;
-        public int MaxReconnectRetries { get; private set; } = 1;
+        public int MaxReconnectRetries { get; private set; } = 4;
         public int ReconnectRetries { get; set; }
         public bool UnableToPing { get; private set; }
         public string PlcName { get; set; }
@@ -114,17 +114,19 @@ namespace OptimaValue
         #region Events
         private void SubscribeEvents(bool subscribeToEvents)
         {
-            if (!isSubscribed && subscribe)
+            if (!isSubscribed && subscribeToEvents)
             {
                 timerPing.Tick += TimerPing_Tick;
                 PlcStatusEvent.NewMessage += PlcStatusEvent_NewMessage;
                 OnlineStatusEvent.NewMessage += OnlineStatusEvent_NewMessage;
+                isSubscribed = true;
             }
             else if (isSubscribed && !subscribeToEvents)
             {
                 timerPing.Tick -= TimerPing_Tick;
                 PlcStatusEvent.NewMessage -= PlcStatusEvent_NewMessage;
                 OnlineStatusEvent.NewMessage -= OnlineStatusEvent_NewMessage;
+                isSubscribed = false;
             }
         }
 

@@ -39,11 +39,14 @@
             this.statusPicture = new System.Windows.Forms.PictureBox();
             this.statsImage = new System.Windows.Forms.PictureBox();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
+            this.contextMenuStripError = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.rensaFelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.contextMenuStrip.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.statusPicture)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statsImage)).BeginInit();
+            this.contextMenuStripError.SuspendLayout();
             this.SuspendLayout();
             // 
             // pictureBox1
@@ -113,6 +116,7 @@
             // 
             // statusPicture
             // 
+            this.statusPicture.ContextMenuStrip = this.contextMenuStripError;
             this.statusPicture.Dock = System.Windows.Forms.DockStyle.Fill;
             this.statusPicture.Image = ((System.Drawing.Image)(resources.GetObject("statusPicture.Image")));
             this.statusPicture.InitialImage = ((System.Drawing.Image)(resources.GetObject("statusPicture.InitialImage")));
@@ -141,6 +145,20 @@
             this.imageList.Images.SetKeyName(0, "icons8_ok_16.png");
             this.imageList.Images.SetKeyName(1, "icons8_error_16.png");
             // 
+            // contextMenuStripError
+            // 
+            this.contextMenuStripError.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.rensaFelToolStripMenuItem});
+            this.contextMenuStripError.Name = "contextMenuStripError";
+            this.contextMenuStripError.Size = new System.Drawing.Size(181, 48);
+            // 
+            // rensaFelToolStripMenuItem
+            // 
+            this.rensaFelToolStripMenuItem.Name = "rensaFelToolStripMenuItem";
+            this.rensaFelToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.rensaFelToolStripMenuItem.Text = "Rensa fel";
+            this.rensaFelToolStripMenuItem.Click += new System.EventHandler(this.rensaFelToolStripMenuItem_Click);
+            // 
             // SingleTagControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -156,6 +174,7 @@
             this.tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.statusPicture)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.statsImage)).EndInit();
+            this.contextMenuStripError.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -172,5 +191,7 @@
         private System.Windows.Forms.PictureBox statsImage;
         private System.Windows.Forms.PictureBox statusPicture;
         private System.Windows.Forms.ImageList imageList;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripError;
+        private System.Windows.Forms.ToolStripMenuItem rensaFelToolStripMenuItem;
     }
 }

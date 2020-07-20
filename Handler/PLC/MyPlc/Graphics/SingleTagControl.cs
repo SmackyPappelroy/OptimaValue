@@ -56,6 +56,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void Tag_ReadErrorEvent(object sender, ReadErrorEventArgs e)
         {
+            if (InvokeRequired)
+            {
+                Invoke((MethodInvoker)delegate { Tag_ReadErrorEvent(sender, e); });
+                return;
+            }
             if (e.Error)
                 statusPicture.Show();
             else
@@ -174,6 +179,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private void pictureBox2_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             OpenStatsForm();
+        }
+
+        private void rensaFelToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SingleTag.NrFailedReadAttempts = 0;
         }
     }
 }

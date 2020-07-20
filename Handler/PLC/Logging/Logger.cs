@@ -122,6 +122,7 @@ namespace OptimaValue
                 if (MyPlc == null)
                     AbortLogThread("Hittade ingen PLC");
 
+                // Reconnect om det ej går att pinga PLC
                 if (MyPlc.ConnectionStatus != ConnectionStatus.Connected)
                 {
                     if (MyPlc.ReconnectRetries < MyPlc.MaxReconnectRetries)
@@ -131,13 +132,21 @@ namespace OptimaValue
                             try
                             {
                                 MyPlc.ReconnectRetries++;
-                                MyPlc.SendPlcStatusMessage($"Försöker ansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Ok);
+                                MyPlc.SendPlcStatusMessage($"Försöker återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Ok);
+                                StatusEvent.RaiseMessage($"Försöker återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Ok);
                                 MyPlc.Close();
                                 MyPlc.Open();
+                                if (MyPlc.IsConnected)
+                                {
+                                    MyPlc.ConnectionStatus = ConnectionStatus.Connected;
+                                    MyPlc.ReconnectRetries = 0;
+                                }
+                                MyPlc.LastReconnect = DateTime.Now;
                             }
                             catch
                             {
                                 MyPlc.SendPlcStatusMessage($"Misslyckades att ansluta till {MyPlc.PlcName}", Status.Error);
+                                StatusEvent.RaiseMessage($"Misslyckades att ansluta till {MyPlc.PlcName}", Status.Error);
                                 MyPlc.LastReconnect = DateTime.Now;
                             }
                         }
@@ -146,7 +155,12 @@ namespace OptimaValue
                     }
                     else
                     {
-                        AbortLogThread($"Max reconnect försök för {MyPlc.PlcName}\r\nAvbryter!");
+                        MyPlc.SendPlcStatusMessage($"Max reconnect försök för {MyPlc.PlcName}\r\nAvbryter!", Status.Error);
+                        StatusEvent.RaiseMessage($"Max reconnect försök för {MyPlc.PlcName}\r\nAvbryter!", Status.Error);
+                        if (PlcPicker.NrActiveEnabledPlc == 1)
+                            Master.StopLog(true);
+                        else
+                            AbortLogThread("");
                     }
                 }
 
