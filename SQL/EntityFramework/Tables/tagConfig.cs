@@ -54,5 +54,9 @@ namespace OptimaValue
         [Column(TypeName = "nvarchar")]
         [StringLength(30)]
         public string logFreq { get; set; }
+
+        [Column(TypeName = "nvarchar")]
+        [StringLength(30)]
+        public string tagUnit { get; set; }
     }
 }

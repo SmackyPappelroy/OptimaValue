@@ -67,6 +67,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             txtBitAddress.Text = tag.bitAddress.ToString();
             comboLogFreq.Text = tag.logFreq.ToString();
             comboLogFreq.SelectedItem = tag.logFreq;
+
+            txtUnit.Text = tag.tagUnit;
         }
 
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
@@ -227,11 +229,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             var connectionString = PlcConfig.ConnectionString();
             var query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq) ";
+            query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,tagUnit) ";
             query += $"VALUES ('{checkActive.Checked}','{txtName.Text}','{comboLogType.SelectedItem}','{txtTimeOfDay.Text}',";
             query += $"{int.Parse(txtDeadband.Text)},'{PlcName}','{comboVarType.SelectedItem}',{int.Parse(txtBlockNr.Text)}, ";
             query += $"'{comboDataType.SelectedItem}',{int.Parse(txtStartByte.Text)},{int.Parse(txtNrOfElements.Text)},";
-            query += $"{byte.Parse(txtBitAddress.Text)},'{comboLogFreq.SelectedItem}')";
+            query += $"{byte.Parse(txtBitAddress.Text)},'{comboLogFreq.SelectedItem}','{txtUnit.Text}')";
 
             try
             {

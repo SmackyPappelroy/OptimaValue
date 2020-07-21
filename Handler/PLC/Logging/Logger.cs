@@ -127,7 +127,7 @@ namespace OptimaValue
                 {
                     if (MyPlc.ReconnectRetries < MyPlc.MaxReconnectRetries)
                     {
-                        if (DateTime.Now - MyPlc.LastReconnect > TimeSpan.FromSeconds(10))
+                        if (DateTime.Now - MyPlc.LastReconnect > TimeSpan.FromSeconds(15))
                         {
                             try
                             {
@@ -219,7 +219,7 @@ namespace OptimaValue
             {
                 int logdiff;
                 if ((int)logTag.logFreq <= 250)
-                    logdiff = 1;
+                    logdiff = 2;
                 else
                     logdiff = 0;
 

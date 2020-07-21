@@ -23,13 +23,12 @@ namespace OptimaValue
         private DateTime UpTimeStart = DateTime.MaxValue;
         private DispatcherTimer timerPing = new DispatcherTimer();
         private bool isSubscribed = false;
-        private bool subscribe = false;
 
         public bool Active = false;
         public int Id = 0;
 
         public DateTime LastReconnect = DateTime.MinValue;
-        public int MaxReconnectRetries { get; private set; } = 4;
+        public int MaxReconnectRetries { get; private set; } = 5;
         public int ReconnectRetries { get; set; }
         public bool UnableToPing { get; private set; }
         public string PlcName { get; set; }

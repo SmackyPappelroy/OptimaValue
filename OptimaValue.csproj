@@ -107,6 +107,8 @@
     <Compile Include="Extensions\PlcExtensionMethods.cs" />
     <Compile Include="Extensions\SqlExtensionMethods.cs" />
     <Compile Include="Handler\Master.cs" />
+    <Compile Include="Handler\PLC\Enums\EdgeDetection.cs" />
+    <Compile Include="Handler\PLC\Enums\EventType.cs" />
     <Compile Include="Handler\PLC\Logging\Logger.cs" />
     <Compile Include="Handler\PLC\Logging\SqlClasses\TagStatistics.cs" />
     <Compile Include="Handler\PLC\MyPlc\Events\DeleteConfirmationEvent.cs" />

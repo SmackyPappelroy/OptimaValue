@@ -56,6 +56,8 @@
             this.comboLogFreq = new System.Windows.Forms.ComboBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnNew = new System.Windows.Forms.Button();
+            this.label12 = new System.Windows.Forms.Label();
+            this.txtUnit = new System.Windows.Forms.TextBox();
             this.errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.tableLayoutPanel1.SuspendLayout();
@@ -93,6 +95,8 @@
             this.tableLayoutPanel1.Controls.Add(this.comboLogFreq, 1, 9);
             this.tableLayoutPanel1.Controls.Add(this.btnSave, 1, 13);
             this.tableLayoutPanel1.Controls.Add(this.btnNew, 0, 13);
+            this.tableLayoutPanel1.Controls.Add(this.label12, 1, 10);
+            this.tableLayoutPanel1.Controls.Add(this.txtUnit, 1, 11);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -113,6 +117,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.25F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(920, 450);
             this.tableLayoutPanel1.TabIndex = 0;
             this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
@@ -461,6 +466,28 @@
             this.btnNew.UseVisualStyleBackColor = true;
             this.btnNew.Click += new System.EventHandler(this.button1_Click);
             // 
+            // label12
+            // 
+            this.label12.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Century Gothic", 12F);
+            this.label12.Location = new System.Drawing.Point(463, 285);
+            this.label12.Name = "label12";
+            this.label12.Padding = new System.Windows.Forms.Padding(10, 0, 0, 2);
+            this.label12.Size = new System.Drawing.Size(120, 23);
+            this.label12.TabIndex = 26;
+            this.label12.Text = "Värde-enhet";
+            // 
+            // txtUnit
+            // 
+            this.txtUnit.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtUnit.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Bold);
+            this.txtUnit.Location = new System.Drawing.Point(463, 311);
+            this.txtUnit.Name = "txtUnit";
+            this.txtUnit.Size = new System.Drawing.Size(454, 23);
+            this.txtUnit.TabIndex = 27;
+            this.toolTip.SetToolTip(this.txtUnit, "Enhet t.ex. Liter, %...");
+            // 
             // errorProvider
             // 
             this.errorProvider.ContainerControl = this;
@@ -515,5 +542,7 @@
         private System.Windows.Forms.ErrorProvider errorProvider;
         private System.Windows.Forms.Button btnNew;
         private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.TextBox txtUnit;
     }
 }

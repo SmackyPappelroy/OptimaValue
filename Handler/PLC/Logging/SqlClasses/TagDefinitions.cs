@@ -21,6 +21,7 @@ namespace OptimaValue
         public LogFrequency logFreq { get; set; }
         public DateTime LastLogTime { get; set; }
 
-
+        // New
+        public string tagUnit { get; set; } = string.Empty;
     }
 }

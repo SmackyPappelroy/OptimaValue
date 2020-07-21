@@ -157,6 +157,7 @@ namespace OptimaValue
                 var _startByte = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("startByte"));
                 var _timeOfDay = (tbl.AsEnumerable().ElementAt(rowIndex).Field<TimeSpan>("timeOfDay"));
                 var _varType = (VarType)Enum.Parse(typeof(VarType), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("varType")));
+                var _tagUnit = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("tagUnit"));
 
 
                 var myPlc = new TagDefinitions()
@@ -176,6 +177,7 @@ namespace OptimaValue
                     startByte = _startByte,
                     timeOfDay = _timeOfDay,
                     varType = _varType,
+                    tagUnit = _tagUnit,
                 };
                 tags.Add(myPlc);
             }

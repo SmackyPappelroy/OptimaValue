@@ -30,18 +30,18 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StatusControl));
             this.panel1 = new System.Windows.Forms.Panel();
+            this.errorImage = new System.Windows.Forms.PictureBox();
             this.txtStatus = new System.Windows.Forms.Label();
             this.lblPlcStatus = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.txtPlc = new System.Windows.Forms.Label();
             this.panelStatus = new System.Windows.Forms.Panel();
             this.txtUpTime = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.errorImage = new System.Windows.Forms.PictureBox();
-            this.txtPlc = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).BeginInit();
             this.panel2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
@@ -55,6 +55,18 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(438, 340);
             this.panel1.TabIndex = 12;
+            // 
+            // errorImage
+            // 
+            this.errorImage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.errorImage.BackColor = System.Drawing.Color.Transparent;
+            this.errorImage.Image = ((System.Drawing.Image)(resources.GetObject("errorImage.Image")));
+            this.errorImage.Location = new System.Drawing.Point(406, 3);
+            this.errorImage.Name = "errorImage";
+            this.errorImage.Size = new System.Drawing.Size(32, 32);
+            this.errorImage.TabIndex = 15;
+            this.errorImage.TabStop = false;
+            this.errorImage.Visible = false;
             // 
             // txtStatus
             // 
@@ -96,6 +108,20 @@
             this.panel2.Size = new System.Drawing.Size(438, 109);
             this.panel2.TabIndex = 13;
             // 
+            // txtPlc
+            // 
+            this.txtPlc.AutoSize = true;
+            this.txtPlc.Dock = System.Windows.Forms.DockStyle.Top;
+            this.txtPlc.Font = new System.Drawing.Font("Century Gothic", 15.75F);
+            this.txtPlc.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
+            this.txtPlc.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.txtPlc.Location = new System.Drawing.Point(10, 0);
+            this.txtPlc.Name = "txtPlc";
+            this.txtPlc.Padding = new System.Windows.Forms.Padding(14, 8, 21, 0);
+            this.txtPlc.Size = new System.Drawing.Size(84, 32);
+            this.txtPlc.TabIndex = 15;
+            this.txtPlc.Text = "PLC";
+            // 
             // panelStatus
             // 
             this.panelStatus.Dock = System.Windows.Forms.DockStyle.Left;
@@ -131,32 +157,6 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(444, 461);
             this.tableLayoutPanel1.TabIndex = 14;
             // 
-            // errorImage
-            // 
-            this.errorImage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.errorImage.BackColor = System.Drawing.Color.Transparent;
-            this.errorImage.Image = ((System.Drawing.Image)(resources.GetObject("errorImage.Image")));
-            this.errorImage.Location = new System.Drawing.Point(406, 3);
-            this.errorImage.Name = "errorImage";
-            this.errorImage.Size = new System.Drawing.Size(32, 32);
-            this.errorImage.TabIndex = 15;
-            this.errorImage.TabStop = false;
-            this.errorImage.Visible = false;
-            // 
-            // txtPlc
-            // 
-            this.txtPlc.AutoSize = true;
-            this.txtPlc.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtPlc.Font = new System.Drawing.Font("Century Gothic", 15.75F);
-            this.txtPlc.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.txtPlc.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.txtPlc.Location = new System.Drawing.Point(10, 0);
-            this.txtPlc.Name = "txtPlc";
-            this.txtPlc.Padding = new System.Windows.Forms.Padding(14, 8, 21, 0);
-            this.txtPlc.Size = new System.Drawing.Size(84, 32);
-            this.txtPlc.TabIndex = 15;
-            this.txtPlc.Text = "PLC";
-            // 
             // StatusControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -167,10 +167,10 @@
             this.Size = new System.Drawing.Size(444, 461);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).EndInit();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).EndInit();
             this.ResumeLayout(false);
 
         }

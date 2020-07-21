@@ -101,6 +101,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void changeTagMenu_Click(object sender, System.EventArgs e)
         {
+            //if (MyPlc == null)
+            //    PlcConfig.PopulateDataTable();
+
             if (!addTagOpen && !MyPlc.logger.IsStarted)
             {
                 changeTagForm = new AddTag(SingleTag.plcName, MyPlc, SingleTag);

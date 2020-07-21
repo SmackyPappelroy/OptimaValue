@@ -67,6 +67,7 @@ namespace OptimaValue
                                                 bitAddress = (byte)dr["bitAddress"],
                                                 logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), dr["logFreq"].ToString()),
                                                 LastLogTime = DateTime.MinValue,
+                                                tagUnit = dr["tagUnit"].ToString(),
                                             }).ToList();
 
                             // Sorterar listan alfabetiskt
