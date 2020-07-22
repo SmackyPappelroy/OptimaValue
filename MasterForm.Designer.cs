@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Optima");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Optima");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MasterForm));
             this.addPlcMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addPlc = new System.Windows.Forms.ToolStripMenuItem();
@@ -37,6 +37,7 @@
             this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.contentPanel = new System.Windows.Forms.Panel();
             this.statusPanel = new System.Windows.Forms.Panel();
+            this.errorImage = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.txtStatus = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -49,17 +50,17 @@
             this.menuSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.databasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.hideMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.errorImage = new System.Windows.Forms.PictureBox();
             this.addPlcMenu.SuspendLayout();
             this.statusPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.menuStrip.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).BeginInit();
             this.SuspendLayout();
             // 
             // addPlcMenu
@@ -86,11 +87,11 @@
             this.treeView.ImageList = this.imageList;
             this.treeView.Location = new System.Drawing.Point(3, 111);
             this.treeView.Name = "treeView";
-            treeNode2.ContextMenuStrip = this.addPlcMenu;
-            treeNode2.Name = "Optima";
-            treeNode2.Text = "Optima";
+            treeNode1.ContextMenuStrip = this.addPlcMenu;
+            treeNode1.Name = "Optima";
+            treeNode1.Text = "Optima";
             this.treeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
+            treeNode1});
             this.treeView.SelectedImageIndex = 0;
             this.treeView.Size = new System.Drawing.Size(294, 607);
             this.treeView.TabIndex = 0;
@@ -104,7 +105,7 @@
             this.imageList.Images.SetKeyName(1, "stop_circled_16px.png");
             this.imageList.Images.SetKeyName(2, "play");
             this.imageList.Images.SetKeyName(3, "warning");
-            this.imageList.Images.SetKeyName(4, "configuration_16px.png");
+            this.imageList.Images.SetKeyName(4, "job_16px.png");
             this.imageList.Images.SetKeyName(5, "status");
             this.imageList.Images.SetKeyName(6, "tags_16px.png");
             this.imageList.Images.SetKeyName(7, "icons8_gas_running_16.png");
@@ -130,6 +131,17 @@
             this.statusPanel.Name = "statusPanel";
             this.statusPanel.Size = new System.Drawing.Size(731, 245);
             this.statusPanel.TabIndex = 2;
+            // 
+            // errorImage
+            // 
+            this.errorImage.BackColor = System.Drawing.Color.Transparent;
+            this.errorImage.Image = ((System.Drawing.Image)(resources.GetObject("errorImage.Image")));
+            this.errorImage.Location = new System.Drawing.Point(671, 3);
+            this.errorImage.Name = "errorImage";
+            this.errorImage.Size = new System.Drawing.Size(32, 32);
+            this.errorImage.TabIndex = 14;
+            this.errorImage.TabStop = false;
+            this.errorImage.Visible = false;
             // 
             // pictureBox1
             // 
@@ -248,6 +260,7 @@
             // 
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuSettings,
+            this.hideMenu,
             this.menuQuestion});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
@@ -279,6 +292,13 @@
             this.debugMenu.Text = "Debug";
             this.debugMenu.CheckedChanged += new System.EventHandler(this.debugMeny_CheckedChanged);
             // 
+            // hideMenu
+            // 
+            this.hideMenu.Name = "hideMenu";
+            this.hideMenu.Size = new System.Drawing.Size(45, 20);
+            this.hideMenu.Text = "Göm";
+            this.hideMenu.Click += new System.EventHandler(this.hideMenu_Click);
+            // 
             // menuQuestion
             // 
             this.menuQuestion.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -291,17 +311,7 @@
             // 
             this.notifyIcon.Text = "notifyIcon1";
             this.notifyIcon.Visible = true;
-            // 
-            // errorImage
-            // 
-            this.errorImage.BackColor = System.Drawing.Color.Transparent;
-            this.errorImage.Image = ((System.Drawing.Image)(resources.GetObject("errorImage.Image")));
-            this.errorImage.Location = new System.Drawing.Point(671, 3);
-            this.errorImage.Name = "errorImage";
-            this.errorImage.Size = new System.Drawing.Size(32, 32);
-            this.errorImage.TabIndex = 14;
-            this.errorImage.TabStop = false;
-            this.errorImage.Visible = false;
+            this.notifyIcon.Click += new System.EventHandler(this.notifyIcon_Click);
             // 
             // MasterForm
             // 
@@ -324,13 +334,13 @@
             this.addPlcMenu.ResumeLayout(false);
             this.statusPanel.ResumeLayout(false);
             this.statusPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel1.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -359,5 +369,6 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.PictureBox errorImage;
+        private System.Windows.Forms.ToolStripMenuItem hideMenu;
     }
 }

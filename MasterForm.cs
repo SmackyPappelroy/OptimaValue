@@ -52,10 +52,12 @@ namespace OptimaValue
             menuStrip.BackColor = UIColors.ForeGroundLayer1;
             menuQuestion.ForeColor = UIColors.HeaderText;
             menuSettings.ForeColor = UIColors.HeaderText;
+            hideMenu.ForeColor = UIColors.HeaderText;
             menuSettings.KeepOpenOnDropdownCheck();
 
             menuSettings.ChangeForeColorMenuItem(Color.Black, UIColors.HeaderText);
             menuQuestion.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
+            hideMenu.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
         }
         #endregion
 
@@ -542,6 +544,20 @@ namespace OptimaValue
         {
             perFormOpen = false;
             perForm.Dispose();
+        }
+
+        private void hideMenu_Click(object sender, EventArgs e)
+        {
+            Hide();
+            notifyIcon.ShowBalloonTip(5000, "OptimaValue körs i bakgrunden", "Se notify-ikon...", ToolTipIcon.None);
+        }
+
+        private void notifyIcon_Click(object sender, EventArgs e)
+        {
+            if (!Visible)
+                Show();
+            else
+                BringToFront();
         }
     }
 }

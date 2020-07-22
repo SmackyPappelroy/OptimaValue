@@ -15,7 +15,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             InitializeComponent();
             PlcName = plcName;
             txtPlc.Text = PlcName;
-            lblPlcStatus.Text = $"{PlcName} status";
+            lblPlcStatus.Text = $"{PlcName} Status";
             txtStatus.Text = string.Empty;
             panelStatus.BackColor = Color.FromArgb(67, 62, 71);
             Subscribe(true);
