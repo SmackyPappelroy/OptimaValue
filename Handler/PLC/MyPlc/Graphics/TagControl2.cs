@@ -11,14 +11,13 @@ namespace OptimaValue
 {
     public partial class TagControl2 : UserControl
     {
-        private int PlcId;
-        private string PlcName = string.Empty;
+        private readonly string PlcName = string.Empty;
 
         private List<TagDefinitions> tags;
-        private DataTable myTable = new DataTable();
-        private TreeView myTreeView;
+        private readonly DataTable myTable = new DataTable();
+        private readonly TreeView myTreeView;
         private AddTag addTagForm;
-        private ExtendedPlc myPlc;
+        private readonly ExtendedPlc myPlc;
         private bool statFormOpen = false;
         private AllTagsStatsForm statForm;
 
@@ -27,7 +26,6 @@ namespace OptimaValue
         public TagControl2(ExtendedPlc activePlc, TreeView treeView)
         {
             InitializeComponent();
-            PlcId = activePlc.Id;
             PlcName = activePlc.PlcName;
             myTreeView = treeView;
             myPlc = activePlc;

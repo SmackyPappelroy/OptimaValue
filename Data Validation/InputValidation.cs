@@ -30,8 +30,8 @@ namespace OptimaValue
                     if (!message.Contains("IP-"))
                     {
                         if (message.Length > 0)
-                            message = message + " och ";
-                        message = message + "Fel format på IP-adress";
+                            message += " och ";
+                        message += "Fel format på IP-adress";
                     }
                 }
                 var cpuType = row.Cells["cpuType"].Value.ToString();
@@ -41,8 +41,8 @@ namespace OptimaValue
                     if (!message.Contains("CPU"))
                     {
                         if (message.Length > 0)
-                            message = message + " och ";
-                        message = message + "Fel format på CPU-typ";
+                            message += " och ";
+                        message += "Fel format på CPU-typ";
                     }
                 }
                 var rack = row.Cells["Rack"].Value.ToString();
@@ -55,8 +55,8 @@ namespace OptimaValue
                     if (!message.Contains("Rack"))
                     {
                         if (message.Length > 0)
-                            message = message + " och ";
-                        message = message + "Fel format på Rack";
+                            message += " och ";
+                        message += "Fel format på Rack";
                     }
                 }
                 if (!CheckShortValid(slot).result)
@@ -65,8 +65,8 @@ namespace OptimaValue
                     if (!message.Contains("Slot"))
                     {
                         if (message.Length > 0)
-                            message = message + " och ";
-                        message = message + "Fel format på Slot";
+                            message += " och ";
+                        message += "Fel format på Slot";
                     }
                 }
             }
@@ -88,7 +88,7 @@ namespace OptimaValue
                 return false;
 
             //Check each substring checking that parses to byte
-            byte obyte = 0;
+            byte obyte;
             foreach (string strOctet in arrOctets)
                 if (!byte.TryParse(strOctet, out obyte))
                     return false;

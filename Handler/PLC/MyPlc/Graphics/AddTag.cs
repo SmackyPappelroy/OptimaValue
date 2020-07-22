@@ -8,10 +8,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
     public partial class AddTag : Form
     {
-        private string PlcName = string.Empty;
-        private TagDefinitions tag;
+        private readonly string PlcName = string.Empty;
+        private readonly TagDefinitions tag;
         public event EventHandler TagChanged;
-        private ExtendedPlc MyPlc;
+        private readonly ExtendedPlc MyPlc;
 
         protected virtual void OnTagChanged(EventArgs e)
         {
@@ -254,7 +254,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void DeleteTag()
         {
-            var tagNamn = string.Empty;
+            string tagNamn;
             if (tag == null)
                 tagNamn = txtName.Text;
             else
@@ -281,7 +281,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private bool CheckIfExists()
         {
-            var tagNamn = string.Empty;
+            string tagNamn;
             if (tag == null)
                 tagNamn = txtName.Text;
             else

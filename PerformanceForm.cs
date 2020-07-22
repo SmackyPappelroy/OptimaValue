@@ -7,9 +7,9 @@ namespace OptimaValue
 {
     public partial class PerformanceForm : Form
     {
-        private Timer cycleTimer;
-        private PerformanceCounter myAppCpu;
-        private PerformanceCounter myAppRam;
+        private readonly Timer cycleTimer;
+        private readonly PerformanceCounter myAppCpu;
+        private readonly PerformanceCounter myAppRam;
 
         public PerformanceForm()
         {

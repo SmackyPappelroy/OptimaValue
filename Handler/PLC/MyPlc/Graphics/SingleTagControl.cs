@@ -9,14 +9,13 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
     public partial class SingleTagControl : UserControl
     {
         public event EventHandler TagChanged;
-        private TagDefinitions SingleTag;
-        private string PlcName = string.Empty;
+        private readonly TagDefinitions SingleTag;
         private bool addTagOpen = false;
-        private TreeView myTreeView;
+        private readonly TreeView myTreeView;
         private AddTag changeTagForm;
-        private ExtendedPlc MyPlc;
+        private readonly ExtendedPlc MyPlc;
         private bool statFormOpen = false;
-        private Image errorImage;
+        private readonly Image errorImage;
 
 
         private bool destroyed = false;

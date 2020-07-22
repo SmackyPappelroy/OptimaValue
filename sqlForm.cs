@@ -93,9 +93,5 @@ namespace OptimaValue
             WindowManager.sqlFormOpen = false;
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            contextInstance.CreateDb();
-        }
     }
 }

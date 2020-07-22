@@ -6,9 +6,9 @@ namespace OptimaValue
 {
     public class MyLogger : ThreadedLogger
     {
-        private static object ThreadSafeObject = new object();
-        private static string myPath = @"c:\OptimaValueLog\";
-        private static string logFile = @"LogFile.txt";
+        private static readonly object ThreadSafeObject = new object();
+        private static readonly string myPath = @"c:\OptimaValueLog\";
+        private static readonly string logFile = @"LogFile.txt";
 
         protected override void AsyncLogMessage(LogRow row)
         {

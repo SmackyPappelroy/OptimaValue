@@ -6,18 +6,18 @@ namespace OptimaValue
 {
     public abstract class ThreadedLogger : IDisposable
     {
-
-        Queue<Action> queue = new Queue<Action>();
-        ManualResetEvent hasNewItems = new ManualResetEvent(false);
-        ManualResetEvent terminate = new ManualResetEvent(false);
-        ManualResetEvent waiting = new ManualResetEvent(false);
-
-        Thread loggingThread;
+        readonly Queue<Action> queue = new Queue<Action>();
+        readonly ManualResetEvent hasNewItems = new ManualResetEvent(false);
+        readonly ManualResetEvent terminate = new ManualResetEvent(false);
+        readonly ManualResetEvent waiting = new ManualResetEvent(false);
+        readonly Thread loggingThread;
 
         public ThreadedLogger()
         {
-            loggingThread = new Thread(new ThreadStart(ProcessQueue));
-            loggingThread.IsBackground = true;
+            loggingThread = new Thread(new ThreadStart(ProcessQueue))
+            {
+                IsBackground = true
+            };
             // this is performed from a bg thread, to ensure the queue is serviced from a single thread
             loggingThread.Start();
         }

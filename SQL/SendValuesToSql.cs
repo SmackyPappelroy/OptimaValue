@@ -13,11 +13,11 @@ namespace OptimaValue
         public static BlockingCollection<rawValueClass> rawValueBlock;
 
         private static Thread sqlThread;
-        private static object addBlock = new object();
+        private static readonly object addBlock = new object();
 
         private static List<LogValuesSql> SqlValues;
         private static List<rawValueClass> rawValueInternal;
-        private static object sqlLock = new object();
+        private static readonly object sqlLock = new object();
         private static DateTime lastLogTime = DateTime.MinValue;
 
         public static void StartSql()
@@ -88,12 +88,12 @@ namespace OptimaValue
                 switch (raw.logValue.varType)
                 {
                     case VarType.Bit: // klar
-                        if (raw.unknownTag is BitArray)
+                        if (raw.unknownTag is BitArray array)
                         {
-                            for (int i = 0; i < ((BitArray)raw.unknownTag).Length; i++)
+                            for (int i = 0; i < array.Length; i++)
                             {
-                                sql.value = ((BitArray)raw.unknownTag)[i] == true ? "True" : "False";
-                                sql.numericValue = ((BitArray)raw.unknownTag)[i] == true ? 1 : 0;
+                                sql.value = array[i] == true ? "True" : "False";
+                                sql.numericValue = array[i] == true ? 1 : 0;
                                 sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
                             }
@@ -107,12 +107,12 @@ namespace OptimaValue
 
                         break;
                     case VarType.Byte: // klar
-                        if (raw.unknownTag is byte[])
+                        if (raw.unknownTag is byte[] v)
                         {
-                            for (int i = 0; i < ((byte[])raw.unknownTag).Length; i++)
+                            for (int i = 0; i < v.Length; i++)
                             {
-                                sql.value = ((byte[])raw.unknownTag)[i].ToString();
-                                sql.numericValue = ((byte[])raw.unknownTag)[i];
+                                sql.value = v[i].ToString();
+                                sql.numericValue = v[i];
                                 sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
                             }
@@ -125,11 +125,11 @@ namespace OptimaValue
                         }
                         break;
                     case VarType.Word: // klar
-                        if (raw.unknownTag is ushort[])
+                        if (raw.unknownTag is ushort[] v1)
                         {
-                            for (int i = 0; i < ((ushort[])raw.unknownTag).Length; i++)
+                            for (int i = 0; i < v1.Length; i++)
                             {
-                                sql.numericValue = ((ushort[])raw.unknownTag)[i];
+                                sql.numericValue = v1[i];
                                 sql.value = sql.numericValue.ToString();
                                 sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
@@ -144,11 +144,11 @@ namespace OptimaValue
 
                         break;
                     case VarType.DWord: // klar
-                        if (raw.unknownTag is uint[])
+                        if (raw.unknownTag is uint[] v2)
                         {
-                            for (int i = 0; i < ((uint[])raw.unknownTag).Length; i++)
+                            for (int i = 0; i < v2.Length; i++)
                             {
-                                sql.numericValue = ((uint[])(raw.unknownTag))[i];
+                                sql.numericValue = v2[i];
                                 sql.value = sql.numericValue.ToString();
                                 sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
@@ -163,11 +163,11 @@ namespace OptimaValue
 
                         break;
                     case VarType.Int: // klar
-                        if (raw.unknownTag is short[])
+                        if (raw.unknownTag is short[] v3)
                         {
-                            for (int i = 0; i < ((short[])raw.unknownTag).Length; i++)
+                            for (int i = 0; i < v3.Length; i++)
                             {
-                                sql.numericValue = ((short[])raw.unknownTag)[i];
+                                sql.numericValue = v3[i];
                                 sql.value = sql.numericValue.ToString();
                                 sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
@@ -181,11 +181,11 @@ namespace OptimaValue
                         }
                         break;
                     case VarType.DInt: // klar
-                        if (raw.unknownTag is int[])
+                        if (raw.unknownTag is int[] v4)
                         {
-                            for (int i = 0; i < ((int[])raw.unknownTag).Length; i++)
+                            for (int i = 0; i < v4.Length; i++)
                             {
-                                sql.numericValue = ((int[])(raw.unknownTag))[i];
+                                sql.numericValue = v4[i];
                                 sql.value = sql.numericValue.ToString();
                                 sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
@@ -199,11 +199,11 @@ namespace OptimaValue
                         }
                         break;
                     case VarType.Real: //Klar
-                        if (raw.unknownTag is float[])
+                        if (raw.unknownTag is float[] v5)
                         {
-                            for (int i = 0; i < ((float[])raw.unknownTag).Length; i++)
+                            for (int i = 0; i < v5.Length; i++)
                             {
-                                sql.numericValue = ((float[])(raw.unknownTag))[i];
+                                sql.numericValue = v5[i];
                                 sql.value = sql.numericValue.ToString();
                                 sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);

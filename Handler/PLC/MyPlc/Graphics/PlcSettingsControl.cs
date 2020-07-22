@@ -330,13 +330,13 @@ namespace OptimaValue.Handler.PLC.Graphics
         private void SavePlcConfig()
         {
             string connectionString = PlcConfig.ConnectionString();
-            var activeString = string.Empty;
-            var query = string.Empty;
+            string activeString;
             if (checkActive.Checked)
                 activeString = "True";
             else
                 activeString = "False";
 
+            string query;
             if (CheckIfExists())
             {
                 query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET active='{activeString}',name='{txtName.Text}'";

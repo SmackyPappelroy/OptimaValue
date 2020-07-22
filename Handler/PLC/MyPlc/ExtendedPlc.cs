@@ -21,7 +21,7 @@ namespace OptimaValue
 
         #region Properties
         private DateTime UpTimeStart = DateTime.MaxValue;
-        private DispatcherTimer timerPing = new DispatcherTimer();
+        private readonly DispatcherTimer timerPing = new DispatcherTimer();
         private bool isSubscribed = false;
 
         public bool Active = false;

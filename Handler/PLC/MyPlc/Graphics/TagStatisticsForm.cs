@@ -5,8 +5,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
     public partial class TagStatisticsForm : Form
     {
-        private TagDefinitions taggen;
-        private Timer ScanTimer = new Timer();
+        private readonly TagDefinitions taggen;
+        private readonly Timer ScanTimer = new Timer();
         public TagStatisticsForm(TagDefinitions tag)
         {
             InitializeComponent();

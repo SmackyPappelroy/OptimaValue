@@ -5,8 +5,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
     public partial class AllTagsStatsForm : Form
     {
-        private Timer ScanTimer = new Timer();
-        private ExtendedPlc MyPlc;
+        private readonly Timer ScanTimer = new Timer();
+        private readonly ExtendedPlc MyPlc;
         public AllTagsStatsForm(ExtendedPlc plc)
         {
             InitializeComponent();
@@ -45,9 +45,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 {
                     if (tag.plcName == MyPlc.PlcName && tag.active)
                     {
-                        successReads = successReads + tag.NrSuccededReadAttempts;
-                        failReads = failReads + tag.NrFailedReadAttempts;
-                        loggedValues = loggedValues + tag.TimesLogged;
+                        successReads += tag.NrSuccededReadAttempts;
+                        failReads += tag.NrFailedReadAttempts;
+                        loggedValues += tag.TimesLogged;
                         activeTags++;
                     }
 

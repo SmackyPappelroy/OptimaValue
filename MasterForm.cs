@@ -18,11 +18,11 @@ namespace OptimaValue
         private TagControl2 tagControl;
         private PerformanceForm perForm;
         private bool perFormOpen = false;
-        private System.Windows.Forms.Timer statusTimer;
-        private System.Windows.Forms.Timer startStopButtonVisibilityTimer;
+        private readonly System.Windows.Forms.Timer statusTimer;
+        private readonly System.Windows.Forms.Timer startStopButtonVisibilityTimer;
         private sqlForm SqlForm;
         private bool IsOpenSqlForm = false;
-        private MyLogger myLogger = new MyLogger();
+        private readonly MyLogger myLogger = new MyLogger();
 
         private bool isSubscribed = false;
         #endregion
@@ -406,25 +406,33 @@ namespace OptimaValue
         private void AddPlcNode(string plcLabel)
         {
 
-            var configurationNode = new TreeNode("Konfiguration");
-            configurationNode.Name = "Konfiguration";
-            configurationNode.ImageIndex = 4;
-            configurationNode.SelectedImageIndex = 4;
+            var configurationNode = new TreeNode("Konfiguration")
+            {
+                Name = "Konfiguration",
+                ImageIndex = 4,
+                SelectedImageIndex = 4
+            };
 
-            var statusNode = new TreeNode("Status");
-            statusNode.Name = "Status";
-            statusNode.ImageIndex = 5;
-            statusNode.SelectedImageIndex = 5;
+            var statusNode = new TreeNode("Status")
+            {
+                Name = "Status",
+                ImageIndex = 5,
+                SelectedImageIndex = 5
+            };
 
-            var tagNode = new TreeNode("Taggar");
-            tagNode.Name = "Taggar";
-            tagNode.ImageIndex = 6;
-            tagNode.SelectedImageIndex = 6;
+            var tagNode = new TreeNode("Taggar")
+            {
+                Name = "Taggar",
+                ImageIndex = 6,
+                SelectedImageIndex = 6
+            };
 
-            var plcNode = new TreeNode(plcLabel, new TreeNode[] { configurationNode, statusNode, tagNode });
-            plcNode.Name = "PLC";
-            plcNode.ImageIndex = 1;
-            plcNode.SelectedImageIndex = 1;
+            var plcNode = new TreeNode(plcLabel, new TreeNode[] { configurationNode, statusNode, tagNode })
+            {
+                Name = "PLC",
+                ImageIndex = 1,
+                SelectedImageIndex = 1
+            };
 
             treeView.TopNode.Nodes.Add(plcNode);
 
@@ -492,9 +500,11 @@ namespace OptimaValue
                     statusControl.Hide();
                 statusControl = null;
 
-                statusControl = new StatusControl(activePlc.PlcName);
-                statusControl.Parent = contentPanel;
-                statusControl.Dock = DockStyle.Fill;
+                statusControl = new StatusControl(activePlc.PlcName)
+                {
+                    Parent = contentPanel,
+                    Dock = DockStyle.Fill
+                };
                 statusControl.Show();
             }
 
@@ -518,9 +528,11 @@ namespace OptimaValue
                     tagControl.Hide();
                 tagControl = null;
 
-                tagControl = new TagControl2(activePlc, treeView);
-                tagControl.Parent = contentPanel;
-                tagControl.Dock = DockStyle.Fill;
+                tagControl = new TagControl2(activePlc, treeView)
+                {
+                    Parent = contentPanel,
+                    Dock = DockStyle.Fill
+                };
                 tagControl.Show();
 
 

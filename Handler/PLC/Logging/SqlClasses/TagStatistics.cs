@@ -50,7 +50,7 @@ namespace OptimaValue
             else
             {
                 lastScanTime = DateTime.Now - lastTimeLogged;
-                totalScanTime = totalScanTime + lastScanTime;
+                totalScanTime += lastScanTime;
                 lastTimeLogged = DateTime.Now;
                 ScanTime = lastScanTime.ToString(@"mm\:ss\.ffff");
             }

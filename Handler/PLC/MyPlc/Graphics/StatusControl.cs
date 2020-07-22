@@ -6,8 +6,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
     public partial class StatusControl : UserControl
     {
         private bool isSubscribed = false;
-        private string PlcName;
-        private Timer statusTimer = new Timer();
+        private readonly string PlcName;
+        private readonly Timer statusTimer = new Timer();
         private bool destroyed = false;
 
         public StatusControl(string plcName)

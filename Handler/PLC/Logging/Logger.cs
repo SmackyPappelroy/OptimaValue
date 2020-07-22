@@ -11,7 +11,7 @@ namespace OptimaValue
 
     public class Logger
     {
-        private ExtendedPlc MyPlc = null;
+        private readonly ExtendedPlc MyPlc = null;
         public event EventHandler StartedEvent;
 
         public Logger(ExtendedPlc myPlc)
@@ -481,9 +481,10 @@ namespace OptimaValue
                         var allOccurencesOfTagInList = lastLogValue.FindAll(n => n.name == logTag.name).OrderBy(dat => dat.logDate).ToList();
                         var nrOfItemsInLastLog = lastLogValue.FindAll(n => n.name == logTag.name);
 
-                        if (nrOfItemsInLastLog.Count > 2)
+                        // Garantera att det bara finns ett värde bakåt
+                        if (nrOfItemsInLastLog.Count > 1)
                         {
-                            var removeDate = allOccurencesOfTagInList[nrOfItemsInLastLog.Count - 3].logDate;
+                            var removeDate = allOccurencesOfTagInList[nrOfItemsInLastLog.Count - 2].logDate;
                             lastLogValue.RemoveAll(i => i.name == logTag.name && i.logDate <= removeDate);
                         }
 
