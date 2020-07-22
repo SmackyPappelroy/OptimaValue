@@ -181,7 +181,7 @@
             this.MinimumSize = new System.Drawing.Size(605, 321);
             this.Name = "sqlForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "sqlForm";
+            this.Text = "Databas";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.sqlForm_FormClosing);
             this.Load += new System.EventHandler(this.SettingForm_Load);

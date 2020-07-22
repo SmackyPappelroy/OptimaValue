@@ -234,6 +234,10 @@ namespace OptimaValue
                     treeView.TopNode.ImageIndex = 7;
                     treeView.TopNode.SelectedImageIndex = 7;
                 }
+                if (notifyIcon.Icon != Resources.icons8_gas_running)
+                    notifyIcon.Icon = Resources.icons8_gas_running;
+                if (notifyIcon.Text != "Ansluten")
+                    notifyIcon.Text = "Ansluten";
             }
             else
             {
@@ -248,6 +252,10 @@ namespace OptimaValue
                     treeView.TopNode.ImageIndex = 0;
                     treeView.TopNode.SelectedImageIndex = 0;
                 }
+                if (notifyIcon.Icon != Resources.icons8_gas_idle)
+                    notifyIcon.Icon = Resources.icons8_gas_idle;
+                if (notifyIcon.Text != "Ej ansluten")
+                    notifyIcon.Text = "Ej ansluten";
             }
         }
 
