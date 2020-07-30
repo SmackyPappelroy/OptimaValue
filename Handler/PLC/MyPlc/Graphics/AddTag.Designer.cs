@@ -118,6 +118,8 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 6.25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(920, 450);
             this.tableLayoutPanel1.TabIndex = 0;
             this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
@@ -184,7 +186,6 @@
             // 
             // checkActive
             // 
-            this.checkActive.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkActive.AutoSize = true;
             this.checkActive.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.checkActive.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
@@ -241,12 +242,14 @@
             this.comboLogType.Items.AddRange(new object[] {
             "Cyclic",
             "Delta",
-            "TimeOfDay"});
+            "TimeOfDay",
+            "Event"});
             this.comboLogType.Location = new System.Drawing.Point(3, 115);
             this.comboLogType.Name = "comboLogType";
             this.comboLogType.Size = new System.Drawing.Size(454, 24);
             this.comboLogType.TabIndex = 5;
             this.toolTip.SetToolTip(this.comboLogType, "Hur ska taggen loggas");
+            this.comboLogType.SelectedIndexChanged += new System.EventHandler(this.comboLogType_SelectedIndexChanged);
             // 
             // label3
             // 
@@ -504,7 +507,8 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "AddTag";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Lägg till tag...";
+            this.Text = "Lägg till / Ändra tag...";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AddTag_FormClosing);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();

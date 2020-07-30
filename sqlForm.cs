@@ -54,7 +54,7 @@ namespace OptimaValue
 
             btnSave.Enabled = true;
             DatabaseCreationEvent.CreatedEvent -= DatabaseCreationEvent_CreatedEvent;
-            this.Close();
+            Close();
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -87,11 +87,5 @@ namespace OptimaValue
                 return false;
         }
         #endregion
-
-        private void sqlForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            WindowManager.sqlFormOpen = false;
-        }
-
     }
 }

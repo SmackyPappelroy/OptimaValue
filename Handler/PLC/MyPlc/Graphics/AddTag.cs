@@ -1,7 +1,9 @@
-﻿using System;
+﻿using S7.Net;
+using System;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
@@ -9,9 +11,12 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
     public partial class AddTag : Form
     {
         private readonly string PlcName = string.Empty;
-        private readonly TagDefinitions tag;
+        private TagDefinitions tag;
         public event EventHandler TagChanged;
         private readonly ExtendedPlc MyPlc;
+        private EventForm eventForm;
+        private bool eventFormOpen = false;
+        private bool startup = true;
 
         protected virtual void OnTagChanged(EventArgs e)
         {
@@ -213,6 +218,14 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             if (ValidateAll())
             {
+                if (tag.eventId == 0)
+                {
+                    tag.eventId = 0;
+                    tag.IsBooleanTrigger = false;
+                    tag.boolTrigger = BooleanTrigger.OnTrue;
+                    tag.analogTrigger = AnalogTrigger.Equal;
+                    tag.analogValue = 0;
+                }
                 DataTable tbl = CreateTable();
                 AddTagToSql(tbl);
             }
@@ -221,19 +234,120 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private void AddTagToSql(DataTable dataTable)
         {
             if (CheckIfExists())
-                DeleteTag();
-            AddNewTag();
+                UpdateTag();
+            else
+                AddNewTag();
         }
 
         private void AddNewTag()
         {
             var connectionString = PlcConfig.ConnectionString();
             var query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,tagUnit) ";
+            query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
+            query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue) ";
             query += $"VALUES ('{checkActive.Checked}','{txtName.Text}','{comboLogType.SelectedItem}','{txtTimeOfDay.Text}',";
             query += $"{int.Parse(txtDeadband.Text)},'{PlcName}','{comboVarType.SelectedItem}',{int.Parse(txtBlockNr.Text)}, ";
             query += $"'{comboDataType.SelectedItem}',{int.Parse(txtStartByte.Text)},{int.Parse(txtNrOfElements.Text)},";
-            query += $"{byte.Parse(txtBitAddress.Text)},'{comboLogFreq.SelectedItem}','{txtUnit.Text}')";
+            query += $"{byte.Parse(txtBitAddress.Text)},'{comboLogFreq.SelectedItem}','{txtUnit.Text}',{tag.eventId},'{tag.IsBooleanTrigger}','";
+            query += $"{tag.boolTrigger}','{tag.analogTrigger}',{tag.analogValue})";
+
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                StatusEvent.RaiseMessage(ex.Message, Status.Error);
+            }
+
+            query = $"SELECT TOP 1 * FROM {SqlSettings.Default.Databas}.dbo.tagConfig ORDER BY id DESC";
+            var tbl = new DataTable();
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        using (SqlDataAdapter adp = new SqlDataAdapter(cmd))
+                        {
+                            con.Open();
+                            adp.Fill(tbl);
+                        }
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                StatusEvent.RaiseMessage(ex.Message, Status.Error);
+            }
+
+            var _active = (tbl.AsEnumerable().ElementAt(0).Field<bool>("active"));
+            var _bitAddress = (tbl.AsEnumerable().ElementAt(0).Field<byte>("bitAddress"));
+            var _blockNr = (tbl.AsEnumerable().ElementAt(0).Field<int>("blockNr"));
+            var _dataType = (S7.Net.DataType)Enum.Parse(typeof(S7.Net.DataType), (tbl.AsEnumerable().ElementAt(0).Field<string>("dataType")));
+            var _deadband = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("deadband"));
+            var _id = (tbl.AsEnumerable().ElementAt(0).Field<int>("id"));
+            var _logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), (tbl.AsEnumerable().ElementAt(0).Field<string>("logFreq")));
+            var _logType = (LogType)Enum.Parse(typeof(LogType), (tbl.AsEnumerable().ElementAt(0).Field<string>("logType")));
+            var _name = (tbl.AsEnumerable().ElementAt(0).Field<string>("name"));
+            var _nrOfElements = (tbl.AsEnumerable().ElementAt(0).Field<int>("nrOfElements"));
+            var _plcName = (tbl.AsEnumerable().ElementAt(0).Field<string>("plcName"));
+            var _startByte = (tbl.AsEnumerable().ElementAt(0).Field<int>("startByte"));
+            var _timeOfDay = (tbl.AsEnumerable().ElementAt(0).Field<TimeSpan>("timeOfDay"));
+            var _varType = (VarType)Enum.Parse(typeof(VarType), (tbl.AsEnumerable().ElementAt(0).Field<string>("varType")));
+            var _tagUnit = (tbl.AsEnumerable().ElementAt(0).Field<string>("tagUnit"));
+            var _eventId = (tbl.AsEnumerable().ElementAt(0).Field<int>("eventId"));
+            var _isBooleanTrigger = (tbl.AsEnumerable().ElementAt(0).Field<bool>("isBooleanTrigger"));
+            var _boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), (tbl.AsEnumerable().ElementAt(0).Field<string>("boolTrigger")));
+            var _analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), (tbl.AsEnumerable().ElementAt(0).Field<string>("analogTrigger")));
+            var _analogValue = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("analogValue"));
+
+
+            tag = new TagDefinitions()
+            {
+                active = _active,
+                bitAddress = _bitAddress,
+                blockNr = _blockNr,
+                dataType = _dataType,
+                deadband = _deadband,
+                id = _id,
+                logFreq = _logFreq,
+                LastLogTime = DateTime.MinValue,
+                logType = _logType,
+                name = _name,
+                nrOfElements = _nrOfElements,
+                plcName = _plcName,
+                startByte = _startByte,
+                timeOfDay = _timeOfDay,
+                varType = _varType,
+                tagUnit = _tagUnit,
+                eventId = _eventId,
+                IsBooleanTrigger = _isBooleanTrigger,
+                boolTrigger = _boolTrigger,
+                analogTrigger = _analogTrigger,
+                analogValue = _analogValue,
+            };
+
+        }
+
+        private void UpdateTag()
+        {
+            var connectionString = PlcConfig.ConnectionString();
+            var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig ";
+            query += $"SET active='{checkActive.Checked}',name='{txtName.Text}',logType='{comboLogType.SelectedItem}',timeOfDay='{txtTimeOfDay.Text}'";
+            query += $",deadband={int.Parse(txtDeadband.Text)},plcName='{PlcName}',varType='{comboVarType.SelectedItem}',blockNr={int.Parse(txtBlockNr.Text)}" +
+                $",dataType='{comboDataType.SelectedItem}',startByte={int.Parse(txtStartByte.Text)},nrOfElements={int.Parse(txtNrOfElements.Text)}" +
+                $",bitAddress={byte.Parse(txtBitAddress.Text)},logFreq='{comboLogFreq.SelectedItem}',";
+            query += $"tagUnit='{txtUnit.Text}',eventId={tag.eventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
+                $",boolTrigger='{tag.boolTrigger}',analogTrigger='{tag.analogTrigger}',analogValue={tag.analogValue} " +
+                $" WHERE id = {tag.id}";
 
             try
             {
@@ -289,7 +403,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             object result = new object();
             var connectionString = PlcConfig.ConnectionString();
             var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"WHERE name = '{tagNamn}' AND plcName = '{MyPlc.PlcName}'";
+            query += $"WHERE id = {tag.id}";
             try
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
@@ -326,13 +440,20 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             tbl.Columns.Add("nrOfElements", typeof(int));
             tbl.Columns.Add("bitAddress", typeof(byte));
             tbl.Columns.Add("logFreq", typeof(string));
+            tbl.Columns.Add("tagUnit", typeof(string));
+            tbl.Columns.Add("eventId", typeof(int));
+            tbl.Columns.Add("isBooleanTrigger", typeof(bool));
+            tbl.Columns.Add("boolTrigger", typeof(string));
+            tbl.Columns.Add("analogTrigger", typeof(string));
+            tbl.Columns.Add("analogValue", typeof(float));
+
 
             tbl.Rows.Add(checkActive.Checked, txtName.Text, comboLogType.SelectedItem.ToString(),
                 TimeSpan.Parse(txtTimeOfDay.Text), float.Parse(txtDeadband.Text),
                 PlcName, comboVarType.SelectedItem.ToString(), int.Parse(txtBlockNr.Text),
                 comboDataType.SelectedItem.ToString(), int.Parse(txtStartByte.Text),
                 int.Parse(txtNrOfElements.Text), byte.Parse(txtBitAddress.Text),
-                comboLogFreq.SelectedItem.ToString());
+                comboLogFreq.SelectedItem.ToString(), tag.eventId, tag.IsBooleanTrigger, tag.boolTrigger, tag.analogTrigger, tag.analogValue);
             return tbl;
 
         }
@@ -340,6 +461,50 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private void button1_Click(object sender, EventArgs e)
         {
             AddNewTag();
+        }
+
+        private void comboLogType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (startup)
+            {
+                startup = false;
+                return;
+            }
+            if (comboLogType.SelectedItem.ToString() == "Event")
+            {
+                if (!eventFormOpen)
+                {
+                    eventFormOpen = true;
+                    eventForm = null;
+                    eventForm = new EventForm(tag, PlcName);
+                    eventForm.FormClosing += EventForm_FormClosing;
+                    eventForm.SaveEvent += EventForm_SaveEvent;
+                    eventForm.Show();
+                }
+                else
+                {
+                    eventForm.BringToFront();
+                }
+            }
+        }
+
+        private void EventForm_SaveEvent(object sender, SaveEventArgs e)
+        {
+            tag.eventId = e.tag.eventId;
+            tag.IsBooleanTrigger = e.tag.IsBooleanTrigger;
+            tag.boolTrigger = e.tag.boolTrigger;
+            tag.analogTrigger = e.tag.analogTrigger;
+            tag.analogValue = e.tag.analogValue;
+        }
+
+        private void EventForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            eventFormOpen = false;
+        }
+
+        private void AddTag_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            TagsToLog.FetchValuesFromSql();
         }
     }
 }

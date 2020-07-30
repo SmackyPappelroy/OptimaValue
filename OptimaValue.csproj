@@ -107,11 +107,14 @@
     <Compile Include="Extensions\PlcExtensionMethods.cs" />
     <Compile Include="Extensions\SqlExtensionMethods.cs" />
     <Compile Include="Handler\Master.cs" />
-    <Compile Include="Handler\PLC\Enums\EdgeDetection.cs" />
     <Compile Include="Handler\PLC\Enums\EventType.cs" />
     <Compile Include="Handler\PLC\Logging\Logger.cs" />
+    <Compile Include="Handler\PLC\Logging\SqlClasses\AnalogTrigger.cs" />
+    <Compile Include="Handler\PLC\Logging\SqlClasses\BooleanTrigger.cs" />
+    <Compile Include="Handler\PLC\Logging\SqlClasses\TagHelpers.cs" />
     <Compile Include="Handler\PLC\Logging\SqlClasses\TagStatistics.cs" />
     <Compile Include="Handler\PLC\MyPlc\Events\DeleteConfirmationEvent.cs" />
+    <Compile Include="Handler\PLC\MyPlc\Events\SaveEventArgs.cs" />
     <Compile Include="Handler\PLC\MyPlc\Graphics\AddTag.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -129,6 +132,12 @@
     </Compile>
     <Compile Include="Handler\PLC\MyPlc\Graphics\DeletePlcConfirmationForm.Designer.cs">
       <DependentUpon>DeletePlcConfirmationForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handler\PLC\MyPlc\Graphics\EventForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Handler\PLC\MyPlc\Graphics\EventForm.Designer.cs">
+      <DependentUpon>EventForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Handler\PLC\MyPlc\Graphics\PlcSettingsControl.cs">
       <SubType>UserControl</SubType>
@@ -208,7 +217,6 @@
     <Compile Include="TextLogger\LoggerAsync\ThreadedLogger.cs" />
     <Compile Include="TextLogger\LogRow.cs" />
     <Compile Include="TextLogger\MyLogger.cs" />
-    <Compile Include="Windows\WindowManager.cs" />
     <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\AddTag.resx">
       <DependentUpon>AddTag.cs</DependentUpon>
     </EmbeddedResource>
@@ -217,6 +225,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\DeletePlcConfirmationForm.resx">
       <DependentUpon>DeletePlcConfirmationForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\EventForm.resx">
+      <DependentUpon>EventForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\PlcSettingsControl.resx">
       <DependentUpon>PlcSettingsControl.cs</DependentUpon>

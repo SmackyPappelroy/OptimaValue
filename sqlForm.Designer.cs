@@ -183,7 +183,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Databas";
             this.TopMost = true;
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.sqlForm_FormClosing);
             this.Load += new System.EventHandler(this.SettingForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();

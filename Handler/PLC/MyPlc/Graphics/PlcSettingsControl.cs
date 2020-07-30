@@ -342,29 +342,48 @@ namespace OptimaValue.Handler.PLC.Graphics
                 query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET active='{activeString}',name='{txtName.Text}'";
                 query += $",ipAddress='{txtIp.Text}',cpuType='{comboCpu.SelectedItem}',rack={txtRack.Text},slot={txtSlot.Text}";
                 query += $" WHERE id = {Id}";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig SET plcName='{txtName.Text}' ";
+                query += $"WHERE plcName = '{PlcName}'";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
             }
             else
             {
                 query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.plcConfig (active,name,ipAddress,cpuType,rack,slot)";
                 query += $"VALUES ('{activeString}','{txtName.Text}','{txtIp.Text}','{comboCpu.SelectedItem}',{txtRack.Text},{txtSlot.Text})";
-            }
-
-
-            using (SqlConnection con = new SqlConnection(connectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             }
+
+
+
             RedrawTreeEvent.RaiseMessage(true);
         }
 
         private bool CheckIfExists()
         {
             object result = new object();
-            var query = $"Select top 1 name FROM {SqlSettings.Default.Databas}.dbo.plcConfig WHERE name ='{txtName.Text}'";
+            var query = $"Select top 1 name FROM {SqlSettings.Default.Databas}.dbo.plcConfig WHERE name ='{PlcName}'";
             string connectionString = PlcConfig.ConnectionString();
             try
             {

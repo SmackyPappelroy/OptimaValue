@@ -58,5 +58,21 @@ namespace OptimaValue
         [Column(TypeName = "nvarchar")]
         [StringLength(30)]
         public string tagUnit { get; set; }
+
+        public int eventId { get; set; }
+
+        [Column(TypeName = "bit")]
+        public bool isBooleanTrigger { get; set; }
+
+        [Column(TypeName = "nvarchar")]
+        [StringLength(30)]
+        public string boolTrigger { get; set; }
+
+        [Column(TypeName = "nvarchar")]
+        [StringLength(30)]
+        public string analogTrigger { get; set; }
+
+        [Column(TypeName = "float")]
+        public float analogValue { get; set; }
     }
 }

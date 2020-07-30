@@ -80,6 +80,20 @@ namespace OptimaValue
             System.Threading.Thread.Sleep(100);
         }
 
+        private void hideMenu_Click(object sender, EventArgs e)
+        {
+            Hide();
+            notifyIcon.ShowBalloonTip(5000, "OptimaValue körs i bakgrunden", "Se notify-ikon...", ToolTipIcon.None);
+        }
+
+        private void notifyIcon_Click(object sender, EventArgs e)
+        {
+            if (!Visible)
+                Show();
+            else
+                BringToFront();
+        }
+
         private void debugMeny_CheckedChanged(object sender, EventArgs e)
         {
             Settings.Default.Debug = debugMenu.Checked;
@@ -159,6 +173,208 @@ namespace OptimaValue
                 SqlForm.FormClosing += SqlForm_FormClosing;
                 SqlForm.Show();
                 IsOpenSqlForm = true;
+            }
+        }
+        #endregion
+
+        #region TreeView
+
+        private void addPlc_Click(object sender, EventArgs e)
+        {
+            AddPlcNode("PLC");
+        }
+
+        private void PopulateTree()
+        {
+            foreach (TreeNode node in treeView.Nodes)
+            {
+                node.Nodes.Clear();
+            }
+            var tbl = PlcConfig.PopulateDataTable();
+            if (tbl == null)
+                return;
+            if (tbl.Rows.Count == 0)
+            {
+                btnStart.Enabled = false;
+            }
+            else
+                btnStart.Enabled = true;
+            foreach (ExtendedPlc plc in PlcConfig.PlcList)
+            {
+                AddPlcNode(plc.PlcName);
+            }
+        }
+
+        private void renameMenu_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (treeView.SelectedNode.Name == "PLC")
+            {
+                treeView.LabelEdit = true;
+                if (!treeView.SelectedNode.IsEditing)
+                    treeView.SelectedNode.BeginEdit();
+            }
+
+        }
+
+        private void CloseUserControls()
+        {
+            if (settingsControl != null)
+            {
+                settingsControl.Hide();
+                settingsControl = null;
+            }
+            if (statusControl != null)
+            {
+                statusControl.Hide();
+                statusControl = null;
+            }
+            if (tagControl != null)
+            {
+                tagControl.Hide();
+                tagControl = null;
+            }
+        }
+
+        private void AddPlcNode(string plcLabel)
+        {
+
+            var configurationNode = new TreeNode("Konfiguration")
+            {
+                Name = "Konfiguration",
+                ImageIndex = 4,
+                SelectedImageIndex = 4
+            };
+
+            var statusNode = new TreeNode("Status")
+            {
+                Name = "Status",
+                ImageIndex = 5,
+                SelectedImageIndex = 5
+            };
+
+            var tagNode = new TreeNode("Taggar")
+            {
+                Name = "Taggar",
+                ImageIndex = 6,
+                SelectedImageIndex = 6
+            };
+
+            var plcNode = new TreeNode(plcLabel, new TreeNode[] { configurationNode, statusNode, tagNode })
+            {
+                Name = "PLC",
+                ImageIndex = 1,
+                SelectedImageIndex = 1
+            };
+
+            treeView.TopNode.Nodes.Add(plcNode);
+
+            treeView.TopNode.Expand();
+        }
+
+        private void treeView_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (treeView.SelectedNode.Name == "Konfiguration")
+            {
+                activePlc = PlcConfig.PlcList.Find(x => x.PlcName == treeView.SelectedNode.Parent.Text);
+
+                if (settingsControl != null)
+                {
+                    settingsControl.Hide();
+                }
+                settingsControl = null;
+
+                // Plcn finns ej i databas
+                if (activePlc == null)
+                {
+                    settingsControl = new PlcSettingsControl(ConnectionStatus.Disconnected, string.Empty
+                                      , string.Empty, 1.ToString(), 0.ToString()
+                                      , false, CpuType.S71500, 0, activePlc)
+                    {
+                        Parent = contentPanel
+                    };
+                    settingsControl.Dock = DockStyle.Fill;
+                }
+                // Plcn finn i databas
+                else
+                {
+                    settingsControl = new PlcSettingsControl(activePlc.ConnectionStatus, activePlc.PlcName
+                  , activePlc.IP, activePlc.Slot.ToString(), activePlc.Rack.ToString()
+                  , activePlc.Active, activePlc.CPU, activePlc.ActivePlcId, activePlc)
+                    {
+                        Parent = contentPanel
+                    };
+                    settingsControl.Dock = DockStyle.Fill;
+                }
+                if (activePlc != null)
+                {
+                    settingsControl.Show();
+                }
+                else if (activePlc == null)
+                    settingsControl.Show();
+
+            }
+
+            if (treeView.SelectedNode.Name != "Konfiguration")
+            {
+                if (settingsControl != null)
+                    settingsControl.Hide();
+                settingsControl = null;
+            }
+
+            if (treeView.SelectedNode.Name == "Status")
+            {
+                activePlc = PlcConfig.PlcList.Find(x => x.PlcName == treeView.SelectedNode.Parent.Text);
+
+                if (activePlc == null)
+                    return;
+
+                if (statusControl != null)
+                    statusControl.Hide();
+                statusControl = null;
+
+                statusControl = new StatusControl(activePlc.PlcName)
+                {
+                    Parent = contentPanel,
+                    Dock = DockStyle.Fill
+                };
+                statusControl.Show();
+            }
+
+            if (treeView.SelectedNode.Name != "Status")
+            {
+                if (statusControl != null)
+                    statusControl.Hide();
+                statusControl = null;
+            }
+
+            if (treeView.SelectedNode.Name == "Taggar")
+            {
+                activePlc = PlcConfig.PlcList.Find(x => x.PlcName == treeView.SelectedNode.Parent.Text);
+
+
+
+                if (activePlc == null)
+                    return;
+
+                if (tagControl != null)
+                    tagControl.Hide();
+                tagControl = null;
+
+                tagControl = new TagControl2(activePlc, treeView)
+                {
+                    Parent = contentPanel,
+                    Dock = DockStyle.Fill
+                };
+                tagControl.Show();
+
+
+            }
+            if (treeView.SelectedNode.Name != "Taggar")
+            {
+                if (tagControl != null)
+                    tagControl.Hide();
+                tagControl = null;
+
             }
         }
         #endregion
@@ -345,212 +561,6 @@ namespace OptimaValue
         }
         #endregion
 
-        private void CloseUserControls()
-        {
-            if (settingsControl != null)
-            {
-                settingsControl.Hide();
-                settingsControl = null;
-            }
-            if (statusControl != null)
-            {
-                statusControl.Hide();
-                statusControl = null;
-            }
-            if (tagControl != null)
-            {
-                tagControl.Hide();
-                tagControl = null;
-            }
-        }
-
-
-
-        private void PopulateTree()
-        {
-            foreach (TreeNode node in treeView.Nodes)
-            {
-                node.Nodes.Clear();
-            }
-            var tbl = PlcConfig.PopulateDataTable();
-            if (tbl == null)
-                return;
-            if (tbl.Rows.Count == 0)
-            {
-                btnStart.Enabled = false;
-            }
-            else
-                btnStart.Enabled = true;
-            foreach (ExtendedPlc plc in PlcConfig.PlcList)
-            {
-                AddPlcNode(plc.PlcName);
-            }
-        }
-
-        private void addPlc_Click(object sender, EventArgs e)
-        {
-            AddPlcNode("PLC");
-        }
-
-        private void renameMenu_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (treeView.SelectedNode.Name == "PLC")
-            {
-                treeView.LabelEdit = true;
-                if (!treeView.SelectedNode.IsEditing)
-                    treeView.SelectedNode.BeginEdit();
-            }
-
-        }
-
-        private void AddPlcNode(string plcLabel)
-        {
-
-            var configurationNode = new TreeNode("Konfiguration")
-            {
-                Name = "Konfiguration",
-                ImageIndex = 4,
-                SelectedImageIndex = 4
-            };
-
-            var statusNode = new TreeNode("Status")
-            {
-                Name = "Status",
-                ImageIndex = 5,
-                SelectedImageIndex = 5
-            };
-
-            var tagNode = new TreeNode("Taggar")
-            {
-                Name = "Taggar",
-                ImageIndex = 6,
-                SelectedImageIndex = 6
-            };
-
-            var plcNode = new TreeNode(plcLabel, new TreeNode[] { configurationNode, statusNode, tagNode })
-            {
-                Name = "PLC",
-                ImageIndex = 1,
-                SelectedImageIndex = 1
-            };
-
-            treeView.TopNode.Nodes.Add(plcNode);
-
-            treeView.TopNode.Expand();
-        }
-
-        private void treeView_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (treeView.SelectedNode.Name == "Konfiguration")
-            {
-                activePlc = PlcConfig.PlcList.Find(x => x.PlcName == treeView.SelectedNode.Parent.Text);
-
-                if (settingsControl != null)
-                {
-                    settingsControl.Hide();
-                }
-                settingsControl = null;
-
-                // Plcn finns ej i databas
-                if (activePlc == null)
-                {
-                    settingsControl = new PlcSettingsControl(ConnectionStatus.Disconnected, string.Empty
-                                      , string.Empty, 1.ToString(), 0.ToString()
-                                      , false, CpuType.S71500, 0, activePlc)
-                    {
-                        Parent = contentPanel
-                    };
-                    settingsControl.Dock = DockStyle.Fill;
-                }
-                // Plcn finn i databas
-                else
-                {
-                    settingsControl = new PlcSettingsControl(activePlc.ConnectionStatus, activePlc.PlcName
-                  , activePlc.IP, activePlc.Slot.ToString(), activePlc.Rack.ToString()
-                  , activePlc.Active, activePlc.CPU, activePlc.ActivePlcId, activePlc)
-                    {
-                        Parent = contentPanel
-                    };
-                    settingsControl.Dock = DockStyle.Fill;
-                }
-                if (activePlc != null)
-                {
-                    settingsControl.Show();
-                }
-                else if (activePlc == null)
-                    settingsControl.Show();
-
-            }
-
-            if (treeView.SelectedNode.Name != "Konfiguration")
-            {
-                if (settingsControl != null)
-                    settingsControl.Hide();
-                settingsControl = null;
-            }
-
-            if (treeView.SelectedNode.Name == "Status")
-            {
-                activePlc = PlcConfig.PlcList.Find(x => x.PlcName == treeView.SelectedNode.Parent.Text);
-
-                if (activePlc == null)
-                    return;
-
-                if (statusControl != null)
-                    statusControl.Hide();
-                statusControl = null;
-
-                statusControl = new StatusControl(activePlc.PlcName)
-                {
-                    Parent = contentPanel,
-                    Dock = DockStyle.Fill
-                };
-                statusControl.Show();
-            }
-
-            if (treeView.SelectedNode.Name != "Status")
-            {
-                if (statusControl != null)
-                    statusControl.Hide();
-                statusControl = null;
-            }
-
-            if (treeView.SelectedNode.Name == "Taggar")
-            {
-                activePlc = PlcConfig.PlcList.Find(x => x.PlcName == treeView.SelectedNode.Parent.Text);
-
-
-
-                if (activePlc == null)
-                    return;
-
-                if (tagControl != null)
-                    tagControl.Hide();
-                tagControl = null;
-
-                tagControl = new TagControl2(activePlc, treeView)
-                {
-                    Parent = contentPanel,
-                    Dock = DockStyle.Fill
-                };
-                tagControl.Show();
-
-
-            }
-            if (treeView.SelectedNode.Name != "Taggar")
-            {
-                if (tagControl != null)
-                    tagControl.Hide();
-                tagControl = null;
-
-            }
-        }
-
-
-
-
-
-
 
         private void SqlForm_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -558,26 +568,14 @@ namespace OptimaValue
             PopulateTree();
         }
 
-
-
         private void PerForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             perFormOpen = false;
             perForm.Dispose();
         }
 
-        private void hideMenu_Click(object sender, EventArgs e)
-        {
-            Hide();
-            notifyIcon.ShowBalloonTip(5000, "OptimaValue körs i bakgrunden", "Se notify-ikon...", ToolTipIcon.None);
-        }
 
-        private void notifyIcon_Click(object sender, EventArgs e)
-        {
-            if (!Visible)
-                Show();
-            else
-                BringToFront();
-        }
+
+
     }
 }

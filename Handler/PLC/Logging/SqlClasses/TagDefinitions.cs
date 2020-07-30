@@ -1,5 +1,6 @@
 ﻿using S7.Net;
 using System;
+using System.Collections.Generic;
 
 namespace OptimaValue
 {
@@ -20,8 +21,37 @@ namespace OptimaValue
         public byte bitAddress { get; set; } = 0;
         public LogFrequency logFreq { get; set; }
         public DateTime LastLogTime { get; set; }
-
-        // New
         public string tagUnit { get; set; } = string.Empty;
+
+        // Events
+        public int eventId { get; set; } // The id of the trigger tag
+        public bool IsBooleanTrigger { get; set; }
+        public BooleanTrigger boolTrigger { get; set; }
+        public AnalogTrigger analogTrigger { get; set; }
+
+        public float analogValue { get; set; } = 0f;
+
+        private List<int> subscribedTags = new List<int>();
+        public List<int> SubscribedTags
+        {
+            get
+            {
+                subscribedTags.Clear();
+                if (TagsToLog.AllLogValues != null)
+                {
+                    if (TagsToLog.AllLogValues.Count > 1)
+                    {
+                        foreach (var tag in TagsToLog.AllLogValues)
+                        {
+                            if (tag.eventId == id && tag.eventId != 0)
+                            {
+                                subscribedTags.Add(tag.id);
+                            }
+                        }
+                    }
+                }
+                return subscribedTags;
+            }
+        }
     }
 }

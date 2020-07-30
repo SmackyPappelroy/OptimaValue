@@ -156,9 +156,14 @@ namespace OptimaValue
                 var _timeOfDay = (tbl.AsEnumerable().ElementAt(rowIndex).Field<TimeSpan>("timeOfDay"));
                 var _varType = (VarType)Enum.Parse(typeof(VarType), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("varType")));
                 var _tagUnit = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("tagUnit"));
+                var _eventId = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("eventId"));
+                var _isBooleanTrigger = (tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("isBooleanTrigger"));
+                var _boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("boolTrigger")));
+                var _analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("analogTrigger")));
+                var _analogValue = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("analogValue"));
 
 
-                var myPlc = new TagDefinitions()
+                var myTag = new TagDefinitions()
                 {
                     active = _active,
                     bitAddress = _bitAddress,
@@ -176,8 +181,13 @@ namespace OptimaValue
                     timeOfDay = _timeOfDay,
                     varType = _varType,
                     tagUnit = _tagUnit,
+                    eventId = _eventId,
+                    IsBooleanTrigger = _isBooleanTrigger,
+                    boolTrigger = _boolTrigger,
+                    analogTrigger = _analogTrigger,
+                    analogValue = _analogValue,
                 };
-                tags.Add(myPlc);
+                tags.Add(myTag);
             }
             // Sorterar listan alfabetiskt
             tags.Sort((x, y) => string.Compare(x.name, y.name));

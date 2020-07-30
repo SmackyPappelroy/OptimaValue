@@ -10,18 +10,9 @@ namespace OptimaValue
     public static class TagsToLog
     {
         #region Lists
-        private static List<TagDefinitions> allLogValues = new List<TagDefinitions>();
-
         public static DataTable AllTagsTable;
 
-        public static List<TagDefinitions> AllLogValues
-        {
-            get => allLogValues;
-            set
-            {
-                allLogValues = value;
-            }
-        }
+        public static List<TagDefinitions> AllLogValues { get; set; } = new List<TagDefinitions>();
         #endregion
 
         public static DataTable FetchValuesFromSql(string plcName = "")
@@ -68,6 +59,11 @@ namespace OptimaValue
                                                 logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), dr["logFreq"].ToString()),
                                                 LastLogTime = DateTime.MinValue,
                                                 tagUnit = dr["tagUnit"].ToString(),
+                                                eventId = (int)dr["eventId"],
+                                                IsBooleanTrigger = (bool)dr["isBooleanTrigger"],
+                                                boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), dr["boolTrigger"].ToString()),
+                                                analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), dr["analogTrigger"].ToString()),
+                                                analogValue = (float)((double)dr["analogValue"]),
                                             }).ToList();
 
                             // Sorterar listan alfabetiskt

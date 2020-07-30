@@ -28,6 +28,7 @@
         {
             foreach (ExtendedPlc plc in PlcConfig.PlcList)
             {
+                plc.ReconnectRetries = 0;
                 plc.logger.Stop(applicationShutdown);
             }
             AbortSqlLog = true;
