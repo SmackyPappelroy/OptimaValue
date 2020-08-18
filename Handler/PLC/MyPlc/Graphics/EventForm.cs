@@ -50,7 +50,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             {
                 if (tag.name != "")
                 {
-                    if (tag.name != taggsen.name && taggsen.plcName == PlcName)
+                    if (tag.name != taggsen.name && taggsen.plcName == PlcName && taggsen.logType != LogType.Event)
                         listan.Add(taggsen.name);
                 }
             }
