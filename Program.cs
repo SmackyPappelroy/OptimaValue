@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace OptimaValue
@@ -13,11 +14,14 @@ namespace OptimaValue
         {
             bool createdNew = true;
 
-            if (createdNew)
+            using (Mutex mutex = new Mutex(true, "OptimaValue", out createdNew))
             {
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new MasterForm());
+                if (createdNew)
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.Run(new MasterForm());
+                }
             }
         }
     }
