@@ -11,9 +11,14 @@ namespace OptimaValue
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MasterForm());
+            bool createdNew = true;
+
+            if (createdNew)
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new MasterForm());
+            }
         }
     }
 }
