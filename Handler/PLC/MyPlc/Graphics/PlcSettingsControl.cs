@@ -306,6 +306,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                     if (plc.logger.IsStarted)
                         return;
                 }
+
             }
 
             ValidateAll();
@@ -489,6 +490,8 @@ namespace OptimaValue.Handler.PLC.Graphics
                     if (plc.logger.IsStarted)
                         return;
                 }
+                RedrawTreeEvent.RaiseMessage(true);
+                return;
             }
 
             if (!CheckIfExistsDelete())
