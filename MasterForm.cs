@@ -22,7 +22,6 @@ namespace OptimaValue
         private readonly System.Windows.Forms.Timer startStopButtonVisibilityTimer;
         private sqlForm SqlForm;
         private bool IsOpenSqlForm = false;
-        private readonly MyLogger myLogger = new MyLogger();
 
         private bool isSubscribed = false;
         #endregion
@@ -199,6 +198,7 @@ namespace OptimaValue
             }
             else
                 btnStart.Enabled = true;
+
             foreach (ExtendedPlc plc in PlcConfig.PlcList)
             {
                 AddPlcNode(plc.PlcName);
@@ -386,7 +386,7 @@ namespace OptimaValue
             {
                 RedrawTreeEvent.NewMessage += RedrawTreeEvent_NewMessage;
                 OnlineStatusEvent.NewMessage += OnlineStatusEvent_NewMessage;
-                StatusEvent.NewMessage += StatusEvent_NewMessage;
+                Apps.Logger.NewLog += Logger_NewLog;
                 statusTimer.Tick += StatusTimer_Tick;
                 startStopButtonVisibilityTimer.Tick += StartStopButtonVisibilityTimer_Tick;
                 DatabaseCreationEvent.CreatedEvent += DatabaseCreationEvent_CreatedEvent;
@@ -397,7 +397,7 @@ namespace OptimaValue
             {
                 RedrawTreeEvent.NewMessage -= RedrawTreeEvent_NewMessage;
                 OnlineStatusEvent.NewMessage -= OnlineStatusEvent_NewMessage;
-                StatusEvent.NewMessage -= StatusEvent_NewMessage;
+                Apps.Logger.NewLog -= Logger_NewLog;
                 statusTimer.Tick -= StatusTimer_Tick;
                 startStopButtonVisibilityTimer.Tick -= StartStopButtonVisibilityTimer_Tick;
                 DatabaseCreationEvent.CreatedEvent -= DatabaseCreationEvent_CreatedEvent;
@@ -405,6 +405,7 @@ namespace OptimaValue
                 isSubscribed = false;
             }
         }
+
 
         private void DatabaseCreationEvent_CreatedEvent(object sender, DataBaseCreationEventArgs e)
         {
@@ -482,43 +483,29 @@ namespace OptimaValue
             errorImage.Visible = false;
         }
 
-        private void StatusEvent_NewMessage(object sender, StatusEventArgs e)
+        private void Logger_NewLog((string message, string hmiString, Severity LogSeverity) obj)
         {
             if (InvokeRequired)
             {
-                Invoke((MethodInvoker)delegate { StatusEvent_NewMessage(sender, e); });
+                Invoke((MethodInvoker)delegate { Logger_NewLog(obj); });
                 return;
             }
-            if (e.Message != "")
-            {
-                if (txtStatus.Text != string.Empty)
-                    txtStatus.Text += $"\n\r\n\r" + e.Message;
-                else
-                    txtStatus.Text = e.Message;
-                txtStatus.Visible = true;
-                statusTimer.Start();
-            }
+            txtStatus.Text = obj.hmiString;
+            txtStatus.Visible = true;
+            statusTimer.Start();
 
-            if (e.Status == Status.Error)
+            if (obj.LogSeverity == Severity.Error)
             {
-                notifyIcon.ShowBalloonTip(3000, $"OptimaValue {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}", e.Message, ToolTipIcon.Error);
+                notifyIcon.ShowBalloonTip(3000, $"OptimaValue {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Error);
                 errorImage.Visible = true;
             }
-            else if (e.Status == Status.Warning)
+            else if (obj.LogSeverity == Severity.Warning)
             {
-                notifyIcon.ShowBalloonTip(3000, $"OptimaValue {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}", e.Message, ToolTipIcon.Warning);
+                notifyIcon.ShowBalloonTip(3000, $"OptimaValue {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Warning);
                 errorImage.Visible = true;
             }
-
-            if (!Settings.Default.Debug)
-                return;
-            var log = new LogRow
-            {
-                status = e.Status,
-                Message = e.Message
-            };
-            myLogger.LogMessage(log);
         }
+
 
         private void OnlineStatusEvent_NewMessage(object sender, OnlineStatusEventArgs e)
         {

@@ -37,7 +37,7 @@ namespace OptimaValue
                     }
                     catch (SqlException ex)
                     {
-                        StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                        Apps.Logger.Log(string.Empty, Severity.Error, ex);
                         return false;
                     }
                     finally
@@ -84,7 +84,7 @@ namespace OptimaValue
                 }
                 catch (SqlException ex)
                 {
-                    StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                    Apps.Logger.Log(string.Empty, Severity.Error, ex);
                     return false;
                 }
             }
@@ -117,7 +117,7 @@ namespace OptimaValue
                     }
                     catch (SqlException ex)
                     {
-                        StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                        Apps.Logger.Log(string.Empty, Severity.Error, ex);
                         return null;
                     }
 

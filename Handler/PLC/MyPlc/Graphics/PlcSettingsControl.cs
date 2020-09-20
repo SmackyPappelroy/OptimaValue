@@ -400,7 +400,7 @@ namespace OptimaValue.Handler.PLC.Graphics
             }
             catch (SqlException ex)
             {
-                $"Misslyckades att läsa från SQL\r\n{ex.Message}".SendThisStatusMessage(Status.Error);
+                $"Misslyckades att läsa från SQL\r\n{ex.Message}".SendThisStatusMessage(Severity.Error);
             }
 
             if (result != null)
@@ -429,7 +429,7 @@ namespace OptimaValue.Handler.PLC.Graphics
             }
             catch (SqlException ex)
             {
-                $"Misslyckades att läsa från SQL\r\n{ex.Message}".SendThisStatusMessage(Status.Error);
+                $"Misslyckades att läsa från SQL\r\n{ex.Message}".SendThisStatusMessage(Severity.Error);
             }
 
             if (result != null)
@@ -514,7 +514,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                 }
                 catch (SqlException ex)
                 {
-                    $"Misslyckades ta bort PLC från SQL\r\n{ex.Message}".SendThisStatusMessage(Status.Error);
+                    $"Misslyckades ta bort PLC från SQL\r\n{ex.Message}".SendThisStatusMessage(Severity.Error);
 
                 }
                 RedrawTreeEvent.RaiseMessage(true);

@@ -89,7 +89,7 @@ namespace OptimaValue
                 MyPlc.Open();
                 if (!MyPlc.IsConnected)
                 {
-                    StatusEvent.RaiseMessage($"Får ej kontakt med {MyPlc.PlcName}", Status.Error);
+                    Apps.Logger.Log($"Får ej kontakt med {MyPlc.PlcName}", Severity.Error);
                     AbortLogThread(string.Empty);
                 }
                 else
@@ -101,7 +101,7 @@ namespace OptimaValue
             }
             catch (PlcException ex)
             {
-                StatusEvent.RaiseMessage($"Lyckas ej ansluta till {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
+                Apps.Logger.Log($"Lyckas ej ansluta till {MyPlc.PlcName}", Severity.Error, ex);
                 AbortLogThread(string.Empty);
             }
 
@@ -135,21 +135,21 @@ namespace OptimaValue
                                 if (MyPlc.IsConnected)
                                 {
                                     MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Ok);
-                                    StatusEvent.RaiseMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Ok);
+                                    Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Severity.Normal);
                                     MyPlc.ConnectionStatus = ConnectionStatus.Connected;
                                     MyPlc.ReconnectRetries = 0;
                                 }
                                 else
                                 {
                                     MyPlc.SendPlcStatusMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Error);
-                                    StatusEvent.RaiseMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Error);
+                                    Apps.Logger.Log($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Severity.Error);
                                 }
                                 MyPlc.LastReconnect = DateTime.Now;
                             }
-                            catch
+                            catch (Exception ex)
                             {
                                 MyPlc.SendPlcStatusMessage($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Error);
-                                StatusEvent.RaiseMessage($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Error);
+                                Apps.Logger.Log($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Severity.Error, ex);
                                 MyPlc.LastReconnect = DateTime.Now;
                             }
                         }
@@ -159,7 +159,7 @@ namespace OptimaValue
                     else
                     {
                         MyPlc.SendPlcStatusMessage($"Max reconnect försök för {MyPlc.PlcName}\r\nAvbryter!", Status.Error);
-                        StatusEvent.RaiseMessage($"Max reconnect försök för {MyPlc.PlcName}\r\nAvbryter!", Status.Error);
+                        Apps.Logger.Log($"Max reconnect försök för {MyPlc.PlcName}\r\nAvbryter!", Severity.Error);
                         if (PlcPicker.NrActiveEnabledPlc == 1)
                             Master.StopLog(true);
                         else
@@ -192,7 +192,7 @@ namespace OptimaValue
             if (message == string.Empty)
                 MyPlc.SendPlcStatusMessage($"Kommunikationen till {MyPlc.PlcName} avbruten", Status.Warning);
             else
-                StatusEvent.RaiseMessage($"Kommunikationen upprättades ej till {MyPlc.PlcName}\n\r{message}", Status.Error);
+                Apps.Logger.Log($"Kommunikationen upprättades ej till {MyPlc.PlcName}\n\r{message}", Severity.Error);
             MyPlc.ReconnectRetries = 0;
 
 

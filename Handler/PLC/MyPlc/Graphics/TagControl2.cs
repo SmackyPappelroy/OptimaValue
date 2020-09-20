@@ -120,7 +120,7 @@ namespace OptimaValue
             }
             catch (SqlException ex)
             {
-                StatusEvent.RaiseMessage($"Hittade inga taggar", Status.Ok);
+                Apps.Logger.Log($"Hittade inga taggar", Severity.Normal, ex);
             }
             PopulateList(myTable);
         }

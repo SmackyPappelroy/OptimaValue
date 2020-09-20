@@ -264,7 +264,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             catch (SqlException ex)
             {
-                StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                Apps.Logger.Log(string.Empty, Severity.Error, ex);
             }
 
             query = $"SELECT TOP 1 * FROM {SqlSettings.Default.Databas}.dbo.tagConfig ORDER BY id DESC";
@@ -285,7 +285,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             catch (SqlException ex)
             {
-                StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                Apps.Logger.Log(string.Empty, Severity.Error, ex);
             }
 
             var _active = (tbl.AsEnumerable().ElementAt(0).Field<bool>("active"));
@@ -362,7 +362,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             catch (SqlException ex)
             {
-                StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                Apps.Logger.Log(string.Empty, Severity.Error, ex);
             }
         }
 
@@ -389,7 +389,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             catch (SqlException ex)
             {
-                StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                Apps.Logger.Log(string.Empty, Severity.Error, ex);
             }
         }
 
@@ -417,7 +417,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             catch (SqlException ex)
             {
-                StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                Apps.Logger.Log(string.Empty, Severity.Error, ex);
             }
             if (result != null)
                 return true;

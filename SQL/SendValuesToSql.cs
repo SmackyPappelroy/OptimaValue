@@ -272,7 +272,7 @@ namespace OptimaValue
                         }
                         catch (SqlException ex)
                         {
-                            $"Problem vid lagring till Sql \n\r{ex.Message}".SendThisStatusMessage(Status.Error);
+                            $"Problem vid lagring till Sql \n\r{ex.Message}".SendThisStatusMessage(Severity.Error);
                         }
                     }
                 }

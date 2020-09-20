@@ -147,7 +147,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             catch (SqlException ex)
             {
-                StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                Apps.Logger.Log(string.Empty, Severity.Error, ex);
             }
         }
 

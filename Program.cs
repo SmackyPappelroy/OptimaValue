@@ -18,6 +18,7 @@ namespace OptimaValue
             {
                 if (createdNew)
                 {
+                    Apps.Logger = new FileLogger(@"C:\OptimaValue\");
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     Application.Run(new MasterForm());

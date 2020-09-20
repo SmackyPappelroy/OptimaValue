@@ -90,12 +90,12 @@ namespace OptimaValue
             }
             catch (SqlException ex)
             {
-                StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                Apps.Logger.Log(string.Empty, Severity.Error, ex);
                 return null;
             }
             catch (Exception ex)
             {
-                StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                Apps.Logger.Log(string.Empty, Severity.Error, ex);
                 return null;
             }
 
@@ -123,7 +123,7 @@ namespace OptimaValue
                 }
                 catch (SqlException ex)
                 {
-                    StatusEvent.RaiseMessage(ex.Message, Status.Error);
+                    Apps.Logger.Log(string.Empty, Severity.Error, ex);
                     return false;
                 }
             }
