@@ -46,7 +46,7 @@ namespace OptimaValue
         /// <param name="filePath">The path to the file that generated the log message</param>
         /// <param name="ex">Optional exception</param>
         /// <param name="lineNumber">What line number generated the log</param>
-        public void Log(string message, Severity severity = Severity.Normal, Exception ex = null, Level logLevel = Level.Debug, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        public void Log(string message, Severity severity = Severity.Normal, Exception ex = null, bool logToHmi = true, Level logLevel = Level.Debug, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
             // Locks the thread
             readerWriterLockSlim.EnterWriteLock();
@@ -74,6 +74,9 @@ namespace OptimaValue
 
             logString += Environment.NewLine + "Meddelande: " + message;
             hmiString += Environment.NewLine + message;
+
+            if (!logToHmi)
+                hmiString = string.Empty;
 
             // Raise an event
             NewLog.Invoke((logString, hmiString, severity));

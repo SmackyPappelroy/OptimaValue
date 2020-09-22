@@ -49,6 +49,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 comboLogType.Text = "Cyclic";
                 comboLogType.SelectedItem = "Cyclic";
             }
+            else
+                Apps.Logger.Log(taggen.id.ToString(), Severity.Normal, null, false);
         }
 
         private void PopulateInputs()
@@ -165,6 +167,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var okNrOfElements = false;
             var okBitAddress = false;
             var okLogFreq = false;
+            var tempString = string.Empty;
 
             if (!string.IsNullOrEmpty(txtName.Text))
                 okName = true;
@@ -182,12 +185,12 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 okVarType = true;
 
             if (ushort.TryParse(txtBlockNr.Text, out ushort _))
-                okVarType = true;
+                okBlockNr = true;
 
             if (!string.IsNullOrEmpty(comboDataType.SelectedItem.ToString()))
                 okDataType = true;
 
-            if (byte.TryParse(txtStartByte.Text, out byte _))
+            if (ushort.TryParse(txtStartByte.Text, out ushort _))
                 okStartByte = true;
 
             if (ushort.TryParse(txtNrOfElements.Text, out ushort _))
@@ -202,12 +205,14 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (!string.IsNullOrEmpty(comboLogFreq.SelectedItem.ToString()))
                 okLogFreq = true;
 
+
             if (okName && okTimeOfDay && okDeadBand && okVarType && okBlockNr
                 && okDataType && okStartByte && okNrOfElements && okBitAddress &&
                 okLogFreq && okLogType)
             {
                 return true;
             }
+
             return false;
 
         }
@@ -241,6 +246,21 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void AddNewTag()
         {
+            int tagEventId = 0;
+            bool isBoolTrigger = false;
+            float analogValue = 0;
+            string boolTrigger = "OnTrue";
+            string analogTrigger = "Equal";
+            if (!(tag == null))
+            {
+                tagEventId = tag.eventId;
+                isBoolTrigger = tag.IsBooleanTrigger;
+                analogTrigger = tag.analogTrigger.ToString();
+                boolTrigger = tag.boolTrigger.ToString();
+                analogValue = tag.analogValue;
+
+            }
+
             var connectionString = PlcConfig.ConnectionString();
             var query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.tagConfig ";
             query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
@@ -248,8 +268,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             query += $"VALUES ('{checkActive.Checked}','{txtName.Text}','{comboLogType.SelectedItem}','{txtTimeOfDay.Text}',";
             query += $"{int.Parse(txtDeadband.Text)},'{PlcName}','{comboVarType.SelectedItem}',{int.Parse(txtBlockNr.Text)}, ";
             query += $"'{comboDataType.SelectedItem}',{int.Parse(txtStartByte.Text)},{int.Parse(txtNrOfElements.Text)},";
-            query += $"{byte.Parse(txtBitAddress.Text)},'{comboLogFreq.SelectedItem}','{txtUnit.Text}',{tag.eventId},'{tag.IsBooleanTrigger}','";
-            query += $"{tag.boolTrigger}','{tag.analogTrigger}',{tag.analogValue})";
+            query += $"{byte.Parse(txtBitAddress.Text)},'{comboLogFreq.SelectedItem}','{txtUnit.Text}',{tagEventId},'{isBoolTrigger}','";
+            query += $"{boolTrigger}','{analogTrigger}',{analogValue})";
 
             try
             {
@@ -261,6 +281,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                         cmd.ExecuteNonQuery();
                     }
                 }
+
             }
             catch (SqlException ex)
             {
