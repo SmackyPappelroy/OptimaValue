@@ -481,16 +481,24 @@ namespace OptimaValue
             statusTimer.Stop();
             txtStatus.Text = string.Empty;
             errorImage.Visible = false;
+            statusPanel.AutoScroll = false;
         }
 
-        private void Logger_NewLog((string message, string hmiString, Severity LogSeverity) obj)
+        private void Logger_NewLog((string message, string hmiString, Severity LogSeverity, DateTime Tid, bool LogSuccess, Exception exception) obj)
         {
             if (InvokeRequired)
             {
                 Invoke((MethodInvoker)delegate { Logger_NewLog(obj); });
                 return;
             }
-            txtStatus.Text = obj.hmiString;
+            if (obj.hmiString.Equals(string.Empty))
+                txtStatus.Text = obj.hmiString;
+            else if (obj.exception != null)
+            {
+                statusPanel.AutoScroll = true;
+                txtStatus.Text = obj.exception.ToString();
+            }
+
             txtStatus.Visible = true;
             statusTimer.Start();
 

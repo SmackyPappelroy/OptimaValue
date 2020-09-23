@@ -169,7 +169,8 @@ namespace OptimaValue
 
                 if (MyPlc.IsConnected)
                     foreach (TagDefinitions logValue in TagsToLog.AllLogValues)
-                        ReadValue(logValue);
+                        if (logValue.plcName.Equals(MyPlc.PlcName))
+                            ReadValue(logValue);
                 if (startClosing)
                 {
                     AbortLogThread(string.Empty);
@@ -228,9 +229,7 @@ namespace OptimaValue
                         if (MyPlc.ConnectionStatus == ConnectionStatus.Connected)
                         {
                             if (logTag.varType == VarType.String || logTag.varType == VarType.StringEx)
-                            {
                                 unknownTag = MyPlc.ReadS7stringToString(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements);
-                            }
                             else
                                 unknownTag = MyPlc.Read(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.varType, logTag.nrOfElements, logTag.bitAddress);
 
@@ -921,6 +920,7 @@ namespace OptimaValue
 
             var allOccurencesOfTagInList = lastLogValue.FindAll(n => n.name == logTag.name).OrderBy(dat => dat.logDate).ToList();
             var nrOfItemsInLastLog = lastLogValue.FindAll(n => n.name == logTag.name);
+
 
             // Garantera att det bara finns ett värde bakåt
             if (nrOfItemsInLastLog.Count > 2)

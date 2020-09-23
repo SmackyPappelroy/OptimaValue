@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Optima");
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Optima");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MasterForm));
             this.addPlcMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addPlc = new System.Windows.Forms.ToolStripMenuItem();
@@ -87,11 +87,11 @@
             this.treeView.ImageList = this.imageList;
             this.treeView.Location = new System.Drawing.Point(3, 111);
             this.treeView.Name = "treeView";
-            treeNode1.ContextMenuStrip = this.addPlcMenu;
-            treeNode1.Name = "Optima";
-            treeNode1.Text = "Optima";
+            treeNode2.ContextMenuStrip = this.addPlcMenu;
+            treeNode2.Name = "Optima";
+            treeNode2.Text = "Optima";
             this.treeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
+            treeNode2});
             this.treeView.SelectedImageIndex = 0;
             this.treeView.Size = new System.Drawing.Size(294, 607);
             this.treeView.TabIndex = 0;
