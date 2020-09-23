@@ -242,7 +242,10 @@ namespace OptimaValue
                             {
                                 var lastKnownLogValue = lastLogValue.FindLast(l => l.name == logTag.name);
                                 if (lastKnownLogValue == null)
+                                {
                                     AddValueToSql(logTag, unknownTag);
+                                    return;
+                                }
 
                                 if (logTag.deadband > 0)
                                 {

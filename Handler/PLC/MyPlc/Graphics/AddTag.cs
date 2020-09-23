@@ -49,8 +49,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 comboLogType.Text = "Cyclic";
                 comboLogType.SelectedItem = "Cyclic";
             }
-            else
-                Apps.Logger.Log(taggen.id.ToString(), Severity.Normal, null, false);
+
         }
 
         private void PopulateInputs()
