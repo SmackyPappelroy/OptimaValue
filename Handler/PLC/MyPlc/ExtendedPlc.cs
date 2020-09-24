@@ -24,6 +24,31 @@ namespace OptimaValue
         private readonly DispatcherTimer timerPing = new DispatcherTimer();
         private bool isSubscribed = false;
 
+        #region Logging
+        private bool loggerIsStarted = false;
+        public bool LoggerIsStarted
+        {
+            get => loggerIsStarted;
+            set
+            {
+                loggerIsStarted = value;
+                if (loggerIsStarted)
+                    onlineTimer.Start();
+                else
+                    onlineTimer.Stop();
+                StartedEvent?.Invoke(typeof(ExtendedPlc), EventArgs.Empty);
+            }
+        }
+        public event EventHandler<EventArgs> StartedEvent;
+
+        private System.Windows.Forms.Timer onlineTimer = new System.Windows.Forms.Timer()
+        {
+            Interval = 500,
+        };
+
+        #endregion
+
+
         public bool Active = false;
         public int Id = 0;
 
@@ -98,7 +123,8 @@ namespace OptimaValue
 
 
         #region Logging classes
-        public Logger logger;
+        // TODO: Måste plockas bort
+        //public Logger logger;
         #endregion
 
         #region Constructor
@@ -106,7 +132,17 @@ namespace OptimaValue
         {
             SubscribeEvents(true);
             timerPing.Interval = new TimeSpan(0, 0, 10);
-            logger = new Logger(this);
+            onlineTimer.Tick += OnlineTimer_Tick;
+            // TODO: Måste plockas bort
+            //logger = new Logger(this);
+        }
+
+        private void OnlineTimer_Tick(object sender, EventArgs e)
+        {
+            if (this != null)
+                this.SendPlcOnlineMessage(this.ConnectionStatus, this.UpTimeString);
+            else
+                this.SendPlcOnlineMessage(ConnectionStatus.Disconnected, string.Empty);
         }
         #endregion
 

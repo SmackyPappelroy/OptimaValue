@@ -35,7 +35,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (taggen != null)
                 PopulateInputs();
             MyPlc = myPlc;
-            if (MyPlc.logger.IsStarted)
+            if (MyPlc.LoggerIsStarted)
             {
                 btnSave.Enabled = false;
                 btnNew.Enabled = false;

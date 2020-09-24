@@ -43,9 +43,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             tag.ReadErrorEvent += Tag_ReadErrorEvent;
 
-            MyPlc.logger.StartedEvent += Logger_StartedEvent;
+            MyPlc.StartedEvent += Logger_StartedEvent;
             this.HandleDestroyed += SingleTagControl_HandleDestroyed;
-            if (MyPlc.logger.IsStarted)
+            if (MyPlc.LoggerIsStarted)
             {
                 contextMenuStrip.Enabled = false;
                 statsImage.Enabled = true;
@@ -69,7 +69,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private void SingleTagControl_HandleDestroyed(object sender, EventArgs e)
         {
             destroyed = true;
-            MyPlc.logger.StartedEvent -= Logger_StartedEvent;
+            MyPlc.StartedEvent -= Logger_StartedEvent;
         }
 
         private void Logger_StartedEvent(object sender, EventArgs e)
@@ -83,7 +83,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     Invoke((MethodInvoker)delegate { Logger_StartedEvent(sender, e); });
                     return;
                 }
-                if (MyPlc.logger.IsStarted)
+                if (MyPlc.LoggerIsStarted)
                 {
                     contextMenuStrip.Enabled = false;
                     statsImage.Enabled = true;
@@ -103,7 +103,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             //if (MyPlc == null)
             //    PlcConfig.PopulateDataTable();
 
-            if (!addTagOpen && !MyPlc.logger.IsStarted)
+            if (!addTagOpen && !MyPlc.LoggerIsStarted)
             {
                 changeTagForm = new AddTag(SingleTag.plcName, MyPlc, SingleTag);
                 changeTagForm.FormClosing += ChangeTagForm_FormClosing;
@@ -124,7 +124,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void removeTagMenu_Click(object sender, System.EventArgs e)
         {
-            if (MyPlc.logger.IsStarted)
+            if (MyPlc.LoggerIsStarted)
                 return;
             DeleteTag();
             OnTagChanged(EventArgs.Empty);

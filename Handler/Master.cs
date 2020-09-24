@@ -12,25 +12,20 @@
             if (TagsToLog.FetchValuesFromSql() == null)
                 return;
 
-            foreach (ExtendedPlc plc in PlcConfig.PlcList)
-            {
-                if (plc.Active)
-                {
-                    plc.logger.Start();
-                    ActivePlcs = true;
-                }
-            }
+
+            Logger.Start();
+            ActivePlcs = true;
+
             if (ActivePlcs)
                 SendValuesToSql.StartSql();
         }
 
         public static void StopLog(bool applicationShutdown)
         {
-            foreach (ExtendedPlc plc in PlcConfig.PlcList)
-            {
-                plc.ReconnectRetries = 0;
-                plc.logger.Stop(applicationShutdown);
-            }
+            foreach (ExtendedPlc myPlc in PlcConfig.PlcList)
+                myPlc.ReconnectRetries = 0;
+
+            Logger.Stop(applicationShutdown);
             AbortSqlLog = true;
         }
     }

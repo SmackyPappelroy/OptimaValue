@@ -30,12 +30,12 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PerformanceForm));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.txtThread = new System.Windows.Forms.Label();
             this.txtRam = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.txtCpu = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.txtThread = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -61,6 +61,18 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.00001F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(239, 369);
             this.tableLayoutPanel1.TabIndex = 0;
+            // 
+            // txtThread
+            // 
+            this.txtThread.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.txtThread.AutoSize = true;
+            this.txtThread.Font = new System.Drawing.Font("Century Gothic", 18F);
+            this.txtThread.ForeColor = System.Drawing.Color.White;
+            this.txtThread.Location = new System.Drawing.Point(106, 284);
+            this.txtThread.Name = "txtThread";
+            this.txtThread.Size = new System.Drawing.Size(26, 30);
+            this.txtThread.TabIndex = 27;
+            this.txtThread.Text = "0";
             // 
             // txtRam
             // 
@@ -130,18 +142,6 @@
             this.label1.TabIndex = 26;
             this.label1.Text = "Använda trådar";
             // 
-            // txtThread
-            // 
-            this.txtThread.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.txtThread.AutoSize = true;
-            this.txtThread.Font = new System.Drawing.Font("Century Gothic", 18F);
-            this.txtThread.ForeColor = System.Drawing.Color.White;
-            this.txtThread.Location = new System.Drawing.Point(106, 284);
-            this.txtThread.Name = "txtThread";
-            this.txtThread.Size = new System.Drawing.Size(26, 30);
-            this.txtThread.TabIndex = 27;
-            this.txtThread.Text = "0";
-            // 
             // PerformanceForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -154,6 +154,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "PerformanceForm";
+            this.Opacity = 0.9D;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "PerformanceForm";
             this.TopMost = true;

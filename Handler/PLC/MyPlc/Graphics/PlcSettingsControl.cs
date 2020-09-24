@@ -38,8 +38,8 @@ namespace OptimaValue.Handler.PLC.Graphics
             MyPlc = myPlc;
             if (MyPlc != null)
             {
-                MyPlc.logger.StartedEvent += Logger_StartedEvent;
-                if (MyPlc.logger.IsStarted)
+                MyPlc.StartedEvent += Logger_StartedEvent;
+                if (MyPlc.LoggerIsStarted)
                 {
                     this.Enabled = false;
                 }
@@ -75,15 +75,15 @@ namespace OptimaValue.Handler.PLC.Graphics
                 return;
             }
 
-            if (MyPlc.logger.IsStarted)
+            if (MyPlc.LoggerIsStarted)
                 this.Enabled = false;
             else
                 this.Enabled = true;
 
-            foreach (ExtendedPlc plc in PlcConfig.PlcList)
+            foreach (ExtendedPlc logPlc in PlcConfig.PlcList)
             {
-                if (plc.PlcName == PlcName)
-                    MyPlc = plc;
+                if (logPlc.PlcName == PlcName)
+                    MyPlc = logPlc;
             }
         }
 
@@ -102,7 +102,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtName, "Fältet får ej va tomt");
                     nameOk = false;
                 }
-                else if (MyPlc.logger.IsStarted)
+                else if (MyPlc.LoggerIsStarted)
                     errorProvider.SetError(txtName, "Plc aktiv");
                 else
                 {
@@ -139,7 +139,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtIp, "Ingen giltig IP-adress");
                     ipOk = false;
                 }
-                else if (MyPlc.logger.IsStarted)
+                else if (MyPlc.LoggerIsStarted)
                     errorProvider.SetError(txtIp, "Plc aktiv");
                 else
                 {
@@ -182,7 +182,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtRack, "För stort värde");
                     rackOk = false;
                 }
-                else if (MyPlc.logger.IsStarted)
+                else if (MyPlc.LoggerIsStarted)
                     errorProvider.SetError(txtRack, "Plc aktiv");
                 else
                 {
@@ -225,7 +225,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtRack, "För stort värde");
                     slotOk = false;
                 }
-                else if (MyPlc.logger.IsStarted)
+                else if (MyPlc.LoggerIsStarted)
                     errorProvider.SetError(txtRack, "Plc aktiv");
                 else
                 {
@@ -263,7 +263,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(comboCpu, "Fältet får ej va tomt");
                     cpuOk = false;
                 }
-                else if (MyPlc.logger.IsStarted)
+                else if (MyPlc.LoggerIsStarted)
                     errorProvider.SetError(comboCpu, "Plc aktiv");
                 else
                 {
@@ -291,19 +291,19 @@ namespace OptimaValue.Handler.PLC.Graphics
         {
             if (MyPlc != null)
             {
-                foreach (ExtendedPlc plc in PlcConfig.PlcList)
+                foreach (ExtendedPlc logPlc in PlcConfig.PlcList)
                 {
-                    if (plc.logger.IsStarted)
+                    if (logPlc.LoggerIsStarted)
                         return;
                 }
-                if (MyPlc.logger.IsStarted)
+                if (MyPlc.LoggerIsStarted)
                     return;
             }
             else
             {
-                foreach (ExtendedPlc plc in PlcConfig.PlcList)
+                foreach (ExtendedPlc logPlc in PlcConfig.PlcList)
                 {
-                    if (plc.logger.IsStarted)
+                    if (logPlc.LoggerIsStarted)
                         return;
                 }
 
@@ -475,19 +475,19 @@ namespace OptimaValue.Handler.PLC.Graphics
         {
             if (MyPlc != null)
             {
-                foreach (ExtendedPlc plc in PlcConfig.PlcList)
+                foreach (ExtendedPlc logPlc in PlcConfig.PlcList)
                 {
-                    if (plc.logger.IsStarted)
+                    if (logPlc.LoggerIsStarted)
                         return;
                 }
-                if (MyPlc.logger.IsStarted)
+                if (MyPlc.LoggerIsStarted)
                     return;
             }
             else
             {
-                foreach (ExtendedPlc plc in PlcConfig.PlcList)
+                foreach (ExtendedPlc logPlc in PlcConfig.PlcList)
                 {
-                    if (plc.logger.IsStarted)
+                    if (logPlc.LoggerIsStarted)
                         return;
                 }
                 RedrawTreeEvent.RaiseMessage(true);

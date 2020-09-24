@@ -126,7 +126,7 @@ namespace OptimaValue
         }
 
         /// <summary>
-        /// Creates a <see cref="List{T}"/> of <see cref="ExtendedPlc"/>
+        /// Creates a <see cref="List{T}"/> of <see cref="LogPlc"/>
         /// </summary>
         /// <returns><code>True</code>If successfull</returns>
         private static bool PopulatePlcList()
@@ -157,6 +157,8 @@ namespace OptimaValue
                     ActivePlcId = (int)tbl.AsEnumerable().ElementAt(rowIndex).Field<Int32>("id"),
                     Active = tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("Active")
                 };
+
+
                 PlcList.Add(myPlc);
             }
             if (PlcList.Count > 0)

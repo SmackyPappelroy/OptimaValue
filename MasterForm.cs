@@ -199,9 +199,9 @@ namespace OptimaValue
             else
                 btnStart.Enabled = true;
 
-            foreach (ExtendedPlc plc in PlcConfig.PlcList)
+            foreach (ExtendedPlc myPlc in PlcConfig.PlcList)
             {
-                AddPlcNode(plc.PlcName);
+                AddPlcNode(myPlc.PlcName);
             }
         }
 
@@ -432,10 +432,10 @@ namespace OptimaValue
                 btnStop.Visible = false;
                 return;
             }
-            foreach (ExtendedPlc plc in PlcConfig.PlcList)
+            foreach (ExtendedPlc myPlc in PlcConfig.PlcList)
             {
-                if (plc.ConnectionStatus == ConnectionStatus.Connected
-                    || plc.logger.IsStarted)
+                if (myPlc.ConnectionStatus == ConnectionStatus.Connected
+                    || myPlc.LoggerIsStarted)
                     anyActivePlcs = true;
             }
             if (anyActivePlcs)

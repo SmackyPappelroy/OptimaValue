@@ -29,7 +29,7 @@ namespace OptimaValue
             PlcName = activePlc.PlcName;
             myTreeView = treeView;
             myPlc = activePlc;
-            if (activePlc.logger.IsStarted)
+            if (activePlc.LoggerIsStarted)
                 contextMenuStrip.Enabled = false;
         }
 
@@ -43,7 +43,7 @@ namespace OptimaValue
         {
             if (myPlc != null)
             {
-                if (myPlc.logger.IsStarted)
+                if (myPlc.LoggerIsStarted)
                 {
                     foreach (TagDefinitions tag in TagsToLog.AllLogValues)
                     {

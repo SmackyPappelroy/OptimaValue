@@ -27,9 +27,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private void ScanTimer_Tick(object sender, EventArgs e)
         {
             var plcActive = false;
-            foreach (ExtendedPlc plc in PlcConfig.PlcList)
+            foreach (ExtendedPlc myPlc in PlcConfig.PlcList)
             {
-                if (plc.logger.IsStarted)
+                if (myPlc.LoggerIsStarted)
                 {
                     plcActive = true;
                     break;
