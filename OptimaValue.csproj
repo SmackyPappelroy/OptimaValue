@@ -283,6 +283,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Mina Resurser\add_new_64px.png" />
+    <Content Include="Mina Resurser\add_new_64px_Gray.png" />
+    <None Include="Mina Resurser\available_updates_64px_gray.png" />
+    <None Include="Mina Resurser\available_updates_64px.png" />
     <Content Include="Mina Resurser\icons8_gas_alarm.ico" />
     <Content Include="Mina Resurser\icons8_gas_alarm_16.png" />
     <Content Include="Mina Resurser\icons8_gas_alarm_32.png" />

@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -17,6 +18,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private EventForm eventForm;
         private bool eventFormOpen = false;
         private bool startup = true;
+        private System.Windows.Forms.Timer timeOut = new System.Windows.Forms.Timer();
+        private Color greyColor = Color.FromArgb(67, 62, 71);
+        private Color greenColor = Color.FromArgb(46, 148, 66);
+        private Color blueColor = Color.FromArgb(46, 127, 148);
 
         protected virtual void OnTagChanged(EventArgs e)
         {
@@ -49,7 +54,17 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 comboLogType.Text = "Cyclic";
                 comboLogType.SelectedItem = "Cyclic";
             }
+            timeOut.Interval = 300;
+            timeOut.Tick += TimeOut_Tick;
+        }
 
+        private void TimeOut_Tick(object sender, EventArgs e)
+        {
+            btnNew.BackColor = greyColor;
+            btnSave.BackColor = greyColor;
+            btnNew.Image = Properties.Resources.add_new_64px;
+            btnSave.Image = Properties.Resources.available_updates_64px;
+            timeOut.Stop();
         }
 
         private void PopulateInputs()
@@ -354,7 +369,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 analogTrigger = _analogTrigger,
                 analogValue = _analogValue,
             };
-
+            btnNew.BackColor = greenColor;
+            btnNew.Image = Properties.Resources.add_new_64px_Gray;
+            timeOut.Start();
         }
 
         private void UpdateTag()
@@ -379,6 +396,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                         cmd.ExecuteNonQuery();
                     }
                 }
+                btnSave.BackColor = blueColor;
+                btnSave.Image = Properties.Resources.available_updates_64px_gray;
+                timeOut.Start();
             }
             catch (SqlException ex)
             {
