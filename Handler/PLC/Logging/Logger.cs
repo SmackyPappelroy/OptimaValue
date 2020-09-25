@@ -118,7 +118,8 @@ namespace OptimaValue
                         {
                             if (MyPlc.ReconnectRetries < MyPlc.MaxReconnectRetries)
                             {
-                                if (DateTime.Now - MyPlc.LastReconnect > TimeSpan.FromSeconds(30))
+                                var tiden = DateTime.Now;
+                                if (tiden - MyPlc.LastReconnect > TimeSpan.FromSeconds(30))
                                 {
                                     try
                                     {
@@ -138,13 +139,13 @@ namespace OptimaValue
                                             MyPlc.SendPlcStatusMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Error);
                                             Apps.Logger.Log($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Severity.Error);
                                         }
-                                        MyPlc.LastReconnect = DateTime.Now;
+                                        MyPlc.LastReconnect = tiden;
                                     }
                                     catch (Exception ex)
                                     {
                                         MyPlc.SendPlcStatusMessage($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Error);
                                         Apps.Logger.Log($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Severity.Error, ex);
-                                        MyPlc.LastReconnect = DateTime.Now;
+                                        MyPlc.LastReconnect = tiden;
                                     }
                                 }
 
@@ -217,13 +218,15 @@ namespace OptimaValue
                 {
                     if (logTag.active == true && MyPlc.PlcName == logTag.plcName)
                     {
+                        var tiden = DateTime.Now;
+
                         int logdiff;
                         if ((int)logTag.logFreq <= 250)
                             logdiff = 2;
                         else
                             logdiff = 0;
 
-                        if ((DateTime.Now - logTag.LastLogTime) >= TimeSpan.FromMilliseconds((int)logTag.logFreq - logdiff)) // Minskar med 2 millisekunder vid snabb loggning för att få en mer exakt loggning
+                        if ((tiden - logTag.LastLogTime) >= TimeSpan.FromMilliseconds((int)logTag.logFreq - logdiff)) // Minskar med 2 millisekunder vid snabb loggning för att få en mer exakt loggning
                         {
                             object unknownTag = new object();
                             try
@@ -235,7 +238,7 @@ namespace OptimaValue
                                     else
                                         unknownTag = MyPlc.Read(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.varType, logTag.nrOfElements, logTag.bitAddress);
 
-                                    logTag.LastLogTime = DateTime.Now;
+                                    logTag.LastLogTime = tiden;
                                     logTag.NrSuccededReadAttempts++;
 
 
@@ -452,21 +455,21 @@ namespace OptimaValue
                                     {
                                         if (logTag.timeOfDay.Seconds != 0)
                                         {
-                                            if (DateTime.Now.Hour == logTag.timeOfDay.Hours &&
-                                                DateTime.Now.Minute == logTag.timeOfDay.Minutes &&
-                                                DateTime.Now.Second == logTag.timeOfDay.Seconds)
+                                            if (tiden.Hour == logTag.timeOfDay.Hours &&
+                                                tiden.Minute == logTag.timeOfDay.Minutes &&
+                                                tiden.Second == logTag.timeOfDay.Seconds)
                                             {
-                                                var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == DateTime.Now.Day);
+                                                var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == tiden.Day);
                                                 if (allOccurencesOfTagInList == null)
                                                 {
                                                     AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
                                                 }
                                             }
                                         }
-                                        else if (DateTime.Now.Hour == logTag.timeOfDay.Hours &&
-                                                DateTime.Now.Minute == logTag.timeOfDay.Minutes)
+                                        else if (tiden.Hour == logTag.timeOfDay.Hours &&
+                                                tiden.Minute == logTag.timeOfDay.Minutes)
                                         {
-                                            var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == DateTime.Now.Day);
+                                            var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == tiden.Day);
                                             if (allOccurencesOfTagInList == null)
                                             {
                                                 AddValueToSql(logTag, unknownTag, MyPlc.PlcName);

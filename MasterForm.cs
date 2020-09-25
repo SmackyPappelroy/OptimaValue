@@ -504,12 +504,14 @@ namespace OptimaValue
 
             if (obj.LogSeverity == Severity.Error)
             {
-                notifyIcon.ShowBalloonTip(3000, $"OptimaValue {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Error);
+                var tiden = DateTime.Now;
+                notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Error);
                 errorImage.Visible = true;
             }
             else if (obj.LogSeverity == Severity.Warning)
             {
-                notifyIcon.ShowBalloonTip(3000, $"OptimaValue {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Warning);
+                var tiden = DateTime.Now;
+                notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Warning);
                 errorImage.Visible = true;
             }
         }

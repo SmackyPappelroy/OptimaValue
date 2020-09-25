@@ -40,6 +40,7 @@ namespace OptimaValue
 
             while (true)
             {
+                var tiden = DateTime.Now;
                 if (rawValueBlock == null)
                     rawValueBlock = new BlockingCollection<rawValueClass>();
 
@@ -49,16 +50,17 @@ namespace OptimaValue
                         rawValueInternal.Add(newRaw);
                 }
 
-                if (rawValueInternal.Count > 0 && lastLogTime.AddSeconds(10) < DateTime.Now
+                if (rawValueInternal.Count > 0 && lastLogTime.AddSeconds(10) < tiden
                     || (Master.AbortSqlLog && rawValueInternal.Count > 0))
                 {
                     MapValue();
-                    lastLogTime = DateTime.Now;
+                    lastLogTime = tiden;
                 }
                 if (Master.AbortSqlLog && rawValueBlock.Count == 0)
                 {
                     AbortSqlThread();
                 }
+                Thread.Sleep(1000);
             }
         }
 

@@ -15,8 +15,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             txtOk.Text = tag.NrSuccededReadAttempts.ToString();
             txtFail.Text = tag.NrFailedReadAttempts.ToString();
             txtPercent.Text = tag.PercentOk.ToString();
-            txtScan.Text = tag.ScanTime;
-            txtAverageScan.Text = tag.AverageScanTime;
         }
 
         private void TagStatisticsForm_Load(object sender, EventArgs e)
@@ -30,8 +28,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             txtOk.Text = taggen.NrSuccededReadAttempts.ToString();
             txtFail.Text = taggen.NrFailedReadAttempts.ToString();
             txtPercent.Text = taggen.PercentOk.ToString();
-            txtScan.Text = taggen.ScanTime;
-            txtAverageScan.Text = taggen.AverageScanTime;
             txtLogs.Text = taggen.TimesLogged.ToString();
         }
 

@@ -71,6 +71,8 @@ namespace OptimaValue
         /// <param name="lineNumber">What line number generated the log</param>
         public void Log(string message, Severity severity = Severity.Normal, Exception ex = null, Level logLevel = Level.Debug, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
+            var tiden = DateTime.Now;
+
             try
             {
                 // Locks the thread
@@ -80,8 +82,8 @@ namespace OptimaValue
                 string exceptionString = string.Empty;
 
                 logString = $"[{(severity.ToString() + "]").PadRight(10)}";
-                logString += DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                hmiString = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                logString += tiden.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                hmiString = tiden.ToString("yyyy-MM-dd HH:mm:ss.fff");
 
                 if (logLevel >= Level.Critical)
                     logString += $"{Environment.NewLine}[{(filePath + "]")}";
@@ -100,7 +102,7 @@ namespace OptimaValue
                 hmiString += Environment.NewLine + message;
 
                 // Raise an event
-                NewLog.Invoke((logString, hmiString, severity, DateTime.Now, true, ex));
+                NewLog.Invoke((logString, hmiString, severity, tiden, true, ex));
 
                 if (EnableFileLog)
                     LogToFile("\r\n\r\n" + logString + "\r\n\r\n");
@@ -111,7 +113,7 @@ namespace OptimaValue
             catch (Exception exc)
             {
                 // Raise an event
-                NewLog.Invoke((string.Empty, string.Empty, Severity.Error, DateTime.Now, true, exc));
+                NewLog.Invoke((string.Empty, string.Empty, Severity.Error, tiden, true, exc));
             }
 
         }
