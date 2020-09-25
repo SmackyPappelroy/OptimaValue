@@ -244,7 +244,7 @@ namespace OptimaValue
 
                                     if (logTag.logType == LogType.Delta)
                                     {
-                                        var lastKnownLogValue = lastLogValue.FindLast(l => l.name == logTag.name);
+                                        var lastKnownLogValue = lastLogValue.FindLast(l => l.name == logTag.name && l.PlcName == logTag.plcName);
                                         if (lastKnownLogValue == null)
                                         {
                                             AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
@@ -918,6 +918,9 @@ namespace OptimaValue
 
         private static void AddValueToSql(TagDefinitions logTag, object unknownTag, string plcName)
         {
+            if (unknownTag == null)
+                return;
+
             logTag.TimesLogged++;
             lastLogValue.Add(new LastValue()
             {
