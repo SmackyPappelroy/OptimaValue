@@ -46,6 +46,7 @@ namespace OptimaValue
 
                 if (rawValueBlock.Count > 0)
                 {
+
                     if (rawValueBlock.TryTake(out rawValueClass newRaw))
                         rawValueInternal.Add(newRaw);
                 }
@@ -56,16 +57,22 @@ namespace OptimaValue
                     MapValue();
                     lastLogTime = tiden;
                 }
-                if (Master.AbortSqlLog && rawValueBlock.Count == 0)
-                {
+                if (Master.AbortSqlLog)
                     AbortSqlThread();
-                }
-                Thread.Sleep(1000);
+
+                Thread.Sleep(50);
             }
         }
 
         private static void AbortSqlThread()
         {
+            while (rawValueBlock.Count > 0)
+            {
+                if (rawValueBlock.TryTake(out rawValueClass newRaw))
+                    rawValueInternal.Add(newRaw);
+                MapValue();
+                Thread.Sleep(10);
+            }
             Master.AbortSqlLog = false;
             sqlThread.Abort();
         }
