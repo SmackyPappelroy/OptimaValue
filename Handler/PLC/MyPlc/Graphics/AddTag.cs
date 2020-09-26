@@ -233,8 +233,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         #endregion
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private void btnUpdate_Click(object sender, EventArgs e)
         {
+            if (CheckForDuplicateNames())
+                return;
+
             if (ValidateAll())
             {
                 if (tag.eventId == 0)
@@ -250,12 +253,73 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
         }
 
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            if (!CheckForDuplicateNames())
+                AddNewTag();
+        }
+
         private void AddTagToSql(DataTable dataTable)
         {
             if (CheckIfExists())
                 UpdateTag();
+        }
+
+        private bool CheckIfExists()
+        {
+            string tagNamn;
+            if (tag == null)
+                tagNamn = txtName.Text;
             else
-                AddNewTag();
+                tagNamn = tag.name;
+            object result = new object();
+            var connectionString = PlcConfig.ConnectionString();
+            var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
+            query += $"WHERE id = {tag.id}";
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        result = cmd.ExecuteScalar();
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                Apps.Logger.Log(string.Empty, Severity.Error, ex);
+            }
+            if (result != null)
+                return true;
+            return false;
+        }
+
+        private bool CheckForDuplicateNames()
+        {
+            object result = new object();
+            var connectionString = PlcConfig.ConnectionString();
+            var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
+            query += $"WHERE name = '{txtName.Text}' AND plcName = '{PlcName}'";
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        result = cmd.ExecuteScalar();
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                Apps.Logger.Log(string.Empty, Severity.Error, ex);
+            }
+            if (result != null)
+                return true;
+            return false;
         }
 
         private void AddNewTag()
@@ -433,36 +497,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
         }
 
-        private bool CheckIfExists()
-        {
-            string tagNamn;
-            if (tag == null)
-                tagNamn = txtName.Text;
-            else
-                tagNamn = tag.name;
-            object result = new object();
-            var connectionString = PlcConfig.ConnectionString();
-            var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"WHERE id = {tag.id}";
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        result = cmd.ExecuteScalar();
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex);
-            }
-            if (result != null)
-                return true;
-            return false;
-        }
+
 
         private DataTable CreateTable()
         {
@@ -496,11 +531,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 comboLogFreq.SelectedItem.ToString(), tag.eventId, tag.IsBooleanTrigger, tag.boolTrigger, tag.analogTrigger, tag.analogValue);
             return tbl;
 
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            AddNewTag();
         }
 
         private void comboLogType_SelectedIndexChanged(object sender, EventArgs e)
@@ -546,5 +576,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             TagsToLog.FetchValuesFromSql();
         }
+
+
     }
 }

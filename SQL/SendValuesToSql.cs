@@ -10,7 +10,7 @@ namespace OptimaValue
 {
     public static class SendValuesToSql
     {
-        public static BlockingCollection<rawValueClass> rawValueBlock;
+        public static ConcurrentBag<rawValueClass> rawValueBlock;
 
         private static Thread sqlThread;
         private static readonly object addBlock = new object();
@@ -42,7 +42,7 @@ namespace OptimaValue
             {
                 var tiden = DateTime.Now;
                 if (rawValueBlock == null)
-                    rawValueBlock = new BlockingCollection<rawValueClass>();
+                    rawValueBlock = new ConcurrentBag<rawValueClass>();
 
                 if (rawValueBlock.Count > 0)
                 {

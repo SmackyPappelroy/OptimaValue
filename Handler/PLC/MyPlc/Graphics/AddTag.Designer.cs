@@ -474,7 +474,7 @@
             this.btnSave.TabIndex = 24;
             this.toolTip.SetToolTip(this.btnSave, "Ändra befintlig tag");
             this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            this.btnSave.Click += new System.EventHandler(this.btnUpdate_Click);
             // 
             // btnNew
             // 
@@ -493,7 +493,7 @@
             this.btnNew.TabIndex = 25;
             this.toolTip.SetToolTip(this.btnNew, "Skapa ny tag");
             this.btnNew.UseVisualStyleBackColor = true;
-            this.btnNew.Click += new System.EventHandler(this.button1_Click);
+            this.btnNew.Click += new System.EventHandler(this.btnAdd_Click);
             // 
             // label12
             // 

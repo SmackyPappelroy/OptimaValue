@@ -11,7 +11,6 @@ namespace OptimaValue
 
     public static class Logger
     {
-        //private static ExtendedPlc MyPlc = null;
         public static event EventHandler StartedEvent;
 
         private static List<LastValue> lastLogValue;
@@ -97,7 +96,7 @@ namespace OptimaValue
 
 
             if (SendValuesToSql.rawValueBlock == null)
-                SendValuesToSql.rawValueBlock = new BlockingCollection<rawValueClass>();
+                SendValuesToSql.rawValueBlock = new ConcurrentBag<rawValueClass>();
 
             if (lastLogValue == null)
                 lastLogValue = new List<LastValue>();
@@ -178,7 +177,6 @@ namespace OptimaValue
             }
         }
 
-
         private static void AbortLogThread(string message)
         {
             foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
@@ -206,9 +204,6 @@ namespace OptimaValue
                 lastLogValue.Clear();
             logThread.Abort();
         }
-
-
-
 
         private static void ReadValue(TagDefinitions logTag)
         {
