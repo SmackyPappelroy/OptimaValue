@@ -11,12 +11,20 @@ namespace OptimaValue
 
     public static class Logger
     {
+        private static object sqlLock = new object();
+
         public static event EventHandler StartedEvent;
+        public static event EventHandler RestartEvent;
+        public static System.Timers.Timer RestartTimer = new System.Timers.Timer()
+        {
+            Interval = 5000,
+        };
 
         private static List<LastValue> lastLogValue;
 
         private static Thread logThread;
 
+        private static bool error = false;
 
         private static System.Timers.Timer onlineTimer;
 
@@ -28,11 +36,18 @@ namespace OptimaValue
             StartedEvent?.Invoke(typeof(Logger), e);
         }
 
+        public static void OnRestartEvent(EventArgs e)
+        {
+            RestartEvent?.Invoke(typeof(Logger), e);
+        }
 
         public static void Start()
         {
             if (!PlcConfig.PlcList.Any(x => x.Active))
                 return;
+
+            RestartTimer.Elapsed -= RestartTimer_Elapsed;
+            RestartTimer.Elapsed += RestartTimer_Elapsed;
 
             if (logThread != null)
                 logThread = null;
@@ -51,6 +66,12 @@ namespace OptimaValue
                 }
             }
 
+        }
+
+        private static void RestartTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            OnRestartEvent(EventArgs.Empty);
+            RestartTimer.Stop();
         }
 
         public static void Stop(bool applicationShutdown)
@@ -73,18 +94,21 @@ namespace OptimaValue
             {
                 try
                 {
+                    if (plc.Active)
+                    {
+                        plc.Open();
+                        if (!plc.IsConnected)
+                        {
+                            Apps.Logger.Log($"Får ej kontakt med {plc.PlcName}", Severity.Error);
+                            AbortLogThread(string.Empty);
+                        }
+                        else
+                        {
+                            plc.ConnectionStatus = ConnectionStatus.Connected;
+                            onlineTimer.Start();
+                        }
+                    }
 
-                    plc.Open();
-                    if (!plc.IsConnected)
-                    {
-                        Apps.Logger.Log($"Får ej kontakt med {plc.PlcName}", Severity.Error);
-                        AbortLogThread(string.Empty);
-                    }
-                    else
-                    {
-                        plc.ConnectionStatus = ConnectionStatus.Connected;
-                        onlineTimer.Start();
-                    }
                 }
 
                 catch (PlcException ex)
@@ -126,7 +150,7 @@ namespace OptimaValue
 
                                         MyPlc.Close();
                                         MyPlc.Open();
-                                        if (MyPlc.IsConnected)
+                                        if (MyPlc.IsConnected && MyPlc.Ping())
                                         {
                                             MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Status.Ok);
                                             Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}\r\nFörsök nummer: {MyPlc.ReconnectRetries}", Severity.Normal);
@@ -226,7 +250,7 @@ namespace OptimaValue
                             object unknownTag = new object();
                             try
                             {
-                                if (MyPlc.ConnectionStatus == ConnectionStatus.Connected)
+                                if (MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.IsConnected)
                                 {
                                     if (logTag.varType == VarType.String || logTag.varType == VarType.StringEx)
                                         unknownTag = MyPlc.ReadS7stringToString(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements);
@@ -237,7 +261,7 @@ namespace OptimaValue
                                     logTag.NrSuccededReadAttempts++;
 
 
-                                    if (logTag.logType == LogType.Delta)
+                                    if (logTag.logType == LogType.Delta && MyPlc.IsConnected)
                                     {
                                         var lastKnownLogValue = lastLogValue.FindLast(l => l.name == logTag.name && l.PlcName == logTag.plcName);
                                         if (lastKnownLogValue == null)
@@ -442,11 +466,11 @@ namespace OptimaValue
                                             }
                                         }
                                     }
-                                    else if (logTag.logType == LogType.Cyclic)
+                                    else if (logTag.logType == LogType.Cyclic && MyPlc.IsConnected)
                                     {
                                         AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
                                     }
-                                    else if (logTag.logType == LogType.TimeOfDay)
+                                    else if (logTag.logType == LogType.TimeOfDay && MyPlc.IsConnected)
                                     {
                                         if (logTag.timeOfDay.Seconds != 0)
                                         {
@@ -901,58 +925,73 @@ namespace OptimaValue
                             catch (PlcException ex)
                             {
                                 MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
+                                Apps.Logger.Log(ex.Message, Severity.Error, ex);
                                 logTag.NrFailedReadAttempts++;
+
                                 logTag.LastErrorMessage = ex.Message;
+                                error = true;
+
+                                break;
                             }
                         }
                     }
                 }
+            }
+            if (error)
+            {
+                RestartTimer.Start();
+                error = false;
+                Master.StopLog(true);
             }
 
         }
 
         private static void AddValueToSql(TagDefinitions logTag, object unknownTag, string plcName)
         {
-            if (unknownTag == null)
-                return;
-
-            logTag.TimesLogged++;
-            lastLogValue.Add(new LastValue()
+            lock (sqlLock)
             {
-                name = logTag.name,
-                value = unknownTag,
-                logDate = logTag.LastLogTime,
-                PlcName = plcName,
-            });
+                if (unknownTag == null)
+                    return;
 
-            var allOccurencesOfTagInList = lastLogValue.FindAll(n => n.name == logTag.name && n.PlcName == logTag.plcName).OrderBy(dat => dat.logDate).ToList();
-            var nrOfItemsInLastLog = lastLogValue.FindAll(n => n.name == logTag.name && n.PlcName == logTag.plcName);
+                logTag.TimesLogged++;
+                lastLogValue.Add(new LastValue()
+                {
+                    name = logTag.name,
+                    value = unknownTag,
+                    logDate = logTag.LastLogTime,
+                    PlcName = plcName,
+                });
+
+                var allOccurencesOfTagInList = lastLogValue.FindAll(n => n.name == logTag.name && n.PlcName == logTag.plcName).OrderBy(dat => dat.logDate).ToList();
+                var nrOfItemsInLastLog = lastLogValue.FindAll(n => n.name == logTag.name && n.PlcName == logTag.plcName);
 
 
-            // Garantera att det bara finns ett värde bakåt
-            if (nrOfItemsInLastLog.Count > 2)
-            {
-                var removeDate = allOccurencesOfTagInList[nrOfItemsInLastLog.Count - 3].logDate;
-                lastLogValue.RemoveAll(i => i.name == logTag.name && i.logDate <= removeDate && i.PlcName == logTag.plcName);
+                // Garantera att det bara finns ett värde bakåt
+                if (nrOfItemsInLastLog.Count > 2)
+                {
+                    var removeDate = allOccurencesOfTagInList[nrOfItemsInLastLog.Count - 3].logDate;
+                    lastLogValue.RemoveAll(i => i.name == logTag.name && i.logDate <= removeDate && i.PlcName == logTag.plcName);
+                }
+
+                var logValue = new TagDefinitions()
+                {
+                    active = logTag.active,
+                    bitAddress = logTag.bitAddress,
+                    blockNr = logTag.blockNr,
+                    nrOfElements = logTag.nrOfElements,
+                    dataType = logTag.dataType,
+                    id = logTag.id,
+                    LastLogTime = logTag.LastLogTime,
+                    logFreq = logTag.logFreq,
+                    name = logTag.name,
+                    plcName = logTag.plcName,
+                    startByte = logTag.startByte,
+                    varType = logTag.varType
+                };
+
+                SendValuesToSql.AddRawValue(unknownTag, logValue);
             }
 
-            var logValue = new TagDefinitions()
-            {
-                active = logTag.active,
-                bitAddress = logTag.bitAddress,
-                blockNr = logTag.blockNr,
-                nrOfElements = logTag.nrOfElements,
-                dataType = logTag.dataType,
-                id = logTag.id,
-                LastLogTime = logTag.LastLogTime,
-                logFreq = logTag.logFreq,
-                name = logTag.name,
-                plcName = logTag.plcName,
-                startByte = logTag.startByte,
-                varType = logTag.varType
-            };
-
-            SendValuesToSql.AddRawValue(unknownTag, logValue);
         }
 
 

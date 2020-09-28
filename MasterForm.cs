@@ -390,6 +390,7 @@ namespace OptimaValue
                 statusTimer.Tick += StatusTimer_Tick;
                 startStopButtonVisibilityTimer.Tick += StartStopButtonVisibilityTimer_Tick;
                 DatabaseCreationEvent.CreatedEvent += DatabaseCreationEvent_CreatedEvent;
+                Logger.RestartEvent += Logger_RestartEvent;
 
                 isSubscribed = true;
             }
@@ -401,11 +402,22 @@ namespace OptimaValue
                 statusTimer.Tick -= StatusTimer_Tick;
                 startStopButtonVisibilityTimer.Tick -= StartStopButtonVisibilityTimer_Tick;
                 DatabaseCreationEvent.CreatedEvent -= DatabaseCreationEvent_CreatedEvent;
+                Logger.RestartEvent -= Logger_RestartEvent;
+
 
                 isSubscribed = false;
             }
         }
 
+        private void Logger_RestartEvent(object sender, EventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((MethodInvoker)delegate { Logger_RestartEvent(sender, e); });
+                return;
+            }
+            btnStart_Click(this, EventArgs.Empty);
+        }
 
         private void DatabaseCreationEvent_CreatedEvent(object sender, DataBaseCreationEventArgs e)
         {

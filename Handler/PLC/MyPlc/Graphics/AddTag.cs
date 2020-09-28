@@ -235,8 +235,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            if (CheckForDuplicateNames())
-                return;
+            if (!txtName.Text.Equals(tag.name))
+                if (CheckForDuplicateNames())
+                    return;
 
             if (ValidateAll())
             {
