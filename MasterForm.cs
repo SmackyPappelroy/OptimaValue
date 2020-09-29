@@ -124,6 +124,13 @@ namespace OptimaValue
 
         private void btnStart_Click(object sender, EventArgs e)
         {
+            // Close all but Masterform
+            for (int i = Application.OpenForms.Count - 1; i >= 0; i--)
+            {
+                if (Application.OpenForms[i].Name != "MasterForm")
+                    Application.OpenForms[i].Close();
+            }
+
             Master.StartLog();
             if (settingsControl != null)
             {

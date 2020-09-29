@@ -120,7 +120,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             if (string.IsNullOrEmpty(txtDeadband.Text))
                 errorProvider.SetError(txtDeadband, "Ange ett numeriskt värde");
-            else if (!uint.TryParse(txtDeadband.Text, out uint _))
+            else if (!float.TryParse(txtDeadband.Text, out float _))
                 errorProvider.SetError(txtDeadband, "Inte ett numeriskt positivt värde");
             else
                 errorProvider.SetError(txtDeadband, "");
@@ -192,7 +192,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (TimeSpan.TryParse(txtTimeOfDay.Text, out TimeSpan _))
                 okTimeOfDay = true;
 
-            if (ushort.TryParse(txtDeadband.Text, out ushort _))
+            if (float.TryParse(txtDeadband.Text, out float _))
                 okDeadBand = true;
 
             if (!string.IsNullOrEmpty(comboVarType.SelectedItem.ToString()))
@@ -345,7 +345,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
             query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue) ";
             query += $"VALUES ('{checkActive.Checked}','{txtName.Text}','{comboLogType.SelectedItem}','{txtTimeOfDay.Text}',";
-            query += $"{int.Parse(txtDeadband.Text)},'{PlcName}','{comboVarType.SelectedItem}',{int.Parse(txtBlockNr.Text)}, ";
+            query += $"{float.Parse(txtDeadband.Text)},'{PlcName}','{comboVarType.SelectedItem}',{int.Parse(txtBlockNr.Text)}, ";
             query += $"'{comboDataType.SelectedItem}',{int.Parse(txtStartByte.Text)},{int.Parse(txtNrOfElements.Text)},";
             query += $"{byte.Parse(txtBitAddress.Text)},'{comboLogFreq.SelectedItem}','{txtUnit.Text}',{tagEventId},'{isBoolTrigger}','";
             query += $"{boolTrigger}','{analogTrigger}',{analogValue})";
@@ -441,10 +441,13 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void UpdateTag()
         {
+
+            var temp = txtDeadband.Text.Replace(',', '.');
+
             var connectionString = PlcConfig.ConnectionString();
             var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig ";
             query += $"SET active='{checkActive.Checked}',name='{txtName.Text}',logType='{comboLogType.SelectedItem}',timeOfDay='{txtTimeOfDay.Text}'";
-            query += $",deadband={int.Parse(txtDeadband.Text)},plcName='{PlcName}',varType='{comboVarType.SelectedItem}',blockNr={int.Parse(txtBlockNr.Text)}" +
+            query += $",deadband={temp},plcName='{PlcName}',varType='{comboVarType.SelectedItem}',blockNr={int.Parse(txtBlockNr.Text)}" +
                 $",dataType='{comboDataType.SelectedItem}',startByte={int.Parse(txtStartByte.Text)},nrOfElements={int.Parse(txtNrOfElements.Text)}" +
                 $",bitAddress={byte.Parse(txtBitAddress.Text)},logFreq='{comboLogFreq.SelectedItem}',";
             query += $"tagUnit='{txtUnit.Text}',eventId={tag.eventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
