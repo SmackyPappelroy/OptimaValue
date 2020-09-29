@@ -24,8 +24,6 @@ namespace OptimaValue
 
         private static Thread logThread;
 
-        private static bool error = false;
-
         private static System.Timers.Timer onlineTimer;
 
         public static bool startClosing = false;
@@ -188,7 +186,7 @@ namespace OptimaValue
                 }
                 foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
                 {
-                    if (MyPlc.IsConnected)
+                    if (MyPlc.IsConnected && MyPlc.ConnectionStatus == ConnectionStatus.Connected)
                         foreach (TagDefinitions logValue in TagsToLog.AllLogValues)
                             if (logValue.plcName.Equals(MyPlc.PlcName))
                                 ReadValue(logValue);
@@ -927,22 +925,22 @@ namespace OptimaValue
                                 MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
                                 Apps.Logger.Log(ex.Message, Severity.Error, ex);
                                 logTag.NrFailedReadAttempts++;
-
+                                MyPlc.ConnectionStatus = ConnectionStatus.Disconnected;
                                 logTag.LastErrorMessage = ex.Message;
-                                error = true;
+                                //error = true;
 
-                                break;
+                                //break;
                             }
                         }
                     }
                 }
             }
-            if (error)
-            {
-                RestartTimer.Start();
-                error = false;
-                Master.StopLog(true);
-            }
+            //if (error)
+            //{
+            //    RestartTimer.Start();
+            //    error = false;
+            //    Master.StopLog(true);
+            //}
 
         }
 
