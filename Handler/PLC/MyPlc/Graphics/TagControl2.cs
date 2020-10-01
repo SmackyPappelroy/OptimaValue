@@ -253,5 +253,7 @@ namespace OptimaValue
             statFormOpen = false;
             statForm.FormClosing -= StatForm_FormClosing;
         }
+
+
     }
 }
