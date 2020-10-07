@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode("Optima");
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Optima");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MasterForm));
             this.addPlcMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addPlc = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,10 +50,10 @@
             this.menuSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.databasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.hideMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.addPlcMenu.SuspendLayout();
             this.statusPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorImage)).BeginInit();
@@ -88,11 +88,11 @@
             this.treeView.ImageList = this.imageList;
             this.treeView.Location = new System.Drawing.Point(3, 111);
             this.treeView.Name = "treeView";
-            treeNode2.ContextMenuStrip = this.addPlcMenu;
-            treeNode2.Name = "Optima";
-            treeNode2.Text = "Optima";
+            treeNode1.ContextMenuStrip = this.addPlcMenu;
+            treeNode1.Name = "Optima";
+            treeNode1.Text = "Optima";
             this.treeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode2});
+            treeNode1});
             this.treeView.SelectedImageIndex = 0;
             this.treeView.Size = new System.Drawing.Size(294, 607);
             this.treeView.TabIndex = 0;
@@ -282,7 +282,7 @@
             // databasToolStripMenuItem
             // 
             this.databasToolStripMenuItem.Name = "databasToolStripMenuItem";
-            this.databasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.databasToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.databasToolStripMenuItem.Text = "Databas";
             this.databasToolStripMenuItem.Click += new System.EventHandler(this.databasToolStripMenuItem_Click);
             // 
@@ -290,9 +290,17 @@
             // 
             this.debugMenu.CheckOnClick = true;
             this.debugMenu.Name = "debugMenu";
-            this.debugMenu.Size = new System.Drawing.Size(180, 22);
+            this.debugMenu.Size = new System.Drawing.Size(133, 22);
             this.debugMenu.Text = "Debug";
             this.debugMenu.CheckedChanged += new System.EventHandler(this.debugMeny_CheckedChanged);
+            // 
+            // notifyMenu
+            // 
+            this.notifyMenu.CheckOnClick = true;
+            this.notifyMenu.Name = "notifyMenu";
+            this.notifyMenu.Size = new System.Drawing.Size(133, 22);
+            this.notifyMenu.Text = "Notify Ikon";
+            this.notifyMenu.CheckedChanged += new System.EventHandler(this.notifyMenu_CheckedChanged);
             // 
             // hideMenu
             // 
@@ -314,14 +322,6 @@
             this.notifyIcon.Text = "notifyIcon1";
             this.notifyIcon.Visible = true;
             this.notifyIcon.Click += new System.EventHandler(this.notifyIcon_Click);
-            // 
-            // notifyMenu
-            // 
-            this.notifyMenu.CheckOnClick = true;
-            this.notifyMenu.Name = "notifyMenu";
-            this.notifyMenu.Size = new System.Drawing.Size(180, 22);
-            this.notifyMenu.Text = "Notify Ikon";
-            this.notifyMenu.CheckedChanged += new System.EventHandler(this.notifyMenu_CheckedChanged);
             // 
             // MasterForm
             // 

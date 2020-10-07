@@ -236,8 +236,36 @@ namespace OptimaValue
                         SqlValues.Add(sql);
                         break;
                     case VarType.Timer:
+                        if (raw.unknownTag is double v6)
+                        {
+                            sql.numericValue = (float)v6;
+                            sql.value = sql.numericValue.ToString();
+                            SqlValues.Add(sql);
+                        }
                         break;
                     case VarType.Counter:
+                        if (raw.unknownTag is ushort v7)
+                        {
+                            sql.numericValue = v7;
+                            sql.value = sql.numericValue.ToString();
+                            SqlValues.Add(sql);
+                        }
+                        break;
+                    case VarType.DateTime:
+                        if (raw.unknownTag is System.DateTime v8)
+                        {
+                            sql.numericValue = 0;
+                            sql.value = v8.ToString();
+                            SqlValues.Add(sql);
+                        }
+                        break;
+                    case VarType.DateTimeLong:
+                        if (raw.unknownTag is System.DateTime v9)
+                        {
+                            sql.numericValue = 0;
+                            sql.value = v9.ToString();
+                            SqlValues.Add(sql);
+                        }
                         break;
                     default:
                         break;

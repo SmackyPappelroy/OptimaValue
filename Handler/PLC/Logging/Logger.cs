@@ -250,8 +250,27 @@ namespace OptimaValue
                             {
                                 if (MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.IsConnected)
                                 {
-                                    if (logTag.varType == VarType.String || logTag.varType == VarType.StringEx)
-                                        unknownTag = MyPlc.ReadS7stringToString(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements);
+
+                                    if (logTag.varType == VarType.StringEx)
+                                    {
+                                        var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements + 2);
+                                        unknownTag = S7.Net.Types.StringEx.FromByteArray(temp);
+                                    }
+                                    else if (logTag.varType == VarType.String)
+                                    {
+                                        var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements);
+                                        unknownTag = S7.Net.Types.String.FromByteArray(temp);
+                                    }
+                                    else if (logTag.varType == VarType.DateTime)
+                                    {
+                                        var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, 8);
+                                        unknownTag = S7.Net.Types.DateTime.FromByteArray(temp);
+                                    }
+                                    else if (logTag.varType == VarType.DateTimeLong)
+                                    {
+                                        var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, 12);
+                                        unknownTag = S7.Net.Types.DateTimeLong.FromByteArray(temp);
+                                    }
                                     else
                                         unknownTag = MyPlc.Read(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.varType, logTag.nrOfElements, logTag.bitAddress);
 
@@ -345,8 +364,11 @@ namespace OptimaValue
                                                     break;
                                                 case VarType.DateTime:
                                                     break;
+                                                case VarType.DateTimeLong:
+                                                    break;
                                                 default:
                                                     break;
+
                                             }
                                         }
                                         else

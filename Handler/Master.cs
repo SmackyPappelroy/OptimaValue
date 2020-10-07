@@ -18,6 +18,7 @@
 
             if (ActivePlcs)
                 SendValuesToSql.StartSql();
+
         }
 
         public static void StopLog(bool applicationShutdown)

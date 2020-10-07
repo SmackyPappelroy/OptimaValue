@@ -343,7 +343,8 @@
             "StringEx",
             "Timer",
             "Counter",
-            "DateTime"});
+            "DateTime",
+            "DateTimeLong"});
             this.comboVarType.Location = new System.Drawing.Point(4, 435);
             this.comboVarType.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.comboVarType.Name = "comboVarType";
