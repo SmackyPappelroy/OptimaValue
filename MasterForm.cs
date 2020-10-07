@@ -63,6 +63,7 @@ namespace OptimaValue
         #region Form
         private async void MasterForm_Load(object sender, EventArgs e)
         {
+            notifyMenu.Checked = Settings.Default.notify;
             var result = await PlcConfig.TestConnectionSqlAsync();
             if (!result)
             {
@@ -524,13 +525,15 @@ namespace OptimaValue
             if (obj.LogSeverity == Severity.Error)
             {
                 var tiden = DateTime.Now;
-                notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Error);
+                if (Settings.Default.notify)
+                    notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Error);
                 errorImage.Visible = true;
             }
             else if (obj.LogSeverity == Severity.Warning)
             {
                 var tiden = DateTime.Now;
-                notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Warning);
+                if (Settings.Default.notify)
+                    notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Warning);
                 errorImage.Visible = true;
             }
         }
@@ -590,8 +593,10 @@ namespace OptimaValue
             perForm.Dispose();
         }
 
-
-
-
+        private void notifyMenu_CheckedChanged(object sender, EventArgs e)
+        {
+            Settings.Default.notify = notifyMenu.Checked;
+            Settings.Default.Save();
+        }
     }
 }

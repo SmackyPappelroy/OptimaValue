@@ -53,6 +53,7 @@
             this.hideMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.addPlcMenu.SuspendLayout();
             this.statusPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorImage)).BeginInit();
@@ -272,7 +273,8 @@
             // 
             this.menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.databasToolStripMenuItem,
-            this.debugMenu});
+            this.debugMenu,
+            this.notifyMenu});
             this.menuSettings.Name = "menuSettings";
             this.menuSettings.Size = new System.Drawing.Size(84, 20);
             this.menuSettings.Text = "Inställningar";
@@ -280,7 +282,7 @@
             // databasToolStripMenuItem
             // 
             this.databasToolStripMenuItem.Name = "databasToolStripMenuItem";
-            this.databasToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
+            this.databasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.databasToolStripMenuItem.Text = "Databas";
             this.databasToolStripMenuItem.Click += new System.EventHandler(this.databasToolStripMenuItem_Click);
             // 
@@ -288,7 +290,7 @@
             // 
             this.debugMenu.CheckOnClick = true;
             this.debugMenu.Name = "debugMenu";
-            this.debugMenu.Size = new System.Drawing.Size(116, 22);
+            this.debugMenu.Size = new System.Drawing.Size(180, 22);
             this.debugMenu.Text = "Debug";
             this.debugMenu.CheckedChanged += new System.EventHandler(this.debugMeny_CheckedChanged);
             // 
@@ -312,6 +314,14 @@
             this.notifyIcon.Text = "notifyIcon1";
             this.notifyIcon.Visible = true;
             this.notifyIcon.Click += new System.EventHandler(this.notifyIcon_Click);
+            // 
+            // notifyMenu
+            // 
+            this.notifyMenu.CheckOnClick = true;
+            this.notifyMenu.Name = "notifyMenu";
+            this.notifyMenu.Size = new System.Drawing.Size(180, 22);
+            this.notifyMenu.Text = "Notify Ikon";
+            this.notifyMenu.CheckedChanged += new System.EventHandler(this.notifyMenu_CheckedChanged);
             // 
             // MasterForm
             // 
@@ -371,5 +381,6 @@
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.PictureBox errorImage;
         private System.Windows.Forms.ToolStripMenuItem hideMenu;
+        private System.Windows.Forms.ToolStripMenuItem notifyMenu;
     }
 }
