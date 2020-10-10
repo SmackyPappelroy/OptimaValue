@@ -40,7 +40,7 @@ namespace OptimaValue
 
             while (true)
             {
-                var tiden = DateTime.Now;
+                var tiden = DateTime.UtcNow;
                 if (rawValueBlock == null)
                     rawValueBlock = new ConcurrentBag<rawValueClass>();
 

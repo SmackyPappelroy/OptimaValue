@@ -524,14 +524,14 @@ namespace OptimaValue
 
             if (obj.LogSeverity == Severity.Error)
             {
-                var tiden = DateTime.Now;
+                var tiden = DateTime.UtcNow + Logger.UtcOffset;
                 if (Settings.Default.notify)
                     notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Error);
                 errorImage.Visible = true;
             }
             else if (obj.LogSeverity == Severity.Warning)
             {
-                var tiden = DateTime.Now;
+                var tiden = DateTime.UtcNow + Logger.UtcOffset;
                 if (Settings.Default.notify)
                     notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Warning);
                 errorImage.Visible = true;

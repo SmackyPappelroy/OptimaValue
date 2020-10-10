@@ -82,7 +82,7 @@ namespace OptimaValue
                 {
                     if (value == ConnectionStatus.Connected)
                     {
-                        UpTimeStart = DateTime.Now;
+                        UpTimeStart = DateTime.UtcNow;
                         timerPing.Start();
                         ReconnectRetries = 0;
                     }
@@ -99,7 +99,7 @@ namespace OptimaValue
                 if (UpTimeStart == DateTime.MaxValue)
                     return TimeSpan.FromSeconds(0);
                 else
-                    return DateTime.Now - UpTimeStart;
+                    return DateTime.UtcNow - UpTimeStart;
             }
         }
         public string UpTimeString
@@ -108,7 +108,7 @@ namespace OptimaValue
             {
                 if (UpTimeStart == DateTime.MaxValue)
                     return "0s";
-                var tid = DateTime.Now - UpTimeStart;
+                var tid = DateTime.UtcNow - UpTimeStart;
                 if (tid < TimeSpan.FromMinutes(1))
                     return tid.ToString("s's'");
                 else if (tid < TimeSpan.FromHours(1))

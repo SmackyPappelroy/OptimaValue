@@ -11,6 +11,11 @@ namespace OptimaValue
 
     public static class Logger
     {
+        /// <summary>
+        /// Lokal tid offset
+        /// </summary>
+        public static TimeSpan UtcOffset => TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow);
+
         private static object sqlLock = new object();
 
         public static event EventHandler StartedEvent;
@@ -139,7 +144,7 @@ namespace OptimaValue
                         {
                             if (MyPlc.ReconnectRetries < MyPlc.MaxReconnectRetries)
                             {
-                                var tiden = DateTime.Now;
+                                var tiden = DateTime.UtcNow;
                                 if (tiden - MyPlc.LastReconnect > TimeSpan.FromSeconds(30))
                                 {
                                     try
@@ -235,7 +240,7 @@ namespace OptimaValue
                 {
                     if (logTag.active == true && MyPlc.PlcName == logTag.plcName)
                     {
-                        var tiden = DateTime.Now;
+                        var tiden = DateTime.UtcNow;
 
                         int logdiff;
                         if ((int)logTag.logFreq <= 250)
@@ -1001,7 +1006,7 @@ namespace OptimaValue
                     nrOfElements = logTag.nrOfElements,
                     dataType = logTag.dataType,
                     id = logTag.id,
-                    LastLogTime = logTag.LastLogTime,
+                    LastLogTime = logTag.LastLogTime + UtcOffset,
                     logFreq = logTag.logFreq,
                     name = logTag.name,
                     plcName = logTag.plcName,

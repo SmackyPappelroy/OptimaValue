@@ -71,7 +71,7 @@ namespace OptimaValue
         /// <param name="lineNumber">What line number generated the log</param>
         public void Log(string message, Severity severity = Severity.Normal, Exception ex = null, Level logLevel = Level.Debug, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
-            var tiden = DateTime.Now;
+            var tiden = DateTime.UtcNow + Logger.UtcOffset;
 
             try
             {
