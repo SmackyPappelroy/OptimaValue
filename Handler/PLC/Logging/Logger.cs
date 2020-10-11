@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -11,6 +12,10 @@ namespace OptimaValue
 
     public static class Logger
     {
+        // Försök att få ner CPU-belastning
+        private static Stopwatch cycleTime = new Stopwatch();
+        public static int FastestLogTime = int.MaxValue;
+
         /// <summary>
         /// Lokal tid offset
         /// </summary>
@@ -131,10 +136,6 @@ namespace OptimaValue
 
             while (PlcConfig.PlcList.Any(p => p.LoggerIsStarted))
             {
-                // TODO: Bortkommenterat
-                //if (MyPlc == null)
-                //    AbortLogThread("Hittade ingen PLC");
-
                 // Reconnect om det ej går att pinga PLC
                 foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
                 {
@@ -194,13 +195,14 @@ namespace OptimaValue
                     if (MyPlc.IsConnected && MyPlc.ConnectionStatus == ConnectionStatus.Connected)
                         foreach (TagDefinitions logValue in TagsToLog.AllLogValues)
                             if (logValue.plcName.Equals(MyPlc.PlcName))
-                                ReadValue(logValue);
+                                ReadValue(MyPlc, logValue);
                     if (startClosing)
                     {
                         AbortLogThread(string.Empty);
                     }
                 }
-
+                var sleepTime = (FastestLogTime - (int)(FastestLogTime * 0.5f));
+                Thread.Sleep(sleepTime);
             }
         }
 
@@ -232,286 +234,274 @@ namespace OptimaValue
             logThread.Abort();
         }
 
-        private static void ReadValue(TagDefinitions logTag)
+        private static void ReadValue(ExtendedPlc MyPlc, TagDefinitions logTag)
         {
-            foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
+            if (MyPlc.IsConnected)
             {
-                if (MyPlc.IsConnected)
+                if (logTag.active == true && MyPlc.PlcName == logTag.plcName)
                 {
-                    if (logTag.active == true && MyPlc.PlcName == logTag.plcName)
+                    var tiden = DateTime.UtcNow;
+
+                    int logdiff;
+                    if ((int)logTag.logFreq <= 250)
+                        logdiff = 2;
+                    else
+                        logdiff = 0;
+
+                    if ((tiden - logTag.LastLogTime) >= TimeSpan.FromMilliseconds((int)logTag.logFreq - logdiff)) // Minskar med 2 millisekunder vid snabb loggning för att få en mer exakt loggning
                     {
-                        var tiden = DateTime.UtcNow;
-
-                        int logdiff;
-                        if ((int)logTag.logFreq <= 250)
-                            logdiff = 2;
-                        else
-                            logdiff = 0;
-
-                        if ((tiden - logTag.LastLogTime) >= TimeSpan.FromMilliseconds((int)logTag.logFreq - logdiff)) // Minskar med 2 millisekunder vid snabb loggning för att få en mer exakt loggning
+                        object unknownTag = new object();
+                        try
                         {
-                            object unknownTag = new object();
-                            try
+                            if (MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.IsConnected)
                             {
-                                if (MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.IsConnected)
+
+                                if (logTag.varType == VarType.StringEx)
                                 {
+                                    var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements + 2);
+                                    unknownTag = S7.Net.Types.StringEx.FromByteArray(temp);
+                                }
+                                else if (logTag.varType == VarType.String)
+                                {
+                                    var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements);
+                                    unknownTag = S7.Net.Types.String.FromByteArray(temp);
+                                }
+                                else if (logTag.varType == VarType.DateTime)
+                                {
+                                    var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, 8);
+                                    unknownTag = S7.Net.Types.DateTime.FromByteArray(temp);
+                                }
+                                else if (logTag.varType == VarType.DateTimeLong)
+                                {
+                                    var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, 12);
+                                    unknownTag = S7.Net.Types.DateTimeLong.FromByteArray(temp);
+                                }
+                                else
+                                    unknownTag = MyPlc.Read(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.varType, logTag.nrOfElements, logTag.bitAddress);
 
-                                    if (logTag.varType == VarType.StringEx)
-                                    {
-                                        var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements + 2);
-                                        unknownTag = S7.Net.Types.StringEx.FromByteArray(temp);
-                                    }
-                                    else if (logTag.varType == VarType.String)
-                                    {
-                                        var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements);
-                                        unknownTag = S7.Net.Types.String.FromByteArray(temp);
-                                    }
-                                    else if (logTag.varType == VarType.DateTime)
-                                    {
-                                        var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, 8);
-                                        unknownTag = S7.Net.Types.DateTime.FromByteArray(temp);
-                                    }
-                                    else if (logTag.varType == VarType.DateTimeLong)
-                                    {
-                                        var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, 12);
-                                        unknownTag = S7.Net.Types.DateTimeLong.FromByteArray(temp);
-                                    }
-                                    else
-                                        unknownTag = MyPlc.Read(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.varType, logTag.nrOfElements, logTag.bitAddress);
-
-                                    logTag.LastLogTime = tiden;
-                                    logTag.NrSuccededReadAttempts++;
+                                logTag.LastLogTime = tiden;
+                                logTag.NrSuccededReadAttempts++;
 
 
-                                    if (logTag.logType == LogType.Delta && MyPlc.IsConnected)
-                                    {
-                                        var lastKnownLogValue = lastLogValue.FindLast(l => l.name == logTag.name && l.PlcName == logTag.plcName);
-                                        if (lastKnownLogValue == null)
-                                        {
-                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                            return;
-                                        }
-
-                                        if (logTag.deadband > 0)
-                                        {
-
-                                            switch (logTag.varType)
-                                            {
-                                                case VarType.Bit:
-                                                    if ((bool)unknownTag != (bool)lastKnownLogValue.value)
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    break;
-                                                case VarType.Byte:
-                                                    if (unknownTag is byte unknownConverted)
-                                                    {
-                                                        if (Math.Abs(unknownConverted - ((byte)lastKnownLogValue.value)) > (float)((byte)logTag.deadband))
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    else
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    break;
-                                                case VarType.Word:
-                                                    if (unknownTag is ushort unknownUShort)
-                                                    {
-                                                        if (Math.Abs(unknownUShort - ((ushort)lastKnownLogValue.value)) > (float)((ushort)logTag.deadband))
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    else
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    break;
-                                                case VarType.DWord:
-                                                    if (unknownTag is uint uknonwnUint)
-                                                    {
-                                                        if (Math.Abs(uknonwnUint - ((uint)lastKnownLogValue.value)) > (float)((uint)logTag.deadband))
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    else
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    break;
-                                                case VarType.Int:
-                                                    if (unknownTag is short unknownShort)
-                                                    {
-                                                        if (Math.Abs(unknownShort - ((short)lastKnownLogValue.value)) > (float)((short)logTag.deadband))
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    else
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    break;
-                                                case VarType.DInt:
-                                                    if (unknownTag is int unknownInt)
-                                                    {
-                                                        if (Math.Abs(unknownInt - ((int)lastKnownLogValue.value)) > (float)((int)logTag.deadband))
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    else
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    break;
-                                                case VarType.Real:
-                                                    if (unknownTag is float unknownFloat)
-                                                    {
-                                                        if (Math.Abs(unknownFloat - (float)lastKnownLogValue.value) > (float)logTag.deadband)
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    else
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    break;
-                                                case VarType.String:
-                                                    if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    break;
-                                                case VarType.StringEx:
-                                                    if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    break;
-                                                case VarType.Timer:
-                                                    break;
-                                                case VarType.Counter:
-                                                    break;
-                                                case VarType.DateTime:
-                                                    break;
-                                                case VarType.DateTimeLong:
-                                                    break;
-                                                default:
-                                                    break;
-
-                                            }
-                                        }
-                                        else
-                                        {
-                                            switch (logTag.varType)
-                                            {
-                                                case VarType.Bit:
-                                                    if ((bool)unknownTag != (bool)lastKnownLogValue.value)
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    break;
-                                                case VarType.Byte:
-                                                    if (unknownTag is byte unknownByte)
-                                                    {
-                                                        if (unknownByte > (byte)lastKnownLogValue.value ||
-                                                            unknownByte < (byte)lastKnownLogValue.value)
-                                                        {
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    break;
-                                                case VarType.Word:
-                                                    if (unknownTag is ushort unknownUShort)
-                                                    {
-                                                        if (unknownUShort > (ushort)lastKnownLogValue.value ||
-                                                            unknownUShort < (ushort)lastKnownLogValue.value)
-                                                        {
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    break;
-                                                case VarType.DWord:
-                                                    if (unknownTag is uint unknownUInt)
-                                                    {
-                                                        if (unknownUInt > (uint)lastKnownLogValue.value ||
-                                                            unknownUInt < (uint)lastKnownLogValue.value)
-                                                        {
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    break;
-                                                case VarType.Int:
-                                                    if (unknownTag is short unknownShort)
-                                                    {
-                                                        if (unknownShort > (short)lastKnownLogValue.value ||
-                                                            unknownShort < (short)lastKnownLogValue.value)
-                                                        {
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    break;
-                                                case VarType.DInt:
-                                                    if (unknownTag is int unknownInt)
-                                                    {
-                                                        if (unknownInt > (int)lastKnownLogValue.value ||
-                                                            unknownInt < (int)lastKnownLogValue.value)
-                                                        {
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    break;
-                                                case VarType.Real:
-                                                    if (unknownTag is float unknownFloat)
-                                                    {
-                                                        if (unknownFloat > (float)lastKnownLogValue.value ||
-                                                            unknownFloat < (float)lastKnownLogValue.value)
-                                                        {
-                                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    break;
-                                                case VarType.String:
-                                                    if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
-                                                    {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    break;
-                                                case VarType.StringEx:
-                                                    if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
-                                                    {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
-                                                    }
-                                                    break;
-                                                case VarType.Timer:
-                                                    break;
-                                                case VarType.Counter:
-                                                    break;
-                                                case VarType.DateTime:
-                                                    break;
-                                                default:
-                                                    break;
-                                            }
-                                        }
-                                    }
-                                    else if (logTag.logType == LogType.Cyclic && MyPlc.IsConnected)
+                                if (logTag.logType == LogType.Delta && MyPlc.IsConnected)
+                                {
+                                    var lastKnownLogValue = lastLogValue.FindLast(l => l.name == logTag.name && l.PlcName == logTag.plcName);
+                                    if (lastKnownLogValue == null)
                                     {
                                         AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                        return;
                                     }
-                                    else if (logTag.logType == LogType.TimeOfDay && MyPlc.IsConnected)
+
+                                    if (logTag.deadband > 0)
                                     {
-                                        if (logTag.timeOfDay.Seconds != 0)
+
+                                        switch (logTag.varType)
                                         {
-                                            if (tiden.Hour == logTag.timeOfDay.Hours &&
-                                                tiden.Minute == logTag.timeOfDay.Minutes &&
-                                                tiden.Second == logTag.timeOfDay.Seconds)
-                                            {
-                                                var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == tiden.Day);
-                                                if (allOccurencesOfTagInList == null)
+                                            case VarType.Bit:
+                                                if ((bool)unknownTag != (bool)lastKnownLogValue.value)
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                break;
+                                            case VarType.Byte:
+                                                if (unknownTag is byte unknownConverted)
+                                                {
+                                                    if (Math.Abs(unknownConverted - ((byte)lastKnownLogValue.value)) > (float)((byte)logTag.deadband))
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                else
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                break;
+                                            case VarType.Word:
+                                                if (unknownTag is ushort unknownUShort)
+                                                {
+                                                    if (Math.Abs(unknownUShort - ((ushort)lastKnownLogValue.value)) > (float)((ushort)logTag.deadband))
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                else
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                break;
+                                            case VarType.DWord:
+                                                if (unknownTag is uint uknonwnUint)
+                                                {
+                                                    if (Math.Abs(uknonwnUint - ((uint)lastKnownLogValue.value)) > (float)((uint)logTag.deadband))
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                else
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                break;
+                                            case VarType.Int:
+                                                if (unknownTag is short unknownShort)
+                                                {
+                                                    if (Math.Abs(unknownShort - ((short)lastKnownLogValue.value)) > (float)((short)logTag.deadband))
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                else
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                break;
+                                            case VarType.DInt:
+                                                if (unknownTag is int unknownInt)
+                                                {
+                                                    if (Math.Abs(unknownInt - ((int)lastKnownLogValue.value)) > (float)((int)logTag.deadband))
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                else
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                break;
+                                            case VarType.Real:
+                                                if (unknownTag is float unknownFloat)
+                                                {
+                                                    if (Math.Abs(unknownFloat - (float)lastKnownLogValue.value) > (float)logTag.deadband)
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                else
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                break;
+                                            case VarType.String:
+                                                if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                break;
+                                            case VarType.StringEx:
+                                                if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                break;
+                                            case VarType.Timer:
+                                                break;
+                                            case VarType.Counter:
+                                                break;
+                                            case VarType.DateTime:
+                                                break;
+                                            case VarType.DateTimeLong:
+                                                break;
+                                            default:
+                                                break;
+
+                                        }
+                                    }
+                                    else
+                                    {
+                                        switch (logTag.varType)
+                                        {
+                                            case VarType.Bit:
+                                                if ((bool)unknownTag != (bool)lastKnownLogValue.value)
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                break;
+                                            case VarType.Byte:
+                                                if (unknownTag is byte unknownByte)
+                                                {
+                                                    if (unknownByte > (byte)lastKnownLogValue.value ||
+                                                        unknownByte < (byte)lastKnownLogValue.value)
+                                                    {
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    }
+                                                }
+                                                else
                                                 {
                                                     AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
                                                 }
-                                            }
+                                                break;
+                                            case VarType.Word:
+                                                if (unknownTag is ushort unknownUShort)
+                                                {
+                                                    if (unknownUShort > (ushort)lastKnownLogValue.value ||
+                                                        unknownUShort < (ushort)lastKnownLogValue.value)
+                                                    {
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                break;
+                                            case VarType.DWord:
+                                                if (unknownTag is uint unknownUInt)
+                                                {
+                                                    if (unknownUInt > (uint)lastKnownLogValue.value ||
+                                                        unknownUInt < (uint)lastKnownLogValue.value)
+                                                    {
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                break;
+                                            case VarType.Int:
+                                                if (unknownTag is short unknownShort)
+                                                {
+                                                    if (unknownShort > (short)lastKnownLogValue.value ||
+                                                        unknownShort < (short)lastKnownLogValue.value)
+                                                    {
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                break;
+                                            case VarType.DInt:
+                                                if (unknownTag is int unknownInt)
+                                                {
+                                                    if (unknownInt > (int)lastKnownLogValue.value ||
+                                                        unknownInt < (int)lastKnownLogValue.value)
+                                                    {
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                break;
+                                            case VarType.Real:
+                                                if (unknownTag is float unknownFloat)
+                                                {
+                                                    if (unknownFloat > (float)lastKnownLogValue.value ||
+                                                        unknownFloat < (float)lastKnownLogValue.value)
+                                                    {
+                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                break;
+                                            case VarType.String:
+                                                if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
+                                                {
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                break;
+                                            case VarType.StringEx:
+                                                if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
+                                                {
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                break;
+                                            case VarType.Timer:
+                                                break;
+                                            case VarType.Counter:
+                                                break;
+                                            case VarType.DateTime:
+                                                break;
+                                            default:
+                                                break;
                                         }
-                                        else if (tiden.Hour == logTag.timeOfDay.Hours &&
-                                                tiden.Minute == logTag.timeOfDay.Minutes)
+                                    }
+                                }
+                                else if (logTag.logType == LogType.Cyclic && MyPlc.IsConnected)
+                                {
+                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                }
+                                else if (logTag.logType == LogType.TimeOfDay && MyPlc.IsConnected)
+                                {
+                                    if (logTag.timeOfDay.Seconds != 0)
+                                    {
+                                        if (tiden.Hour == logTag.timeOfDay.Hours &&
+                                            tiden.Minute == logTag.timeOfDay.Minutes &&
+                                            tiden.Second == logTag.timeOfDay.Seconds)
                                         {
                                             var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == tiden.Day);
                                             if (allOccurencesOfTagInList == null)
@@ -520,456 +510,456 @@ namespace OptimaValue
                                             }
                                         }
                                     }
-
-                                    // Check if tag has any subscribed event tags
-                                    if (logTag.SubscribedTags.Count > 0)
+                                    else if (tiden.Hour == logTag.timeOfDay.Hours &&
+                                            tiden.Minute == logTag.timeOfDay.Minutes)
                                     {
-                                        foreach (int id in logTag.SubscribedTags)
+                                        var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == tiden.Day);
+                                        if (allOccurencesOfTagInList == null)
                                         {
-                                            var subbedTag = TagHelpers.GetTagFromId(id);
-                                            var lastValue = lastLogValue.Find(l => l.name == logTag.name);
-                                            if (subbedTag.IsBooleanTrigger && logTag.varType == VarType.Bit)
-                                            {
-                                                switch (subbedTag.boolTrigger)
-                                                {
-                                                    case BooleanTrigger.OnTrue:
-                                                        if (!(bool)lastValue.value && (bool)unknownTag)
-                                                        {
-                                                            var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                            AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                        }
-                                                        break;
-                                                    case BooleanTrigger.WhileTrue:
-                                                        if ((bool)unknownTag)
-                                                        {
-                                                            var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                            AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                        }
-                                                        break;
-                                                    case BooleanTrigger.OnFalse:
-                                                        if ((bool)lastValue.value && !(bool)unknownTag)
-                                                        {
-                                                            var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                            AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                        }
-                                                        break;
-                                                    default:
-                                                        break;
-                                                }
-                                            }
-                                            else if (!subbedTag.IsBooleanTrigger)
-                                            {
-                                                switch (subbedTag.analogTrigger)
-                                                {
-                                                    case AnalogTrigger.LessThan:
-                                                        switch (logTag.varType)
-                                                        {
-                                                            case VarType.Bit:
-                                                                break;
-                                                            case VarType.Byte:
-                                                                if ((byte)unknownTag < subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Word:
-                                                                if ((UInt16)unknownTag < subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DWord:
-                                                                if ((UInt32)unknownTag < subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Int:
-                                                                if ((short)unknownTag < subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DInt:
-                                                                if ((Int32)unknownTag < subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Real:
-                                                                if ((float)unknownTag < subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.String:
-                                                                break;
-                                                            case VarType.StringEx:
-                                                                break;
-                                                            case VarType.Timer:
-                                                                break;
-                                                            case VarType.Counter:
-                                                                break;
-                                                            case VarType.DateTime:
-                                                                break;
-                                                            default:
-                                                                break;
-                                                        }
-                                                        break;
-                                                    case AnalogTrigger.MoreThan:
-                                                        switch (logTag.varType)
-                                                        {
-                                                            case VarType.Bit:
-                                                                break;
-                                                            case VarType.Byte:
-                                                                if ((byte)unknownTag > subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Word:
-                                                                if ((UInt16)unknownTag > subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DWord:
-                                                                if ((UInt32)unknownTag > subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Int:
-                                                                if ((short)unknownTag > subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DInt:
-                                                                if ((Int32)unknownTag > subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Real:
-                                                                if ((float)unknownTag > subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.String:
-                                                                break;
-                                                            case VarType.StringEx:
-                                                                break;
-                                                            case VarType.Timer:
-                                                                break;
-                                                            case VarType.Counter:
-                                                                break;
-                                                            case VarType.DateTime:
-                                                                break;
-                                                            default:
-                                                                break;
-                                                        }
-                                                        break;
-                                                    case AnalogTrigger.Equal:
-                                                        switch (logTag.varType)
-                                                        {
-                                                            case VarType.Bit:
-                                                                break;
-                                                            case VarType.Byte:
-                                                                if ((byte)unknownTag == subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Word:
-                                                                if ((UInt16)unknownTag == subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DWord:
-                                                                if ((UInt32)unknownTag == subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Int:
-                                                                if ((short)unknownTag == subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DInt:
-                                                                if ((Int32)unknownTag == subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Real:
-                                                                if ((float)unknownTag == subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.String:
-                                                                break;
-                                                            case VarType.StringEx:
-                                                                break;
-                                                            case VarType.Timer:
-                                                                break;
-                                                            case VarType.Counter:
-                                                                break;
-                                                            case VarType.DateTime:
-                                                                break;
-                                                            default:
-                                                                break;
-                                                        }
-                                                        break;
-                                                    case AnalogTrigger.LessOrEqual:
-                                                        switch (logTag.varType)
-                                                        {
-                                                            case VarType.Bit:
-                                                                break;
-                                                            case VarType.Byte:
-                                                                if ((byte)unknownTag <= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Word:
-                                                                if ((UInt16)unknownTag <= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DWord:
-                                                                if ((UInt32)unknownTag <= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Int:
-                                                                if ((short)unknownTag <= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DInt:
-                                                                if ((Int32)unknownTag <= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Real:
-                                                                if ((float)unknownTag <= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.String:
-                                                                break;
-                                                            case VarType.StringEx:
-                                                                break;
-                                                            case VarType.Timer:
-                                                                break;
-                                                            case VarType.Counter:
-                                                                break;
-                                                            case VarType.DateTime:
-                                                                break;
-                                                            default:
-                                                                break;
-                                                        }
-                                                        break;
-                                                    case AnalogTrigger.MoreOrEqual:
-                                                        switch (logTag.varType)
-                                                        {
-                                                            case VarType.Bit:
-                                                                break;
-                                                            case VarType.Byte:
-                                                                if ((byte)unknownTag >= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Word:
-                                                                if ((UInt16)unknownTag >= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DWord:
-                                                                if ((UInt32)unknownTag >= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Int:
-                                                                if ((short)unknownTag >= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DInt:
-                                                                if ((Int32)unknownTag >= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Real:
-                                                                if ((float)unknownTag >= subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.String:
-                                                                break;
-                                                            case VarType.StringEx:
-                                                                break;
-                                                            case VarType.Timer:
-                                                                break;
-                                                            case VarType.Counter:
-                                                                break;
-                                                            case VarType.DateTime:
-                                                                break;
-                                                            default:
-                                                                break;
-                                                        }
-                                                        break;
-                                                    case AnalogTrigger.NotEqual:
-                                                        switch (logTag.varType)
-                                                        {
-                                                            case VarType.Bit:
-                                                                break;
-                                                            case VarType.Byte:
-                                                                if ((byte)unknownTag != subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Word:
-                                                                if ((UInt16)unknownTag != subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DWord:
-                                                                if ((UInt32)unknownTag != subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Int:
-                                                                if ((short)unknownTag != subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.DInt:
-                                                                if ((Int32)unknownTag != subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.Real:
-                                                                if ((float)unknownTag != subbedTag.analogValue)
-                                                                {
-                                                                    var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
-                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                }
-                                                                break;
-                                                            case VarType.String:
-                                                                break;
-                                                            case VarType.StringEx:
-                                                                break;
-                                                            case VarType.Timer:
-                                                                break;
-                                                            case VarType.Counter:
-                                                                break;
-                                                            case VarType.DateTime:
-                                                                break;
-                                                            default:
-                                                                break;
-                                                        }
-                                                        break;
-                                                    default:
-                                                        break;
-                                                }
-                                            }
-
+                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
                                         }
                                     }
-
                                 }
-                                else
+
+                                // Check if tag has any subscribed event tags
+                                if (logTag.SubscribedTags.Count > 0)
                                 {
-                                    if (MyPlc.UnableToPing)
+                                    foreach (int id in logTag.SubscribedTags)
                                     {
-                                        var errorString = $"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.IP}";
-                                        logTag.LastErrorMessage = errorString;
-                                        MyPlc.SendPlcStatusMessage(errorString, Status.Error);
+                                        var subbedTag = TagHelpers.GetTagFromId(id);
+                                        var lastValue = lastLogValue.Find(l => l.name == logTag.name);
+                                        if (subbedTag.IsBooleanTrigger && logTag.varType == VarType.Bit)
+                                        {
+                                            switch (subbedTag.boolTrigger)
+                                            {
+                                                case BooleanTrigger.OnTrue:
+                                                    if (!(bool)lastValue.value && (bool)unknownTag)
+                                                    {
+                                                        var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                    }
+                                                    break;
+                                                case BooleanTrigger.WhileTrue:
+                                                    if ((bool)unknownTag)
+                                                    {
+                                                        var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                    }
+                                                    break;
+                                                case BooleanTrigger.OnFalse:
+                                                    if ((bool)lastValue.value && !(bool)unknownTag)
+                                                    {
+                                                        var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                    }
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
+                                        }
+                                        else if (!subbedTag.IsBooleanTrigger)
+                                        {
+                                            switch (subbedTag.analogTrigger)
+                                            {
+                                                case AnalogTrigger.LessThan:
+                                                    switch (logTag.varType)
+                                                    {
+                                                        case VarType.Bit:
+                                                            break;
+                                                        case VarType.Byte:
+                                                            if ((byte)unknownTag < subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Word:
+                                                            if ((UInt16)unknownTag < subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DWord:
+                                                            if ((UInt32)unknownTag < subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Int:
+                                                            if ((short)unknownTag < subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DInt:
+                                                            if ((Int32)unknownTag < subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Real:
+                                                            if ((float)unknownTag < subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.String:
+                                                            break;
+                                                        case VarType.StringEx:
+                                                            break;
+                                                        case VarType.Timer:
+                                                            break;
+                                                        case VarType.Counter:
+                                                            break;
+                                                        case VarType.DateTime:
+                                                            break;
+                                                        default:
+                                                            break;
+                                                    }
+                                                    break;
+                                                case AnalogTrigger.MoreThan:
+                                                    switch (logTag.varType)
+                                                    {
+                                                        case VarType.Bit:
+                                                            break;
+                                                        case VarType.Byte:
+                                                            if ((byte)unknownTag > subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Word:
+                                                            if ((UInt16)unknownTag > subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DWord:
+                                                            if ((UInt32)unknownTag > subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Int:
+                                                            if ((short)unknownTag > subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DInt:
+                                                            if ((Int32)unknownTag > subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Real:
+                                                            if ((float)unknownTag > subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.String:
+                                                            break;
+                                                        case VarType.StringEx:
+                                                            break;
+                                                        case VarType.Timer:
+                                                            break;
+                                                        case VarType.Counter:
+                                                            break;
+                                                        case VarType.DateTime:
+                                                            break;
+                                                        default:
+                                                            break;
+                                                    }
+                                                    break;
+                                                case AnalogTrigger.Equal:
+                                                    switch (logTag.varType)
+                                                    {
+                                                        case VarType.Bit:
+                                                            break;
+                                                        case VarType.Byte:
+                                                            if ((byte)unknownTag == subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Word:
+                                                            if ((UInt16)unknownTag == subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DWord:
+                                                            if ((UInt32)unknownTag == subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Int:
+                                                            if ((short)unknownTag == subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DInt:
+                                                            if ((Int32)unknownTag == subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Real:
+                                                            if ((float)unknownTag == subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.String:
+                                                            break;
+                                                        case VarType.StringEx:
+                                                            break;
+                                                        case VarType.Timer:
+                                                            break;
+                                                        case VarType.Counter:
+                                                            break;
+                                                        case VarType.DateTime:
+                                                            break;
+                                                        default:
+                                                            break;
+                                                    }
+                                                    break;
+                                                case AnalogTrigger.LessOrEqual:
+                                                    switch (logTag.varType)
+                                                    {
+                                                        case VarType.Bit:
+                                                            break;
+                                                        case VarType.Byte:
+                                                            if ((byte)unknownTag <= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Word:
+                                                            if ((UInt16)unknownTag <= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DWord:
+                                                            if ((UInt32)unknownTag <= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Int:
+                                                            if ((short)unknownTag <= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DInt:
+                                                            if ((Int32)unknownTag <= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Real:
+                                                            if ((float)unknownTag <= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.String:
+                                                            break;
+                                                        case VarType.StringEx:
+                                                            break;
+                                                        case VarType.Timer:
+                                                            break;
+                                                        case VarType.Counter:
+                                                            break;
+                                                        case VarType.DateTime:
+                                                            break;
+                                                        default:
+                                                            break;
+                                                    }
+                                                    break;
+                                                case AnalogTrigger.MoreOrEqual:
+                                                    switch (logTag.varType)
+                                                    {
+                                                        case VarType.Bit:
+                                                            break;
+                                                        case VarType.Byte:
+                                                            if ((byte)unknownTag >= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Word:
+                                                            if ((UInt16)unknownTag >= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DWord:
+                                                            if ((UInt32)unknownTag >= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Int:
+                                                            if ((short)unknownTag >= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DInt:
+                                                            if ((Int32)unknownTag >= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Real:
+                                                            if ((float)unknownTag >= subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.String:
+                                                            break;
+                                                        case VarType.StringEx:
+                                                            break;
+                                                        case VarType.Timer:
+                                                            break;
+                                                        case VarType.Counter:
+                                                            break;
+                                                        case VarType.DateTime:
+                                                            break;
+                                                        default:
+                                                            break;
+                                                    }
+                                                    break;
+                                                case AnalogTrigger.NotEqual:
+                                                    switch (logTag.varType)
+                                                    {
+                                                        case VarType.Bit:
+                                                            break;
+                                                        case VarType.Byte:
+                                                            if ((byte)unknownTag != subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Word:
+                                                            if ((UInt16)unknownTag != subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DWord:
+                                                            if ((UInt32)unknownTag != subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Int:
+                                                            if ((short)unknownTag != subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.DInt:
+                                                            if ((Int32)unknownTag != subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.Real:
+                                                            if ((float)unknownTag != subbedTag.analogValue)
+                                                            {
+                                                                var subbedLog = MyPlc.Read(subbedTag.dataType, subbedTag.blockNr, subbedTag.startByte, subbedTag.varType, subbedTag.nrOfElements, subbedTag.bitAddress);
+                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                                                            }
+                                                            break;
+                                                        case VarType.String:
+                                                            break;
+                                                        case VarType.StringEx:
+                                                            break;
+                                                        case VarType.Timer:
+                                                            break;
+                                                        case VarType.Counter:
+                                                            break;
+                                                        case VarType.DateTime:
+                                                            break;
+                                                        default:
+                                                            break;
+                                                    }
+                                                    break;
+                                                default:
+                                                    break;
+                                            }
+                                        }
+
                                     }
                                 }
 
                             }
-                            catch (PlcException ex)
+                            else
                             {
-                                MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
-                                Apps.Logger.Log(ex.Message, Severity.Error, ex);
-                                logTag.NrFailedReadAttempts++;
-                                MyPlc.ConnectionStatus = ConnectionStatus.Disconnected;
-                                logTag.LastErrorMessage = ex.Message;
-                                //error = true;
-
-                                //break;
+                                if (MyPlc.UnableToPing)
+                                {
+                                    var errorString = $"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.IP}";
+                                    logTag.LastErrorMessage = errorString;
+                                    MyPlc.SendPlcStatusMessage(errorString, Status.Error);
+                                }
                             }
+
+                        }
+                        catch (PlcException ex)
+                        {
+                            MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
+                            Apps.Logger.Log(ex.Message, Severity.Error, ex);
+                            logTag.NrFailedReadAttempts++;
+                            MyPlc.ConnectionStatus = ConnectionStatus.Disconnected;
+                            logTag.LastErrorMessage = ex.Message;
                         }
                     }
                 }
             }
-            //if (error)
-            //{
-            //    RestartTimer.Start();
-            //    error = false;
-            //    Master.StopLog(true);
-            //}
-
         }
+
 
         private static void AddValueToSql(TagDefinitions logTag, object unknownTag, string plcName)
         {

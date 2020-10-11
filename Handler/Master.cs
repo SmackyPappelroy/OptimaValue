@@ -12,6 +12,11 @@
             if (TagsToLog.FetchValuesFromSql() == null)
                 return;
 
+            foreach (TagDefinitions item in TagsToLog.AllLogValues)
+            {
+                if ((int)item.logFreq < Logger.FastestLogTime && item.active)
+                    Logger.FastestLogTime = (int)item.logFreq;
+            }
 
             Logger.Start();
             ActivePlcs = true;

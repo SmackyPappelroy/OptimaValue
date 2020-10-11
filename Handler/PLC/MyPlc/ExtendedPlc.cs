@@ -121,12 +121,6 @@ namespace OptimaValue
         }
         #endregion
 
-
-        #region Logging classes
-        // TODO: Måste plockas bort
-        //public Logger logger;
-        #endregion
-
         #region Constructor
         public ExtendedPlc(CpuType cpu, string ip, short rack, short slot) : base(cpu, ip, rack, slot)
         {
