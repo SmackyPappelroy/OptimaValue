@@ -201,7 +201,7 @@ namespace OptimaValue
                         AbortLogThread(string.Empty);
                     }
                 }
-                var sleepTime = (FastestLogTime - (int)(FastestLogTime * 0.5f));
+                int sleepTime = (int)((float)FastestLogTime * 0.125f);
                 Thread.Sleep(sleepTime);
             }
         }
