@@ -144,18 +144,33 @@ namespace OptimaValue
             PlcList.Clear();
             for (int rowIndex = 0; rowIndex < tbl.Rows.Count; rowIndex++)
             {
-
+                var _id = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("id"));
                 var _ip = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("ipAddress"));
                 var _cpu = (CpuType)Enum.Parse(typeof(CpuType), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("cpuType")));
                 var _rack = (tbl.AsEnumerable().ElementAt(rowIndex).Field<short>("rack"));
                 var _slot = (tbl.AsEnumerable().ElementAt(rowIndex).Field<short>("slot"));
                 var _name = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("name"));
 
+                var _actualTimeDb = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("actualTimeDb"));
+                var _actualTimeOffset = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("actualTimeOffset"));
+                var _syncTimeDbNr = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("syncTimeDbNr"));
+                var _syncTimeDbOffset = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("syncTimeOffset"));
+                var _syncActive = (tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("syncActive"));
+                var _syncBoolAddress = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("syncBoolAddress"));
+
                 var myPlc = new ExtendedPlc(_cpu, _ip, _rack, _slot)
                 {
+                    Id = _id,
                     PlcName = _name,
                     ActivePlcId = (int)tbl.AsEnumerable().ElementAt(rowIndex).Field<Int32>("id"),
-                    Active = tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("Active")
+                    Active = tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("Active"),
+
+                    ActualTimeDbNr = _actualTimeDb,
+                    ActualTimeOffset = _actualTimeOffset,
+                    SyncTimeDbNr = _syncTimeDbNr,
+                    SyncTimeOffset = _syncTimeDbOffset,
+                    SyncBoolAddress = _syncBoolAddress,
+                    SyncActive = _syncActive,
                 };
 
 

@@ -161,6 +161,12 @@
     <Compile Include="Handler\PLC\MyPlc\Graphics\StatusControl.Designer.cs">
       <DependentUpon>StatusControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Handler\PLC\MyPlc\Graphics\SyncPlcTimeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Handler\PLC\MyPlc\Graphics\SyncPlcTimeForm.Designer.cs">
+      <DependentUpon>SyncPlcTimeForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Handler\PLC\MyPlc\Graphics\TagControl2.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -238,6 +244,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\StatusControl.resx">
       <DependentUpon>StatusControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\SyncPlcTimeForm.resx">
+      <DependentUpon>SyncPlcTimeForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\TagControl2.resx">
       <DependentUpon>TagControl2.cs</DependentUpon>

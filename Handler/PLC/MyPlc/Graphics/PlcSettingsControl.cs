@@ -21,6 +21,8 @@ namespace OptimaValue.Handler.PLC.Graphics
         private bool destroyed = false;
         private bool DeleteFormOpen = false;
         private DeletePlcConfirmationForm confirmForm;
+        private SyncPlcTimeForm syncForm;
+        private bool syncFormOpen;
 
 
         public PlcSettingsControl(ConnectionStatus conStatus, string plcName, string plcIp,
@@ -36,6 +38,7 @@ namespace OptimaValue.Handler.PLC.Graphics
             CpuType = cpuType;
             Id = id;
             MyPlc = myPlc;
+            btnSyncTime.Visible = false;
             if (MyPlc != null)
             {
                 MyPlc.StartedEvent += Logger_StartedEvent;
@@ -48,6 +51,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                     btnDelete.Enabled = true;
                     btnSave.Enabled = true;
                 }
+                btnSyncTime.Visible = true;
             }
 
             this.HandleDestroyed += PlcSettingsControl_HandleDestroyed;
@@ -465,6 +469,42 @@ namespace OptimaValue.Handler.PLC.Graphics
             }
         }
 
+        private void btnSyncTime_Click(object sender, EventArgs e)
+        {
+            if (MyPlc != null)
+            {
+                foreach (ExtendedPlc logPlc in PlcConfig.PlcList)
+                {
+                    if (logPlc.LoggerIsStarted)
+                        return;
+                }
+                if (MyPlc.LoggerIsStarted)
+                    return;
+            }
+            else
+                return;
+
+            if (!syncFormOpen)
+            {
+                syncForm = new SyncPlcTimeForm(MyPlc);
+                syncForm.Show();
+                syncFormOpen = true;
+                this.Enabled = false;
+                syncForm.SavedEvent += (temp) =>
+                {
+                    btnSave_Click(this, EventArgs.Empty);
+                };
+                syncForm.FormClosed += SyncForm_FormClosed;
+
+            }
+        }
+
+        private void SyncForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Enabled = true;
+            syncFormOpen = false;
+        }
+
         private void ConfirmForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             DeleteFormOpen = true;
@@ -520,5 +560,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                 RedrawTreeEvent.RaiseMessage(true);
             }
         }
+
+
     }
 }

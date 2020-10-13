@@ -6,8 +6,7 @@
 
         public static void StartLog()
         {
-            //PlcConfig.PopulateDataTable();
-            var ActivePlcs = false;
+            bool ActivePlcs;
 
             if (TagsToLog.FetchValuesFromSql() == null)
                 return;

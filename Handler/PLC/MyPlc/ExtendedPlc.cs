@@ -17,7 +17,15 @@ namespace OptimaValue
         public string ExternalOnlineMessage = "Ej ansluten";
         #endregion
 
+        #region Sync Plc
+        public int ActualTimeDbNr;
+        public int ActualTimeOffset;
+        public int SyncTimeDbNr;
+        public int SyncTimeOffset;
+        public string SyncBoolAddress = string.Empty;
+        public bool SyncActive;
 
+        #endregion
 
         #region Properties
         private DateTime UpTimeStart = DateTime.MaxValue;

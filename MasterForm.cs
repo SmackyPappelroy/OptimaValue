@@ -302,7 +302,7 @@ namespace OptimaValue
                     };
                     settingsControl.Dock = DockStyle.Fill;
                 }
-                // Plcn finn i databas
+                // Plcn finns i databas
                 else
                 {
                     settingsControl = new PlcSettingsControl(activePlc.ConnectionStatus, activePlc.PlcName

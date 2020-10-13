@@ -30,5 +30,23 @@ namespace OptimaValue
         [Column(TypeName = "smallint")]
         public short slot { get; set; }
 
+        [Column(TypeName = "int")]
+        public int actualTimeDb { get; set; }
+
+        [Column(TypeName = "int")]
+        public int actualTimeOffset { get; set; }
+
+        [Column(TypeName = "int")]
+        public int syncTimeDb { get; set; }
+
+        [Column(TypeName = "int")]
+        public int syncTimeOffset { get; set; }
+
+        [Column(TypeName = "bit")]
+        public bool syncActive { get; set; }
+
+        [Column(TypeName = "nvarchar")]
+        [StringLength(20)]
+        public string syncBoolAddress { get; set; }
     }
 }
