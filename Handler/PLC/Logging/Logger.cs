@@ -208,7 +208,11 @@ namespace OptimaValue
             }
         }
 
-
+        /// <summary>
+        /// Synkronisera PLC-klockan en gång om dagen
+        /// </summary>
+        /// <param name="MyPlc"></param>
+        /// <param name="tid"></param>
         private static void SyncPlc(ExtendedPlc MyPlc, DateTime tid)
         {
 
@@ -314,6 +318,7 @@ namespace OptimaValue
                         {
                             if (MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.IsConnected)
                             {
+                                // Synkronisera klockan
                                 if (tiden > MyPlc.lastSyncTime + TimeSpan.FromDays(1) && MyPlc.SyncActive)
                                     SyncPlc(MyPlc, tiden);
 
