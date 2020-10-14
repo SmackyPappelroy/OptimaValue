@@ -215,7 +215,7 @@ namespace OptimaValue
         /// <param name="tid"></param>
         private static void SyncPlc(ExtendedPlc MyPlc, DateTime tid)
         {
-
+            var tid1 = TimeZoneInfo.ConvertTimeFromUtc(tid, TimeZoneInfo.Local);
             try
             {
                 switch (MyPlc.CPU)
@@ -226,22 +226,19 @@ namespace OptimaValue
                         break;
                     case CpuType.S7300:
                         // Write Time
-                        tid += TimeSpan.FromHours(2);
-                        var tidBytes = S7.Net.Types.DateTime.ToByteArray(tid);
+                        var tidBytes = S7.Net.Types.DateTime.ToByteArray(tid1);
                         MyPlc.WriteBytes(DataType.DataBlock, MyPlc.SyncTimeDbNr, MyPlc.SyncTimeOffset, tidBytes);
                         MyPlc.Write(MyPlc.SyncBoolAddress, 1);
                         break;
                     case CpuType.S7400:
-                        var tid2 = TimeZoneInfo.ConvertTimeFromUtc(tid, TimeZoneInfo.Local);
-                        var tidByte = S7.Net.Types.DateTime.ToByteArray(tid2);
+                        var tidByte = S7.Net.Types.DateTime.ToByteArray(tid1);
                         MyPlc.WriteBytes(DataType.DataBlock, MyPlc.SyncTimeDbNr, MyPlc.SyncTimeOffset, tidByte);
                         MyPlc.Write(MyPlc.SyncBoolAddress, 1);
                         break;
                     case CpuType.S71200:
                         break;
                     case CpuType.S71500:
-                        var tid3 = TimeZoneInfo.ConvertTimeFromUtc(tid, TimeZoneInfo.Local);
-                        var tidByt = S7.Net.Types.DateTimeLong.ToByteArray(tid3);
+                        var tidByt = S7.Net.Types.DateTimeLong.ToByteArray(tid1);
                         MyPlc.WriteBytes(DataType.DataBlock, MyPlc.SyncTimeDbNr, MyPlc.SyncTimeOffset, tidByt);
                         MyPlc.Write(MyPlc.SyncBoolAddress, 1);
                         break;
