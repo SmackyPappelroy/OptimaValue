@@ -18,13 +18,11 @@ namespace OptimaValue
         #endregion
 
         #region Sync Plc
-        public int ActualTimeDbNr;
-        public int ActualTimeOffset;
         public int SyncTimeDbNr;
         public int SyncTimeOffset;
         public string SyncBoolAddress = string.Empty;
         public bool SyncActive;
-
+        public DateTime lastSyncTime;
         #endregion
 
         #region Properties

@@ -11,42 +11,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         public event Action<bool> SavedEvent = (details) => { };
 
         #region Validation
-        private bool aktuellDbOk;
-        private bool aktuellOffsetOk;
         private bool syncDbOk;
         private bool syncOffsetOk;
         private bool syncBitOk;
 
-        private void txtAktuellTidDb_Validating(object sender, CancelEventArgs e)
-        {
-            if (string.IsNullOrEmpty(txtAktuellTidDb.Text))
-            {
-                errorProvider.SetError(txtAktuellTidDb, "Fältet får ej va tomt");
-                aktuellDbOk = false;
-            }
-            else if (!uint.TryParse(txtAktuellTidDb.Text, out uint _))
-            {
-                errorProvider.SetError(txtAktuellTidDb, "Inte ett positivt heltal");
-                aktuellDbOk = false;
-            }
-            else
-                aktuellDbOk = true;
-        }
-        private void txtAktuellTidByte_Validating(object sender, CancelEventArgs e)
-        {
-            if (string.IsNullOrEmpty(txtAktuellTidByte.Text))
-            {
-                errorProvider.SetError(txtAktuellTidByte, "Fältet får ej va tomt");
-                aktuellOffsetOk = false;
-            }
-            else if (!uint.TryParse(txtAktuellTidByte.Text, out uint _))
-            {
-                errorProvider.SetError(txtAktuellTidByte, "Inte ett positivt heltal");
-                aktuellOffsetOk = false;
-            }
-            else
-                aktuellOffsetOk = true;
-        }
+
         private void txtSynkDb_Validating(object sender, CancelEventArgs e)
         {
             if (string.IsNullOrEmpty(txtSynkDb.Text))
@@ -90,31 +59,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private bool ValidateAll()
         {
-            if (string.IsNullOrEmpty(txtAktuellTidDb.Text))
-            {
-                errorProvider.SetError(txtAktuellTidDb, "Fältet får ej va tomt");
-                aktuellDbOk = false;
-            }
-            else if (!uint.TryParse(txtAktuellTidDb.Text, out uint _))
-            {
-                errorProvider.SetError(txtAktuellTidDb, "Inte ett positivt heltal");
-                aktuellDbOk = false;
-            }
-            else
-                aktuellDbOk = true;
-
-            if (string.IsNullOrEmpty(txtAktuellTidByte.Text))
-            {
-                errorProvider.SetError(txtAktuellTidByte, "Fältet får ej va tomt");
-                aktuellOffsetOk = false;
-            }
-            else if (!uint.TryParse(txtAktuellTidByte.Text, out uint _))
-            {
-                errorProvider.SetError(txtAktuellTidByte, "Inte ett positivt heltal");
-                aktuellOffsetOk = false;
-            }
-            else
-                aktuellOffsetOk = true;
 
             if (string.IsNullOrEmpty(txtSynkDb.Text))
             {
@@ -150,7 +94,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             else
                 syncBitOk = true;
 
-            if (!aktuellDbOk || !aktuellOffsetOk || !syncDbOk || !syncOffsetOk || !syncBitOk)
+            if (!syncDbOk || !syncOffsetOk || !syncBitOk)
                 return false;
             else
                 return true;
@@ -161,20 +105,21 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             InitializeComponent();
             MyPlc = myPlc;
-            txtAktuellTidDb.Text = myPlc.ActualTimeDbNr.ToString();
-            txtAktuellTidByte.Text = myPlc.ActualTimeOffset.ToString();
             txtSynkDb.Text = myPlc.SyncTimeDbNr.ToString();
             txtSynkByte.Text = myPlc.SyncTimeOffset.ToString();
             checkActive.Checked = myPlc.SyncActive;
             txtSyncBool.Text = myPlc.SyncBoolAddress.ToString();
+            if (MyPlc.CPU == S7.Net.CpuType.S7300 || MyPlc.CPU == S7.Net.CpuType.S7400)
+                pictureBox1.Image = Properties.Resources.S7300Sync;
+            else
+                pictureBox1.Image = Properties.Resources.S71500Sync__Custom_;
+
         }
 
         private void btnSave_Click(object sender, EventArgs e)
         {
             if (ValidateAll())
             {
-                MyPlc.ActualTimeDbNr = int.Parse(txtAktuellTidDb.Text);
-                MyPlc.ActualTimeOffset = int.Parse(txtAktuellTidByte.Text);
                 MyPlc.SyncTimeDbNr = int.Parse(txtSynkDb.Text);
                 MyPlc.SyncTimeOffset = int.Parse(txtSynkByte.Text);
                 MyPlc.SyncBoolAddress = txtSyncBool.Text;
@@ -194,8 +139,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 activeString = "False";
 
             string query;
-            query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET actualTimeDb={txtAktuellTidDb.Text},actualTimeOffset={txtAktuellTidByte.Text}";
-            query += $",syncTimeDbNr={txtSynkDb.Text},syncTimeOffset={txtSynkByte.Text},syncBoolAddress='{txtSyncBool.Text}',syncActive='{activeString}'";
+            query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET ";
+            query += $"syncTimeDbNr={txtSynkDb.Text},syncTimeOffset={txtSynkByte.Text},syncBoolAddress='{txtSyncBool.Text}',syncActive='{activeString}'";
             query += $" WHERE id = {MyPlc.Id}";
             using (SqlConnection con = new SqlConnection(connectionString))
             {

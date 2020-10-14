@@ -59,7 +59,7 @@
             this.lblName.Location = new System.Drawing.Point(49, 86);
             this.lblName.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblName.Name = "lblName";
-            this.lblName.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.lblName.Padding = new System.Windows.Forms.Padding(6);
             this.lblName.Size = new System.Drawing.Size(114, 48);
             this.lblName.TabIndex = 0;
             this.lblName.Text = "Namn";
@@ -73,7 +73,7 @@
             this.lblIpAddress.Location = new System.Drawing.Point(49, 220);
             this.lblIpAddress.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblIpAddress.Name = "lblIpAddress";
-            this.lblIpAddress.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.lblIpAddress.Padding = new System.Windows.Forms.Padding(6);
             this.lblIpAddress.Size = new System.Drawing.Size(152, 48);
             this.lblIpAddress.TabIndex = 1;
             this.lblIpAddress.Text = "IP-adress";
@@ -87,7 +87,7 @@
             this.lblCpu.Location = new System.Drawing.Point(337, 86);
             this.lblCpu.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblCpu.Name = "lblCpu";
-            this.lblCpu.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.lblCpu.Padding = new System.Windows.Forms.Padding(6);
             this.lblCpu.Size = new System.Drawing.Size(143, 48);
             this.lblCpu.TabIndex = 2;
             this.lblCpu.Text = "CPU-typ";
@@ -101,7 +101,7 @@
             this.lblRack.Location = new System.Drawing.Point(49, 354);
             this.lblRack.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblRack.Name = "lblRack";
-            this.lblRack.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.lblRack.Padding = new System.Windows.Forms.Padding(6);
             this.lblRack.Size = new System.Drawing.Size(99, 48);
             this.lblRack.TabIndex = 3;
             this.lblRack.Text = "Rack";
@@ -115,7 +115,7 @@
             this.lblSlot.Location = new System.Drawing.Point(337, 354);
             this.lblSlot.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblSlot.Name = "lblSlot";
-            this.lblSlot.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.lblSlot.Padding = new System.Windows.Forms.Padding(6);
             this.lblSlot.Size = new System.Drawing.Size(76, 48);
             this.lblSlot.TabIndex = 4;
             this.lblSlot.Text = "Slot";
@@ -125,7 +125,7 @@
             this.txtName.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
             this.txtName.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtName.Location = new System.Drawing.Point(51, 140);
-            this.txtName.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtName.Margin = new System.Windows.Forms.Padding(6);
             this.txtName.Name = "txtName";
             this.txtName.Size = new System.Drawing.Size(274, 37);
             this.txtName.TabIndex = 5;
@@ -135,7 +135,7 @@
             // 
             this.txtIp.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtIp.Location = new System.Drawing.Point(51, 274);
-            this.txtIp.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtIp.Margin = new System.Windows.Forms.Padding(6);
             this.txtIp.Name = "txtIp";
             this.txtIp.Size = new System.Drawing.Size(270, 37);
             this.txtIp.TabIndex = 6;
@@ -154,7 +154,7 @@
             "S71200",
             "S71500"});
             this.comboCpu.Location = new System.Drawing.Point(339, 140);
-            this.comboCpu.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.comboCpu.Margin = new System.Windows.Forms.Padding(6);
             this.comboCpu.Name = "comboCpu";
             this.comboCpu.Size = new System.Drawing.Size(180, 36);
             this.comboCpu.TabIndex = 7;
@@ -164,7 +164,7 @@
             // 
             this.txtRack.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtRack.Location = new System.Drawing.Point(51, 408);
-            this.txtRack.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtRack.Margin = new System.Windows.Forms.Padding(6);
             this.txtRack.Name = "txtRack";
             this.txtRack.Size = new System.Drawing.Size(103, 37);
             this.txtRack.TabIndex = 8;
@@ -174,7 +174,7 @@
             // 
             this.txtSlot.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtSlot.Location = new System.Drawing.Point(339, 408);
-            this.txtSlot.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.txtSlot.Margin = new System.Windows.Forms.Padding(6);
             this.txtSlot.Name = "txtSlot";
             this.txtSlot.Size = new System.Drawing.Size(103, 37);
             this.txtSlot.TabIndex = 9;
@@ -280,6 +280,7 @@
             // btnSyncTime
             // 
             this.btnSyncTime.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnSyncTime.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
             this.btnSyncTime.FlatAppearance.BorderSize = 0;
             this.btnSyncTime.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSyncTime.Font = new System.Drawing.Font("Century Gothic", 14.25F);

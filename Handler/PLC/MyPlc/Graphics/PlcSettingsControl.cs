@@ -368,8 +368,10 @@ namespace OptimaValue.Handler.PLC.Graphics
             }
             else
             {
-                query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.plcConfig (active,name,ipAddress,cpuType,rack,slot)";
-                query += $"VALUES ('{activeString}','{txtName.Text}','{txtIp.Text}','{comboCpu.SelectedItem}',{txtRack.Text},{txtSlot.Text})";
+                query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.plcConfig (active,name,ipAddress,cpuType,rack,slot,";
+                query += $"syncTimeDbNr,syncTimeOffset,syncActive,syncBoolAddress,lastSyncTime)";
+                query += $"VALUES ('{activeString}','{txtName.Text}','{txtIp.Text}','{comboCpu.SelectedItem}',{txtRack.Text},{txtSlot.Text},";
+                query += $"0,0,'False','DBX0.0','{DateTime.UtcNow - TimeSpan.FromDays(1)}')";
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                     using (SqlCommand cmd = new SqlCommand(query, con))

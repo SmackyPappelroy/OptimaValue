@@ -31,12 +31,6 @@ namespace OptimaValue
         public short slot { get; set; }
 
         [Column(TypeName = "int")]
-        public int actualTimeDb { get; set; }
-
-        [Column(TypeName = "int")]
-        public int actualTimeOffset { get; set; }
-
-        [Column(TypeName = "int")]
         public int syncTimeDb { get; set; }
 
         [Column(TypeName = "int")]
@@ -48,5 +42,8 @@ namespace OptimaValue
         [Column(TypeName = "nvarchar")]
         [StringLength(20)]
         public string syncBoolAddress { get; set; }
+
+        [Column(TypeName = "datetime")]
+        public System.DateTime lastSyncTime { get; set; }
     }
 }

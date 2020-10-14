@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -146,6 +147,7 @@ namespace OptimaValue
                             if (MyPlc.ReconnectRetries < MyPlc.MaxReconnectRetries)
                             {
                                 var tiden = DateTime.UtcNow;
+
                                 if (tiden - MyPlc.LastReconnect > TimeSpan.FromSeconds(30))
                                 {
                                     try
@@ -192,7 +194,7 @@ namespace OptimaValue
                 }
                 foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
                 {
-                    if (MyPlc.IsConnected && MyPlc.ConnectionStatus == ConnectionStatus.Connected)
+                    if (MyPlc.IsConnected && MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.Active)
                         foreach (TagDefinitions logValue in TagsToLog.AllLogValues)
                             if (logValue.plcName.Equals(MyPlc.PlcName))
                                 ReadValue(MyPlc, logValue);
@@ -206,8 +208,65 @@ namespace OptimaValue
             }
         }
 
+
+        private static void SyncPlc(ExtendedPlc MyPlc, DateTime tid)
+        {
+
+            try
+            {
+                switch (MyPlc.CPU)
+                {
+                    case CpuType.S7200:
+                        break;
+                    case CpuType.Logo0BA8:
+                        break;
+                    case CpuType.S7300:
+                        // Write Time
+                        tid += TimeSpan.FromHours(2);
+                        var tidBytes = S7.Net.Types.DateTime.ToByteArray(tid);
+                        MyPlc.WriteBytes(DataType.DataBlock, MyPlc.SyncTimeDbNr, MyPlc.SyncTimeOffset, tidBytes);
+                        MyPlc.Write(MyPlc.SyncBoolAddress, 1);
+                        break;
+                    case CpuType.S7400:
+                        var tid2 = TimeZoneInfo.ConvertTimeFromUtc(tid, TimeZoneInfo.Local);
+                        var tidByte = S7.Net.Types.DateTime.ToByteArray(tid2);
+                        MyPlc.WriteBytes(DataType.DataBlock, MyPlc.SyncTimeDbNr, MyPlc.SyncTimeOffset, tidByte);
+                        MyPlc.Write(MyPlc.SyncBoolAddress, 1);
+                        break;
+                    case CpuType.S71200:
+                        break;
+                    case CpuType.S71500:
+                        var tid3 = TimeZoneInfo.ConvertTimeFromUtc(tid, TimeZoneInfo.Local);
+                        var tidByt = S7.Net.Types.DateTimeLong.ToByteArray(tid3);
+                        MyPlc.WriteBytes(DataType.DataBlock, MyPlc.SyncTimeDbNr, MyPlc.SyncTimeOffset, tidByt);
+                        MyPlc.Write(MyPlc.SyncBoolAddress, 1);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            catch (PlcException)
+            {
+                throw;
+            }
+            MyPlc.lastSyncTime = tid;
+
+            var connectionString = PlcConfig.ConnectionString();
+            var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET lastSyncTime = '{tid}' WHERE name = '{MyPlc.PlcName}'";
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
         private static void AbortLogThread(string message)
         {
+
+
             foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
             {
                 if (MyPlc.LoggerIsStarted)
@@ -255,6 +314,8 @@ namespace OptimaValue
                         {
                             if (MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.IsConnected)
                             {
+                                if (tiden > MyPlc.lastSyncTime + TimeSpan.FromDays(1) && MyPlc.SyncActive)
+                                    SyncPlc(MyPlc, tiden);
 
                                 if (logTag.varType == VarType.StringEx)
                                 {

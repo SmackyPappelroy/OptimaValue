@@ -151,12 +151,11 @@ namespace OptimaValue
                 var _slot = (tbl.AsEnumerable().ElementAt(rowIndex).Field<short>("slot"));
                 var _name = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("name"));
 
-                var _actualTimeDb = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("actualTimeDb"));
-                var _actualTimeOffset = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("actualTimeOffset"));
                 var _syncTimeDbNr = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("syncTimeDbNr"));
                 var _syncTimeDbOffset = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("syncTimeOffset"));
                 var _syncActive = (tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("syncActive"));
                 var _syncBoolAddress = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("syncBoolAddress"));
+                var _lastSyncTime = (tbl.AsEnumerable().ElementAt(rowIndex).Field<DateTime>("lastSyncTime"));
 
                 var myPlc = new ExtendedPlc(_cpu, _ip, _rack, _slot)
                 {
@@ -165,12 +164,11 @@ namespace OptimaValue
                     ActivePlcId = (int)tbl.AsEnumerable().ElementAt(rowIndex).Field<Int32>("id"),
                     Active = tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("Active"),
 
-                    ActualTimeDbNr = _actualTimeDb,
-                    ActualTimeOffset = _actualTimeOffset,
                     SyncTimeDbNr = _syncTimeDbNr,
                     SyncTimeOffset = _syncTimeDbOffset,
                     SyncBoolAddress = _syncBoolAddress,
                     SyncActive = _syncActive,
+                    lastSyncTime = _lastSyncTime,
                 };
 
 
