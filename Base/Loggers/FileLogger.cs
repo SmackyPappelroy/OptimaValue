@@ -125,6 +125,7 @@ namespace OptimaValue
 
             using (StreamWriter stream = new StreamWriter(FilePath + "Log.txt", true))
                 stream.Write(logString + tempString);
+
         }
         #endregion
     }

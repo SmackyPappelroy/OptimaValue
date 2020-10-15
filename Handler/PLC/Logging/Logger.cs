@@ -248,20 +248,30 @@ namespace OptimaValue
             }
             catch (PlcException)
             {
+                Apps.Logger.Log($"Misslyckades att synka {MyPlc.PlcName}", Severity.Error);
                 throw;
             }
             MyPlc.lastSyncTime = tid;
 
             var connectionString = PlcConfig.ConnectionString();
             var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET lastSyncTime = '{tid}' WHERE name = '{MyPlc.PlcName}'";
-            using (SqlConnection con = new SqlConnection(connectionString))
+            try
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             }
+            catch (SqlException ex)
+            {
+                Apps.Logger.Log($"Lyckades ej skriva till databas vid tids-synkning: {MyPlc.PlcName}", Severity.Error, ex);
+            }
+
+            Apps.Logger.Log($"Synkade {MyPlc.PlcName}", Severity.Success);
         }
 
         private static void AbortLogThread(string message)
