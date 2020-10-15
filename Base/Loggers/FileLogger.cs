@@ -115,7 +115,6 @@ namespace OptimaValue
                 // Raise an event
                 NewLog.Invoke((string.Empty, string.Empty, Severity.Error, tiden, true, exc));
             }
-
         }
 
         private void LogToFile(string logString)

@@ -75,7 +75,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1578, 450);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1578, 361);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // btnSave
@@ -88,11 +88,11 @@
             this.btnSave.Font = new System.Drawing.Font("Century Gothic", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSave.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(36)))), ((int)(((byte)(36)))), ((int)(((byte)(36)))));
             this.btnSave.Image = ((System.Drawing.Image)(resources.GetObject("btnSave.Image")));
-            this.btnSave.Location = new System.Drawing.Point(4, 365);
+            this.btnSave.Location = new System.Drawing.Point(4, 293);
             this.btnSave.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnSave.Name = "btnSave";
             this.tableLayoutPanel1.SetRowSpan(this.btnSave, 2);
-            this.btnSave.Size = new System.Drawing.Size(310, 80);
+            this.btnSave.Size = new System.Drawing.Size(310, 63);
             this.btnSave.TabIndex = 33;
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
@@ -104,7 +104,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.SetColumnSpan(this.txtSyncBool, 2);
             this.txtSyncBool.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtSyncBool.Location = new System.Drawing.Point(6, 276);
+            this.txtSyncBool.Location = new System.Drawing.Point(6, 222);
             this.txtSyncBool.Margin = new System.Windows.Forms.Padding(6);
             this.txtSyncBool.Name = "txtSyncBool";
             this.txtSyncBool.Size = new System.Drawing.Size(306, 37);
@@ -118,7 +118,7 @@
             this.tableLayoutPanel1.SetColumnSpan(this.label5, 2);
             this.label5.Font = new System.Drawing.Font("Century Gothic", 12F);
             this.label5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.label5.Location = new System.Drawing.Point(47, 240);
+            this.label5.Location = new System.Drawing.Point(47, 186);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(224, 30);
@@ -136,7 +136,7 @@
             this.checkActive.Location = new System.Drawing.Point(4, 5);
             this.checkActive.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.checkActive.Name = "checkActive";
-            this.checkActive.Size = new System.Drawing.Size(111, 35);
+            this.checkActive.Size = new System.Drawing.Size(111, 26);
             this.checkActive.TabIndex = 30;
             this.checkActive.Text = "Aktiv";
             this.checkActive.UseVisualStyleBackColor = true;
@@ -148,7 +148,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.SetColumnSpan(this.txtSynkByte, 2);
             this.txtSynkByte.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtSynkByte.Location = new System.Drawing.Point(6, 186);
+            this.txtSynkByte.Location = new System.Drawing.Point(6, 150);
             this.txtSynkByte.Margin = new System.Windows.Forms.Padding(6);
             this.txtSynkByte.Name = "txtSynkByte";
             this.txtSynkByte.Size = new System.Drawing.Size(306, 37);
@@ -162,7 +162,7 @@
             this.tableLayoutPanel1.SetColumnSpan(this.label3, 2);
             this.label3.Font = new System.Drawing.Font("Century Gothic", 12F);
             this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.label3.Location = new System.Drawing.Point(39, 150);
+            this.label3.Location = new System.Drawing.Point(39, 114);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(240, 30);
@@ -177,7 +177,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tableLayoutPanel1.SetColumnSpan(this.txtSynkDb, 2);
             this.txtSynkDb.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtSynkDb.Location = new System.Drawing.Point(6, 96);
+            this.txtSynkDb.Location = new System.Drawing.Point(6, 78);
             this.txtSynkDb.Margin = new System.Windows.Forms.Padding(6);
             this.txtSynkDb.Name = "txtSynkDb";
             this.txtSynkDb.Size = new System.Drawing.Size(306, 37);
@@ -191,7 +191,7 @@
             this.tableLayoutPanel1.SetColumnSpan(this.label2, 2);
             this.label2.Font = new System.Drawing.Font("Century Gothic", 12F);
             this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.label2.Location = new System.Drawing.Point(30, 60);
+            this.label2.Location = new System.Drawing.Point(30, 42);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(257, 30);
@@ -205,7 +205,7 @@
             this.pictureBox1.Location = new System.Drawing.Point(321, 3);
             this.pictureBox1.Name = "pictureBox1";
             this.tableLayoutPanel1.SetRowSpan(this.pictureBox1, 10);
-            this.pictureBox1.Size = new System.Drawing.Size(1254, 444);
+            this.pictureBox1.Size = new System.Drawing.Size(1254, 355);
             this.pictureBox1.TabIndex = 34;
             this.pictureBox1.TabStop = false;
             // 
@@ -218,7 +218,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(14F, 30F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
-            this.ClientSize = new System.Drawing.Size(1578, 450);
+            this.ClientSize = new System.Drawing.Size(1578, 361);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Font = new System.Drawing.Font("Century Gothic", 12F);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
