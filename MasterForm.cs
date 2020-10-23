@@ -51,12 +51,10 @@ namespace OptimaValue
             menuStrip.BackColor = UIColors.ForeGroundLayer1;
             menuQuestion.ForeColor = UIColors.HeaderText;
             menuSettings.ForeColor = UIColors.HeaderText;
-            hideMenu.ForeColor = UIColors.HeaderText;
             menuSettings.KeepOpenOnDropdownCheck();
 
             menuSettings.ChangeForeColorMenuItem(Color.Black, UIColors.HeaderText);
             menuQuestion.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
-            hideMenu.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
         }
         #endregion
 
@@ -80,18 +78,18 @@ namespace OptimaValue
             System.Threading.Thread.Sleep(100);
         }
 
-        private void hideMenu_Click(object sender, EventArgs e)
-        {
-            Hide();
-            notifyIcon.ShowBalloonTip(5000, "OptimaValue körs i bakgrunden", "Se notify-ikon...", ToolTipIcon.None);
-        }
-
         private void notifyIcon_Click(object sender, EventArgs e)
         {
-            if (!Visible)
-                Show();
+            if (!this.Visible)
+            {
+                this.Show();
+                this.WindowState = FormWindowState.Normal;
+            }
             else
-                BringToFront();
+            {
+                this.WindowState = FormWindowState.Normal;
+                this.BringToFront();
+            }
         }
 
         private void debugMeny_CheckedChanged(object sender, EventArgs e)
@@ -399,7 +397,7 @@ namespace OptimaValue
                 startStopButtonVisibilityTimer.Tick += StartStopButtonVisibilityTimer_Tick;
                 DatabaseCreationEvent.CreatedEvent += DatabaseCreationEvent_CreatedEvent;
                 Logger.RestartEvent += Logger_RestartEvent;
-
+                this.Resize += MasterForm_Resize;
                 isSubscribed = true;
             }
             else if (isSubscribed && !subscribe)
@@ -414,6 +412,15 @@ namespace OptimaValue
 
 
                 isSubscribed = false;
+            }
+        }
+
+        private void MasterForm_Resize(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                notifyIcon.ShowBalloonTip(5000, "OptimaValue körs i bakgrunden", "Se notify-ikon...", ToolTipIcon.None);
+                this.Hide();
             }
         }
 
