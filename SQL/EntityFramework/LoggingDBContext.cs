@@ -6,7 +6,7 @@ namespace OptimaValue
 {
     public class LoggingDBContext : DbContext
     {
-        public DbSet<logValues> ogValues { get; set; }
+        public DbSet<logValues> logValues { get; set; }
         public DbSet<plcConfig> plcConfig { get; set; }
         public DbSet<tagConfig> tagConfig { get; set; }
 

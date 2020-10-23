@@ -102,8 +102,18 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             if (string.IsNullOrEmpty(txtName.Text))
                 errorProvider.SetError(txtName, "Fyll i ett namn");
+            else if (txtName.Text.Length > 50)
+                errorProvider.SetError(txtName, "Max 50 tecken");
             else
                 errorProvider.SetError(txtName, "");
+        }
+
+        private void txtUnit_Validating(object sender, CancelEventArgs e)
+        {
+            if (txtUnit.Text.Length > 30)
+                errorProvider.SetError(txtUnit, "Max 30 tecken");
+            else
+                errorProvider.SetError(txtUnit, "");
         }
 
         private void txtTimeOfDay_Validating(object sender, CancelEventArgs e)
@@ -181,9 +191,13 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var okNrOfElements = false;
             var okBitAddress = false;
             var okLogFreq = false;
+            var okUnit = false;
             var tempString = string.Empty;
 
-            if (!string.IsNullOrEmpty(txtName.Text))
+            if (txtUnit.Text.Length <= 30)
+                okUnit = true;
+
+            if (!string.IsNullOrEmpty(txtName.Text) && txtName.Text.Length <= 50)
                 okName = true;
 
             if (!string.IsNullOrEmpty(comboLogType.SelectedItem.ToString()))
@@ -222,7 +236,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             if (okName && okTimeOfDay && okDeadBand && okVarType && okBlockNr
                 && okDataType && okStartByte && okNrOfElements && okBitAddress &&
-                okLogFreq && okLogType)
+                okLogFreq && okLogType && okUnit)
             {
                 return true;
             }

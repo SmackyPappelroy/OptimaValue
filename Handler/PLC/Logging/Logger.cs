@@ -570,11 +570,12 @@ namespace OptimaValue
                                 }
                                 else if (logTag.logType == LogType.TimeOfDay && MyPlc.IsConnected)
                                 {
+                                    var tid1 = TimeZoneInfo.ConvertTimeFromUtc(tiden, TimeZoneInfo.Local);
                                     if (logTag.timeOfDay.Seconds != 0)
                                     {
-                                        if (tiden.Hour == logTag.timeOfDay.Hours &&
-                                            tiden.Minute == logTag.timeOfDay.Minutes &&
-                                            tiden.Second == logTag.timeOfDay.Seconds)
+                                        if (tid1.Hour == logTag.timeOfDay.Hours &&
+                                            tid1.Minute == logTag.timeOfDay.Minutes &&
+                                            tid1.Second == logTag.timeOfDay.Seconds)
                                         {
                                             var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == tiden.Day);
                                             if (allOccurencesOfTagInList == null)
@@ -583,8 +584,8 @@ namespace OptimaValue
                                             }
                                         }
                                     }
-                                    else if (tiden.Hour == logTag.timeOfDay.Hours &&
-                                            tiden.Minute == logTag.timeOfDay.Minutes)
+                                    else if (tid1.Hour == logTag.timeOfDay.Hours &&
+                                            tid1.Minute == logTag.timeOfDay.Minutes)
                                     {
                                         var allOccurencesOfTagInList = lastLogValue.Find(n => n.name == logTag.name && n.logDate.Day == tiden.Day);
                                         if (allOccurencesOfTagInList == null)
