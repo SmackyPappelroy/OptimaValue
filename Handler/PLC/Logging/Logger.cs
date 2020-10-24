@@ -147,23 +147,32 @@ namespace OptimaValue
 
                             var tiden = DateTime.UtcNow;
 
-                            if (tiden - MyPlc.LastReconnect > TimeSpan.FromSeconds(5))
+                            if (tiden - MyPlc.LastReconnect > TimeSpan.FromSeconds(8))
                             {
                                 try
                                 {
-                                    MyPlc.Close();
-                                    MyPlc.Open();
-                                    if (MyPlc.IsConnected && MyPlc.Ping())
+                                    if (MyPlc.Ping())
                                     {
-                                        MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Ok);
-                                        Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Normal);
-                                        MyPlc.ConnectionStatus = ConnectionStatus.Connected;
+                                        MyPlc.Close();
+                                        MyPlc.Open();
+                                        if (MyPlc.IsConnected)
+                                        {
+                                            MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Ok);
+                                            Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Normal);
+                                            MyPlc.ConnectionStatus = ConnectionStatus.Connected;
+                                        }
+                                        else
+                                        {
+                                            MyPlc.SendPlcStatusMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Error);
+                                            Apps.Logger.Log($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Error);
+                                        }
                                     }
                                     else
                                     {
-                                        MyPlc.SendPlcStatusMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Error);
-                                        Apps.Logger.Log($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Error);
+                                        MyPlc.SendPlcStatusMessage($"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Error);
+                                        Apps.Logger.Log($"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Error);
                                     }
+
                                     MyPlc.LastReconnect = tiden;
                                 }
                                 catch (Exception ex)

@@ -518,12 +518,14 @@ namespace OptimaValue
                 Invoke((MethodInvoker)delegate { Logger_NewLog(obj); });
                 return;
             }
-            if (obj.hmiString.Equals(string.Empty))
-                txtStatus.Text = obj.hmiString;
-            else if (obj.exception != null)
+            if (obj.exception != null)
             {
                 statusPanel.AutoScroll = true;
                 txtStatus.Text = obj.exception.ToString();
+            }
+            else
+            {
+                txtStatus.Text = obj.hmiString;
             }
 
             txtStatus.Visible = true;
