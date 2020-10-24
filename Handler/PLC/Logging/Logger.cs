@@ -147,7 +147,7 @@ namespace OptimaValue
 
                             var tiden = DateTime.UtcNow;
 
-                            if (tiden - MyPlc.LastReconnect > TimeSpan.FromSeconds(8))
+                            if (tiden - MyPlc.LastReconnect > TimeSpan.FromSeconds(3))
                             {
                                 try
                                 {
