@@ -50,48 +50,12 @@ namespace OptimaValue.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Reconnect {
-            get {
-                return ((bool)(this["Reconnect"]));
-            }
-            set {
-                this["Reconnect"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool Debug {
             get {
                 return ((bool)(this["Debug"]));
             }
             set {
                 this["Debug"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int ReconnectRetries {
-            get {
-                return ((int)(this["ReconnectRetries"]));
-            }
-            set {
-                this["ReconnectRetries"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("5")]
-        public int ReconnectTime {
-            get {
-                return ((int)(this["ReconnectTime"]));
-            }
-            set {
-                this["ReconnectTime"] = value;
             }
         }
         

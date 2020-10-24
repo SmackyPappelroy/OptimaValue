@@ -59,8 +59,6 @@ namespace OptimaValue
         public int Id = 0;
 
         public DateTime LastReconnect = DateTime.MinValue;
-        public int MaxReconnectRetries { get; private set; } = 5;
-        public int ReconnectRetries { get; set; }
         public bool UnableToPing { get; private set; }
         public string PlcName { get; set; }
         public Int32 ActivePlcId { get; set; }
@@ -90,7 +88,6 @@ namespace OptimaValue
                     {
                         UpTimeStart = DateTime.UtcNow;
                         timerPing.Start();
-                        ReconnectRetries = 0;
                     }
                 }
                 if (value != ConnectionStatus.Connected)

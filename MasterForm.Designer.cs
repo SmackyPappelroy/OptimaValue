@@ -278,7 +278,7 @@
             this.menuQuestion});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1588, 35);
+            this.menuStrip.Size = new System.Drawing.Size(1588, 33);
             this.menuStrip.TabIndex = 6;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -295,7 +295,7 @@
             // databasToolStripMenuItem
             // 
             this.databasToolStripMenuItem.Name = "databasToolStripMenuItem";
-            this.databasToolStripMenuItem.Size = new System.Drawing.Size(203, 34);
+            this.databasToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.databasToolStripMenuItem.Text = "Databas";
             this.databasToolStripMenuItem.Click += new System.EventHandler(this.databasToolStripMenuItem_Click);
             // 
@@ -303,7 +303,7 @@
             // 
             this.debugMenu.CheckOnClick = true;
             this.debugMenu.Name = "debugMenu";
-            this.debugMenu.Size = new System.Drawing.Size(203, 34);
+            this.debugMenu.Size = new System.Drawing.Size(270, 34);
             this.debugMenu.Text = "Debug";
             this.debugMenu.CheckedChanged += new System.EventHandler(this.debugMeny_CheckedChanged);
             // 
@@ -311,7 +311,7 @@
             // 
             this.notifyMenu.CheckOnClick = true;
             this.notifyMenu.Name = "notifyMenu";
-            this.notifyMenu.Size = new System.Drawing.Size(203, 34);
+            this.notifyMenu.Size = new System.Drawing.Size(270, 34);
             this.notifyMenu.Text = "Notify Ikon";
             this.notifyMenu.CheckedChanged += new System.EventHandler(this.notifyMenu_CheckedChanged);
             // 

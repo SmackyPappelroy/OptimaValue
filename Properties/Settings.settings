@@ -8,17 +8,8 @@
     <Setting Name="AutoStart" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Reconnect" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="Debug" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="ReconnectRetries" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
-    </Setting>
-    <Setting Name="ReconnectTime" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">5</Value>
     </Setting>
     <Setting Name="notify" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
