@@ -90,8 +90,7 @@ namespace OptimaValue
                 var sql = new LogValuesSql()
                 {
                     logTime = raw.logValue.LastLogTime,
-                    tagName = raw.logValue.name,
-                    plcName = raw.logValue.plcName
+                    tag_id = raw.logValue.id
                 };
 
                 switch (raw.logValue.varType)
@@ -103,7 +102,6 @@ namespace OptimaValue
                             {
                                 sql.value = array[i] == true ? "True" : "False";
                                 sql.numericValue = array[i] == true ? 1 : 0;
-                                sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
                             }
                         }
@@ -122,7 +120,6 @@ namespace OptimaValue
                             {
                                 sql.value = v[i].ToString();
                                 sql.numericValue = v[i];
-                                sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
                             }
                         }
@@ -140,7 +137,6 @@ namespace OptimaValue
                             {
                                 sql.numericValue = v1[i];
                                 sql.value = sql.numericValue.ToString();
-                                sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
                             }
                         }
@@ -159,7 +155,6 @@ namespace OptimaValue
                             {
                                 sql.numericValue = v2[i];
                                 sql.value = sql.numericValue.ToString();
-                                sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
                             }
                         }
@@ -178,7 +173,6 @@ namespace OptimaValue
                             {
                                 sql.numericValue = v3[i];
                                 sql.value = sql.numericValue.ToString();
-                                sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
                             }
                         }
@@ -196,7 +190,6 @@ namespace OptimaValue
                             {
                                 sql.numericValue = v4[i];
                                 sql.value = sql.numericValue.ToString();
-                                sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
                             }
                         }
@@ -214,7 +207,6 @@ namespace OptimaValue
                             {
                                 sql.numericValue = v5[i];
                                 sql.value = sql.numericValue.ToString();
-                                sql.tagName = $"{raw.logValue.name}[{i}]";
                                 SqlValues.Add(sql);
                             }
                         }
@@ -297,11 +289,10 @@ namespace OptimaValue
                     using (SqlBulkCopy objBulk = new SqlBulkCopy(connection))
                     {
                         objBulk.DestinationTableName = "logValues";
-                        objBulk.ColumnMappings.Add("tagName", "tagName");
-                        objBulk.ColumnMappings.Add("plcName", "plcName");
                         objBulk.ColumnMappings.Add("logTime", "logTime");
                         objBulk.ColumnMappings.Add("value", "value");
                         objBulk.ColumnMappings.Add("numericValue", "numericValue");
+                        objBulk.ColumnMappings.Add("tag_id", "tag_id");
                         try
                         {
                             con.Open();

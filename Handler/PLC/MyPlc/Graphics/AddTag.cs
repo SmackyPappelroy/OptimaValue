@@ -53,6 +53,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 comboDataType.SelectedItem = "DataBlock";
                 comboLogType.Text = "Cyclic";
                 comboLogType.SelectedItem = "Cyclic";
+                txtScaleMin.Text = 0.ToString();
+                txtScaleMax.Text = 0.ToString();
+                txtScaleOffset.Text = 0.ToString();
             }
             timeOut.Interval = 300;
             timeOut.Tick += TimeOut_Tick;
@@ -90,6 +93,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             comboLogFreq.SelectedItem = tag.logFreq;
 
             txtUnit.Text = tag.tagUnit;
+
+            txtScaleMin.Text = tag.scaleMin.ToString();
+            txtScaleMax.Text = tag.scaleMax.ToString();
+            txtScaleOffset.Text = tag.scaleOffset.ToString();
         }
 
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
@@ -145,6 +152,33 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             else
                 errorProvider.SetError(txtBlockNr, "");
         }
+        private void txtScaleMin_Validating(object sender, CancelEventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtScaleMin.Text))
+                errorProvider.SetError(txtScaleMin, "Ange ett numeriskt värde");
+            else if (!uint.TryParse(txtScaleMin.Text, out uint _))
+                errorProvider.SetError(txtScaleMin, "Inte ett numeriskt positivt värde");
+            else
+                errorProvider.SetError(txtScaleMin, "");
+        }
+        private void txtScaleMax_Validating(object sender, CancelEventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtScaleMax.Text))
+                errorProvider.SetError(txtScaleMax, "Ange ett numeriskt värde");
+            else if (!uint.TryParse(txtScaleMax.Text, out uint _))
+                errorProvider.SetError(txtScaleMax, "Inte ett numeriskt positivt värde");
+            else
+                errorProvider.SetError(txtScaleMax, "");
+        }
+        private void txtScaleOffset_Validating(object sender, CancelEventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtScaleOffset.Text))
+                errorProvider.SetError(txtScaleOffset, "Ange ett numeriskt värde");
+            else if (!uint.TryParse(txtScaleOffset.Text, out uint _))
+                errorProvider.SetError(txtScaleOffset, "Inte ett numeriskt positivt värde");
+            else
+                errorProvider.SetError(txtScaleOffset, "");
+        }
 
         private void txtStartByte_Validating(object sender, CancelEventArgs e)
         {
@@ -193,6 +227,18 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var okLogFreq = false;
             var okUnit = false;
             var tempString = string.Empty;
+            var okScaleMin = false;
+            var okScaleMax = false;
+            var okScaleOffset = false;
+
+            if (int.TryParse(txtScaleMin.Text, out int _))
+                okScaleMin = true;
+
+            if (int.TryParse(txtScaleMax.Text, out int _))
+                okScaleMax = true;
+
+            if (int.TryParse(txtScaleOffset.Text, out int _))
+                okScaleOffset = true;
 
             if (txtUnit.Text.Length <= 30)
                 okUnit = true;
@@ -236,7 +282,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             if (okName && okTimeOfDay && okDeadBand && okVarType && okBlockNr
                 && okDataType && okStartByte && okNrOfElements && okBitAddress &&
-                okLogFreq && okLogType && okUnit)
+                okLogFreq && okLogType && okUnit && okScaleMin && okScaleMax && okScaleOffset)
             {
                 return true;
             }
@@ -339,7 +385,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void AddNewTag()
         {
-            int tagEventId = 0;
+            decimal tagEventId = 0;
             bool isBoolTrigger = false;
             float analogValue = 0;
             string boolTrigger = "OnTrue";
@@ -357,12 +403,12 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var connectionString = PlcConfig.ConnectionString();
             var query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.tagConfig ";
             query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
-            query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue) ";
+            query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
             query += $"VALUES ('{checkActive.Checked}','{txtName.Text}','{comboLogType.SelectedItem}','{txtTimeOfDay.Text}',";
             query += $"{float.Parse(txtDeadband.Text)},'{PlcName}','{comboVarType.SelectedItem}',{int.Parse(txtBlockNr.Text)}, ";
             query += $"'{comboDataType.SelectedItem}',{int.Parse(txtStartByte.Text)},{int.Parse(txtNrOfElements.Text)},";
             query += $"{byte.Parse(txtBitAddress.Text)},'{comboLogFreq.SelectedItem}','{txtUnit.Text}',{tagEventId},'{isBoolTrigger}','";
-            query += $"{boolTrigger}','{analogTrigger}',{analogValue})";
+            query += $"{boolTrigger}','{analogTrigger}',{analogValue},{txtScaleMin.Text},{txtScaleMax.Text},{txtScaleOffset.Text})";
 
             try
             {
@@ -407,7 +453,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var _blockNr = (tbl.AsEnumerable().ElementAt(0).Field<int>("blockNr"));
             var _dataType = (S7.Net.DataType)Enum.Parse(typeof(S7.Net.DataType), (tbl.AsEnumerable().ElementAt(0).Field<string>("dataType")));
             var _deadband = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("deadband"));
-            var _id = (tbl.AsEnumerable().ElementAt(0).Field<int>("id"));
+            var _id = (tbl.AsEnumerable().ElementAt(0).Field<decimal>("id"));
             var _logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), (tbl.AsEnumerable().ElementAt(0).Field<string>("logFreq")));
             var _logType = (LogType)Enum.Parse(typeof(LogType), (tbl.AsEnumerable().ElementAt(0).Field<string>("logType")));
             var _name = (tbl.AsEnumerable().ElementAt(0).Field<string>("name"));
@@ -417,11 +463,15 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var _timeOfDay = (tbl.AsEnumerable().ElementAt(0).Field<TimeSpan>("timeOfDay"));
             var _varType = (VarType)Enum.Parse(typeof(VarType), (tbl.AsEnumerable().ElementAt(0).Field<string>("varType")));
             var _tagUnit = (tbl.AsEnumerable().ElementAt(0).Field<string>("tagUnit"));
-            var _eventId = (tbl.AsEnumerable().ElementAt(0).Field<int>("eventId"));
+            var _eventId = (tbl.AsEnumerable().ElementAt(0).Field<decimal>("eventId"));
             var _isBooleanTrigger = (tbl.AsEnumerable().ElementAt(0).Field<bool>("isBooleanTrigger"));
             var _boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), (tbl.AsEnumerable().ElementAt(0).Field<string>("boolTrigger")));
             var _analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), (tbl.AsEnumerable().ElementAt(0).Field<string>("analogTrigger")));
             var _analogValue = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("analogValue"));
+            var _scaleMin = (tbl.AsEnumerable().ElementAt(0).Field<int>("scaleMin"));
+            var _scaleMax = (tbl.AsEnumerable().ElementAt(0).Field<int>("scaleMax"));
+            var _scaleOffset = (tbl.AsEnumerable().ElementAt(0).Field<int>("scaleOffset"));
+
 
 
             tag = new TagDefinitions()
@@ -435,9 +485,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 logFreq = _logFreq,
                 LastLogTime = DateTime.MinValue,
                 logType = _logType,
-                name = _name,
                 nrOfElements = _nrOfElements,
-                plcName = _plcName,
                 startByte = _startByte,
                 timeOfDay = _timeOfDay,
                 varType = _varType,
@@ -447,6 +495,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 boolTrigger = _boolTrigger,
                 analogTrigger = _analogTrigger,
                 analogValue = _analogValue,
+                scaleMin = _scaleMin,
+                scaleMax = _scaleMax,
+                scaleOffset = _scaleOffset,
             };
             btnNew.BackColor = greenColor;
             btnNew.Image = Properties.Resources.add_new_64px_Gray;
@@ -466,6 +517,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 $",bitAddress={byte.Parse(txtBitAddress.Text)},logFreq='{comboLogFreq.SelectedItem}',";
             query += $"tagUnit='{txtUnit.Text}',eventId={tag.eventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
                 $",boolTrigger='{tag.boolTrigger}',analogTrigger='{tag.analogTrigger}',analogValue={tag.analogValue} " +
+                $"scaleMin={txtScaleMin.Text},scaleMax={txtScaleMax.Text},scaleOffset={txtScaleOffset.Text}" +
                 $" WHERE id = {tag.id}";
 
             try
@@ -487,35 +539,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 Apps.Logger.Log(string.Empty, Severity.Error, ex);
             }
         }
-
-        private void DeleteTag()
-        {
-            string tagNamn;
-            if (tag == null)
-                tagNamn = txtName.Text;
-            else
-                tagNamn = tag.name;
-            var connectionString = PlcConfig.ConnectionString();
-            var query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"WHERE name = '{tagNamn}' AND plcName = '{MyPlc.PlcName}'";
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex);
-            }
-        }
-
-
 
         private DataTable CreateTable()
         {
@@ -539,6 +562,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             tbl.Columns.Add("boolTrigger", typeof(string));
             tbl.Columns.Add("analogTrigger", typeof(string));
             tbl.Columns.Add("analogValue", typeof(float));
+            tbl.Columns.Add("scaleMin", typeof(int));
+            tbl.Columns.Add("scaleMax", typeof(int));
+            tbl.Columns.Add("scaleOffset", typeof(int));
 
 
             tbl.Rows.Add(checkActive.Checked, txtName.Text, comboLogType.SelectedItem.ToString(),
@@ -546,7 +572,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 PlcName, comboVarType.SelectedItem.ToString(), int.Parse(txtBlockNr.Text),
                 comboDataType.SelectedItem.ToString(), int.Parse(txtStartByte.Text),
                 int.Parse(txtNrOfElements.Text), byte.Parse(txtBitAddress.Text),
-                comboLogFreq.SelectedItem.ToString(), tag.eventId, tag.IsBooleanTrigger, tag.boolTrigger, tag.analogTrigger, tag.analogValue);
+                comboLogFreq.SelectedItem.ToString(), tag.eventId, tag.IsBooleanTrigger, tag.boolTrigger, tag.analogTrigger, tag.analogValue, int.Parse(txtScaleMin.Text),
+                int.Parse(txtScaleMax.Text), int.Parse(txtScaleOffset.Text));
             return tbl;
 
         }
@@ -578,6 +605,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void EventForm_SaveEvent(object sender, SaveEventArgs e)
         {
+            if (tag == null)
+                tag = new TagDefinitions();
             tag.eventId = e.tag.eventId;
             tag.IsBooleanTrigger = e.tag.IsBooleanTrigger;
             tag.boolTrigger = e.tag.boolTrigger;

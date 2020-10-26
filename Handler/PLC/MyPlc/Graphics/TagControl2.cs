@@ -146,7 +146,7 @@ namespace OptimaValue
                 var _blockNr = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("blockNr"));
                 var _dataType = (DataType)Enum.Parse(typeof(DataType), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("dataType")));
                 var _deadband = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("deadband"));
-                var _id = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("id"));
+                var _id = (tbl.AsEnumerable().ElementAt(rowIndex).Field<decimal>("id"));
                 var _logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("logFreq")));
                 var _logType = (LogType)Enum.Parse(typeof(LogType), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("logType")));
                 var _name = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("name"));
@@ -156,12 +156,14 @@ namespace OptimaValue
                 var _timeOfDay = (tbl.AsEnumerable().ElementAt(rowIndex).Field<TimeSpan>("timeOfDay"));
                 var _varType = (VarType)Enum.Parse(typeof(VarType), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("varType")));
                 var _tagUnit = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("tagUnit"));
-                var _eventId = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("eventId"));
+                var _eventId = (tbl.AsEnumerable().ElementAt(rowIndex).Field<decimal>("eventId"));
                 var _isBooleanTrigger = (tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("isBooleanTrigger"));
                 var _boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("boolTrigger")));
                 var _analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("analogTrigger")));
                 var _analogValue = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("analogValue"));
-
+                var _scaleMin = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("scaleMin"));
+                var _scaleMax = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("scaleMax"));
+                var _scaleOffset = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("scaleOffset"));
 
                 var myTag = new TagDefinitions()
                 {
@@ -186,6 +188,9 @@ namespace OptimaValue
                     boolTrigger = _boolTrigger,
                     analogTrigger = _analogTrigger,
                     analogValue = _analogValue,
+                    scaleMin = _scaleMin,
+                    scaleMax = _scaleMax,
+                    scaleOffset = _scaleOffset,
                 };
                 tags.Add(myTag);
             }

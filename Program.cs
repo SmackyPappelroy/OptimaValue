@@ -19,7 +19,9 @@ namespace OptimaValue
                 if (createdNew)
                 {
                     Apps.Logger = new FileLogger(@"C:\OptimaValue\", true);
+#if RELEASE
                     AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+#endif
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     Application.Run(new MasterForm());

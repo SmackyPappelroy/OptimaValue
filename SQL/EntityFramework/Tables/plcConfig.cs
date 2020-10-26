@@ -31,7 +31,7 @@ namespace OptimaValue
         public short slot { get; set; }
 
         [Column(TypeName = "int")]
-        public int syncTimeDb { get; set; }
+        public int syncTimeDbNr { get; set; }
 
         [Column(TypeName = "int")]
         public int syncTimeOffset { get; set; }

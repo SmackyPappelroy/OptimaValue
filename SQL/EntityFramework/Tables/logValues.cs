@@ -10,13 +10,7 @@ namespace OptimaValue
         [Key]
         public decimal index { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(30)]
-        public string tagName { get; set; }
-
-        [Column(TypeName = "nvarchar")]
-        [StringLength(50)]
-        public string plcName { get; set; }
+        public tagConfig tag { get; set; }
 
         [Column(TypeName = "datetime")]
         public DateTime logTime { get; set; }

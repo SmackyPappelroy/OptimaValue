@@ -8,7 +8,7 @@ namespace OptimaValue
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
-        public int id { get; set; }
+        public decimal id { get; set; }
 
         [Column(TypeName = "bit")]
         public bool active { get; set; }
@@ -59,7 +59,7 @@ namespace OptimaValue
         [StringLength(30)]
         public string tagUnit { get; set; }
 
-        public int eventId { get; set; }
+        public decimal eventId { get; set; }
 
         [Column(TypeName = "bit")]
         public bool isBooleanTrigger { get; set; }
@@ -74,5 +74,14 @@ namespace OptimaValue
 
         [Column(TypeName = "float")]
         public float analogValue { get; set; }
+
+        [Column(TypeName = "int")]
+        public int scaleMin { get; set; }
+
+        [Column(TypeName = "int")]
+        public int scaleMax { get; set; }
+
+        [Column(TypeName = "int")]
+        public int scaleOffset { get; set; }
     }
 }

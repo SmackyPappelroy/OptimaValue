@@ -95,6 +95,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 }
             }
             catch (System.ComponentModel.InvalidAsynchronousStateException) { }
+            catch (InvalidOperationException) { }
 
         }
 
@@ -132,8 +133,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private void DeleteTag()
         {
             var connectionString = PlcConfig.ConnectionString();
-            var query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"WHERE name = '{txtName.Text}'";
+            var query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.logValues ";
+            query += $"WHERE tag_id = {SingleTag.id}";
             try
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
@@ -148,6 +149,25 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             catch (SqlException ex)
             {
                 Apps.Logger.Log(string.Empty, Severity.Error, ex);
+            }
+
+
+            query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
+            query += $"WHERE id = {SingleTag.id}";
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (SqlException ex2)
+            {
+                Apps.Logger.Log(string.Empty, Severity.Error, ex2);
             }
         }
 

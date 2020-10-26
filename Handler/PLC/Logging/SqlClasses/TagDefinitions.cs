@@ -6,7 +6,7 @@ namespace OptimaValue
 {
     public class TagDefinitions : TagStatistics
     {
-        public int id { get; set; }
+        public decimal id { get; set; }
         public bool active { get; set; }
         public string name { get; set; }
         public LogType logType { get; set; }
@@ -23,16 +23,23 @@ namespace OptimaValue
         public DateTime LastLogTime { get; set; }
         public string tagUnit { get; set; } = string.Empty;
 
+        #region Skalering
+        public int scaleMin { get; set; }
+        public int scaleMax { get; set; }
+        public int scaleOffset { get; set; }
+
+        #endregion
+
         // Events
-        public int eventId { get; set; } // The id of the trigger tag
+        public decimal eventId { get; set; } // The id of the trigger tag
         public bool IsBooleanTrigger { get; set; }
         public BooleanTrigger boolTrigger { get; set; }
         public AnalogTrigger analogTrigger { get; set; }
 
         public float analogValue { get; set; } = 0f;
 
-        private List<int> subscribedTags = new List<int>();
-        public List<int> SubscribedTags
+        private List<decimal> subscribedTags = new List<decimal>();
+        public List<decimal> SubscribedTags
         {
             get
             {
