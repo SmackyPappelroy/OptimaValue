@@ -8,7 +8,7 @@ namespace OptimaValue
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
-        public decimal id { get; set; }
+        public int id { get; set; }
 
         [Column(TypeName = "bit")]
         public bool active { get; set; }
@@ -59,7 +59,7 @@ namespace OptimaValue
         [StringLength(30)]
         public string tagUnit { get; set; }
 
-        public decimal eventId { get; set; }
+        public int eventId { get; set; }
 
         [Column(TypeName = "bit")]
         public bool isBooleanTrigger { get; set; }

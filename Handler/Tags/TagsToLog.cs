@@ -43,7 +43,7 @@ namespace OptimaValue
                             AllLogValues = (from DataRow dr in AllTagsTable.Rows
                                             select new TagDefinitions()
                                             {
-                                                id = (decimal)dr["id"],
+                                                id = (int)dr["id"],
                                                 active = (bool)dr["active"],
                                                 name = dr["name"].ToString(),
                                                 logType = (LogType)Enum.Parse(typeof(LogType), dr["logType"].ToString()),
@@ -59,7 +59,7 @@ namespace OptimaValue
                                                 logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), dr["logFreq"].ToString()),
                                                 LastLogTime = DateTime.MinValue,
                                                 tagUnit = dr["tagUnit"].ToString(),
-                                                eventId = (decimal)dr["eventId"],
+                                                eventId = (int)dr["eventId"],
                                                 IsBooleanTrigger = (bool)dr["isBooleanTrigger"],
                                                 boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), dr["boolTrigger"].ToString()),
                                                 analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), dr["analogTrigger"].ToString()),

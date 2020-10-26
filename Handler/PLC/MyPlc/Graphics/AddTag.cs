@@ -385,7 +385,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void AddNewTag()
         {
-            decimal tagEventId = 0;
+            int tagEventId = 0;
             bool isBoolTrigger = false;
             float analogValue = 0;
             string boolTrigger = "OnTrue";
@@ -453,7 +453,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var _blockNr = (tbl.AsEnumerable().ElementAt(0).Field<int>("blockNr"));
             var _dataType = (S7.Net.DataType)Enum.Parse(typeof(S7.Net.DataType), (tbl.AsEnumerable().ElementAt(0).Field<string>("dataType")));
             var _deadband = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("deadband"));
-            var _id = (tbl.AsEnumerable().ElementAt(0).Field<decimal>("id"));
+            var _id = (tbl.AsEnumerable().ElementAt(0).Field<int>("id"));
             var _logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), (tbl.AsEnumerable().ElementAt(0).Field<string>("logFreq")));
             var _logType = (LogType)Enum.Parse(typeof(LogType), (tbl.AsEnumerable().ElementAt(0).Field<string>("logType")));
             var _name = (tbl.AsEnumerable().ElementAt(0).Field<string>("name"));
@@ -463,7 +463,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var _timeOfDay = (tbl.AsEnumerable().ElementAt(0).Field<TimeSpan>("timeOfDay"));
             var _varType = (VarType)Enum.Parse(typeof(VarType), (tbl.AsEnumerable().ElementAt(0).Field<string>("varType")));
             var _tagUnit = (tbl.AsEnumerable().ElementAt(0).Field<string>("tagUnit"));
-            var _eventId = (tbl.AsEnumerable().ElementAt(0).Field<decimal>("eventId"));
+            var _eventId = (tbl.AsEnumerable().ElementAt(0).Field<int>("eventId"));
             var _isBooleanTrigger = (tbl.AsEnumerable().ElementAt(0).Field<bool>("isBooleanTrigger"));
             var _boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), (tbl.AsEnumerable().ElementAt(0).Field<string>("boolTrigger")));
             var _analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), (tbl.AsEnumerable().ElementAt(0).Field<string>("analogTrigger")));
