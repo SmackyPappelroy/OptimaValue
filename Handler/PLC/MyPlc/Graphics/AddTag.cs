@@ -516,7 +516,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 $",dataType='{comboDataType.SelectedItem}',startByte={int.Parse(txtStartByte.Text)},nrOfElements={int.Parse(txtNrOfElements.Text)}" +
                 $",bitAddress={byte.Parse(txtBitAddress.Text)},logFreq='{comboLogFreq.SelectedItem}',";
             query += $"tagUnit='{txtUnit.Text}',eventId={tag.eventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
-                $",boolTrigger='{tag.boolTrigger}',analogTrigger='{tag.analogTrigger}',analogValue={tag.analogValue} " +
+                $",boolTrigger='{tag.boolTrigger}',analogTrigger='{tag.analogTrigger}',analogValue={tag.analogValue}, " +
                 $"scaleMin={txtScaleMin.Text},scaleMax={txtScaleMax.Text},scaleOffset={txtScaleOffset.Text}" +
                 $" WHERE id = {tag.id}";
 

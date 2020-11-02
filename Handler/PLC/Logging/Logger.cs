@@ -53,20 +53,19 @@ namespace OptimaValue
         public static void Start()
         {
             if (!PlcConfig.PlcList.Any(x => x.Active))
+            {
+                Apps.Logger.Log("Inga aktiva Plc", Severity.Error);
                 return;
+            }
+
 
             RestartTimer.Elapsed -= RestartTimer_Elapsed;
             RestartTimer.Elapsed += RestartTimer_Elapsed;
 
-            if (logThread != null)
-                logThread = null;
-
-            logThread = new Thread(Cycler);
-            logThread.Start();
 
             foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
             {
-                if (MyPlc.Active)
+                if (MyPlc.Active && MyPlc.ActiveTagsInPlc)
                 {
                     MyPlc.LoggerIsStarted = true;
                     StartStopButtonEvent.RaiseMessage(true);
@@ -74,6 +73,17 @@ namespace OptimaValue
                         OnStartedEvent(EventArgs.Empty);
                 }
             }
+            if (PlcConfig.PlcList.Any(p => !p.ActiveTagsInPlc))
+            {
+                Apps.Logger.Log("Inga aktiva taggar", Severity.Error);
+                return;
+            }
+
+            if (logThread != null)
+                logThread = null;
+
+            logThread = new Thread(Cycler);
+            logThread.Start();
 
         }
 

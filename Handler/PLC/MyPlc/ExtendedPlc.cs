@@ -1,6 +1,7 @@
 ﻿using S7.Net;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Threading;
 
 namespace OptimaValue
@@ -54,6 +55,21 @@ namespace OptimaValue
 
         #endregion
 
+        public bool ActiveTagsInPlc
+        {
+            get
+            {
+                if (TagsToLog.AllLogValues.Count == 0)
+                    return false;
+                else
+                {
+                    if (TagsToLog.AllLogValues.Any(t => t.plcName.Equals(PlcName) && t.active))
+                        return true;
+                    else
+                        return false;
+                }
+            }
+        }
 
         public bool Active = false;
         public int Id = 0;
