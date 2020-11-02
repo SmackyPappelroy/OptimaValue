@@ -52,12 +52,11 @@ namespace OptimaValue
 
         public static void Start()
         {
-            if (!PlcConfig.PlcList.Any(x => x.Active))
+            if (!PlcConfig.PlcList.Any(x => x.Active && x.ActiveTagsInPlc))
             {
-                Apps.Logger.Log("Inga aktiva Plc", Severity.Error);
+                Apps.Logger.Log("Inga aktiva Plc eller aktiva taggar", Severity.Error);
                 return;
             }
-
 
             RestartTimer.Elapsed -= RestartTimer_Elapsed;
             RestartTimer.Elapsed += RestartTimer_Elapsed;
@@ -72,11 +71,6 @@ namespace OptimaValue
                     if (!AppIsShuttingDown)
                         OnStartedEvent(EventArgs.Empty);
                 }
-            }
-            if (PlcConfig.PlcList.Any(p => !p.ActiveTagsInPlc))
-            {
-                Apps.Logger.Log("Inga aktiva taggar", Severity.Error);
-                return;
             }
 
             if (logThread != null)
@@ -299,6 +293,8 @@ namespace OptimaValue
                     OnlineStatusEvent.RaiseMessage(MyPlc.ConnectionStatus, MyPlc.PlcName);
                     MyPlc.LoggerIsStarted = false;
                 }
+                else
+                    MyPlc.ConnectionStatus = ConnectionStatus.Disconnected;
             }
 
 
