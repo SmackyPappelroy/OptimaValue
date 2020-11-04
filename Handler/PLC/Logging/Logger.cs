@@ -276,8 +276,6 @@ namespace OptimaValue
 
         private static void AbortLogThread(string message)
         {
-
-
             foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
             {
                 if (MyPlc.LoggerIsStarted)
@@ -1027,7 +1025,7 @@ namespace OptimaValue
                         catch (PlcException ex)
                         {
                             MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
-                            Apps.Logger.Log(ex.Message, Severity.Error, ex);
+                            Apps.Logger.Log($"Misslyckades att läsa {logTag.name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);
                             logTag.NrFailedReadAttempts++;
                             MyPlc.ConnectionStatus = ConnectionStatus.Disconnected;
                             logTag.LastErrorMessage = ex.Message;

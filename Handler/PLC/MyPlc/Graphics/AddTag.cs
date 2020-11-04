@@ -580,6 +580,34 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void comboLogType_SelectedIndexChanged(object sender, EventArgs e)
         {
+            switch (comboLogType.SelectedItem.ToString())
+            {
+                case "Cyclic":
+                    lblTime.Visible = false;
+                    txtTimeOfDay.Visible = false;
+
+                    lblDeadband.Visible = false;
+                    txtDeadband.Visible = false;
+                    break;
+                case "Delta":
+                    lblTime.Visible = false;
+                    txtTimeOfDay.Visible = false;
+
+                    lblDeadband.Visible = true;
+                    txtDeadband.Visible = true;
+                    break;
+                case "TimeOfDay":
+                    lblTime.Visible = true;
+                    txtTimeOfDay.Visible = true;
+
+                    lblDeadband.Visible = false;
+                    txtDeadband.Visible = false;
+                    break;
+                default:
+                    break;
+            }
+
+
             if (startup)
             {
                 startup = false;
@@ -602,6 +630,65 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 }
             }
         }
+        private void comboVarType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboVarType.SelectedItem.ToString())
+            {
+                case "Bit":
+                    lblScaleMax.Visible = false;
+                    txtScaleMax.Visible = false;
+
+                    lblScaleMin.Visible = false;
+                    txtScaleMin.Visible = false;
+
+                    lblScaleOffset.Visible = false;
+                    txtScaleOffset.Visible = false;
+
+                    lblBitAddress.Visible = true;
+                    txtBitAddress.Visible = true;
+                    break;
+                case "String":
+                    lblScaleMax.Visible = false;
+                    txtScaleMax.Visible = false;
+
+                    lblScaleMin.Visible = false;
+                    txtScaleMin.Visible = false;
+
+                    lblScaleOffset.Visible = false;
+                    txtScaleOffset.Visible = false;
+
+                    lblBitAddress.Visible = false;
+                    txtBitAddress.Visible = false;
+                    break;
+                case "StringEx":
+                    lblScaleMax.Visible = false;
+                    txtScaleMax.Visible = false;
+
+                    lblScaleMin.Visible = false;
+                    txtScaleMin.Visible = false;
+
+                    lblScaleOffset.Visible = false;
+                    txtScaleOffset.Visible = false;
+
+                    lblBitAddress.Visible = false;
+                    txtBitAddress.Visible = false;
+                    break;
+                default:
+                    lblScaleMax.Visible = true;
+                    txtScaleMax.Visible = true;
+
+                    lblScaleMin.Visible = true;
+                    txtScaleMin.Visible = true;
+
+                    lblScaleOffset.Visible = true;
+                    txtScaleOffset.Visible = true;
+
+                    lblBitAddress.Visible = true;
+                    txtBitAddress.Visible = true;
+                    break;
+            }
+        }
+
 
         private void EventForm_SaveEvent(object sender, SaveEventArgs e)
         {
