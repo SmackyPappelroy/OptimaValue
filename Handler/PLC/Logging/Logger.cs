@@ -195,9 +195,12 @@ namespace OptimaValue
                 foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
                 {
                     if (MyPlc.IsConnected && MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.Active)
+                    {
                         foreach (TagDefinitions logValue in TagsToLog.AllLogValues)
                             if (logValue.plcName.Equals(MyPlc.PlcName))
                                 ReadValue(MyPlc, logValue);
+
+                    }
                     if (startClosing)
                     {
                         AbortLogThread(string.Empty);
@@ -207,6 +210,7 @@ namespace OptimaValue
                 Thread.Sleep(sleepTime);
             }
         }
+
 
         /// <summary>
         /// Synkronisera PLC-klockan en gång om dagen

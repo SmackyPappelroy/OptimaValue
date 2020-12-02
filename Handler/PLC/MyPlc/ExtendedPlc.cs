@@ -8,6 +8,28 @@ namespace OptimaValue
 {
     public class ExtendedPlc : Plc
     {
+
+
+        #region Constructor
+        public ExtendedPlc(CpuType cpu, string ip, short rack, short slot) : base(cpu, ip, rack, slot)
+        {
+            SubscribeEvents(true);
+            timerPing.Interval = new TimeSpan(0, 0, 10);
+            onlineTimer.Tick += OnlineTimer_Tick;
+            // TODO: Måste plockas bort
+            //logger = new Logger(this);
+        }
+        #endregion
+
+        private void OnlineTimer_Tick(object sender, EventArgs e)
+        {
+            if (this != null)
+                this.SendPlcOnlineMessage(this.ConnectionStatus, this.UpTimeString);
+            else
+                this.SendPlcOnlineMessage(ConnectionStatus.Disconnected, string.Empty);
+        }
+
+
         #region Messages
         public string ExternalStatusMessage = string.Empty;
         public Status ExternalStatus = Status.Ok;
@@ -140,24 +162,7 @@ namespace OptimaValue
         }
         #endregion
 
-        #region Constructor
-        public ExtendedPlc(CpuType cpu, string ip, short rack, short slot) : base(cpu, ip, rack, slot)
-        {
-            SubscribeEvents(true);
-            timerPing.Interval = new TimeSpan(0, 0, 10);
-            onlineTimer.Tick += OnlineTimer_Tick;
-            // TODO: Måste plockas bort
-            //logger = new Logger(this);
-        }
 
-        private void OnlineTimer_Tick(object sender, EventArgs e)
-        {
-            if (this != null)
-                this.SendPlcOnlineMessage(this.ConnectionStatus, this.UpTimeString);
-            else
-                this.SendPlcOnlineMessage(ConnectionStatus.Disconnected, string.Empty);
-        }
-        #endregion
 
         #region Events
         private void SubscribeEvents(bool subscribeToEvents)

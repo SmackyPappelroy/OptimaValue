@@ -17,5 +17,11 @@
     <Setting Name="Password" Type="System.String" Scope="User">
       <Value Profile="(Default)">sa</Value>
     </Setting>
+    <Setting Name="CipDatabas" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Cip</Value>
+    </Setting>
+    <Setting Name="ConnectionStringCip" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

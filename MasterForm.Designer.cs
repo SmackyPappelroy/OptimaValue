@@ -86,7 +86,7 @@
             this.treeView.ForeColor = System.Drawing.Color.Black;
             this.treeView.ImageIndex = 0;
             this.treeView.ImageList = this.imageList;
-            this.treeView.Location = new System.Drawing.Point(3, 111);
+            this.treeView.Location = new System.Drawing.Point(3, 101);
             this.treeView.Name = "treeView";
             treeNode1.ContextMenuStrip = this.addPlcMenu;
             treeNode1.Name = "Optima";
@@ -94,7 +94,7 @@
             this.treeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
             treeNode1});
             this.treeView.SelectedImageIndex = 0;
-            this.treeView.Size = new System.Drawing.Size(294, 607);
+            this.treeView.Size = new System.Drawing.Size(294, 555);
             this.treeView.TabIndex = 0;
             this.treeView.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.treeView_MouseDoubleClick);
             // 
@@ -110,6 +110,7 @@
             this.imageList.Images.SetKeyName(5, "status");
             this.imageList.Images.SetKeyName(6, "tags_16px.png");
             this.imageList.Images.SetKeyName(7, "icons8_gas_running_16.png");
+            this.imageList.Images.SetKeyName(8, "cipStation.png");
             // 
             // contentPanel
             // 
@@ -191,7 +192,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(294, 102);
+            this.panel1.Size = new System.Drawing.Size(294, 92);
             this.panel1.TabIndex = 3;
             // 
             // btnStart
@@ -206,7 +207,7 @@
             this.btnStart.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnStart.Location = new System.Drawing.Point(0, 0);
             this.btnStart.Name = "btnStart";
-            this.btnStart.Size = new System.Drawing.Size(94, 102);
+            this.btnStart.Size = new System.Drawing.Size(94, 92);
             this.btnStart.TabIndex = 9;
             this.btnStart.UseVisualStyleBackColor = false;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
@@ -222,7 +223,7 @@
             this.btnStop.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnStop.Location = new System.Drawing.Point(190, 0);
             this.btnStop.Name = "btnStop";
-            this.btnStop.Size = new System.Drawing.Size(104, 102);
+            this.btnStop.Size = new System.Drawing.Size(104, 92);
             this.btnStop.TabIndex = 8;
             this.btnStop.UseVisualStyleBackColor = true;
             this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
@@ -238,7 +239,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 85F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(300, 721);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(300, 659);
             this.tableLayoutPanel1.TabIndex = 4;
             // 
             // tableLayoutPanel2
@@ -266,7 +267,7 @@
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Padding = new System.Windows.Forms.Padding(4, 1, 0, 1);
-            this.menuStrip.Size = new System.Drawing.Size(1057, 24);
+            this.menuStrip.Size = new System.Drawing.Size(1053, 24);
             this.menuStrip.TabIndex = 6;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -322,7 +323,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(1057, 690);
+            this.ClientSize = new System.Drawing.Size(1053, 690);
             this.Controls.Add(this.menuStrip);
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.tableLayoutPanel1);
@@ -330,7 +331,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(1077, 785);
+            this.MaximumSize = new System.Drawing.Size(1073, 773);
             this.Name = "MasterForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Optima Value";

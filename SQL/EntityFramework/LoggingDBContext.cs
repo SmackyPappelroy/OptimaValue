@@ -11,7 +11,6 @@ namespace OptimaValue
         public DbSet<tagConfig> tagConfig { get; set; }
 
         public LoggingDBContext() : base(SqlSettings.Default.ConnectionString)
-
         {
         }
 

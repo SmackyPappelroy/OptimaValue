@@ -5,6 +5,7 @@ using S7.Net;
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OptimaValue
@@ -195,7 +196,8 @@ namespace OptimaValue
             {
                 node.Nodes.Clear();
             }
-            var tbl = PlcConfig.PopulateDataTable();
+            var temp = Task.Run(() => PlcConfig.PopulateDataTable());
+            var tbl = temp.Result;
             if (tbl == null)
                 return;
             if (tbl.Rows.Count == 0)
@@ -264,6 +266,7 @@ namespace OptimaValue
                 ImageIndex = 6,
                 SelectedImageIndex = 6
             };
+
 
             var plcNode = new TreeNode(plcLabel, new TreeNode[] { configurationNode, statusNode, tagNode })
             {
@@ -357,8 +360,6 @@ namespace OptimaValue
             {
                 activePlc = PlcConfig.PlcList.Find(x => x.PlcName == treeView.SelectedNode.Parent.Text);
 
-
-
                 if (activePlc == null)
                     return;
 
@@ -380,8 +381,8 @@ namespace OptimaValue
                 if (tagControl != null)
                     tagControl.Hide();
                 tagControl = null;
-
             }
+
         }
         #endregion
 
@@ -607,5 +608,7 @@ namespace OptimaValue
             Settings.Default.notify = notifyMenu.Checked;
             Settings.Default.Save();
         }
+
+
     }
 }

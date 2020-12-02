@@ -12,7 +12,7 @@ namespace OptimaValue {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.6.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.7.0.0")]
     internal sealed partial class SqlSettings : global::System.Configuration.ApplicationSettingsBase {
         
         private static SqlSettings defaultInstance = ((SqlSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new SqlSettings())));
@@ -80,6 +80,30 @@ namespace OptimaValue {
             }
             set {
                 this["Password"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Cip")]
+        public string CipDatabas {
+            get {
+                return ((string)(this["CipDatabas"]));
+            }
+            set {
+                this["CipDatabas"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string ConnectionStringCip {
+            get {
+                return ((string)(this["ConnectionStringCip"]));
+            }
+            set {
+                this["ConnectionStringCip"] = value;
             }
         }
     }

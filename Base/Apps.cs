@@ -1,4 +1,5 @@
-﻿namespace OptimaValue
+﻿
+namespace OptimaValue
 {
     public static class Apps
     {

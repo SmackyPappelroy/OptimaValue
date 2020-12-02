@@ -64,6 +64,17 @@ namespace OptimaValue
         }
 
         /// <summary>
+        /// Creates a SQL connection string to Cip log
+        /// </summary>
+        /// <returns>A connection string</returns>
+        public static string ConnectionStringCip()
+        {
+            SqlSettings.Default.ConnectionString = ($"Server={@SqlSettings.Default.Server};Database={SqlSettings.Default.CipDatabas};User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
+            SqlSettings.Default.Save();
+            return SqlSettings.Default.ConnectionString;
+        }
+
+        /// <summary>
         /// Deletes all rows from dbo.plcConfig table
         /// </summary>
         /// <returns>True if successfull</returns>
@@ -178,6 +189,11 @@ namespace OptimaValue
                 return true;
             else
                 return false;
+        }
+
+        public static ExtendedPlc FindPlc(int plcId)
+        {
+            return PlcList.Find(p => p.Id == plcId);
         }
         #endregion
     }

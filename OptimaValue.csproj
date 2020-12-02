@@ -67,8 +67,11 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.1.1.1\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.Bcl.AsyncInterfaces.5.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="S7.Net, Version=0.7.0.0, Culture=neutral, PublicKeyToken=d5812d469e84c693, processorArchitecture=MSIL">
       <HintPath>packages\S7netplus.0.7.0\lib\net452\S7.Net.dll</HintPath>
@@ -76,8 +79,8 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.4.7.1\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>packages\System.Runtime.CompilerServices.Unsafe.5.0.0\lib\net45\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
@@ -151,6 +154,18 @@
     </Compile>
     <Compile Include="Handler\PLC\MyPlc\Graphics\EventForm.Designer.cs">
       <DependentUpon>EventForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handler\PLC\MyPlc\Graphics\Parameters\paramaterComboControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Handler\PLC\MyPlc\Graphics\Parameters\paramaterComboControl.Designer.cs">
+      <DependentUpon>paramaterComboControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Handler\PLC\MyPlc\Graphics\Parameters\parameterTextControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Handler\PLC\MyPlc\Graphics\Parameters\parameterTextControl.Designer.cs">
+      <DependentUpon>parameterTextControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Handler\PLC\MyPlc\Graphics\PlcSettingsControl.cs">
       <SubType>UserControl</SubType>
@@ -244,6 +259,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\EventForm.resx">
       <DependentUpon>EventForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\Parameters\paramaterComboControl.resx">
+      <DependentUpon>paramaterComboControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\Parameters\parameterTextControl.resx">
+      <DependentUpon>parameterTextControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Handler\PLC\MyPlc\Graphics\PlcSettingsControl.resx">
       <DependentUpon>PlcSettingsControl.cs</DependentUpon>
