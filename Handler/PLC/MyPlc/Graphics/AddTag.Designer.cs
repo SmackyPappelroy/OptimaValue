@@ -37,8 +37,6 @@
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.checkActive = new System.Windows.Forms.CheckBox();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.paraName = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
             this.paraLogType = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
             this.paraLogTime = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
@@ -54,6 +52,8 @@
             this.paraBitAddress = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
             this.paraFreq = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
             this.paraUnit = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
+            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -152,23 +152,6 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(873, 550);
             this.flowLayoutPanel1.TabIndex = 1;
             // 
-            // flowLayoutPanel2
-            // 
-            this.flowLayoutPanel2.Controls.Add(this.flowLayoutPanel1);
-            this.flowLayoutPanel2.Controls.Add(this.tableLayoutPanel1);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(1, 40);
-            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(841, 659);
-            this.flowLayoutPanel2.TabIndex = 2;
-            // 
-            // flowLayoutPanel3
-            // 
-            this.flowLayoutPanel3.Controls.Add(this.checkActive);
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(1, 2);
-            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(132, 32);
-            this.flowLayoutPanel3.TabIndex = 3;
-            // 
             // paraName
             // 
             this.paraName.BackColor = System.Drawing.Color.Transparent;
@@ -240,7 +223,7 @@
         "DInt",
         "Real",
         "String",
-        "StringEx",
+        "S7String",
         "Timer",
         "Counter",
         "DateTime",
@@ -408,6 +391,23 @@
             this.paraUnit.Size = new System.Drawing.Size(409, 56);
             this.paraUnit.TabIndex = 65;
             this.paraUnit.Validating += new System.ComponentModel.CancelEventHandler(this.txtUnit_Validating);
+            // 
+            // flowLayoutPanel2
+            // 
+            this.flowLayoutPanel2.Controls.Add(this.flowLayoutPanel1);
+            this.flowLayoutPanel2.Controls.Add(this.tableLayoutPanel1);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(1, 40);
+            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(841, 659);
+            this.flowLayoutPanel2.TabIndex = 2;
+            // 
+            // flowLayoutPanel3
+            // 
+            this.flowLayoutPanel3.Controls.Add(this.checkActive);
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(1, 2);
+            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(132, 32);
+            this.flowLayoutPanel3.TabIndex = 3;
             // 
             // AddTag
             // 

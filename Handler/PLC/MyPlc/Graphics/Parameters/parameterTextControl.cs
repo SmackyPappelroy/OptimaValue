@@ -24,8 +24,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters
                     PropertyNamn = propertyNamn;
                 }
             }
-
-
+        }
+        public parameterTextControl()
+        {
+            InitializeComponent();
         }
 
         private void SetProperty(object tag, string propertyName, object value)

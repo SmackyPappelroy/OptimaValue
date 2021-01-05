@@ -222,7 +222,7 @@ namespace OptimaValue
                         sql.value = raw.unknownTag.ToString();
                         SqlValues.Add(sql);
                         break;
-                    case VarType.StringEx:
+                    case VarType.S7String:
                         sql.numericValue = 0;
                         sql.value = raw.unknownTag.ToString();
                         SqlValues.Add(sql);

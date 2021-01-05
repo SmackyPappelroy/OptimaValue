@@ -331,10 +331,10 @@ namespace OptimaValue
                                 if (tiden > MyPlc.lastSyncTime + TimeSpan.FromDays(1) && MyPlc.SyncActive)
                                     SyncPlc(MyPlc, tiden);
 
-                                if (logTag.varType == VarType.StringEx)
+                                if (logTag.varType == VarType.S7String)
                                 {
                                     var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements + 2);
-                                    unknownTag = S7.Net.Types.StringEx.FromByteArray(temp);
+                                    unknownTag = S7.Net.Types.S7String.FromByteArray(temp);
                                 }
                                 else if (logTag.varType == VarType.String)
                                 {
@@ -434,7 +434,7 @@ namespace OptimaValue
                                                 if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
                                                     AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
                                                 break;
-                                            case VarType.StringEx:
+                                            case VarType.S7String:
                                                 if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
                                                     AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
                                                 break;
@@ -549,7 +549,7 @@ namespace OptimaValue
                                                     AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
                                                 }
                                                 break;
-                                            case VarType.StringEx:
+                                            case VarType.S7String:
                                                 if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
                                                 {
                                                     AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
@@ -689,7 +689,7 @@ namespace OptimaValue
                                                                 break;
                                                             case VarType.String:
                                                                 break;
-                                                            case VarType.StringEx:
+                                                            case VarType.S7String:
                                                                 break;
                                                             case VarType.Timer:
                                                                 break;
@@ -750,7 +750,7 @@ namespace OptimaValue
                                                                 break;
                                                             case VarType.String:
                                                                 break;
-                                                            case VarType.StringEx:
+                                                            case VarType.S7String:
                                                                 break;
                                                             case VarType.Timer:
                                                                 break;
@@ -811,7 +811,7 @@ namespace OptimaValue
                                                                 break;
                                                             case VarType.String:
                                                                 break;
-                                                            case VarType.StringEx:
+                                                            case VarType.S7String:
                                                                 break;
                                                             case VarType.Timer:
                                                                 break;
@@ -872,7 +872,7 @@ namespace OptimaValue
                                                                 break;
                                                             case VarType.String:
                                                                 break;
-                                                            case VarType.StringEx:
+                                                            case VarType.S7String:
                                                                 break;
                                                             case VarType.Timer:
                                                                 break;
@@ -933,7 +933,7 @@ namespace OptimaValue
                                                                 break;
                                                             case VarType.String:
                                                                 break;
-                                                            case VarType.StringEx:
+                                                            case VarType.S7String:
                                                                 break;
                                                             case VarType.Timer:
                                                                 break;
@@ -994,7 +994,7 @@ namespace OptimaValue
                                                                 break;
                                                             case VarType.String:
                                                                 break;
-                                                            case VarType.StringEx:
+                                                            case VarType.S7String:
                                                                 break;
                                                             case VarType.Timer:
                                                                 break;

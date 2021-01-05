@@ -54,7 +54,7 @@
             this.lblText.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.lblText.Name = "lblText";
             this.lblText.Padding = new System.Windows.Forms.Padding(2, 0, 0, 3);
-            this.lblText.Size = new System.Drawing.Size(102, 33);
+            this.lblText.Size = new System.Drawing.Size(70, 24);
             this.lblText.TabIndex = 4;
             this.lblText.Text = "Header";
             // 
@@ -62,14 +62,14 @@
             // 
             this.txtParameter.Dock = System.Windows.Forms.DockStyle.Left;
             this.txtParameter.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtParameter.Location = new System.Drawing.Point(3, 36);
+            this.txtParameter.Location = new System.Drawing.Point(3, 27);
             this.txtParameter.Name = "txtParameter";
-            this.txtParameter.Size = new System.Drawing.Size(400, 31);
+            this.txtParameter.Size = new System.Drawing.Size(400, 23);
             this.txtParameter.TabIndex = 5;
             // 
             // parameterTextControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(14F, 30F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 21F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Transparent;
             this.Controls.Add(this.flowLayoutPanel1);
