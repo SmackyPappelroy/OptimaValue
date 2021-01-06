@@ -73,8 +73,8 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="S7.Net, Version=0.8.0.0, Culture=neutral, PublicKeyToken=d5812d469e84c693, processorArchitecture=MSIL">
-      <HintPath>packages\S7netplus.0.8.0\lib\net452\S7.Net.dll</HintPath>
+    <Reference Include="S7.Net, Version=0.8.1.0, Culture=neutral, PublicKeyToken=d5812d469e84c693, processorArchitecture=MSIL">
+      <HintPath>packages\S7netplus.0.8.1\lib\net452\S7.Net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
