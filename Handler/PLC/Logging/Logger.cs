@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-
+using System.Threading.Tasks;
 
 namespace OptimaValue
 {
@@ -33,7 +33,9 @@ namespace OptimaValue
 
         private static List<LastValue> lastLogValue;
 
-        private static Thread logThread;
+        private static Task logTask;
+        private static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+
 
         private static System.Timers.Timer onlineTimer;
 
@@ -73,12 +75,29 @@ namespace OptimaValue
                 }
             }
 
-            if (logThread != null)
-                logThread = null;
+            StartTask();
 
-            logThread = new Thread(Cycler);
-            logThread.Start();
+        }
 
+        private static void StartTask()
+        {
+            logTask = Task.Run(async () =>
+            {
+                await Cycler(cancelTokenSource.Token).ConfigureAwait(false);
+            }, cancelTokenSource.Token)
+                .ContinueWith(t =>
+                {
+                    t.Exception?.Handle(e => true);
+                    AbortLogThread(string.Empty);
+                    Console.WriteLine("You have canceled the task");
+                    cancelTokenSource = new CancellationTokenSource();
+                }, TaskContinuationOptions.OnlyOnCanceled);
+        }
+
+        public static void RequestDisconnect()
+        {
+            if (logTask != null && !cancelTokenSource.IsCancellationRequested)
+                cancelTokenSource.Cancel();
         }
 
         private static void RestartTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -94,7 +113,7 @@ namespace OptimaValue
             startClosing = true;
         }
 
-        private static void Cycler()
+        private static async Task Cycler(CancellationToken ct)
         {
 
             if (onlineTimer == null)
@@ -113,7 +132,7 @@ namespace OptimaValue
                         if (!plc.IsConnected)
                         {
                             Apps.Logger.Log($"Får ej kontakt med {plc.PlcName}", Severity.Error);
-                            AbortLogThread(string.Empty);
+                            RequestDisconnect();
                         }
                         else
                         {
@@ -127,7 +146,8 @@ namespace OptimaValue
                 catch (PlcException ex)
                 {
                     Apps.Logger.Log($"Lyckas ej ansluta till {plc.PlcName}", Severity.Error, ex);
-                    AbortLogThread(string.Empty);
+                    RequestDisconnect();
+
                 }
             }
 
@@ -203,11 +223,12 @@ namespace OptimaValue
                     }
                     if (startClosing)
                     {
-                        AbortLogThread(string.Empty);
+                        RequestDisconnect();
+
                     }
                 }
-                int sleepTime = (int)((float)FastestLogTime * 0.125f);
-                Thread.Sleep(sleepTime);
+                await Task.Delay((int)((float)FastestLogTime * 0.125f));
+                ct.ThrowIfCancellationRequested();
             }
         }
 
@@ -303,7 +324,7 @@ namespace OptimaValue
             startClosing = false;
             if (lastLogValue != null)
                 lastLogValue.Clear();
-            logThread.Abort();
+
         }
 
         private static void ReadValue(ExtendedPlc MyPlc, TagDefinitions logTag)

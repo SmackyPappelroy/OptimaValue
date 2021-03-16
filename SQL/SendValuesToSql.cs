@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace OptimaValue
 {
@@ -12,7 +13,9 @@ namespace OptimaValue
     {
         public static ConcurrentBag<rawValueClass> rawValueBlock;
 
-        private static Thread sqlThread;
+        private static Task sqlTask;
+        private static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+
         private static readonly object addBlock = new object();
 
         private static List<LogValuesSql> SqlValues;
@@ -22,18 +25,20 @@ namespace OptimaValue
 
         public static void StartSql()
         {
-            if (sqlThread == null)
-                sqlThread = new Thread(SqlCycler);
-            else if (sqlThread.ThreadState != ThreadState.Running)
+            sqlTask = Task.Run(async () =>
             {
-                sqlThread = null;
-                sqlThread = new Thread(SqlCycler);
-            }
-            if (sqlThread.ThreadState != ThreadState.Running)
-                sqlThread.Start();
+                await SqlCycler(cancelTokenSource.Token).ConfigureAwait(false);
+            }, cancelTokenSource.Token)
+                .ContinueWith(t =>
+                {
+                    t.Exception?.Handle(e => true);
+                    AbortSqlThread();
+                    Console.WriteLine("You have canceled the task");
+                    cancelTokenSource = new CancellationTokenSource();
+                }, TaskContinuationOptions.OnlyOnCanceled);
         }
 
-        private static void SqlCycler()
+        private static async Task SqlCycler(CancellationToken cancellationToken)
         {
             if (rawValueInternal == null)
                 rawValueInternal = new List<rawValueClass>();
@@ -58,10 +63,17 @@ namespace OptimaValue
                     lastLogTime = tiden;
                 }
                 if (Master.AbortSqlLog)
-                    AbortSqlThread();
+                    RequestDisconnect();
 
-                Thread.Sleep(50);
+                await Task.Delay(50);
+                cancellationToken.ThrowIfCancellationRequested();
             }
+        }
+
+        public static void RequestDisconnect()
+        {
+            if (sqlTask != null && !cancelTokenSource.IsCancellationRequested)
+                cancelTokenSource.Cancel();
         }
 
         private static void AbortSqlThread()
@@ -74,7 +86,6 @@ namespace OptimaValue
                 Thread.Sleep(10);
             }
             Master.AbortSqlLog = false;
-            sqlThread.Abort();
         }
 
         public static int MapValue()

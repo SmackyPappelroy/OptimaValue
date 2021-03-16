@@ -2,7 +2,6 @@
 using System;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Threading;
 
 namespace OptimaValue
 {
@@ -14,7 +13,7 @@ namespace OptimaValue
         public ExtendedPlc(CpuType cpu, string ip, short rack, short slot) : base(cpu, ip, rack, slot)
         {
             SubscribeEvents(true);
-            timerPing.Interval = new TimeSpan(0, 0, 10);
+            timerPing.Interval = 10;
             onlineTimer.Tick += OnlineTimer_Tick;
             // TODO: Måste plockas bort
             //logger = new Logger(this);
@@ -50,7 +49,7 @@ namespace OptimaValue
 
         #region Properties
         private DateTime UpTimeStart = DateTime.MaxValue;
-        private readonly DispatcherTimer timerPing = new DispatcherTimer();
+        private readonly System.Timers.Timer timerPing = new System.Timers.Timer();
         private bool isSubscribed = false;
 
         #region Logging
@@ -169,14 +168,14 @@ namespace OptimaValue
         {
             if (!isSubscribed && subscribeToEvents)
             {
-                timerPing.Tick += TimerPing_Tick;
+                timerPing.Elapsed += TimerPing_Tick;
                 PlcStatusEvent.NewMessage += PlcStatusEvent_NewMessage;
                 OnlineStatusEvent.NewMessage += OnlineStatusEvent_NewMessage;
                 isSubscribed = true;
             }
             else if (isSubscribed && !subscribeToEvents)
             {
-                timerPing.Tick -= TimerPing_Tick;
+                timerPing.Elapsed -= TimerPing_Tick;
                 PlcStatusEvent.NewMessage -= PlcStatusEvent_NewMessage;
                 OnlineStatusEvent.NewMessage -= OnlineStatusEvent_NewMessage;
                 isSubscribed = false;
