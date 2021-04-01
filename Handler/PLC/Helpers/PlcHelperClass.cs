@@ -1,4 +1,5 @@
-﻿using System;
+﻿using S7.Net;
+using System;
 using System.Linq;
 
 namespace OptimaValue
@@ -66,6 +67,68 @@ namespace OptimaValue
                 WeekDay = (byte)(dt.DayOfWeek + 1),
             };
             return dtl;
+        }
+
+        public static string S7StringSwedish(this byte[] bytes)
+        {
+            {
+                if (bytes.Length < 2)
+                {
+                    throw new PlcException(ErrorCode.ReadData, "Malformed S7 String / too short");
+                }
+
+                int size = bytes[0];
+                int length = bytes[1];
+                if (length > size)
+                {
+                    throw new PlcException(ErrorCode.ReadData, "Malformed S7 String / length larger than capacity");
+                }
+
+                try
+                {
+                    char[] chars = new char[length];
+                    for (int i = 2; i < length + 2; i++)
+                    {
+                        chars[i - 2] = Convert.ToChar(bytes[i]);
+                    }
+                    return new string(chars);
+                }
+                catch (Exception e)
+                {
+                    throw new PlcException(ErrorCode.ReadData,
+                        $"Failed to parse {VarType.S7String} from data. Following fields were read: size: '{size}', actual length: '{length}', total number of bytes (including header): '{bytes.Length}'.",
+                        e);
+                }
+
+            }
+        }
+
+        public static string StringSwedish(this byte[] bytes)
+        {
+            {
+                if (bytes.Length < 1)
+                {
+                    throw new PlcException(ErrorCode.ReadData, "Malformed S7 String / too short");
+                }
+
+
+                try
+                {
+                    char[] chars = new char[bytes.Count()];
+                    for (int i = 0; i < bytes.Count() - 1; i++)
+                    {
+                        chars[i] = Convert.ToChar(bytes[i]);
+                    }
+                    return new string(chars);
+                }
+                catch (Exception e)
+                {
+                    throw new PlcException(ErrorCode.ReadData,
+                        $"Failed to parse {VarType.S7String} from data. ",
+                        e);
+                }
+
+            }
         }
     }
 }

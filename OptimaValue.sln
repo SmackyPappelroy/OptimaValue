@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimaValue", "OptimaValue.csproj", "{31ECA409-EF3C-47C6-BEA7-E214A0445F38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue", "OptimaValue.csproj", "{31ECA409-EF3C-47C6-BEA7-E214A0445F38}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "OptimaValueInstaller", "..\OptimaValueInstaller\OptimaValueInstaller.vdproj", "{E3DDD5B8-61BF-4198-AF0C-7940D55AF276}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup", "..\Setup\Setup.vdproj", "{F8EBF6D6-860F-4D99-8185-DCDE24733CF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,12 +23,10 @@ Global
 		{31ECA409-EF3C-47C6-BEA7-E214A0445F38}.Release|Any CPU.Build.0 = Release|Any CPU
 		{31ECA409-EF3C-47C6-BEA7-E214A0445F38}.Release|x64.ActiveCfg = Release|x64
 		{31ECA409-EF3C-47C6-BEA7-E214A0445F38}.Release|x64.Build.0 = Release|x64
-		{E3DDD5B8-61BF-4198-AF0C-7940D55AF276}.Debug|Any CPU.ActiveCfg = Debug
-		{E3DDD5B8-61BF-4198-AF0C-7940D55AF276}.Debug|x64.ActiveCfg = Debug
-		{E3DDD5B8-61BF-4198-AF0C-7940D55AF276}.Debug|x64.Build.0 = Debug
-		{E3DDD5B8-61BF-4198-AF0C-7940D55AF276}.Release|Any CPU.ActiveCfg = Release
-		{E3DDD5B8-61BF-4198-AF0C-7940D55AF276}.Release|x64.ActiveCfg = Release
-		{E3DDD5B8-61BF-4198-AF0C-7940D55AF276}.Release|x64.Build.0 = Release
+		{F8EBF6D6-860F-4D99-8185-DCDE24733CF0}.Debug|Any CPU.ActiveCfg = Debug
+		{F8EBF6D6-860F-4D99-8185-DCDE24733CF0}.Debug|x64.ActiveCfg = Debug
+		{F8EBF6D6-860F-4D99-8185-DCDE24733CF0}.Release|Any CPU.ActiveCfg = Release
+		{F8EBF6D6-860F-4D99-8185-DCDE24733CF0}.Release|x64.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -355,12 +355,12 @@ namespace OptimaValue
                                 if (logTag.varType == VarType.S7String)
                                 {
                                     var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements + 2);
-                                    unknownTag = S7.Net.Types.S7String.FromByteArray(temp);
+                                    unknownTag = temp.S7StringSwedish();
                                 }
                                 else if (logTag.varType == VarType.String)
                                 {
                                     var temp = MyPlc.ReadBytes(logTag.dataType, logTag.blockNr, logTag.startByte, logTag.nrOfElements);
-                                    unknownTag = S7.Net.Types.String.FromByteArray(temp);
+                                    unknownTag = temp.StringSwedish();
                                 }
                                 else if (logTag.varType == VarType.DateTime)
                                 {
