@@ -68,7 +68,8 @@ namespace OptimaValue
             {
                 txtStatus.Text = "Misslyckades att ansluta till Sql";
             }
-            PopulateTree();
+            else
+                PopulateTree();
         }
 
         private void MasterForm_FormClosing(object sender, FormClosingEventArgs e)
