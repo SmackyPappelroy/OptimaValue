@@ -12,7 +12,7 @@ namespace OptimaValue {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.7.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.10.0.0")]
     internal sealed partial class SqlSettings : global::System.Configuration.ApplicationSettingsBase {
         
         private static SqlSettings defaultInstance = ((SqlSettings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new SqlSettings())));

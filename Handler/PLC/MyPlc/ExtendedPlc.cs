@@ -7,16 +7,12 @@ namespace OptimaValue
 {
     public class ExtendedPlc : Plc
     {
-
-
         #region Constructor
         public ExtendedPlc(CpuType cpu, string ip, short rack, short slot) : base(cpu, ip, rack, slot)
         {
             SubscribeEvents(true);
-            timerPing.Interval = 10;
+            timerPing.Interval = 30 * 1000;
             onlineTimer.Tick += OnlineTimer_Tick;
-            // TODO: Måste plockas bort
-            //logger = new Logger(this);
         }
         #endregion
 
@@ -27,7 +23,6 @@ namespace OptimaValue
             else
                 this.SendPlcOnlineMessage(ConnectionStatus.Disconnected, string.Empty);
         }
-
 
         #region Messages
         public string ExternalStatusMessage = string.Empty;
@@ -52,6 +47,8 @@ namespace OptimaValue
         private readonly System.Timers.Timer timerPing = new System.Timers.Timer();
         private bool isSubscribed = false;
 
+        #endregion
+
         #region Logging
         private bool loggerIsStarted = false;
         public bool LoggerIsStarted
@@ -74,7 +71,6 @@ namespace OptimaValue
             Interval = 500,
         };
 
-        #endregion
 
         public bool ActiveTagsInPlc
         {
@@ -160,8 +156,6 @@ namespace OptimaValue
             }
         }
         #endregion
-
-
 
         #region Events
         private void SubscribeEvents(bool subscribeToEvents)
