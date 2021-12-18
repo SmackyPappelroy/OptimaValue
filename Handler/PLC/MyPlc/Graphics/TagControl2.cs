@@ -1,9 +1,13 @@
-﻿using OptimaValue.Handler.PLC.MyPlc.Graphics;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using OptimaValue.Handler.PLC.MyPlc.Graphics;
 using S7.Net;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -14,7 +18,7 @@ namespace OptimaValue
         private readonly string PlcName = string.Empty;
 
         private List<TagDefinitions> tags;
-        private readonly DataTable myTable = new DataTable();
+        private DataTable myTable = new DataTable();
         private readonly TreeView myTreeView;
         private AddTag addTagForm;
         private readonly ExtendedPlc myPlc;
@@ -22,6 +26,10 @@ namespace OptimaValue
         private AllTagsStatsForm statForm;
 
         private bool addMenuOpen = false;
+
+        private string fileName;
+
+        CsvConfiguration csvConfig;
 
         public TagControl2(ExtendedPlc activePlc, TreeView treeView)
         {
@@ -31,6 +39,38 @@ namespace OptimaValue
             myPlc = activePlc;
             if (activePlc.LoggerIsStarted)
                 contextMenuStrip.Enabled = false;
+
+            csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = ";"
+            };
+            this.flowLayoutPanel.AllowDrop = true;
+
+            this.flowLayoutPanel.DragEnter += TagControl2_DragEnter;
+            this.flowLayoutPanel.DragDrop += TagControl2_DragDrop;
+        }
+
+        private void TagControl2_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Copy;
+            else
+                e.Effect = DragDropEffects.None;
+        }
+
+        private void TagControl2_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] FileList = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+
+            fileName = FileList[0];
+
+            if (fileName.Substring(fileName.Length - 3) != "csv".ToLower())
+            {
+                Apps.Logger.Log("Fel fil-format", Severity.Error);
+                return;
+            }
+
+            ImportFile(fileName);
         }
 
 
@@ -222,6 +262,146 @@ namespace OptimaValue
             }
         }
 
+        private void click_Export(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "CSV File|*.csv";
+            save.Title = "Spara .CSV fil";
+            DialogResult result = save.ShowDialog();
+
+            if (save.FileName != "" && result == DialogResult.OK)
+            {
+                try
+                {
+                    using (var sw = new StreamWriter(save.FileName))
+                    {
+                        var wr = new CsvWriter(sw, csvConfig);
+
+                        wr.WriteRecords(tags);
+                        Apps.Logger.Log($"Sparade {myPlc.PlcName}s taggar till {save.FileName}", Severity.Success);
+                    }
+                }
+                catch (IOException ex)
+                {
+                    Apps.Logger.Log($"Lyckades ej spara {myPlc.PlcName}s taggar till {save.FileName}", Severity.Error);
+                }
+            }
+        }
+
+        private void click_Import(object sender, EventArgs e)
+        {
+            string file = "";
+            OpenFileDialog dialog = new OpenFileDialog();
+            DialogResult result = dialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                file = dialog.FileName;
+                ImportFile(file);
+            }
+        }
+
+        private void ImportFile(string fileName)
+        {
+            try
+            {
+                using (var sr = new StreamReader(fileName))
+                {
+                    using (var csvReader = new CsvReader(sr, csvConfig))
+                    {
+                        var records = csvReader.GetRecords<TagDefinitions>().ToList();
+                        AddTag(records);
+                        UpdateTag(records);
+                        Apps.Logger.Log($"Importerade {myPlc.PlcName}s taggar från {fileName}", Severity.Success);
+                    }
+                }
+
+            }
+            catch (IOException ex)
+            {
+                Apps.Logger.Log($"Lyckades ej läsa {myPlc.PlcName}s taggar från {fileName}", Severity.Error);
+            }
+        }
+
+        private void AddTag(List<TagDefinitions> newList)
+        {
+
+            newList = newList.OrderBy(x => x.name).ToList();
+
+            var newTags = newList.Except(tags).ToList();
+
+            newTags.RemoveAll(a => tags.Contains(a));
+
+            if (newTags.Count == 0)
+                return;
+
+            foreach (var tag in newTags)
+            {
+                var connectionString = PlcConfig.ConnectionString();
+                var query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.tagConfig ";
+                query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
+                query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
+                query += $"VALUES ('{tag.active}','{tag.name}','{tag.logType}','{tag.timeOfDay}',";
+                query += $"{tag.deadband},'{tag.plcName}','{tag.varType}',{tag.blockNr}, ";
+                query += $"'{tag.dataType}',{tag.startByte},{tag.nrOfElements},";
+                query += $"{tag.bitAddress},'{tag.logFreq}','{tag.tagUnit}',{tag.eventId},'{tag.IsBooleanTrigger}','";
+                query += $"{tag.boolTrigger}','{tag.analogTrigger}',{tag.analogValue},{tag.scaleMin},{tag.scaleMax},{tag.scaleOffset})";
+
+                try
+                {
+                    using (SqlConnection con = new SqlConnection(connectionString))
+                    {
+                        using (SqlCommand cmd = new SqlCommand(query, con))
+                        {
+                            con.Open();
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                }
+                catch (SqlException)
+                {
+                    Apps.Logger.Log("Lyckas ej skapa nya taggar i SQL", Severity.Error);
+                }
+            }
+
+        }
+
+        private void UpdateTag(List<TagDefinitions> list)
+        {
+            foreach (var tag in list)
+            {
+                var connectionString = PlcConfig.ConnectionString();
+                var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig ";
+                query += $"SET active='{tag.active}',name='{tag.name}',logType='{tag.logType}',timeOfDay='{tag.timeOfDay}'";
+                query += $",deadband={tag.deadband},plcName='{tag.plcName}',varType='{tag.varType}',blockNr={tag.blockNr}" +
+                    $",dataType='{tag.dataType}',startByte={tag.startByte},nrOfElements={tag.nrOfElements}" +
+                    $",bitAddress={tag.bitAddress},logFreq='{tag.logFreq}',";
+                query += $"tagUnit='{tag.tagUnit}',eventId={tag.eventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
+                    $",boolTrigger='{tag.boolTrigger}',analogTrigger='{tag.analogTrigger}',analogValue={tag.analogValue}, " +
+                    $"scaleMin={tag.scaleMin},scaleMax={tag.scaleMax},scaleOffset={tag.scaleOffset}" +
+                    $" WHERE id = {tag.id}";
+
+                try
+                {
+                    using (SqlConnection con = new SqlConnection(connectionString))
+                    {
+                        using (SqlCommand cmd = new SqlCommand(query, con))
+                        {
+                            con.Open();
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+                catch (SqlException ex)
+                {
+                    Apps.Logger.Log(string.Empty, Severity.Error, ex);
+                }
+
+            }
+            Redraw();
+
+        }
+
         private void AddTagForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             addMenuOpen = false;
@@ -259,6 +439,9 @@ namespace OptimaValue
             statForm.FormClosing -= StatForm_FormClosing;
         }
 
+        private void dropCsvFile(object sender, DragEventArgs e)
+        {
 
+        }
     }
 }
