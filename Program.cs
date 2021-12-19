@@ -24,7 +24,17 @@ namespace OptimaValue
 #endif
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
-                    Application.Run(new MasterForm());
+                    Application.SetHighDpiMode(HighDpiMode.SystemAware);
+                    try
+                    {
+                        Application.Run(new MasterForm());
+                    }
+                    catch (Exception ex)
+                    {
+                        Apps.Logger.EnableFileLog = true;
+                        Apps.Logger.Log($"Applikationen krashade", Severity.Error, ex);
+                        Environment.Exit(0);
+                    }
                 }
             }
         }

@@ -6,6 +6,7 @@ namespace OptimaValue
 {
     public partial class sqlForm : Form
     {
+        public bool DatabaseCreated = false;
         #region Form
         public sqlForm()
         {
@@ -29,7 +30,7 @@ namespace OptimaValue
         #endregion
 
         #region Winform user control events
-        private void btnSave_Click(object sender, EventArgs e)
+        private async void btnSave_Click(object sender, EventArgs e)
         {
             Application.UseWaitCursor = true;
             btnSave.Enabled = false;
@@ -41,7 +42,25 @@ namespace OptimaValue
             btnSave.Enabled = false;
             SqlSettings.Default.Save();
 
-            var created = Task.Run(contextInstance.CreateDb);
+            var result = await PlcConfig.TestConnectionSqlAsync();
+            if (!result)
+            {
+                $"Misslyckades att ansluta med följande Connection-sträng: {PlcConfig.ConnectionString()}".SendThisStatusMessage(Severity.Error);
+                btnSave.Enabled = true;
+            }
+            else
+            {
+                try
+                {
+                    var created = await contextInstance.CreateDb();
+                }
+                catch (Exception ex)
+                {
+                    "Misslyckades att skapa databas".SendThisStatusMessage(Severity.Error);
+                }
+            }
+            Application.UseWaitCursor = false;
+
         }
 
         private void DatabaseCreationEvent_CreatedEvent(object sender, DataBaseCreationEventArgs e)
@@ -53,6 +72,7 @@ namespace OptimaValue
             }
 
             btnSave.Enabled = true;
+            DatabaseCreated = true;
             DatabaseCreationEvent.CreatedEvent -= DatabaseCreationEvent_CreatedEvent;
             Close();
         }

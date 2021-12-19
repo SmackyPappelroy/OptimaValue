@@ -595,7 +595,10 @@ namespace OptimaValue
         private void SqlForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             IsOpenSqlForm = false;
-            PopulateTree();
+            if (SqlForm.DatabaseCreated == true)
+            {
+                PopulateTree();
+            }
         }
 
         private void PerForm_FormClosed(object sender, FormClosedEventArgs e)
