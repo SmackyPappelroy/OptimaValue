@@ -13,7 +13,7 @@
 
             foreach (var tag in TagsToLog.AllLogValues)
             {
-                if (id == tag.id)
+                if (id == tag.Id)
                     return tag;
             }
             return null;

@@ -40,7 +40,6 @@ namespace OptimaValue
             {
                 Interval = 500
             };
-            startStopButtonVisibilityTimer.Start();
             Subscribe(true);
 
             SqlForm = new sqlForm();
@@ -62,6 +61,9 @@ namespace OptimaValue
         #region Form
         private async void MasterForm_Load(object sender, EventArgs e)
         {
+            btnStop.Visible = false;
+            btnStart.Visible = false;
+            startStopButtonVisibilityTimer.Start();
             notifyMenu.Checked = Settings.Default.notify;
             var result = await PlcConfig.TestConnectionSqlAsync();
             if (!result)
@@ -70,10 +72,12 @@ namespace OptimaValue
             }
             else
                 PopulateTree();
+
         }
 
         private void MasterForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            startStopButtonVisibilityTimer.Stop();
             Subscribe(false);
             Master.StopLog(true);
             startStopButtonVisibilityTimer.Stop();
@@ -103,7 +107,7 @@ namespace OptimaValue
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
         {
             var assemblyVersion = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString();
-            notifyIcon.ShowBalloonTip(5000, $"OptimaValue \nCopyright © 2020 v{assemblyVersion}", "By Hans-Martin Nilsson", ToolTipIcon.None);
+            notifyIcon.ShowBalloonTip(5000, $".NET-version {Environment.Version} \nCopyright © 2020 - v{assemblyVersion} ", "By Hans-Martin Nilsson", ToolTipIcon.None);
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
@@ -123,8 +127,9 @@ namespace OptimaValue
             }
         }
 
-        private void btnStart_Click(object sender, EventArgs e)
+        private async void btnStart_Click(object sender, EventArgs e)
         {
+            btnStart.Visible = false;
             // Close all but Masterform
             for (int i = Application.OpenForms.Count - 1; i >= 0; i--)
             {
@@ -132,7 +137,9 @@ namespace OptimaValue
                     Application.OpenForms[i].Close();
             }
 
-            Master.StartLog();
+            if (!await Master.StartLog())
+                btnStart.Visible = true;
+
             if (settingsControl != null)
             {
                 if (settingsControl.Visible == true)
@@ -160,6 +167,7 @@ namespace OptimaValue
             }
 
             addPlc.Enabled = false;
+
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -455,9 +463,9 @@ namespace OptimaValue
         private void StartStopButtonVisibilityTimer_Tick(object sender, EventArgs e)
         {
             var anyActivePlcs = false;
-            if (PlcConfig.PlcList == null)
+            if (PlcConfig.PlcList == null || PlcConfig.PlcList.Count == 0)
             {
-                btnStart.Visible = true;
+                btnStart.Visible = false;
                 btnStop.Visible = false;
                 return;
             }

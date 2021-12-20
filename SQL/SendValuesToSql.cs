@@ -101,10 +101,10 @@ namespace OptimaValue
                 var sql = new LogValuesSql()
                 {
                     logTime = raw.logValue.LastLogTime,
-                    tag_id = raw.logValue.id
+                    tag_id = raw.logValue.Id
                 };
 
-                switch (raw.logValue.varType)
+                switch (raw.logValue.VarType)
                 {
                     case VarType.Bit: // klar
                         if (raw.unknownTag is BitArray array)

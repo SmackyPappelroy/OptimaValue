@@ -87,7 +87,7 @@ namespace OptimaValue
                 {
                     foreach (TagDefinitions tag in TagsToLog.AllLogValues)
                     {
-                        if (tag.plcName == myPlc.PlcName)
+                        if (tag.PlcName == myPlc.PlcName)
                         {
                             var newTag = new SingleTagControl(tag, myPlc, myTreeView);
                             newTag.TagChanged -= NewTag_TagChanged;
@@ -207,27 +207,27 @@ namespace OptimaValue
 
                 var myTag = new TagDefinitions()
                 {
-                    active = _active,
-                    bitAddress = _bitAddress,
-                    blockNr = _blockNr,
-                    dataType = _dataType,
-                    deadband = _deadband,
-                    id = _id,
-                    logFreq = _logFreq,
+                    Active = _active,
+                    BitAddress = _bitAddress,
+                    BlockNr = _blockNr,
+                    DataType = _dataType,
+                    Deadband = _deadband,
+                    Id = _id,
+                    LogFreq = _logFreq,
                     LastLogTime = DateTime.MinValue,
-                    logType = _logType,
-                    name = _name,
-                    nrOfElements = _nrOfElements,
-                    plcName = _plcName,
-                    startByte = _startByte,
-                    timeOfDay = _timeOfDay,
-                    varType = _varType,
-                    tagUnit = _tagUnit,
-                    eventId = _eventId,
+                    LogType = _logType,
+                    Name = _name,
+                    NrOfElements = _nrOfElements,
+                    PlcName = _plcName,
+                    StartByte = _startByte,
+                    TimeOfDay = _timeOfDay,
+                    VarType = _varType,
+                    TagUnit = _tagUnit,
+                    EventId = _eventId,
                     IsBooleanTrigger = _isBooleanTrigger,
-                    boolTrigger = _boolTrigger,
-                    analogTrigger = _analogTrigger,
-                    analogValue = _analogValue,
+                    BoolTrigger = _boolTrigger,
+                    AnalogTrigger = _analogTrigger,
+                    AnalogValue = _analogValue,
                     scaleMin = _scaleMin,
                     scaleMax = _scaleMax,
                     scaleOffset = _scaleOffset,
@@ -235,7 +235,7 @@ namespace OptimaValue
                 tags.Add(myTag);
             }
             // Sorterar listan alfabetiskt
-            tags.Sort((x, y) => string.Compare(x.name, y.name));
+            tags.Sort((x, y) => string.Compare(x.Name, y.Name));
 
             if (tags.Count > 0)
                 return true;
@@ -264,7 +264,7 @@ namespace OptimaValue
 
         private void click_Export(object sender, EventArgs e)
         {
-            SaveFileDialog save = new SaveFileDialog();
+            SaveFileDialog save = new();
             save.Filter = "CSV File|*.csv";
             save.Title = "Spara .CSV fil";
             DialogResult result = save.ShowDialog();
@@ -281,7 +281,7 @@ namespace OptimaValue
                         Apps.Logger.Log($"Sparade {myPlc.PlcName}s taggar till {save.FileName}", Severity.Success);
                     }
                 }
-                catch (IOException ex)
+                catch (IOException)
                 {
                     Apps.Logger.Log($"Lyckades ej spara {myPlc.PlcName}s taggar till {save.FileName}", Severity.Error);
                 }
@@ -290,12 +290,11 @@ namespace OptimaValue
 
         private void click_Import(object sender, EventArgs e)
         {
-            string file = "";
             OpenFileDialog dialog = new OpenFileDialog();
             DialogResult result = dialog.ShowDialog();
             if (result == DialogResult.OK)
             {
-                file = dialog.FileName;
+                string file = dialog.FileName;
                 ImportFile(file);
             }
         }
@@ -316,7 +315,7 @@ namespace OptimaValue
                 }
 
             }
-            catch (IOException ex)
+            catch (IOException)
             {
                 Apps.Logger.Log($"Lyckades ej läsa {myPlc.PlcName}s taggar från {fileName}", Severity.Error);
             }
@@ -325,7 +324,7 @@ namespace OptimaValue
         private void AddTag(List<TagDefinitions> newList)
         {
 
-            newList = newList.OrderBy(x => x.name).ToList();
+            newList = newList.OrderBy(x => x.Name).ToList();
 
             var newTags = newList.Except(tags).ToList();
 
@@ -340,11 +339,11 @@ namespace OptimaValue
                 var query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.tagConfig ";
                 query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
                 query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
-                query += $"VALUES ('{tag.active}','{tag.name}','{tag.logType}','{tag.timeOfDay}',";
-                query += $"{tag.deadband},'{tag.plcName}','{tag.varType}',{tag.blockNr}, ";
-                query += $"'{tag.dataType}',{tag.startByte},{tag.nrOfElements},";
-                query += $"{tag.bitAddress},'{tag.logFreq}','{tag.tagUnit}',{tag.eventId},'{tag.IsBooleanTrigger}','";
-                query += $"{tag.boolTrigger}','{tag.analogTrigger}',{tag.analogValue},{tag.scaleMin},{tag.scaleMax},{tag.scaleOffset})";
+                query += $"VALUES ('{tag.Active}','{tag.Name}','{tag.LogType}','{tag.TimeOfDay}',";
+                query += $"{tag.Deadband},'{tag.PlcName}','{tag.VarType}',{tag.BlockNr}, ";
+                query += $"'{tag.DataType}',{tag.StartByte},{tag.NrOfElements},";
+                query += $"{tag.BitAddress},'{tag.LogFreq}','{tag.TagUnit}',{tag.EventId},'{tag.IsBooleanTrigger}','";
+                query += $"{tag.BoolTrigger}','{tag.AnalogTrigger}',{tag.AnalogValue},{tag.scaleMin},{tag.scaleMax},{tag.scaleOffset})";
 
                 try
                 {
@@ -372,14 +371,14 @@ namespace OptimaValue
             {
                 var connectionString = PlcConfig.ConnectionString();
                 var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig ";
-                query += $"SET active='{tag.active}',name='{tag.name}',logType='{tag.logType}',timeOfDay='{tag.timeOfDay}'";
-                query += $",deadband={tag.deadband},plcName='{tag.plcName}',varType='{tag.varType}',blockNr={tag.blockNr}" +
-                    $",dataType='{tag.dataType}',startByte={tag.startByte},nrOfElements={tag.nrOfElements}" +
-                    $",bitAddress={tag.bitAddress},logFreq='{tag.logFreq}',";
-                query += $"tagUnit='{tag.tagUnit}',eventId={tag.eventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
-                    $",boolTrigger='{tag.boolTrigger}',analogTrigger='{tag.analogTrigger}',analogValue={tag.analogValue}, " +
+                query += $"SET active='{tag.Active}',name='{tag.Name}',logType='{tag.LogType}',timeOfDay='{tag.TimeOfDay}'";
+                query += $",deadband={tag.Deadband},plcName='{tag.PlcName}',varType='{tag.VarType}',blockNr={tag.BlockNr}" +
+                    $",dataType='{tag.DataType}',startByte={tag.StartByte},nrOfElements={tag.NrOfElements}" +
+                    $",bitAddress={tag.BitAddress},logFreq='{tag.LogFreq}',";
+                query += $"tagUnit='{tag.TagUnit}',eventId={tag.EventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
+                    $",boolTrigger='{tag.BoolTrigger}',analogTrigger='{tag.AnalogTrigger}',analogValue={tag.AnalogValue}, " +
                     $"scaleMin={tag.scaleMin},scaleMax={tag.scaleMax},scaleOffset={tag.scaleOffset}" +
-                    $" WHERE id = {tag.id}";
+                    $" WHERE id = {tag.Id}";
 
                 try
                 {

@@ -9,38 +9,38 @@ namespace OptimaValue
 {
     public class TagDefinitions : TagStatistics
     {
-        [Name("id")]
-        public int id { get; set; }
-        [Name("active")]
-        public bool active { get; set; }
-        [Name("name")]
-        public string name { get; set; }
-        [Name("logType")]
-        public LogType logType { get; set; }
-        [Name("timeOfDay")]
-        public TimeSpan timeOfDay { get; set; }
-        [Name("deadband")]
-        public float deadband { get; set; }
-        [Name("plcName")]
-        public string plcName { get; set; }
-        [Name("varType")]
-        public VarType varType { get; set; }
-        [Name("blockNr")]
-        public int blockNr { get; set; }
-        [Name("dataType")]
-        public DataType dataType { get; set; }
-        [Name("startByte")]
-        public int startByte { get; set; }
-        [Name("nrOfElements")]
-        public int nrOfElements { get; set; }
-        [Name("bitAddress")]
-        public byte bitAddress { get; set; } = 0;
-        [Name("logFreq")]
-        public LogFrequency logFreq { get; set; }
+        [Name("Id")]
+        public int Id { get; set; }
+        [Name("Active")]
+        public bool Active { get; set; }
+        [Name("Name")]
+        public string Name { get; set; }
+        [Name("LogType")]
+        public LogType LogType { get; set; }
+        [Name("TimeOfDay")]
+        public TimeSpan TimeOfDay { get; set; }
+        [Name("Deadband")]
+        public float Deadband { get; set; }
+        [Name("PlcName")]
+        public string PlcName { get; set; }
+        [Name("VarType")]
+        public VarType VarType { get; set; }
+        [Name("BlockNr")]
+        public int BlockNr { get; set; }
+        [Name("DataType")]
+        public DataType DataType { get; set; }
+        [Name("StartByte")]
+        public int StartByte { get; set; }
+        [Name("NrOfElements")]
+        public int NrOfElements { get; set; }
+        [Name("BitAddress")]
+        public byte BitAddress { get; set; } = 0;
+        [Name("LogFreq")]
+        public LogFrequency LogFreq { get; set; }
         [Name("LastLogTime")]
         public DateTime LastLogTime { get; set; }
-        [Name("tagUnit")]
-        public string tagUnit { get; set; } = string.Empty;
+        [Name("TagUnit")]
+        public string TagUnit { get; set; } = string.Empty;
 
         #region Skalering
 
@@ -54,17 +54,17 @@ namespace OptimaValue
         #endregion
 
         // Events
-        [Name("eventId")]
-        public int eventId { get; set; } // The id of the trigger tag
+        [Name("EventId")]
+        public int EventId { get; set; } // The id of the trigger tag
         [Name("IsBooleanTrigger")]
         public bool IsBooleanTrigger { get; set; }
-        [Name("boolTrigger")]
-        public BooleanTrigger boolTrigger { get; set; }
-        [Name("analogTrigger")]
-        public AnalogTrigger analogTrigger { get; set; }
+        [Name("BoolTrigger")]
+        public BooleanTrigger BoolTrigger { get; set; }
+        [Name("AnalogTrigger")]
+        public AnalogTrigger AnalogTrigger { get; set; }
 
-        [Name("analogValue")]
-        public float analogValue { get; set; } = 0f;
+        [Name("AnalogValue")]
+        public float AnalogValue { get; set; } = 0f;
 
         private List<int> subscribedTags = new List<int>();
         [Name("SubscribedTags")]
@@ -79,9 +79,9 @@ namespace OptimaValue
                     {
                         foreach (var tag in TagsToLog.AllLogValues)
                         {
-                            if (tag.eventId == id && tag.eventId != 0)
+                            if (tag.EventId == Id && tag.EventId != 0)
                             {
-                                subscribedTags.Add(tag.id);
+                                subscribedTags.Add(tag.Id);
                             }
                         }
                     }
@@ -94,10 +94,15 @@ namespace OptimaValue
         {
             var thisObject = (TagDefinitions)obj;
 
-            if (thisObject.name == this.name)
+            if (thisObject.Name == this.Name)
                 return true;
 
             return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Name.GetHashCode();
         }
     }
 }

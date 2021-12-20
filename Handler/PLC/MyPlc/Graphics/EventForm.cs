@@ -48,18 +48,18 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var listan = new List<string>();
             foreach (var taggsen in TagsToLog.AllLogValues)
             {
-                if (tag.name != "")
+                if (tag.Name != "")
                 {
-                    if (tag.id != taggsen.id && taggsen.logType != LogType.Event)
-                        listan.Add(taggsen.name);
+                    if (tag.Id != taggsen.Id && taggsen.LogType != LogType.Event)
+                        listan.Add(taggsen.Name);
                 }
             }
             comboEventId.DataSource = listan;
-            comboBoolTrigger.SelectedItem = tag.boolTrigger;
-            comboBoolTrigger.SelectedText = tag.boolTrigger.ToString();
-            comboAnalog.SelectedItem = tag.analogTrigger;
-            comboAnalog.SelectedText = tag.analogTrigger.ToString();
-            txtValue.Text = tag.analogValue.ToString();
+            comboBoolTrigger.SelectedItem = tag.BoolTrigger;
+            comboBoolTrigger.SelectedText = tag.BoolTrigger.ToString();
+            comboAnalog.SelectedItem = tag.AnalogTrigger;
+            comboAnalog.SelectedText = tag.AnalogTrigger.ToString();
+            txtValue.Text = tag.AnalogValue.ToString();
             radioBoolTrigger.Checked = tag.IsBooleanTrigger;
         }
 
@@ -91,26 +91,26 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void SaveValues()
         {
-            tag.boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), comboBoolTrigger.SelectedItem.ToString());
-            tag.analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), comboAnalog.SelectedItem.ToString());
+            tag.BoolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), comboBoolTrigger.SelectedItem.ToString());
+            tag.AnalogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), comboAnalog.SelectedItem.ToString());
             tag.IsBooleanTrigger = radioBoolTrigger.Checked;
             if (!radioBoolTrigger.Checked)
-                tag.analogValue = float.Parse(txtValue.Text);
+                tag.AnalogValue = float.Parse(txtValue.Text);
             foreach (var taggen in TagsToLog.AllLogValues)
             {
-                if (taggen.plcName == PlcName)
+                if (taggen.PlcName == PlcName)
                 {
-                    if (taggen.name == comboEventId.SelectedItem.ToString())
-                        tag.eventId = taggen.id;
+                    if (taggen.Name == comboEventId.SelectedItem.ToString())
+                        tag.EventId = taggen.Id;
                 }
             }
-            if (tag.eventId != 0)
+            if (tag.EventId != 0)
             {
                 tag.IsBooleanTrigger = radioBoolTrigger.Checked;
-                tag.boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), comboBoolTrigger.SelectedItem.ToString());
-                tag.analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), comboAnalog.SelectedItem.ToString());
+                tag.BoolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), comboBoolTrigger.SelectedItem.ToString());
+                tag.AnalogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), comboAnalog.SelectedItem.ToString());
                 if (!radioBoolTrigger.Checked)
-                    tag.analogValue = float.Parse(txtValue.Text);
+                    tag.AnalogValue = float.Parse(txtValue.Text);
                 OnSaveEvent(tag);
                 Close();
             }

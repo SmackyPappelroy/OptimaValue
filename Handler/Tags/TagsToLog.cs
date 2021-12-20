@@ -43,34 +43,34 @@ namespace OptimaValue
                             AllLogValues = (from DataRow dr in AllTagsTable.Rows
                                             select new TagDefinitions()
                                             {
-                                                id = (int)dr["id"],
-                                                active = (bool)dr["active"],
-                                                name = dr["name"].ToString(),
-                                                logType = (LogType)Enum.Parse(typeof(LogType), dr["logType"].ToString()),
-                                                timeOfDay = (TimeSpan)dr["timeOfDay"],
-                                                deadband = (float)((double)dr["deadband"]),
-                                                plcName = dr["plcName"].ToString(),
-                                                varType = (VarType)Enum.Parse(typeof(VarType), dr["varType"].ToString()),
-                                                blockNr = (int)dr["blockNr"],
-                                                dataType = (DataType)Enum.Parse(typeof(DataType), dr["dataType"].ToString()),
-                                                startByte = (int)dr["startByte"],
-                                                nrOfElements = (int)dr["nrOfElements"],
-                                                bitAddress = (byte)dr["bitAddress"],
-                                                logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), dr["logFreq"].ToString()),
+                                                Id = (int)dr["id"],
+                                                Active = (bool)dr["active"],
+                                                Name = dr["name"].ToString(),
+                                                LogType = (LogType)Enum.Parse(typeof(LogType), dr["logType"].ToString()),
+                                                TimeOfDay = (TimeSpan)dr["timeOfDay"],
+                                                Deadband = (float)((double)dr["deadband"]),
+                                                PlcName = dr["plcName"].ToString(),
+                                                VarType = (VarType)Enum.Parse(typeof(VarType), dr["varType"].ToString()),
+                                                BlockNr = (int)dr["blockNr"],
+                                                DataType = (DataType)Enum.Parse(typeof(DataType), dr["dataType"].ToString()),
+                                                StartByte = (int)dr["startByte"],
+                                                NrOfElements = (int)dr["nrOfElements"],
+                                                BitAddress = (byte)dr["bitAddress"],
+                                                LogFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), dr["logFreq"].ToString()),
                                                 LastLogTime = DateTime.MinValue,
-                                                tagUnit = dr["tagUnit"].ToString(),
-                                                eventId = (int)dr["eventId"],
+                                                TagUnit = dr["tagUnit"].ToString(),
+                                                EventId = (int)dr["eventId"],
                                                 IsBooleanTrigger = (bool)dr["isBooleanTrigger"],
-                                                boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), dr["boolTrigger"].ToString()),
-                                                analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), dr["analogTrigger"].ToString()),
-                                                analogValue = (float)((double)dr["analogValue"]),
+                                                BoolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), dr["boolTrigger"].ToString()),
+                                                AnalogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), dr["analogTrigger"].ToString()),
+                                                AnalogValue = (float)((double)dr["analogValue"]),
                                                 scaleMin = (int)dr["scaleMin"],
                                                 scaleMax = (int)dr["scaleMax"],
                                                 scaleOffset = (int)dr["scaleOffset"],
                                             }).ToList();
 
                             // Sorterar listan alfabetiskt
-                            AllLogValues.Sort((x, y) => string.Compare(x.name, y.name));
+                            AllLogValues.Sort((x, y) => string.Compare(x.Name, y.Name));
 
                             return AllTagsTable;
                         }

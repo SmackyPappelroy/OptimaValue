@@ -43,7 +43,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 var activeTags = 0;
                 foreach (TagDefinitions tag in TagsToLog.AllLogValues)
                 {
-                    if (tag.plcName == MyPlc.PlcName && tag.active)
+                    if (tag.PlcName == MyPlc.PlcName && tag.Active)
                     {
                         successReads += tag.NrSuccededReadAttempts;
                         failReads += tag.NrFailedReadAttempts;

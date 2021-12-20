@@ -80,7 +80,7 @@ namespace OptimaValue
                     return false;
                 else
                 {
-                    if (TagsToLog.AllLogValues.Any(t => t.plcName.Equals(PlcName) && t.active))
+                    if (TagsToLog.AllLogValues.Any(t => t.PlcName.Equals(PlcName) && t.Active))
                         return true;
                     else
                         return false;

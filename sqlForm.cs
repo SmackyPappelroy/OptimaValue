@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Microsoft.SqlServer.Management.Smo;
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,8 +19,8 @@ namespace OptimaValue
         }
         private void SettingForm_Load(object sender, EventArgs e)
         {
+            comboServer.SelectedItem = SqlSettings.Default.Server;
             txtDatabas.Text = SqlSettings.Default.Databas;
-            txtServer.Text = SqlSettings.Default.Server;
             txtUser.Text = SqlSettings.Default.User;
             txtPassword.Text = SqlSettings.Default.Password;
             DatabaseCreationEvent.CreatedEvent += DatabaseCreationEvent_CreatedEvent;
@@ -36,7 +40,7 @@ namespace OptimaValue
             btnSave.Enabled = false;
             SqlSettings.Default.User = txtUser.Text;
             SqlSettings.Default.Password = txtPassword.Text;
-            SqlSettings.Default.Server = txtServer.Text;
+            SqlSettings.Default.Server = comboServer.SelectedItem.ToString();
             SqlSettings.Default.Databas = txtDatabas.Text;
 
             btnSave.Enabled = false;
@@ -54,7 +58,7 @@ namespace OptimaValue
                 {
                     var created = await contextInstance.CreateDb();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     "Misslyckades att skapa databas".SendThisStatusMessage(Severity.Error);
                 }
@@ -96,9 +100,15 @@ namespace OptimaValue
         #region Methods
         private bool validateInputs()
         {
+            if (comboServer.Items.Count == 0)
+            {
+                comboServer.Items.Add(" ");
+                comboServer.SelectedItem = comboServer.Items[0];
+            }
+
             if (!string.IsNullOrWhiteSpace(txtPassword.Text)
                 && !string.IsNullOrWhiteSpace(txtUser.Text)
-                && !string.IsNullOrWhiteSpace(txtServer.Text)
+                  && !string.IsNullOrWhiteSpace(comboServer.SelectedItem.ToString())
                 && !string.IsNullOrWhiteSpace(txtDatabas.Text))
             {
                 return true;
@@ -107,5 +117,37 @@ namespace OptimaValue
                 return false;
         }
         #endregion
+
+        private void btnSearchServer_Click(object sender, EventArgs e)
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                List<string> list = new();
+                string ServerName = Environment.MachineName;
+                RegistryView registryView = Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32;
+                using (RegistryKey hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, registryView))
+                {
+                    RegistryKey instanceKey = hklm.OpenSubKey(@"SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL", false);
+                    if (instanceKey != null)
+                    {
+                        foreach (var instanceName in instanceKey.GetValueNames())
+                        {
+                            list.Add(ServerName + "\\" + instanceName);
+                        }
+                    }
+                }
+                if (list.Count > 0)
+                {
+                    list.Sort();
+                    comboServer.Items.Clear();
+                    foreach (var item in list)
+                    {
+                        comboServer.Items.Add(item);
+                    }
+                    comboServer.SelectedItem = comboServer.Items[0];
+                    btnSave.Enabled = true;
+                }
+            }
+        }
     }
 }

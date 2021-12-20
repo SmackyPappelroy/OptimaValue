@@ -30,7 +30,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             InitializeComponent();
 
             SingleTag = tag;
-            txtName.Text = tag.name;
+            txtName.Text = tag.Name;
             myTreeView = treeView;
             MyPlc = myPlc;
             errorImage = Resources.tag_error;
@@ -106,7 +106,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             if (!addTagOpen && !MyPlc.LoggerIsStarted)
             {
-                changeTagForm = new AddTag(SingleTag.plcName, MyPlc, SingleTag);
+                changeTagForm = new AddTag(SingleTag.PlcName, MyPlc, SingleTag);
                 changeTagForm.FormClosing += ChangeTagForm_FormClosing;
                 addTagOpen = true;
                 myTreeView.Enabled = false;
@@ -134,7 +134,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             var connectionString = PlcConfig.ConnectionString();
             var query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.logValues ";
-            query += $"WHERE tag_id = {SingleTag.id}";
+            query += $"WHERE tag_id = {SingleTag.Id}";
             try
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
@@ -153,7 +153,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
 
             query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"WHERE id = {SingleTag.id}";
+            query += $"WHERE id = {SingleTag.Id}";
             try
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
@@ -178,7 +178,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             TagDefinitions tag = null;
             foreach (TagDefinitions logValue in TagsToLog.AllLogValues)
             {
-                if (SingleTag.id == logValue.id)
+                if (SingleTag.Id == logValue.Id)
                     tag = logValue;
             }
             if (tag != null && !statFormOpen)
@@ -186,7 +186,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 statFormOpen = true;
                 statForm = new TagStatisticsForm(tag)
                 {
-                    Text = tag.name
+                    Text = tag.Name
                 };
                 statForm.FormClosing += StatForm_FormClosing;
                 statForm.Show();

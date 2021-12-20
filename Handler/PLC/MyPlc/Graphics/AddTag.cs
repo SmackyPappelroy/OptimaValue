@@ -77,27 +77,27 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void PopulateInputs()
         {
-            checkActive.Checked = tag.active;
-            paraName.ParameterValue = tag.name;
-            paraLogType.comboBoxen.Text = tag.logType.ToString();
-            paraLogType.comboBoxen.SelectedItem = tag.logType;
+            checkActive.Checked = tag.Active;
+            paraName.ParameterValue = tag.Name;
+            paraLogType.comboBoxen.Text = tag.LogType.ToString();
+            paraLogType.comboBoxen.SelectedItem = tag.LogType;
 
-            paraLogTime.ParameterValue = tag.timeOfDay.ToString();
-            paraDeadband.ParameterValue = tag.deadband.ToString();
-            paraVarType.comboBoxen.Text = tag.varType.ToString();
-            paraVarType.comboBoxen.SelectedItem = tag.varType;
+            paraLogTime.ParameterValue = tag.TimeOfDay.ToString();
+            paraDeadband.ParameterValue = tag.Deadband.ToString();
+            paraVarType.comboBoxen.Text = tag.VarType.ToString();
+            paraVarType.comboBoxen.SelectedItem = tag.VarType;
 
-            paraBlockNr.ParameterValue = tag.blockNr.ToString();
-            paraDataType.comboBoxen.Text = tag.dataType.ToString();
-            paraDataType.comboBoxen.SelectedItem = tag.dataType;
+            paraBlockNr.ParameterValue = tag.BlockNr.ToString();
+            paraDataType.comboBoxen.Text = tag.DataType.ToString();
+            paraDataType.comboBoxen.SelectedItem = tag.DataType;
 
-            paraStartAddress.ParameterValue = tag.startByte.ToString();
-            paraNrOfValues.ParameterValue = tag.nrOfElements.ToString();
-            paraBitAddress.ParameterValue = tag.bitAddress.ToString();
-            paraFreq.comboBoxen.Text = tag.logFreq.ToString();
-            paraFreq.comboBoxen.SelectedItem = tag.logFreq;
+            paraStartAddress.ParameterValue = tag.StartByte.ToString();
+            paraNrOfValues.ParameterValue = tag.NrOfElements.ToString();
+            paraBitAddress.ParameterValue = tag.BitAddress.ToString();
+            paraFreq.comboBoxen.Text = tag.LogFreq.ToString();
+            paraFreq.comboBoxen.SelectedItem = tag.LogFreq;
 
-            paraUnit.ParameterValue = tag.tagUnit;
+            paraUnit.ParameterValue = tag.TagUnit;
 
             paraScaleMin.ParameterValue = tag.scaleMin.ToString();
             paraScaleMax.ParameterValue = tag.scaleMax.ToString();
@@ -333,19 +333,19 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 timeOut.Start();
                 return;
             }
-            if (!paraName.ParameterValue.Equals(tag.name))
+            if (!paraName.ParameterValue.Equals(tag.Name))
                 if (CheckForDuplicateNames())
                     return;
 
             if (ValidateAll())
             {
-                if (tag.eventId == 0)
+                if (tag.EventId == 0)
                 {
-                    tag.eventId = 0;
+                    tag.EventId = 0;
                     tag.IsBooleanTrigger = false;
-                    tag.boolTrigger = BooleanTrigger.OnTrue;
-                    tag.analogTrigger = AnalogTrigger.Equal;
-                    tag.analogValue = 0;
+                    tag.BoolTrigger = BooleanTrigger.OnTrue;
+                    tag.AnalogTrigger = AnalogTrigger.Equal;
+                    tag.AnalogValue = 0;
                 }
                 DataTable tbl = CreateTable();
                 AddTagToSql(tbl);
@@ -376,11 +376,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (tag == null)
                 tagNamn = paraName.ParameterValue;
             else
-                tagNamn = tag.name;
+                tagNamn = tag.Name;
             object result = new object();
             var connectionString = PlcConfig.ConnectionString();
             var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"WHERE id = {tag.id}";
+            query += $"WHERE id = {tag.Id}";
             try
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
@@ -436,11 +436,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             string analogTrigger = "Equal";
             if (!(tag == null))
             {
-                tagEventId = tag.eventId;
+                tagEventId = tag.EventId;
                 isBoolTrigger = tag.IsBooleanTrigger;
-                analogTrigger = tag.analogTrigger.ToString();
-                boolTrigger = tag.boolTrigger.ToString();
-                analogValue = tag.analogValue;
+                analogTrigger = tag.AnalogTrigger.ToString();
+                boolTrigger = tag.BoolTrigger.ToString();
+                analogValue = tag.AnalogValue;
 
             }
 
@@ -522,25 +522,25 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             tag = new TagDefinitions()
             {
-                active = _active,
-                bitAddress = _bitAddress,
-                blockNr = _blockNr,
-                dataType = _dataType,
-                deadband = _deadband,
-                id = _id,
-                logFreq = _logFreq,
+                Active = _active,
+                BitAddress = _bitAddress,
+                BlockNr = _blockNr,
+                DataType = _dataType,
+                Deadband = _deadband,
+                Id = _id,
+                LogFreq = _logFreq,
                 LastLogTime = DateTime.MinValue,
-                logType = _logType,
-                nrOfElements = _nrOfElements,
-                startByte = _startByte,
-                timeOfDay = _timeOfDay,
-                varType = _varType,
-                tagUnit = _tagUnit,
-                eventId = _eventId,
+                LogType = _logType,
+                NrOfElements = _nrOfElements,
+                StartByte = _startByte,
+                TimeOfDay = _timeOfDay,
+                VarType = _varType,
+                TagUnit = _tagUnit,
+                EventId = _eventId,
                 IsBooleanTrigger = _isBooleanTrigger,
-                boolTrigger = _boolTrigger,
-                analogTrigger = _analogTrigger,
-                analogValue = _analogValue,
+                BoolTrigger = _boolTrigger,
+                AnalogTrigger = _analogTrigger,
+                AnalogValue = _analogValue,
                 scaleMin = _scaleMin,
                 scaleMax = _scaleMax,
                 scaleOffset = _scaleOffset,
@@ -561,10 +561,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             query += $",deadband={temp},plcName='{PlcName}',varType='{paraVarType.comboBoxen.SelectedItem}',blockNr={int.Parse(paraBlockNr.ParameterValue)}" +
                 $",dataType='{paraDataType.comboBoxen.SelectedItem}',startByte={int.Parse(paraStartAddress.ParameterValue)},nrOfElements={int.Parse(paraNrOfValues.ParameterValue)}" +
                 $",bitAddress={byte.Parse(paraBitAddress.ParameterValue)},logFreq='{paraFreq.comboBoxen.SelectedItem}',";
-            query += $"tagUnit='{paraUnit.ParameterValue}',eventId={tag.eventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
-                $",boolTrigger='{tag.boolTrigger}',analogTrigger='{tag.analogTrigger}',analogValue={tag.analogValue}, " +
+            query += $"tagUnit='{paraUnit.ParameterValue}',eventId={tag.EventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
+                $",boolTrigger='{tag.BoolTrigger}',analogTrigger='{tag.AnalogTrigger}',analogValue={tag.AnalogValue}, " +
                 $"scaleMin={paraScaleMin.ParameterValue},scaleMax={paraScaleMax.ParameterValue},scaleOffset={paraScaleOffset.ParameterValue}" +
-                $" WHERE id = {tag.id}";
+                $" WHERE id = {tag.Id}";
 
             try
             {
@@ -618,7 +618,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 PlcName, paraVarType.comboBoxen.SelectedItem.ToString(), int.Parse(paraBlockNr.ParameterValue),
                 paraDataType.comboBoxen.SelectedItem.ToString(), int.Parse(paraStartAddress.ParameterValue),
                 int.Parse(paraNrOfValues.ParameterValue), byte.Parse(paraBitAddress.ParameterValue),
-                paraFreq.comboBoxen.SelectedItem.ToString(), tag.eventId, tag.IsBooleanTrigger, tag.boolTrigger, tag.analogTrigger, tag.analogValue, int.Parse(paraScaleMin.ParameterValue),
+                paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue, int.Parse(paraScaleMin.ParameterValue),
                 int.Parse(paraScaleMax.ParameterValue), int.Parse(paraScaleOffset.ParameterValue));
             return tbl;
 
@@ -720,11 +720,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             if (tag == null)
                 tag = new TagDefinitions();
-            tag.eventId = e.tag.eventId;
+            tag.EventId = e.tag.EventId;
             tag.IsBooleanTrigger = e.tag.IsBooleanTrigger;
-            tag.boolTrigger = e.tag.boolTrigger;
-            tag.analogTrigger = e.tag.analogTrigger;
-            tag.analogValue = e.tag.analogValue;
+            tag.BoolTrigger = e.tag.BoolTrigger;
+            tag.AnalogTrigger = e.tag.AnalogTrigger;
+            tag.AnalogValue = e.tag.AnalogValue;
         }
 
         private void EventForm_FormClosing(object sender, FormClosingEventArgs e)
