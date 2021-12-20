@@ -181,6 +181,8 @@
             this.comboServer.Name = "comboServer";
             this.comboServer.Size = new System.Drawing.Size(324, 31);
             this.comboServer.TabIndex = 9;
+            this.comboServer.SelectedIndexChanged += new System.EventHandler(this.comboServer_SelectedIndexChanged);
+            this.comboServer.Validated += new System.EventHandler(this.comboServer_Validated);
             // 
             // btnSearchServer
             // 

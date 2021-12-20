@@ -19,7 +19,13 @@ namespace OptimaValue
         }
         private void SettingForm_Load(object sender, EventArgs e)
         {
-            comboServer.SelectedItem = SqlSettings.Default.Server;
+            comboServer.Text = SqlSettings.Default.Server != string.Empty ? SqlSettings.Default.Server : string.Empty;
+            if (comboServer.Text != string.Empty)
+            {
+                comboServer.Items.Clear();
+                comboServer.Items.Add(comboServer.Text);
+                comboServer.SelectedIndex = 0;
+            }
             txtDatabas.Text = SqlSettings.Default.Databas;
             txtUser.Text = SqlSettings.Default.User;
             txtPassword.Text = SqlSettings.Default.Password;
@@ -102,7 +108,7 @@ namespace OptimaValue
         {
             if (comboServer.Items.Count == 0)
             {
-                comboServer.Items.Add(" ");
+                comboServer.Items.Add(string.Empty);
                 comboServer.SelectedItem = comboServer.Items[0];
             }
 
@@ -148,6 +154,36 @@ namespace OptimaValue
                     btnSave.Enabled = true;
                 }
             }
+        }
+
+        private void comboServer_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboServer.Items.Count == 0 || comboServer.SelectedItem == null)
+                return;
+
+            if (string.IsNullOrEmpty(comboServer.SelectedItem.ToString()))
+                return;
+
+            validateInputs();
+        }
+
+        private void comboServer_Validated(object sender, EventArgs e)
+        {
+            if (comboServer.Items.Count == 0)
+                return;
+
+            if (string.IsNullOrEmpty(comboServer.Text))
+                return;
+
+            comboServer.Items.Clear();
+            comboServer.Items.Add(comboServer.Text);
+            comboServer.SelectedItem = comboServer.Items[0];
+
+            bool isValidated = validateInputs();
+            if (!isValidated)
+                comboServer.Items.Clear();
+            else
+                btnSave.Enabled = true;
         }
     }
 }
