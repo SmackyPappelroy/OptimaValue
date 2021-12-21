@@ -468,9 +468,16 @@ namespace OptimaValue
         private void DatabaseTimer_Tick(object sender, EventArgs e)
         {
             if (!DatabaseStatus.isConnected)
+            {
                 databaseImage.Visible = !databaseImage.Visible;
+                databaseImage.Image = noDatabase;
+            }
             else
+            {
                 databaseImage.Visible = true;
+                databaseImage.Image = okDatabase;
+
+            }
 
             toolTip.SetToolTip(databaseImage, databaseTooltip);
         }

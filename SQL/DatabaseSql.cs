@@ -36,10 +36,6 @@ public static class DatabaseSql
             DatabaseStatus.isConnected = false;
             return false;
         }
-        finally
-        {
-            con.Dispose();
-        }
     }
 
     /// <summary>
@@ -134,7 +130,7 @@ public static class DatabaseSql
         }
         catch (SqlException ex)
         {
-            string.Empty.SendStatusMessage(Severity.Error, ex);
+            "Lyckas ej uppdatera tag".SendStatusMessage(Severity.Error, ex);
             return false;
         }
     }
@@ -157,7 +153,7 @@ public static class DatabaseSql
         }
         catch (SqlException ex)
         {
-            Apps.Logger.Log(string.Empty, Severity.Error, ex);
+            "Lyckas ej ta bort tag".SendStatusMessage(Severity.Error, ex);
         }
 
 
@@ -173,7 +169,7 @@ public static class DatabaseSql
         }
         catch (SqlException ex2)
         {
-            Apps.Logger.Log(string.Empty, Severity.Error, ex2);
+            "Lyckas ej ta bort tag".SendStatusMessage(Severity.Error, ex2);
         }
     }
 
@@ -191,7 +187,7 @@ public static class DatabaseSql
         }
         catch (SqlException ex)
         {
-            string.Empty.SendStatusMessage(Severity.Error, ex);
+            "Lyckas ej kolla om det finns dubletter av taggar".SendStatusMessage(Severity.Error, ex);
         }
         if (result != null)
             return true;
@@ -214,7 +210,7 @@ public static class DatabaseSql
         }
         catch (SqlException ex)
         {
-            string.Empty.SendStatusMessage(Severity.Error, ex);
+            "Lyckas ej lägga till tag".SendStatusMessage(Severity.Error, ex);
         }
     }
 
@@ -236,7 +232,7 @@ public static class DatabaseSql
         }
         catch (SqlException ex)
         {
-            string.Empty.SendStatusMessage(Severity.Error, ex);
+            "Lyckas ej hämta senaste tillagda tag".SendStatusMessage(Severity.Error, ex);
         }
         return tbl;
     }
@@ -262,7 +258,7 @@ public static class DatabaseSql
         }
         catch (SqlException ex)
         {
-            Apps.Logger.Log(string.Empty, Severity.Error, ex);
+            "Lyckas ej hämta PLC tabell".SendStatusMessage(Severity.Error, ex);
             return null;
         }
     }
