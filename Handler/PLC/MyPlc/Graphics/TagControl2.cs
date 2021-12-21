@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -141,27 +142,8 @@ namespace OptimaValue
 
         private void FetchTagsFromSql()
         {
-            var query = $"SELECT * FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"WHERE plcName = '{PlcName}'";
-            var connectionString = PlcConfig.ConnectionString();
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        using (SqlDataAdapter adp = new SqlDataAdapter(cmd))
-                        {
-                            con.Open();
-                            adp.Fill(myTable);
-                        }
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log($"Hittade inga taggar", Severity.Normal, ex);
-            }
+            myTable = DatabaseSql.GetTags(plcName: PlcName);
+
             PopulateList(myTable);
         }
 
@@ -301,18 +283,51 @@ namespace OptimaValue
 
         private void ImportFile(string fileName)
         {
+            bool intouchCsv = false;
+            int rowIndexStart = 0;
+            bool intFound = false;
             try
             {
                 using (var sr = new StreamReader(fileName))
                 {
                     using (var csvReader = new CsvReader(sr, csvConfig))
                     {
-                        var records = csvReader.GetRecords<TagDefinitions>().ToList();
-                        AddTag(records);
-                        UpdateTag(records);
-                        Apps.Logger.Log($"Importerade {myPlc.PlcName}s taggar från {fileName}", Severity.Success);
+                        try
+                        {
+                            var records = csvReader.GetRecords<TagDefinitions>().ToList();
+                            AddTag(records);
+                            UpdateTag(records);
+                            Apps.Logger.Log($"Importerade {myPlc.PlcName}s taggar från {fileName}", Severity.Success);
+                        }
+                        catch (HeaderValidationException)
+                        {
+                            // Kolla om det är Intouch taggar
+                            intouchCsv = true;
+                        }
                     }
+
+
                 }
+                // TODO: Fixa så man kan läsa intouch taggar
+                //using (var sr = new StreamReader(fileName))
+                //{
+                //    if (intouchCsv)
+                //    {
+                //        var config = new CsvConfiguration(CultureInfo.InvariantCulture);
+
+                //        config.Delimiter = ";";
+
+
+                //        using (var csvReader = new CsvReader(sr, config))
+                //        {
+                //            while (csvReader.Read())
+                //            {
+                //                if(csvReader.)
+                //            }
+
+                //        }
+                //    }
+                //}
 
             }
             catch (IOException)
@@ -335,7 +350,6 @@ namespace OptimaValue
 
             foreach (var tag in newTags)
             {
-                var connectionString = PlcConfig.ConnectionString();
                 var query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.tagConfig ";
                 query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
                 query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
@@ -345,22 +359,8 @@ namespace OptimaValue
                 query += $"{tag.BitAddress},'{tag.LogFreq}','{tag.TagUnit}',{tag.EventId},'{tag.IsBooleanTrigger}','";
                 query += $"{tag.BoolTrigger}','{tag.AnalogTrigger}',{tag.AnalogValue},{tag.scaleMin},{tag.scaleMax},{tag.scaleOffset})";
 
-                try
-                {
-                    using (SqlConnection con = new SqlConnection(connectionString))
-                    {
-                        using (SqlCommand cmd = new SqlCommand(query, con))
-                        {
-                            con.Open();
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
+                DatabaseSql.AddTag(query);
 
-                }
-                catch (SqlException)
-                {
-                    Apps.Logger.Log("Lyckas ej skapa nya taggar i SQL", Severity.Error);
-                }
             }
 
         }
@@ -369,7 +369,6 @@ namespace OptimaValue
         {
             foreach (var tag in list)
             {
-                var connectionString = PlcConfig.ConnectionString();
                 var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig ";
                 query += $"SET active='{tag.Active}',name='{tag.Name}',logType='{tag.LogType}',timeOfDay='{tag.TimeOfDay}'";
                 query += $",deadband={tag.Deadband},plcName='{tag.PlcName}',varType='{tag.VarType}',blockNr={tag.BlockNr}" +
@@ -380,21 +379,7 @@ namespace OptimaValue
                     $"scaleMin={tag.scaleMin},scaleMax={tag.scaleMax},scaleOffset={tag.scaleOffset}" +
                     $" WHERE id = {tag.Id}";
 
-                try
-                {
-                    using (SqlConnection con = new SqlConnection(connectionString))
-                    {
-                        using (SqlCommand cmd = new SqlCommand(query, con))
-                        {
-                            con.Open();
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                }
-                catch (SqlException ex)
-                {
-                    Apps.Logger.Log(string.Empty, Severity.Error, ex);
-                }
+                DatabaseSql.UpdateTag(query);
 
             }
             Redraw();
@@ -438,9 +423,6 @@ namespace OptimaValue
             statForm.FormClosing -= StatForm_FormClosing;
         }
 
-        private void dropCsvFile(object sender, DragEventArgs e)
-        {
 
-        }
     }
 }

@@ -83,7 +83,7 @@ namespace OptimaValue
             autoStartTool.Checked = Settings.Default.AutoStart;
 
 
-            var result = await PlcConfig.TestConnectionSqlAsync();
+            var result = await DatabaseSql.TestConnectionAsync();
             if (!result)
             {
                 txtStatus.Text = "Misslyckades att ansluta till Sql";

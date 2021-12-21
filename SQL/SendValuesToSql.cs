@@ -293,30 +293,11 @@ namespace OptimaValue
 
             lock (sqlLock)
             {
-                string connection = PlcConfig.ConnectionString();
-
-                using (SqlConnection con = new SqlConnection(connection))
-                {
-                    using (SqlBulkCopy objBulk = new SqlBulkCopy(connection))
-                    {
-                        objBulk.DestinationTableName = "logValues";
-                        objBulk.ColumnMappings.Add("logTime", "logTime");
-                        objBulk.ColumnMappings.Add("value", "value");
-                        objBulk.ColumnMappings.Add("numericValue", "numericValue");
-                        objBulk.ColumnMappings.Add("tag_id", "tag_id");
-                        try
-                        {
-                            con.Open();
-                            objBulk.WriteToServer(tbl);
-                        }
-                        catch (SqlException ex)
-                        {
-                            $"Problem vid lagring till Sql \n\r{ex.Message}".SendThisStatusMessage(Severity.Error);
-                        }
-                    }
-                }
+                DatabaseSql.SendLogValuesToSql(tbl);
             }
         }
+
+
 
         public static void AddRawValue(object unknownObject, TagDefinitions taggen)
         {

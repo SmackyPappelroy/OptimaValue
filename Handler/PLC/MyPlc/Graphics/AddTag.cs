@@ -24,6 +24,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private Color blueColor = Color.FromArgb(46, 127, 148);
         private Color redColor = Color.FromArgb(201, 74, 74);
 
+        private bool CheckIfExists => DatabaseSql.TagExist(tag.Id);
+
+        private bool CheckForDuplicateNames => DatabaseSql.CheckForDuplicateTagNames(tagName: paraName.ParameterValue, plcName: PlcName);
+
         protected virtual void OnTagChanged(EventArgs e)
         {
             TagChanged?.Invoke(this, e);
@@ -334,7 +338,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 return;
             }
             if (!paraName.ParameterValue.Equals(tag.Name))
-                if (CheckForDuplicateNames())
+                if (CheckForDuplicateNames)
                     return;
 
             if (ValidateAll())
@@ -360,72 +364,19 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 timeOut.Start();
                 return;
             }
-            if (!CheckForDuplicateNames())
+            if (!CheckForDuplicateNames)
                 AddNewTag();
         }
 
         private void AddTagToSql(DataTable dataTable)
         {
-            if (CheckIfExists())
+            if (CheckIfExists)
                 UpdateTag();
         }
 
-        private bool CheckIfExists()
-        {
-            string tagNamn;
-            if (tag == null)
-                tagNamn = paraName.ParameterValue;
-            else
-                tagNamn = tag.Name;
-            object result = new object();
-            var connectionString = PlcConfig.ConnectionString();
-            var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"WHERE id = {tag.Id}";
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        result = cmd.ExecuteScalar();
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex);
-            }
-            if (result != null)
-                return true;
-            return false;
-        }
 
-        private bool CheckForDuplicateNames()
-        {
-            object result = new object();
-            var connectionString = PlcConfig.ConnectionString();
-            var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"WHERE name = '{paraName.ParameterValue}' AND plcName = '{PlcName}'";
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        result = cmd.ExecuteScalar();
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex);
-            }
-            if (result != null)
-                return true;
-            return false;
-        }
+
+
 
         private void AddNewTag()
         {
@@ -446,7 +397,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             var deadband = paraDeadband.ParameterValue.Replace(",", ".");
 
-            var connectionString = PlcConfig.ConnectionString();
             var query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.tagConfig ";
             query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
             query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
@@ -456,43 +406,13 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             query += $"{byte.Parse(paraBitAddress.ParameterValue)},'{paraFreq.comboBoxen.SelectedItem}','{paraUnit.ParameterValue}',{tagEventId},'{isBoolTrigger}','";
             query += $"{boolTrigger}','{analogTrigger}',{analogValue},{paraScaleMin.ParameterValue},{paraScaleMax.ParameterValue},{paraScaleOffset.ParameterValue})";
 
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
+            DatabaseSql.AddTag(query);
 
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex);
-            }
 
-            query = $"SELECT TOP 1 * FROM {SqlSettings.Default.Databas}.dbo.tagConfig ORDER BY id DESC";
             var tbl = new DataTable();
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        using (SqlDataAdapter adp = new SqlDataAdapter(cmd))
-                        {
-                            con.Open();
-                            adp.Fill(tbl);
-                        }
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex);
-            }
+            tbl = DatabaseSql.GetLastTag();
+
+
 
             var _active = (tbl.AsEnumerable().ElementAt(0).Field<bool>("active"));
             var _bitAddress = (tbl.AsEnumerable().ElementAt(0).Field<byte>("bitAddress"));
@@ -555,7 +475,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             var temp = paraDeadband.ParameterValue.Replace(',', '.');
 
-            var connectionString = PlcConfig.ConnectionString();
             var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig ";
             query += $"SET active='{checkActive.Checked}',name='{paraName.ParameterValue}',logType='{paraLogType.comboBoxen.SelectedItem}',timeOfDay='{paraLogTime.ParameterValue}'";
             query += $",deadband={temp},plcName='{PlcName}',varType='{paraVarType.comboBoxen.SelectedItem}',blockNr={int.Parse(paraBlockNr.ParameterValue)}" +
@@ -566,23 +485,13 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 $"scaleMin={paraScaleMin.ParameterValue},scaleMax={paraScaleMax.ParameterValue},scaleOffset={paraScaleOffset.ParameterValue}" +
                 $" WHERE id = {tag.Id}";
 
-            try
+            bool success = DatabaseSql.UpdateTag(query);
+
+            if (success)
             {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
                 btnSave.BackColor = blueColor;
                 btnSave.Image = Properties.Resources.available_updates_64px_gray;
                 timeOut.Start();
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex);
             }
         }
 
@@ -734,7 +643,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void AddTag_FormClosing(object sender, FormClosingEventArgs e)
         {
-            TagsToLog.FetchValuesFromSql();
+            TagsToLog.GetAllTagsFromSql();
         }
 
         private void txtDeadband_TextChanged(object sender, CancelEventArgs e)

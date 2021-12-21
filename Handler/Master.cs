@@ -10,13 +10,13 @@ namespace OptimaValue
         {
             bool ActivePlcs;
 
-            if (!await PlcConfig.TestConnectionSqlAsync())
+            if (!await DatabaseSql.TestConnectionAsync())
             {
                 "Ingen kontakt med databas".SendThisStatusMessage(Severity.Warning);
                 return false;
             }
 
-            if (TagsToLog.FetchValuesFromSql() == null)
+            if (TagsToLog.GetAllTagsFromSql() == null)
                 return false;
 
             foreach (TagDefinitions item in TagsToLog.AllLogValues)

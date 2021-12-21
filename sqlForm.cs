@@ -52,10 +52,10 @@ namespace OptimaValue
             btnSave.Enabled = false;
             SqlSettings.Default.Save();
 
-            var result = await PlcConfig.TestConnectionSqlAsync();
+            var result = await DatabaseSql.TestConnectionAsync();
             if (!result)
             {
-                $"Misslyckades att ansluta med följande Connection-sträng: {PlcConfig.ConnectionString()}".SendThisStatusMessage(Severity.Error);
+                $"Misslyckades att ansluta med följande Connection-sträng: {DatabaseSql.ConnectionString}".SendThisStatusMessage(Severity.Error);
                 btnSave.Enabled = true;
             }
             else

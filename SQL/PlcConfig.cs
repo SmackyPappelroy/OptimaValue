@@ -14,95 +14,11 @@ namespace OptimaValue
         public static DataTable tblPlcConfig = new DataTable();
         public static List<ExtendedPlc> PlcList = new List<ExtendedPlc>();
 
-        public static DataTable tblGridView = new DataTable();
         public static bool plcSettingsFormOpen = false;
         public static bool sqlSettingsFormOpen = false;
         #endregion
 
         #region Methods
-        /// <summary>
-        /// Test connection asynchronously to the <see cref="SQL"/>-server
-        /// </summary>
-        /// <returns><code>True</code>If Successfull</returns>
-        public static async Task<bool> TestConnectionSqlAsync()
-        {
-            try
-            {
-                using (SqlConnection con = new SqlConnection(PlcConfig.ConnectionString()))
-                {
-                    try
-                    {
-                        await con.OpenAsync();
-                        DatabaseStatus.isConnected = true;
-                        return true;
-                    }
-                    catch (SqlException ex)
-                    {
-                        Apps.Logger.Log(string.Empty, Severity.Error, ex);
-                        DatabaseStatus.isConnected = false;
-                        return false;
-                    }
-                    finally
-                    {
-                        con.Dispose();
-                    }
-                }
-            }
-            catch (SqlException)
-            {
-                DatabaseStatus.isConnected = false;
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Creates a SQL connection string
-        /// </summary>
-        /// <returns>A connection string</returns>
-        public static string ConnectionString()
-        {
-            SqlSettings.Default.ConnectionString = ($"Server={@SqlSettings.Default.Server};Database={SqlSettings.Default.Databas};User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
-            SqlSettings.Default.Save();
-            return SqlSettings.Default.ConnectionString;
-        }
-
-        /// <summary>
-        /// Creates a SQL connection string to Cip log
-        /// </summary>
-        /// <returns>A connection string</returns>
-        public static string ConnectionStringCip()
-        {
-            SqlSettings.Default.ConnectionString = ($"Server={@SqlSettings.Default.Server};Database={SqlSettings.Default.CipDatabas};User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
-            SqlSettings.Default.Save();
-            return SqlSettings.Default.ConnectionString;
-        }
-
-        /// <summary>
-        /// Deletes all rows from dbo.plcConfig table
-        /// </summary>
-        /// <returns>True if successfull</returns>
-        public static bool DeletePlcSql()
-        {
-            string query = @"Delete FROM " + SqlSettings.Default.Databas + ".dbo.plcConfig";
-            using (SqlConnection con = new SqlConnection(ConnectionString()))
-            {
-                try
-                {
-                    con.Open();
-                    using (SqlCommand cmd = new SqlCommand(query))
-                    {
-                        cmd.Connection = con;
-                        cmd.ExecuteNonQuery();
-                        return true;
-                    }
-                }
-                catch (SqlException ex)
-                {
-                    Apps.Logger.Log(string.Empty, Severity.Error, ex);
-                    return false;
-                }
-            }
-        }
 
         /// <summary>
         /// Retrieves the configured <see cref="Plc"/>s from the Sql-server
@@ -111,32 +27,13 @@ namespace OptimaValue
         public static DataTable PopulateDataTable()
         {
             tblPlcConfig.Clear();
-            string connection = ConnectionString();
-            string query = "SELECT * FROM " + SqlSettings.Default.Databas + ".dbo.plcConfig";
-            using (SqlConnection con = new SqlConnection(connection))
+            tblPlcConfig = DatabaseSql.GetPlcDataTable();
+            if (tblPlcConfig != null)
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    try
-                    {
-                        con.Open();
-                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                        {
-                            tblPlcConfig.Clear();
-                            da.Fill(tblPlcConfig);
-                            tblGridView = tblPlcConfig;
-                            PopulatePlcList();
-                            return tblGridView;
-                        }
-                    }
-                    catch (SqlException ex)
-                    {
-                        Apps.Logger.Log(string.Empty, Severity.Error, ex);
-                        return null;
-                    }
-
-                }
+                PopulatePlcList();
             }
+            return tblPlcConfig;
+
         }
 
         /// <summary>
@@ -194,10 +91,8 @@ namespace OptimaValue
                 return false;
         }
 
-        public static ExtendedPlc FindPlc(int plcId)
-        {
-            return PlcList.Find(p => p.Id == plcId);
-        }
+        public static ExtendedPlc FindPlc(int plcId) => PlcList.Find(p => p.Id == plcId);
+
         #endregion
     }
 }

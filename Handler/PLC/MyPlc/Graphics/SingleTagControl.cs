@@ -130,46 +130,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             DeleteTag();
             OnTagChanged(EventArgs.Empty);
         }
-        private void DeleteTag()
-        {
-            var connectionString = PlcConfig.ConnectionString();
-            var query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.logValues ";
-            query += $"WHERE tag_id = {SingleTag.Id}";
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex);
-            }
 
-
-            query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"WHERE id = {SingleTag.Id}";
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (SqlException ex2)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex2);
-            }
-        }
+        /// <summary>
+        /// Delete one tag from SQL
+        /// </summary>
+        private void DeleteTag() => DatabaseSql.DeleteTag(SingleTag.Id);
 
 
         private void OpenStatsForm()

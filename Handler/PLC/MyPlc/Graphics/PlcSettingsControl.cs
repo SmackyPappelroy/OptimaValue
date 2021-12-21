@@ -24,6 +24,9 @@ namespace OptimaValue.Handler.PLC.Graphics
         private SyncPlcTimeForm syncForm;
         private bool syncFormOpen;
 
+        private bool PlcExists => DatabaseSql.DoesPlcExist(PlcName);
+
+
 
         public PlcSettingsControl(ConnectionStatus conStatus, string plcName, string plcIp,
             string slot, string rack, bool active, CpuType cpuType, int id, ExtendedPlc myPlc)
@@ -334,116 +337,26 @@ namespace OptimaValue.Handler.PLC.Graphics
 
         private void SavePlcConfig()
         {
-            string connectionString = PlcConfig.ConnectionString();
             string activeString;
             if (checkActive.Checked)
                 activeString = "True";
             else
                 activeString = "False";
 
-            string query;
-            if (CheckIfExists())
-            {
-                query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET active='{activeString}',name='{txtName.Text}'";
-                query += $",ipAddress='{txtIp.Text}',cpuType='{comboCpu.SelectedItem}',rack={txtRack.Text},slot={txtSlot.Text}";
-                query += $" WHERE id = {Id}";
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig SET plcName='{txtName.Text}' ";
-                query += $"WHERE plcName = '{PlcName}'";
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            else
-            {
-                query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.plcConfig (active,name,ipAddress,cpuType,rack,slot,";
-                query += $"syncTimeDbNr,syncTimeOffset,syncActive,syncBoolAddress,lastSyncTime)";
-                query += $"VALUES ('{activeString}','{txtName.Text}','{txtIp.Text}','{comboCpu.SelectedItem}',{txtRack.Text},{txtSlot.Text},";
-                query += $"0,0,'False','DBX0.0','{DateTime.UtcNow - TimeSpan.FromDays(1)}')";
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
 
-
+            DatabaseSql.SavePlcConfig(activeString,
+                name: txtName.Text,
+                ip: txtIp.Text,
+                cpu: comboCpu.SelectedItem.ToString(),
+                rack: txtRack.Text,
+                slot: txtSlot.Text,
+                id: Id,
+                plcName: PlcName);
 
             RedrawTreeEvent.RaiseMessage(true);
         }
 
-        private bool CheckIfExists()
-        {
-            object result = new object();
-            var query = $"Select top 1 name FROM {SqlSettings.Default.Databas}.dbo.plcConfig WHERE name ='{PlcName}'";
-            string connectionString = PlcConfig.ConnectionString();
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        result = cmd.ExecuteScalar();
-                    }
-                }
 
-            }
-            catch (SqlException ex)
-            {
-                $"Misslyckades att läsa från SQL\r\n{ex.Message}".SendThisStatusMessage(Severity.Error);
-            }
-
-            if (result != null)
-                return true;
-            else
-                return false;
-
-        }
-
-        private bool CheckIfExistsDelete()
-        {
-            object result = new object();
-            var query = $"Select top 1 id FROM {SqlSettings.Default.Databas}.dbo.plcConfig WHERE id ='{Id}'";
-            string connectionString = PlcConfig.ConnectionString();
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        result = cmd.ExecuteScalar();
-                    }
-                }
-
-            }
-            catch (SqlException ex)
-            {
-                $"Misslyckades att läsa från SQL\r\n{ex.Message}".SendThisStatusMessage(Severity.Error);
-            }
-
-            if (result != null)
-                return true;
-            else
-                return false;
-
-        }
 
         private void PlcSettingsControl_Load(object sender, EventArgs e)
         {
@@ -536,29 +449,11 @@ namespace OptimaValue.Handler.PLC.Graphics
                 return;
             }
 
-            if (!CheckIfExistsDelete())
+            if (!PlcExists)
                 RedrawTreeEvent.RaiseMessage(true);
             else
             {
-                var query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.plcConfig ";
-                query += $"WHERE id ='{Id}'";
-                var connectionString = PlcConfig.ConnectionString();
-                try
-                {
-                    using (SqlConnection con = new SqlConnection(connectionString))
-                    {
-                        using (SqlCommand cmd = new SqlCommand(query, con))
-                        {
-                            con.Open();
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                }
-                catch (SqlException ex)
-                {
-                    $"Misslyckades ta bort PLC från SQL\r\n{ex.Message}".SendThisStatusMessage(Severity.Error);
-
-                }
+                DatabaseSql.DeletePlc(Id);
                 RedrawTreeEvent.RaiseMessage(true);
             }
         }

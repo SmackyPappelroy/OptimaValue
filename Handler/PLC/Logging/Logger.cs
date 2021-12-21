@@ -278,23 +278,7 @@ namespace OptimaValue
             }
             MyPlc.lastSyncTime = tid;
 
-            var connectionString = PlcConfig.ConnectionString();
-            var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET lastSyncTime = '{tid}' WHERE name = '{MyPlc.PlcName}'";
-            try
-            {
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log($"Lyckades ej skriva till databas vid tids-synkning: {MyPlc.PlcName}", Severity.Error, ex);
-            }
+            DatabaseSql.SaveSyncTime(tid: tid, plcName: MyPlc.PlcName);
 
             Apps.Logger.Log($"Synkade {MyPlc.PlcName}", Severity.Success);
         }

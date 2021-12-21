@@ -131,25 +131,20 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void SaveToSql()
         {
-            string connectionString = PlcConfig.ConnectionString();
             string activeString;
             if (checkActive.Checked)
                 activeString = "True";
             else
                 activeString = "False";
 
-            string query;
-            query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET ";
-            query += $"syncTimeDbNr={txtSynkDb.Text},syncTimeOffset={txtSynkByte.Text},syncBoolAddress='{txtSyncBool.Text}',syncActive='{activeString}'";
-            query += $" WHERE id = {MyPlc.Id}";
-            using (SqlConnection con = new SqlConnection(connectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                }
-            }
+
+            DatabaseSql.SavePlcSyncParameters(
+                syncDb: txtSynkDb.Text
+                , syncByte: txtSynkByte.Text
+                , syncBool: txtSyncBool.Text
+                , activeString: activeString
+                , plcId: MyPlc.Id);
+
         }
     }
 }

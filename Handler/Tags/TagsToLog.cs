@@ -15,121 +15,69 @@ namespace OptimaValue
         public static List<TagDefinitions> AllLogValues { get; set; } = new List<TagDefinitions>();
         #endregion
 
-        public static DataTable FetchValuesFromSql(string plcName = "")
+
+        /// <summary>
+        /// Gets all tags from sql or tags for one or all <see cref="ExtendedPlc"/>
+        /// </summary>
+        /// <param name="plcName"></param>
+        /// <returns></returns>
+        public static DataTable GetAllTagsFromSql(string plcName = "")
         {
             if (AllTagsTable == null)
                 AllTagsTable = new DataTable();
 
-            var query = $"SELECT * FROM {SqlSettings.Default.Databas}.dbo.tagConfig";
-            string connection = PlcConfig.ConnectionString();
-            try
+            AllTagsTable = DatabaseSql.GetTags(plcName);
+
+            if (plcName == string.Empty)
             {
-                using (SqlConnection con = new SqlConnection(connection))
-                {
-                    if (plcName == "")
-                    {
-                        using (SqlCommand cmd = new SqlCommand(query, con))
-                        {
-
-                            con.Open();
-
-                            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                            {
-                                if (AllTagsTable != null)
-                                    AllTagsTable.Clear();
-                                da.Fill(AllTagsTable);
-                            }
-                            AllLogValues.Clear();
-                            AllLogValues = (from DataRow dr in AllTagsTable.Rows
-                                            select new TagDefinitions()
-                                            {
-                                                Id = (int)dr["id"],
-                                                Active = (bool)dr["active"],
-                                                Name = dr["name"].ToString(),
-                                                LogType = (LogType)Enum.Parse(typeof(LogType), dr["logType"].ToString()),
-                                                TimeOfDay = (TimeSpan)dr["timeOfDay"],
-                                                Deadband = (float)((double)dr["deadband"]),
-                                                PlcName = dr["plcName"].ToString(),
-                                                VarType = (VarType)Enum.Parse(typeof(VarType), dr["varType"].ToString()),
-                                                BlockNr = (int)dr["blockNr"],
-                                                DataType = (DataType)Enum.Parse(typeof(DataType), dr["dataType"].ToString()),
-                                                StartByte = (int)dr["startByte"],
-                                                NrOfElements = (int)dr["nrOfElements"],
-                                                BitAddress = (byte)dr["bitAddress"],
-                                                LogFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), dr["logFreq"].ToString()),
-                                                LastLogTime = DateTime.MinValue,
-                                                TagUnit = dr["tagUnit"].ToString(),
-                                                EventId = (int)dr["eventId"],
-                                                IsBooleanTrigger = (bool)dr["isBooleanTrigger"],
-                                                BoolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), dr["boolTrigger"].ToString()),
-                                                AnalogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), dr["analogTrigger"].ToString()),
-                                                AnalogValue = (float)((double)dr["analogValue"]),
-                                                scaleMin = (int)dr["scaleMin"],
-                                                scaleMax = (int)dr["scaleMax"],
-                                                scaleOffset = (int)dr["scaleOffset"],
-                                            }).ToList();
-
-                            // Sorterar listan alfabetiskt
-                            AllLogValues.Sort((x, y) => string.Compare(x.Name, y.Name));
-
-                            return AllTagsTable;
-                        }
-                    }
-                    else
-                    {
-                        var tagTable = new DataTable();
-                        query = $"SELECT * FROM {SqlSettings.Default.Databas}.dbo.tagConfig WHERE plcName = '{plcName}'";
-                        using (SqlCommand cmd = new SqlCommand(query, con))
-                        {
-                            con.Open();
-                            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                            {
-                                da.Fill(tagTable);
-                            }
-                            return tagTable;
-                        }
-                    }
-                }
-            }
-            catch (SqlException ex)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex);
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Apps.Logger.Log(string.Empty, Severity.Error, ex);
-                return null;
+                AllLogValues = TagTableToList(AllTagsTable);
             }
 
-
+            return AllTagsTable;
         }
 
         /// <summary>
-        /// Deletes all rows from dbo.plcConfig table
+        /// Converts Datatable to a list of <see cref="TagDefinitions"/>/>
         /// </summary>
-        /// <returns>True if successfull</returns>
-        public static bool DeleteTagSql()
+        /// <param name="tbl"></param>
+        /// <returns></returns>
+        private static List<TagDefinitions> TagTableToList(DataTable tbl)
         {
-            string query = @"Delete FROM " + SqlSettings.Default.Databas + ".dbo.tagConfig";
-            using (SqlConnection con = new SqlConnection(PlcConfig.ConnectionString()))
-            {
-                try
-                {
-                    con.Open();
-                    using (SqlCommand cmd = new SqlCommand(query))
-                    {
-                        cmd.Connection = con;
-                        cmd.ExecuteNonQuery();
-                        return true;
-                    }
-                }
-                catch (SqlException ex)
-                {
-                    Apps.Logger.Log(string.Empty, Severity.Error, ex);
-                    return false;
-                }
-            }
+            var logValues = new List<TagDefinitions>();
+            logValues.Clear();
+            logValues = (from DataRow dr in AllTagsTable.Rows
+                         select new TagDefinitions()
+                         {
+                             Id = (int)dr["id"],
+                             Active = (bool)dr["active"],
+                             Name = dr["name"].ToString(),
+                             LogType = (LogType)Enum.Parse(typeof(LogType), dr["logType"].ToString()),
+                             TimeOfDay = (TimeSpan)dr["timeOfDay"],
+                             Deadband = (float)((double)dr["deadband"]),
+                             PlcName = dr["plcName"].ToString(),
+                             VarType = (VarType)Enum.Parse(typeof(VarType), dr["varType"].ToString()),
+                             BlockNr = (int)dr["blockNr"],
+                             DataType = (DataType)Enum.Parse(typeof(DataType), dr["dataType"].ToString()),
+                             StartByte = (int)dr["startByte"],
+                             NrOfElements = (int)dr["nrOfElements"],
+                             BitAddress = (byte)dr["bitAddress"],
+                             LogFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), dr["logFreq"].ToString()),
+                             LastLogTime = DateTime.MinValue,
+                             TagUnit = dr["tagUnit"].ToString(),
+                             EventId = (int)dr["eventId"],
+                             IsBooleanTrigger = (bool)dr["isBooleanTrigger"],
+                             BoolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), dr["boolTrigger"].ToString()),
+                             AnalogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), dr["analogTrigger"].ToString()),
+                             AnalogValue = (float)((double)dr["analogValue"]),
+                             scaleMin = (int)dr["scaleMin"],
+                             scaleMax = (int)dr["scaleMax"],
+                             scaleOffset = (int)dr["scaleOffset"],
+                         }).ToList();
+
+            // Sorterar listan alfabetiskt
+            logValues.Sort((x, y) => string.Compare(x.Name, y.Name));
+
+            return logValues;
         }
     }
 }

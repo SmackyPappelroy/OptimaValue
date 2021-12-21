@@ -18,7 +18,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (tag == null)
                 tag = new TagDefinitions();
             if (TagsToLog.AllLogValues.Count == 0)
-                TagsToLog.FetchValuesFromSql();
+                TagsToLog.GetAllTagsFromSql();
             PopulateTagCombo(tag);
         }
 
