@@ -467,7 +467,7 @@ namespace OptimaValue
 
         private void DatabaseTimer_Tick(object sender, EventArgs e)
         {
-            if (databaseImage.Image == noDatabase)
+            if (!DatabaseStatus.isConnected)
                 databaseImage.Visible = !databaseImage.Visible;
             else
                 databaseImage.Visible = true;

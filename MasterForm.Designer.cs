@@ -146,6 +146,7 @@
             // 
             // databaseImage
             // 
+            this.databaseImage.BackColor = System.Drawing.Color.Transparent;
             this.databaseImage.Location = new System.Drawing.Point(821, 35);
             this.databaseImage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.databaseImage.Name = "databaseImage";
@@ -313,7 +314,7 @@
             // databasToolStripMenuItem
             // 
             this.databasToolStripMenuItem.Name = "databasToolStripMenuItem";
-            this.databasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.databasToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
             this.databasToolStripMenuItem.Text = "Databas";
             this.databasToolStripMenuItem.Click += new System.EventHandler(this.databasToolStripMenuItem_Click);
             // 
@@ -321,7 +322,7 @@
             // 
             this.debugMenu.CheckOnClick = true;
             this.debugMenu.Name = "debugMenu";
-            this.debugMenu.Size = new System.Drawing.Size(180, 22);
+            this.debugMenu.Size = new System.Drawing.Size(133, 22);
             this.debugMenu.Text = "Debug";
             this.debugMenu.CheckedChanged += new System.EventHandler(this.debugMeny_CheckedChanged);
             // 
@@ -329,7 +330,7 @@
             // 
             this.notifyMenu.CheckOnClick = true;
             this.notifyMenu.Name = "notifyMenu";
-            this.notifyMenu.Size = new System.Drawing.Size(180, 22);
+            this.notifyMenu.Size = new System.Drawing.Size(133, 22);
             this.notifyMenu.Text = "Notify Ikon";
             this.notifyMenu.CheckedChanged += new System.EventHandler(this.notifyMenu_CheckedChanged);
             // 
@@ -337,7 +338,7 @@
             // 
             this.autoStartTool.CheckOnClick = true;
             this.autoStartTool.Name = "autoStartTool";
-            this.autoStartTool.Size = new System.Drawing.Size(180, 22);
+            this.autoStartTool.Size = new System.Drawing.Size(133, 22);
             this.autoStartTool.Text = "Autostart";
             this.autoStartTool.CheckedChanged += new System.EventHandler(this.autoStartTool_CheckedChanged);
             // 
