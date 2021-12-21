@@ -14,50 +14,58 @@ public static class DatabaseSql
     /// Creates a SQL connection string
     /// </summary>
     /// <returns>A connection string</returns>
-    public static string ConnectionString
-    {
-        get
-        {
-            SqlSettings.Default.ConnectionString = ($"Server={@SqlSettings.Default.Server};Database={SqlSettings.Default.Databas};User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
-            SqlSettings.Default.Save();
-            return SqlSettings.Default.ConnectionString;
-        }
-    }
-
+    public static string ConnectionString => SqlSettings.Default.ConnectionString;
 
     /// <summary>
-    /// Test connection asynchronously to the <see cref="SQL"/>-server
+    /// Test connection asynchronously to the <see cref="Microsoft.SqlServer"/>
     /// </summary>
     /// <returns><code>True</code>If Successfull</returns>
     public static async Task<bool> TestConnectionAsync()
     {
+        using SqlConnection con = new(ConnectionString);
+
         try
         {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                try
-                {
-                    await con.OpenAsync();
-                    DatabaseStatus.isConnected = true;
-                    return true;
-                }
-                catch (SqlException ex)
-                {
-                    Apps.Logger.Log(string.Empty, Severity.Error, ex);
-                    DatabaseStatus.isConnected = false;
-                    return false;
-                }
-                finally
-                {
-                    con.Dispose();
-                }
-            }
+            await con.OpenAsync();
+            DatabaseStatus.isConnected = true;
+            return true;
         }
-        catch (SqlException)
+        catch (SqlException ex)
         {
+            Apps.Logger.Log(string.Empty, Severity.Error, ex);
             DatabaseStatus.isConnected = false;
             return false;
         }
+        finally
+        {
+            con.Dispose();
+        }
+    }
+
+    /// <summary>
+    /// Does the tag exist?
+    /// </summary>
+    /// <param name="tagId"></param>
+    /// <returns></returns>
+    public static bool TagExist(int tagId)
+    {
+        object result = new object();
+        var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
+        query += $"WHERE id = {tagId}";
+        try
+        {
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            result = cmd.ExecuteScalar();
+        }
+        catch (SqlException ex)
+        {
+            Apps.Logger.Log(string.Empty, Severity.Error, ex);
+        }
+        if (result != null)
+            return true;
+        return false;
     }
 
     /// <summary>
@@ -71,37 +79,32 @@ public static class DatabaseSql
         var query = $"SELECT * FROM {SqlSettings.Default.Databas}.dbo.tagConfig";
         try
         {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
+            using SqlConnection con = new(ConnectionString);
+            if (plcName == "")
             {
-                if (plcName == "")
-                {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
+                using SqlCommand cmd = new(query, con);
 
-                        con.Open();
+                con.Open();
 
-                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                        {
-                            if (tbl != null)
-                                tbl.Clear();
-                            da.Fill(tbl);
-                        }
-                        return tbl;
-                    }
-                }
-                else
+                using (SqlDataAdapter da = new(cmd))
                 {
-                    query = $"SELECT * FROM {SqlSettings.Default.Databas}.dbo.tagConfig WHERE plcName = '{plcName}'";
-                    using (SqlCommand cmd = new SqlCommand(query, con))
-                    {
-                        con.Open();
-                        using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                        {
-                            da.Fill(tbl);
-                        }
-                        return tbl;
-                    }
+                    if (tbl != null)
+                        tbl.Clear();
+                    da.Fill(tbl);
                 }
+                return tbl;
+            }
+            else
+            {
+                query = $"SELECT * FROM {SqlSettings.Default.Databas}.dbo.tagConfig WHERE plcName = '{plcName}'";
+                using SqlCommand cmd = new(query, con);
+
+                con.Open();
+                using (SqlDataAdapter da = new(cmd))
+                {
+                    da.Fill(tbl);
+                }
+                return tbl;
             }
         }
         catch (SqlException ex)
@@ -116,6 +119,26 @@ public static class DatabaseSql
         }
     }
 
+    public static bool UpdateTag(string query)
+    {
+        try
+        {
+            using (SqlConnection con = new(ConnectionString))
+            {
+                using SqlCommand cmd = new(query, con);
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+            return true;
+
+        }
+        catch (SqlException ex)
+        {
+            string.Empty.SendStatusMessage(Severity.Error, ex);
+            return false;
+        }
+    }
+
     /// <summary>
     /// Delete one tag from Sql
     /// </summary>
@@ -126,14 +149,11 @@ public static class DatabaseSql
         query += $"WHERE tag_id = {tagId}";
         try
         {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            using SqlConnection con = new SqlConnection(ConnectionString);
+            using SqlCommand cmd = new SqlCommand(query, con);
+
+            con.Open();
+            cmd.ExecuteNonQuery();
         }
         catch (SqlException ex)
         {
@@ -145,19 +165,80 @@ public static class DatabaseSql
         query += $"WHERE id = {tagId}";
         try
         {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            using SqlConnection con = new SqlConnection(ConnectionString);
+            using SqlCommand cmd = new SqlCommand(query, con);
+
+            con.Open();
+            cmd.ExecuteNonQuery();
         }
         catch (SqlException ex2)
         {
             Apps.Logger.Log(string.Empty, Severity.Error, ex2);
         }
+    }
+
+    public static bool CheckForDuplicateTagNames(string tagName, string plcName)
+    {
+        object result = new object();
+        var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
+        query += $"WHERE name = '{tagName}' AND plcName = '{plcName}'";
+        try
+        {
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            result = cmd.ExecuteScalar();
+        }
+        catch (SqlException ex)
+        {
+            string.Empty.SendStatusMessage(Severity.Error, ex);
+        }
+        if (result != null)
+            return true;
+        return false;
+    }
+
+    /// <summary>
+    /// Add tag to SQL
+    /// </summary>
+    /// <param name="query"></param>
+    public static void AddTag(string query)
+    {
+        try
+        {
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            cmd.ExecuteNonQuery();
+
+        }
+        catch (SqlException ex)
+        {
+            string.Empty.SendStatusMessage(Severity.Error, ex);
+        }
+    }
+
+    /// <summary>
+    /// Get the last added tag from SQL
+    /// </summary>
+    /// <returns></returns>
+    public static DataTable GetLastTag()
+    {
+        DataTable tbl = new DataTable();
+        string query = $"SELECT TOP 1 * FROM {SqlSettings.Default.Databas}.dbo.tagConfig ORDER BY id DESC";
+        try
+        {
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            using SqlDataAdapter adp = new SqlDataAdapter(cmd);
+            con.Open();
+            adp.Fill(tbl);
+        }
+        catch (SqlException ex)
+        {
+            string.Empty.SendStatusMessage(Severity.Error, ex);
+        }
+        return tbl;
     }
 
     /// <summary>
@@ -168,27 +249,21 @@ public static class DatabaseSql
     {
         var tbl = new DataTable();
         string query = "SELECT * FROM " + SqlSettings.Default.Databas + ".dbo.plcConfig";
-        using (SqlConnection con = new SqlConnection(ConnectionString))
+        using SqlConnection con = new SqlConnection(ConnectionString);
+        using SqlCommand cmd = new SqlCommand(query, con);
+        try
         {
-            using (SqlCommand cmd = new SqlCommand(query, con))
-            {
-                try
-                {
-                    con.Open();
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                    {
-                        tbl.Clear();
-                        da.Fill(tbl);
-                        return tbl;
-                    }
-                }
-                catch (SqlException ex)
-                {
-                    Apps.Logger.Log(string.Empty, Severity.Error, ex);
-                    return null;
-                }
+            con.Open();
+            using SqlDataAdapter da = new SqlDataAdapter(cmd);
 
-            }
+            tbl.Clear();
+            da.Fill(tbl);
+            return tbl;
+        }
+        catch (SqlException ex)
+        {
+            Apps.Logger.Log(string.Empty, Severity.Error, ex);
+            return null;
         }
     }
 
@@ -202,47 +277,15 @@ public static class DatabaseSql
         query += $"WHERE id ='{id}'";
         try
         {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            using SqlConnection con = new SqlConnection(ConnectionString);
+            using SqlCommand cmd = new SqlCommand(query, con);
+
+            con.Open();
+            cmd.ExecuteNonQuery();
         }
         catch (SqlException ex)
         {
-            $"Misslyckades ta bort PLC från SQL\r\n{ex.Message}".SendThisStatusMessage(Severity.Error);
-        }
-    }
-
-    /// <summary>
-    /// Sends logvalues in bulk to SQL
-    /// </summary>
-    /// <param name="tbl"></param>
-    public static void SendLogValuesToSql(DataTable tbl)
-    {
-
-        using (SqlConnection con = new SqlConnection(ConnectionString))
-        {
-            using (SqlBulkCopy objBulk = new SqlBulkCopy(ConnectionString))
-            {
-                objBulk.DestinationTableName = "logValues";
-                objBulk.ColumnMappings.Add("logTime", "logTime");
-                objBulk.ColumnMappings.Add("value", "value");
-                objBulk.ColumnMappings.Add("numericValue", "numericValue");
-                objBulk.ColumnMappings.Add("tag_id", "tag_id");
-                try
-                {
-                    con.Open();
-                    objBulk.WriteToServer(tbl);
-                }
-                catch (SqlException ex)
-                {
-                    $"Problem vid lagring till Sql \n\r{ex.Message}".SendThisStatusMessage(Severity.Error);
-                }
-            }
+            $"Misslyckades ta bort PLC från SQL\r\n{ex.Message}".SendStatusMessage(Severity.Error);
         }
     }
 
@@ -260,14 +303,11 @@ public static class DatabaseSql
         query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET ";
         query += $"syncTimeDbNr={syncDb},syncTimeOffset={syncByte},syncBoolAddress='{syncBool}',syncActive='{activeString}'";
         query += $" WHERE id = {plcId}";
-        using (SqlConnection con = new SqlConnection(ConnectionString))
-        {
-            using (SqlCommand cmd = new SqlCommand(query, con))
-            {
-                con.Open();
-                cmd.ExecuteNonQuery();
-            }
-        }
+
+        using SqlConnection con = new SqlConnection(ConnectionString);
+        using SqlCommand cmd = new SqlCommand(query, con);
+        con.Open();
+        cmd.ExecuteNonQuery();
     }
 
     /// <summary>
@@ -281,19 +321,15 @@ public static class DatabaseSql
         var query = $"Select top 1 name FROM {SqlSettings.Default.Databas}.dbo.plcConfig WHERE name ='{plcName}'";
         try
         {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    result = cmd.ExecuteScalar();
-                }
-            }
+            using SqlConnection con = new SqlConnection(ConnectionString);
+            using SqlCommand cmd = new SqlCommand(query, con);
+            con.Open();
+            result = cmd.ExecuteScalar();
 
         }
         catch (SqlException ex)
         {
-            $"Misslyckades att läsa från SQL\r\n{ex.Message}".SendThisStatusMessage(Severity.Error);
+            $"Misslyckades att läsa från SQL\r\n{ex.Message}".SendStatusMessage(Severity.Error);
         }
 
         if (result != null)
@@ -321,23 +357,20 @@ public static class DatabaseSql
             query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET active='{activeString}',name='{name}'";
             query += $",ipAddress='{ip}',cpuType='{cpu}',rack={rack},slot={slot}";
             query += $" WHERE id = {id}";
-            using (SqlConnection con = new SqlConnection(ConnectionString))
+
+            using (SqlConnection con = new(ConnectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                }
+                using SqlCommand cmd = new(query, con);
+                con.Open();
+                cmd.ExecuteNonQuery();
             }
             query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig SET plcName='{name}' ";
             query += $"WHERE plcName = '{plcName}'";
-            using (SqlConnection con = new SqlConnection(ConnectionString))
+            using (SqlConnection con = new(ConnectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                }
+                using SqlCommand cmd = new(query, con);
+                con.Open();
+                cmd.ExecuteNonQuery();
             }
         }
         else
@@ -347,14 +380,10 @@ public static class DatabaseSql
             query += $"syncTimeDbNr,syncTimeOffset,syncActive,syncBoolAddress,lastSyncTime)";
             query += $"VALUES ('{activeString}','{name}','{ip}','{cpu}',{rack},{slot},";
             query += $"0,0,'False','DBX0.0','{DateTime.UtcNow - TimeSpan.FromDays(1)}')";
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            cmd.ExecuteNonQuery();
         }
     }
 
@@ -368,148 +397,40 @@ public static class DatabaseSql
         var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET lastSyncTime = '{tid}' WHERE name = '{plcName}'";
         try
         {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            cmd.ExecuteNonQuery();
         }
         catch (SqlException ex)
         {
-            Apps.Logger.Log($"Lyckades ej skriva till databas vid tids-synkning: {plcName}", Severity.Error, ex);
+            $"Lyckades ej skriva till databas vid tids-synkning: {plcName}".SendStatusMessage(Severity.Error, ex);
         }
     }
 
     /// <summary>
-    /// Does the tag exist?
+    /// Sends logvalues in bulk to SQL
     /// </summary>
-    /// <param name="tagId"></param>
-    /// <returns></returns>
-    public static bool TagExist(int tagId)
+    /// <param name="tbl"></param>
+    public static void SendLogValuesToSql(DataTable tbl)
     {
-        object result = new object();
-        var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-        query += $"WHERE id = {tagId}";
+
+        using SqlConnection con = new SqlConnection(ConnectionString);
+        using SqlBulkCopy objBulk = new SqlBulkCopy(ConnectionString);
+
+        objBulk.DestinationTableName = "logValues";
+        objBulk.ColumnMappings.Add("logTime", "logTime");
+        objBulk.ColumnMappings.Add("value", "value");
+        objBulk.ColumnMappings.Add("numericValue", "numericValue");
+        objBulk.ColumnMappings.Add("tag_id", "tag_id");
         try
         {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    result = cmd.ExecuteScalar();
-                }
-            }
+            con.Open();
+            objBulk.WriteToServer(tbl);
         }
         catch (SqlException ex)
         {
-            Apps.Logger.Log(string.Empty, Severity.Error, ex);
-        }
-        if (result != null)
-            return true;
-        return false;
-    }
-
-    public static bool CheckForDuplicateTagNames(string tagName, string plcName)
-    {
-        object result = new object();
-        var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
-        query += $"WHERE name = '{tagName}' AND plcName = '{plcName}'";
-        try
-        {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    result = cmd.ExecuteScalar();
-                }
-            }
-        }
-        catch (SqlException ex)
-        {
-            Apps.Logger.Log(string.Empty, Severity.Error, ex);
-        }
-        if (result != null)
-            return true;
-        return false;
-    }
-
-    /// <summary>
-    /// Add tag to SQL
-    /// </summary>
-    /// <param name="query"></param>
-    public static void AddTag(string query)
-    {
-        try
-        {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                }
-            }
-
-        }
-        catch (SqlException ex)
-        {
-            Apps.Logger.Log(string.Empty, Severity.Error, ex);
-        }
-    }
-
-    /// <summary>
-    /// Get the last added tag from SQL
-    /// </summary>
-    /// <returns></returns>
-    public static DataTable GetLastTag()
-    {
-        DataTable tbl = new DataTable();
-        string query = $"SELECT TOP 1 * FROM {SqlSettings.Default.Databas}.dbo.tagConfig ORDER BY id DESC";
-        try
-        {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    using (SqlDataAdapter adp = new SqlDataAdapter(cmd))
-                    {
-                        con.Open();
-                        adp.Fill(tbl);
-                    }
-                }
-            }
-        }
-        catch (SqlException ex)
-        {
-            Apps.Logger.Log(string.Empty, Severity.Error, ex);
-        }
-        return tbl;
-    }
-
-    public static bool UpdateTag(string query)
-    {
-        try
-        {
-            using (SqlConnection con = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                }
-            }
-            return true;
-
-        }
-        catch (SqlException ex)
-        {
-            Apps.Logger.Log(string.Empty, Severity.Error, ex);
-            return false;
+            $"Problem vid lagring till Sql \n\r{ex.Message}".SendStatusMessage(Severity.Error);
         }
     }
 }

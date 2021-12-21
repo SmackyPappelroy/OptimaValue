@@ -1,10 +1,12 @@
-﻿namespace OptimaValue
+﻿using System;
+
+namespace OptimaValue
 {
     public static class EventExtensionMethods
     {
-        public static void SendThisStatusMessage(this string message, Severity severity = Severity.Normal)
+        public static void SendStatusMessage(this string message, Severity severity = Severity.Normal, Exception ex = null)
         {
-            Apps.Logger.Log(message, severity);
+            Apps.Logger.Log(message, severity, ex);
 
         }
     }

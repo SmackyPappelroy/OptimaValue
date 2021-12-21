@@ -22,9 +22,10 @@ static class Program
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 #endif
             ApplicationConfiguration.Initialize();
-            // Ökar kontrasten radikalt
             try
             {
+                SqlSettings.Default.ConnectionString = ($"Server={@SqlSettings.Default.Server};Database={SqlSettings.Default.Databas};User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
+                SqlSettings.Default.Save();
                 Application.Run(new MasterForm());
             }
             catch (Exception ex)

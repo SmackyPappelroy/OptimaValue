@@ -12,7 +12,7 @@ namespace OptimaValue
 
             if (!await DatabaseSql.TestConnectionAsync())
             {
-                "Ingen kontakt med databas".SendThisStatusMessage(Severity.Warning);
+                "Ingen kontakt med databas".SendStatusMessage(Severity.Warning);
                 return false;
             }
 

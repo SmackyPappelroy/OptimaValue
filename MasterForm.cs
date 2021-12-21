@@ -502,9 +502,9 @@ namespace OptimaValue
                 return;
             }
             if (e.Created)
-                $"Skapade ny databas {SqlSettings.Default.Databas}".SendThisStatusMessage();
+                $"Skapade ny databas {SqlSettings.Default.Databas}".SendStatusMessage();
             else
-                $"Sparade inställningarna till SQL".SendThisStatusMessage();
+                $"Sparade inställningarna till SQL".SendStatusMessage();
 
             PlcConfig.PopulateDataTable();
             Application.UseWaitCursor = false;

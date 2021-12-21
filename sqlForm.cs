@@ -48,6 +48,8 @@ namespace OptimaValue
             SqlSettings.Default.Password = txtPassword.Text;
             SqlSettings.Default.Server = comboServer.SelectedItem.ToString();
             SqlSettings.Default.Databas = txtDatabas.Text;
+            SqlSettings.Default.ConnectionString = ($"Server={@SqlSettings.Default.Server};Database={SqlSettings.Default.Databas};User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
+
 
             btnSave.Enabled = false;
             SqlSettings.Default.Save();
@@ -55,7 +57,7 @@ namespace OptimaValue
             var result = await DatabaseSql.TestConnectionAsync();
             if (!result)
             {
-                $"Misslyckades att ansluta med följande Connection-sträng: {DatabaseSql.ConnectionString}".SendThisStatusMessage(Severity.Error);
+                $"Misslyckades att ansluta med följande Connection-sträng: {DatabaseSql.ConnectionString}".SendStatusMessage(Severity.Error);
                 btnSave.Enabled = true;
             }
             else
@@ -66,7 +68,7 @@ namespace OptimaValue
                 }
                 catch (Exception)
                 {
-                    "Misslyckades att skapa databas".SendThisStatusMessage(Severity.Error);
+                    "Misslyckades att skapa databas".SendStatusMessage(Severity.Error);
                 }
             }
             Application.UseWaitCursor = false;
