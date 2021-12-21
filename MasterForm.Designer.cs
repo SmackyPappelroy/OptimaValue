@@ -37,6 +37,7 @@
             this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.contentPanel = new System.Windows.Forms.Panel();
             this.statusPanel = new System.Windows.Forms.Panel();
+            this.databaseImage = new System.Windows.Forms.PictureBox();
             this.errorImage = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.txtStatus = new System.Windows.Forms.Label();
@@ -51,10 +52,14 @@
             this.databasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoStartTool = new System.Windows.Forms.ToolStripMenuItem();
             this.menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.databaseImageList = new System.Windows.Forms.ImageList(this.components);
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.addPlcMenu.SuspendLayout();
             this.statusPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.databaseImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.errorImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel1.SuspendLayout();
@@ -87,7 +92,7 @@
             this.treeView.ImageIndex = 0;
             this.treeView.ImageList = this.imageList;
             this.treeView.Location = new System.Drawing.Point(4, 105);
-            this.treeView.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.treeView.Margin = new System.Windows.Forms.Padding(4);
             this.treeView.Name = "treeView";
             treeNode1.ContextMenuStrip = this.addPlcMenu;
             treeNode1.Name = "Optima";
@@ -119,7 +124,7 @@
             this.contentPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
             this.contentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.contentPanel.Location = new System.Drawing.Point(4, 240);
-            this.contentPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.contentPanel.Margin = new System.Windows.Forms.Padding(4);
             this.contentPanel.Name = "contentPanel";
             this.contentPanel.Size = new System.Drawing.Size(852, 431);
             this.contentPanel.TabIndex = 1;
@@ -127,23 +132,33 @@
             // statusPanel
             // 
             this.statusPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
+            this.statusPanel.Controls.Add(this.databaseImage);
             this.statusPanel.Controls.Add(this.errorImage);
             this.statusPanel.Controls.Add(this.pictureBox1);
             this.statusPanel.Controls.Add(this.txtStatus);
             this.statusPanel.Controls.Add(this.label4);
             this.statusPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.statusPanel.Location = new System.Drawing.Point(4, 4);
-            this.statusPanel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.statusPanel.Margin = new System.Windows.Forms.Padding(4);
             this.statusPanel.Name = "statusPanel";
             this.statusPanel.Size = new System.Drawing.Size(852, 228);
             this.statusPanel.TabIndex = 2;
+            // 
+            // databaseImage
+            // 
+            this.databaseImage.Location = new System.Drawing.Point(821, 35);
+            this.databaseImage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.databaseImage.Name = "databaseImage";
+            this.databaseImage.Size = new System.Drawing.Size(28, 28);
+            this.databaseImage.TabIndex = 15;
+            this.databaseImage.TabStop = false;
             // 
             // errorImage
             // 
             this.errorImage.BackColor = System.Drawing.Color.Transparent;
             this.errorImage.Image = ((System.Drawing.Image)(resources.GetObject("errorImage.Image")));
-            this.errorImage.Location = new System.Drawing.Point(783, 4);
-            this.errorImage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.errorImage.Location = new System.Drawing.Point(778, 4);
+            this.errorImage.Margin = new System.Windows.Forms.Padding(4);
             this.errorImage.Name = "errorImage";
             this.errorImage.Size = new System.Drawing.Size(38, 37);
             this.errorImage.TabIndex = 14;
@@ -154,8 +169,8 @@
             // 
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(825, 7);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox1.Location = new System.Drawing.Point(826, 7);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(18, 19);
             this.pictureBox1.TabIndex = 13;
@@ -199,7 +214,7 @@
             this.panel1.Controls.Add(this.btnStop);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(4, 4);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(342, 93);
             this.panel1.TabIndex = 3;
@@ -215,7 +230,7 @@
             this.btnStart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnStart.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnStart.Location = new System.Drawing.Point(0, 0);
-            this.btnStart.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnStart.Margin = new System.Windows.Forms.Padding(4);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(109, 93);
             this.btnStart.TabIndex = 9;
@@ -232,7 +247,7 @@
             this.btnStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnStop.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnStop.Location = new System.Drawing.Point(220, 0);
-            this.btnStop.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnStop.Margin = new System.Windows.Forms.Padding(4);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(122, 93);
             this.btnStop.TabIndex = 8;
@@ -246,7 +261,7 @@
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.treeView, 0, 1);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(14, 34);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
@@ -262,7 +277,7 @@
             this.tableLayoutPanel2.Controls.Add(this.statusPanel, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.contentPanel, 0, 1);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(368, 34);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 3;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 35F));
@@ -289,7 +304,8 @@
             this.menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.databasToolStripMenuItem,
             this.debugMenu,
-            this.notifyMenu});
+            this.notifyMenu,
+            this.autoStartTool});
             this.menuSettings.Name = "menuSettings";
             this.menuSettings.Size = new System.Drawing.Size(84, 20);
             this.menuSettings.Text = "Inställningar";
@@ -297,7 +313,7 @@
             // databasToolStripMenuItem
             // 
             this.databasToolStripMenuItem.Name = "databasToolStripMenuItem";
-            this.databasToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.databasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.databasToolStripMenuItem.Text = "Databas";
             this.databasToolStripMenuItem.Click += new System.EventHandler(this.databasToolStripMenuItem_Click);
             // 
@@ -305,7 +321,7 @@
             // 
             this.debugMenu.CheckOnClick = true;
             this.debugMenu.Name = "debugMenu";
-            this.debugMenu.Size = new System.Drawing.Size(133, 22);
+            this.debugMenu.Size = new System.Drawing.Size(180, 22);
             this.debugMenu.Text = "Debug";
             this.debugMenu.CheckedChanged += new System.EventHandler(this.debugMeny_CheckedChanged);
             // 
@@ -313,9 +329,17 @@
             // 
             this.notifyMenu.CheckOnClick = true;
             this.notifyMenu.Name = "notifyMenu";
-            this.notifyMenu.Size = new System.Drawing.Size(133, 22);
+            this.notifyMenu.Size = new System.Drawing.Size(180, 22);
             this.notifyMenu.Text = "Notify Ikon";
             this.notifyMenu.CheckedChanged += new System.EventHandler(this.notifyMenu_CheckedChanged);
+            // 
+            // autoStartTool
+            // 
+            this.autoStartTool.CheckOnClick = true;
+            this.autoStartTool.Name = "autoStartTool";
+            this.autoStartTool.Size = new System.Drawing.Size(180, 22);
+            this.autoStartTool.Text = "Autostart";
+            this.autoStartTool.CheckedChanged += new System.EventHandler(this.autoStartTool_CheckedChanged);
             // 
             // menuQuestion
             // 
@@ -331,6 +355,14 @@
             this.notifyIcon.Visible = true;
             this.notifyIcon.Click += new System.EventHandler(this.notifyIcon_Click);
             // 
+            // databaseImageList
+            // 
+            this.databaseImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.databaseImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("databaseImageList.ImageStream")));
+            this.databaseImageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.databaseImageList.Images.SetKeyName(0, "no_database_26px.png");
+            this.databaseImageList.Images.SetKeyName(1, "database_view_26px.png");
+            // 
             // MasterForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -343,9 +375,9 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(1249, 883);
+            this.MaximumSize = new System.Drawing.Size(1249, 881);
             this.Name = "MasterForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Optima Value";
@@ -354,6 +386,7 @@
             this.addPlcMenu.ResumeLayout(false);
             this.statusPanel.ResumeLayout(false);
             this.statusPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.databaseImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.errorImage)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel1.ResumeLayout(false);
@@ -390,5 +423,9 @@
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.PictureBox errorImage;
         private System.Windows.Forms.ToolStripMenuItem notifyMenu;
+        private System.Windows.Forms.PictureBox databaseImage;
+        private System.Windows.Forms.ImageList databaseImageList;
+        private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.ToolStripMenuItem autoStartTool;
     }
 }

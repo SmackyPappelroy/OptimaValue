@@ -1,4 +1,5 @@
-﻿using OptimaValue.Handler.PLC.Graphics;
+﻿using IWshRuntimeLibrary;
+using OptimaValue.Handler.PLC.Graphics;
 using OptimaValue.Handler.PLC.MyPlc.Graphics;
 using OptimaValue.Properties;
 using S7.Net;
@@ -20,11 +21,17 @@ namespace OptimaValue
         private PerformanceForm perForm;
         private bool perFormOpen = false;
         private readonly System.Windows.Forms.Timer statusTimer;
+        private readonly System.Windows.Forms.Timer databaseTimer;
         private readonly System.Windows.Forms.Timer startStopButtonVisibilityTimer;
         private sqlForm SqlForm;
         private bool IsOpenSqlForm = false;
 
         private bool isSubscribed = false;
+
+        private Image noDatabase;
+        private Image okDatabase;
+
+        private string databaseTooltip => databaseImage.Image == okDatabase ? "Ansluten till SQL-server" : "Ingen anslutning till SQL";
         #endregion
 
         #region Constructor
@@ -40,7 +47,12 @@ namespace OptimaValue
             {
                 Interval = 500
             };
+            databaseTimer = new System.Windows.Forms.Timer
+            {
+                Interval = 500
+            };
             Subscribe(true);
+            databaseTimer.Start();
 
             SqlForm = new sqlForm();
             SqlForm.FormClosing += SqlForm_FormClosing;
@@ -61,18 +73,40 @@ namespace OptimaValue
         #region Form
         private async void MasterForm_Load(object sender, EventArgs e)
         {
+            noDatabase = databaseImageList.Images[0];
+            okDatabase = databaseImageList.Images[1];
+
             btnStop.Visible = false;
             btnStart.Visible = false;
             startStopButtonVisibilityTimer.Start();
             notifyMenu.Checked = Settings.Default.notify;
+            autoStartTool.Checked = Settings.Default.AutoStart;
+
+
             var result = await PlcConfig.TestConnectionSqlAsync();
             if (!result)
             {
                 txtStatus.Text = "Misslyckades att ansluta till Sql";
+                databaseImage.Image = noDatabase;
             }
             else
+            {
                 PopulateTree();
+                databaseImage.Image = okDatabase;
+            }
+            toolTip.InitialDelay = 100;
+            toolTip.AutoPopDelay = 5000;
 
+            if (autoStartTool.Checked)
+                await AutoStart();
+        }
+
+        private async Task AutoStart()
+        {
+            if (DatabaseStatus.isConnected)
+            {
+                await StartLogging();
+            }
         }
 
         private void MasterForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -129,6 +163,12 @@ namespace OptimaValue
 
         private async void btnStart_Click(object sender, EventArgs e)
         {
+            await StartLogging();
+
+        }
+
+        private async Task StartLogging()
+        {
             btnStart.Visible = false;
             // Close all but Masterform
             for (int i = Application.OpenForms.Count - 1; i >= 0; i--)
@@ -167,7 +207,6 @@ namespace OptimaValue
             }
 
             addPlc.Enabled = false;
-
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -406,6 +445,7 @@ namespace OptimaValue
                 statusTimer.Tick += StatusTimer_Tick;
                 startStopButtonVisibilityTimer.Tick += StartStopButtonVisibilityTimer_Tick;
                 DatabaseCreationEvent.CreatedEvent += DatabaseCreationEvent_CreatedEvent;
+                databaseTimer.Tick += DatabaseTimer_Tick;
                 Logger.RestartEvent += Logger_RestartEvent;
                 this.Resize += MasterForm_Resize;
                 isSubscribed = true;
@@ -423,6 +463,16 @@ namespace OptimaValue
 
                 isSubscribed = false;
             }
+        }
+
+        private void DatabaseTimer_Tick(object sender, EventArgs e)
+        {
+            if (databaseImage.Image == noDatabase)
+                databaseImage.Visible = !databaseImage.Visible;
+            else
+                databaseImage.Visible = true;
+
+            toolTip.SetToolTip(databaseImage, databaseTooltip);
         }
 
         private void MasterForm_Resize(object sender, EventArgs e)
@@ -458,6 +508,7 @@ namespace OptimaValue
 
             PlcConfig.PopulateDataTable();
             Application.UseWaitCursor = false;
+            databaseImage.Image = okDatabase;
         }
 
         private void StartStopButtonVisibilityTimer_Tick(object sender, EventArgs e)
@@ -605,8 +656,11 @@ namespace OptimaValue
             IsOpenSqlForm = false;
             if (SqlForm.DatabaseCreated == true)
             {
+                databaseImage.Image = okDatabase;
                 PopulateTree();
             }
+            else
+                databaseImage.Image = noDatabase;
         }
 
         private void PerForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -621,6 +675,43 @@ namespace OptimaValue
             Settings.Default.Save();
         }
 
+        private void autoStartTool_CheckedChanged(object sender, EventArgs e)
+        {
+            if (autoStartTool.Checked != Settings.Default.AutoStart)
+            {
+                Settings.Default.AutoStart = autoStartTool.Checked;
+                Settings.Default.Save();
+                if (autoStartTool.Checked)
+                {
+                    WshShell wshShell = new WshShell();
+                    IWshRuntimeLibrary.IWshShortcut shortcut;
+                    string startUpFolderPath =
+                      Environment.GetFolderPath(Environment.SpecialFolder.Startup);
 
+                    // Create the shortcut
+                    shortcut =
+                      (IWshRuntimeLibrary.IWshShortcut)wshShell.CreateShortcut(
+                        startUpFolderPath + "\\" +
+                        Application.ProductName + ".lnk");
+
+                    shortcut.TargetPath = Application.ExecutablePath;
+                    shortcut.WorkingDirectory = Application.StartupPath;
+                    shortcut.Description = "Launch My Application";
+                    // shortcut.IconLocation = Application.StartupPath + @"\App.ico";
+                    shortcut.Save();
+                }
+                else
+                {
+                    string startupFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
+                    string fileName = startupFolderPath + "\\" +
+                        Application.ProductName + ".lnk";
+
+                    if (System.IO.File.Exists(fileName))
+                    {
+                        System.IO.File.Delete(fileName);
+                    }
+                }
+            }
+        }
     }
 }

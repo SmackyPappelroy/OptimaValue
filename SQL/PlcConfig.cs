@@ -33,11 +33,13 @@ namespace OptimaValue
                     try
                     {
                         await con.OpenAsync();
+                        DatabaseStatus.isConnected = true;
                         return true;
                     }
                     catch (SqlException ex)
                     {
                         Apps.Logger.Log(string.Empty, Severity.Error, ex);
+                        DatabaseStatus.isConnected = false;
                         return false;
                     }
                     finally
@@ -48,6 +50,7 @@ namespace OptimaValue
             }
             catch (SqlException)
             {
+                DatabaseStatus.isConnected = false;
                 return false;
             }
         }
