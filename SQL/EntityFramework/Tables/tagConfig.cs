@@ -17,6 +17,9 @@ namespace OptimaValue
         [StringLength(50)]
         public string name { get; set; }
 
+        [Column(TypeName = "nvarchar(MAX)")]
+        public string description { get; set; }
+
         [Column(TypeName = "nvarchar")]
         [StringLength(50)]
         public string logType { get; set; }

@@ -15,6 +15,8 @@ namespace OptimaValue
         public bool Active { get; set; }
         [Name("Name")]
         public string Name { get; set; }
+        [Name("Description")]
+        public string Description { get; set; }
         [Name("LogType")]
         public LogType LogType { get; set; }
         [Name("TimeOfDay")]

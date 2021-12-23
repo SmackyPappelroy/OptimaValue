@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace OptimaValue
 {
-    public class IntouchInt
+    public class IntouchReal
     {
-        [Name(":IOInt")]
+        [Name(":IOReal")]
         public string Name { get; set; }
 
         [Name("Group")]
@@ -43,19 +43,19 @@ namespace OptimaValue
         public string EngUnits { get; set; }
 
         [Name("InitialValue")]
-        public int InitialValue { get; set; }
+        public float InitialValue { get; set; }
 
         [Name("MinEU")]
-        public int MinEu { get; set; }
+        public float MinEu { get; set; }
 
         [Name("MaxEU")]
-        public int MaxEu { get; set; }
+        public float MaxEu { get; set; }
 
         [Name("Deadband")]
-        public int Deadband { get; set; }
+        public float Deadband { get; set; }
 
         [Name("LogDeadband")]
-        public int LogDeadband { get; set; }
+        public float LogDeadband { get; set; }
 
         [Name("LoLoAlarmState")]
         public string LoLoAlarmState { get; set; }
@@ -79,58 +79,58 @@ namespace OptimaValue
         public string HiAlarmState { get; set; }
 
         [Name("HiAlarmValue")]
-        public int HiAlarmValue { get; set; }
+        public float HiAlarmValue { get; set; }
 
         [Name("HiAlarmPri")]
-        public int HiAlarmPri { get; set; }
+        public float HiAlarmPri { get; set; }
 
         [Name("HiHiAlarmState")]
         public string HiHiAlarmState { get; set; }
 
         [Name("HiHiAlarmValue")]
-        public int HiHiAlarmValue { get; set; }
+        public float HiHiAlarmValue { get; set; }
 
         [Name("HiHiAlarmPri")]
-        public int HiHiAlarmPri { get; set; }
+        public float HiHiAlarmPri { get; set; }
 
         [Name("MinorDevAlarmState")]
         public string MinorDevAlarmState { get; set; }
 
         [Name("MinorDevAlarmValue")]
-        public int MinorDevAlarmValue { get; set; }
+        public float MinorDevAlarmValue { get; set; }
 
         [Name("MinorDevAlarmPri")]
-        public int MinorDevAlarmPri { get; set; }
+        public float MinorDevAlarmPri { get; set; }
 
         [Name("MajorDevAlarmState")]
         public string MajorDevAlarmState { get; set; }
 
         [Name("MajorDevAlarmValue")]
-        public int MajorDevAlarmValue { get; set; }
+        public float MajorDevAlarmValue { get; set; }
 
         [Name("MajorDevAlarmPri")]
-        public int MajorDevAlarmPri { get; set; }
+        public float MajorDevAlarmPri { get; set; }
 
         [Name("DevTarget")]
-        public int DevTarget { get; set; }
+        public float DevTarget { get; set; }
 
         [Name("ROCAlarmState")]
         public string ROCDevAlarmState { get; set; }
 
         [Name("ROCAlarmValue")]
-        public int ROCDevAlarmValue { get; set; }
+        public float ROCDevAlarmValue { get; set; }
 
         [Name("ROCAlarmPri")]
-        public int ROCDevAlarmPri { get; set; }
+        public float ROCDevAlarmPri { get; set; }
 
         [Name("ROCTimeBase")]
         public string ROCTimeBase { get; set; }
 
         [Name("MinRaw")]
-        public int MinRaw { get; set; }
+        public float MinRaw { get; set; }
 
         [Name("MaxRaw")]
-        public int MaxRaw { get; set; }
+        public float MaxRaw { get; set; }
 
         [Name("Conversion")]
         public string Conversion { get; set; }
@@ -151,28 +151,28 @@ namespace OptimaValue
         public string AlarmComment { get; set; }
 
         [Name("AlarmAckModel")]
-        public int AlarmAckModel { get; set; }
+        public float AlarmAckModel { get; set; }
 
         [Name("LoLoAlarmDisable")]
-        public int LoLoAlarmDisable { get; set; }
+        public float LoLoAlarmDisable { get; set; }
 
         [Name("LoAlarmDisable")]
-        public int LoAlarmDisable { get; set; }
+        public float LoAlarmDisable { get; set; }
 
         [Name("HiAlarmDisable")]
-        public int HiAlarmDisable { get; set; }
+        public float HiAlarmDisable { get; set; }
 
         [Name("HiHiAlarmDisable")]
-        public int HiHiAlarmDisable { get; set; }
+        public float HiHiAlarmDisable { get; set; }
 
         [Name("MinDevAlarmDisable")]
-        public int MinDevAlarmDisable { get; set; }
+        public float MinDevAlarmDisable { get; set; }
 
         [Name("MajDevAlarmDisable")]
-        public int MajDevAlarmDisable { get; set; }
+        public float MajDevAlarmDisable { get; set; }
 
         [Name("RocAlarmDisable")]
-        public int RocDevAlarmDisable { get; set; }
+        public float RocDevAlarmDisable { get; set; }
 
         [Name("LoLoAlarmInhibitor")]
         public string LoLoAlarmInhibitor { get; set; }

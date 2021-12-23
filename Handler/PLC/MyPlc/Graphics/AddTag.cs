@@ -83,6 +83,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             checkActive.Checked = tag.Active;
             paraName.ParameterValue = tag.Name;
+            paraDescription.ParameterValue = tag.Description;
             paraLogType.comboBoxen.Text = tag.LogType.ToString();
             paraLogType.comboBoxen.SelectedItem = tag.LogType;
 
@@ -398,9 +399,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var deadband = paraDeadband.ParameterValue.Replace(",", ".");
 
             var query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
+            query += $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
             query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
-            query += $"VALUES ('{checkActive.Checked}','{paraName.ParameterValue}','{paraLogType.comboBoxen.SelectedItem}','{paraLogTime.ParameterValue}',";
+            query += $"VALUES ('{checkActive.Checked}','{paraName.ParameterValue}','{paraDescription.ParameterValue}','{paraLogType.comboBoxen.SelectedItem}','{paraLogTime.ParameterValue}',";
             query += $"{deadband},'{PlcName}','{paraVarType.comboBoxen.SelectedItem}',{int.Parse(paraBlockNr.ParameterValue)}, ";
             query += $"'{paraDataType.comboBoxen.SelectedItem}',{int.Parse(paraStartAddress.ParameterValue)},{int.Parse(paraNrOfValues.ParameterValue)},";
             query += $"{byte.Parse(paraBitAddress.ParameterValue)},'{paraFreq.comboBoxen.SelectedItem}','{paraUnit.ParameterValue}',{tagEventId},'{isBoolTrigger}','";
@@ -423,6 +424,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var _logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), (tbl.AsEnumerable().ElementAt(0).Field<string>("logFreq")));
             var _logType = (LogType)Enum.Parse(typeof(LogType), (tbl.AsEnumerable().ElementAt(0).Field<string>("logType")));
             var _name = (tbl.AsEnumerable().ElementAt(0).Field<string>("name"));
+            var _description = (tbl.AsEnumerable().ElementAt(0).Field<string>("description"));
             var _nrOfElements = (tbl.AsEnumerable().ElementAt(0).Field<int>("nrOfElements"));
             var _plcName = (tbl.AsEnumerable().ElementAt(0).Field<string>("plcName"));
             var _startByte = (tbl.AsEnumerable().ElementAt(0).Field<int>("startByte"));
@@ -476,7 +478,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var temp = paraDeadband.ParameterValue.Replace(',', '.');
 
             var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig ";
-            query += $"SET active='{checkActive.Checked}',name='{paraName.ParameterValue}',logType='{paraLogType.comboBoxen.SelectedItem}',timeOfDay='{paraLogTime.ParameterValue}'";
+            query += $"SET active='{checkActive.Checked}',name='{paraName.ParameterValue}',description='{paraDescription.ParameterValue}',logType='{paraLogType.comboBoxen.SelectedItem}',timeOfDay='{paraLogTime.ParameterValue}'";
             query += $",deadband={temp},plcName='{PlcName}',varType='{paraVarType.comboBoxen.SelectedItem}',blockNr={int.Parse(paraBlockNr.ParameterValue)}" +
                 $",dataType='{paraDataType.comboBoxen.SelectedItem}',startByte={int.Parse(paraStartAddress.ParameterValue)},nrOfElements={int.Parse(paraNrOfValues.ParameterValue)}" +
                 $",bitAddress={byte.Parse(paraBitAddress.ParameterValue)},logFreq='{paraFreq.comboBoxen.SelectedItem}',";
@@ -500,6 +502,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             DataTable tbl = new DataTable();
             tbl.Columns.Add("active", typeof(bool));
             tbl.Columns.Add("name", typeof(string));
+            tbl.Columns.Add("description", typeof(string));
             tbl.Columns.Add("logType", typeof(string));
             tbl.Columns.Add("timeOfDay", typeof(TimeSpan));
             tbl.Columns.Add("deadband", typeof(float));
@@ -522,7 +525,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             tbl.Columns.Add("scaleOffset", typeof(int));
 
 
-            tbl.Rows.Add(checkActive.Checked, paraName.ParameterValue, paraLogType.comboBoxen.SelectedItem.ToString(),
+            tbl.Rows.Add(checkActive.Checked, paraName.ParameterValue, paraDescription.ParameterValue, paraLogType.comboBoxen.SelectedItem.ToString(),
                 TimeSpan.Parse(paraLogTime.ParameterValue), float.Parse(paraDeadband.ParameterValue),
                 PlcName, paraVarType.comboBoxen.SelectedItem.ToString(), int.Parse(paraBlockNr.ParameterValue),
                 paraDataType.comboBoxen.SelectedItem.ToString(), int.Parse(paraStartAddress.ParameterValue),

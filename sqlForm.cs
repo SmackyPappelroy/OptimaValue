@@ -59,12 +59,17 @@ namespace OptimaValue
             {
                 $"Misslyckades att ansluta med följande Connection-sträng: {DatabaseSql.ConnectionString}".SendStatusMessage(Severity.Error);
                 btnSave.Enabled = true;
-            }
-            else
-            {
+                //}
+                //else
+                //{
                 try
                 {
                     var created = await contextInstance.CreateDb();
+                    var result1 = await DatabaseSql.TestConnectionAsync();
+                    if (result1)
+                    {
+                        "Skapade databas".SendStatusMessage(Severity.Success);
+                    }
                 }
                 catch (Exception)
                 {

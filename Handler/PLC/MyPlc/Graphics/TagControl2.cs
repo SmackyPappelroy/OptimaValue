@@ -14,6 +14,7 @@ using System.Windows.Forms;
 
 namespace OptimaValue
 {
+    enum IntouchType { None, Int, Real, Bool }
     public partial class TagControl2 : UserControl
     {
         private readonly string PlcName = string.Empty;
@@ -43,7 +44,7 @@ namespace OptimaValue
 
             csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                Delimiter = ";"
+                DetectDelimiter = true
             };
             this.flowLayoutPanel.AllowDrop = true;
 
@@ -153,7 +154,11 @@ namespace OptimaValue
                 return false;
 
             if (tbl.Rows.Count == 0)
+            {
+                if (tags != null)
+                    tags.Clear();
                 return false;
+            }
 
             if (tags == null)
                 tags = new List<TagDefinitions>();
@@ -172,6 +177,7 @@ namespace OptimaValue
                 var _logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("logFreq")));
                 var _logType = (LogType)Enum.Parse(typeof(LogType), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("logType")));
                 var _name = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("name"));
+                var _description = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("description"));
                 var _nrOfElements = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("nrOfElements"));
                 var _plcName = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("plcName"));
                 var _startByte = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("startByte"));
@@ -199,6 +205,7 @@ namespace OptimaValue
                     LastLogTime = DateTime.MinValue,
                     LogType = _logType,
                     Name = _name,
+                    Description = _description,
                     NrOfElements = _nrOfElements,
                     PlcName = _plcName,
                     StartByte = _startByte,
@@ -251,13 +258,18 @@ namespace OptimaValue
             save.Title = "Spara .CSV fil";
             DialogResult result = save.ShowDialog();
 
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = ";"
+            };
+
             if (save.FileName != "" && result == DialogResult.OK)
             {
                 try
                 {
                     using (var sw = new StreamWriter(save.FileName))
                     {
-                        var wr = new CsvWriter(sw, csvConfig);
+                        var wr = new CsvWriter(sw, config);
 
                         wr.WriteRecords(tags);
                         Apps.Logger.Log($"Sparade {myPlc.PlcName}s taggar till {save.FileName}", Severity.Success);
@@ -284,8 +296,6 @@ namespace OptimaValue
         private void ImportFile(string fileName)
         {
             bool intouchCsv = false;
-            int rowIndexStart = 0;
-            bool intFound = false;
             try
             {
                 using (var sr = new StreamReader(fileName))
@@ -298,6 +308,7 @@ namespace OptimaValue
                             AddTag(records);
                             UpdateTag(records);
                             Apps.Logger.Log($"Importerade {myPlc.PlcName}s taggar från {fileName}", Severity.Success);
+                            return;
                         }
                         catch (HeaderValidationException)
                         {
@@ -309,25 +320,108 @@ namespace OptimaValue
 
                 }
                 // TODO: Fixa så man kan läsa intouch taggar
-                //using (var sr = new StreamReader(fileName))
-                //{
-                //    if (intouchCsv)
-                //    {
-                //        var config = new CsvConfiguration(CultureInfo.InvariantCulture);
+                using (var sr = new StreamReader(fileName))
+                {
+                    var intouchInt = new List<IntouchInt>();
+                    var intouchReal = new List<IntouchReal>();
+                    var intouchBool = new List<IntouchBool>();
 
-                //        config.Delimiter = ";";
+                    if (intouchCsv)
+                    {
+                        var config = new CsvConfiguration(CultureInfo.InvariantCulture);
+
+                        //config.Delimiter = ";";
+                        config.DetectDelimiter = true;
+                        config.MissingFieldFound = (arg) => { };
+                        config.BadDataFound = (arg) => { };
+
+                        var intouchType = IntouchType.None;
+
+                        using var csvReader = new CsvReader(sr, config);
 
 
-                //        using (var csvReader = new CsvReader(sr, config))
-                //        {
-                //            while (csvReader.Read())
-                //            {
-                //                if(csvReader.)
-                //            }
+                        while (csvReader.Read())
+                        {
+                            var discriminator = csvReader.GetField<string>(0);
+                            switch (discriminator)
+                            {
+                                case ":IOInt":
+                                    intouchType = IntouchType.Int;
+                                    break;
+                                case ":IOReal":
+                                    intouchType = IntouchType.Real;
+                                    break;
+                                case ":IODisc":
+                                    intouchType = IntouchType.Bool;
+                                    break;
+                                case "":
+                                    intouchType = IntouchType.None;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            if (intouchType == IntouchType.Int)
+                            {
+                                if (discriminator == ":IOInt")
+                                {
+                                    csvReader.ReadHeader();
+                                    csvReader.Read();
+                                }
+                                if (discriminator.Substring(0, 1) != ":" || discriminator != "")
+                                {
+                                    intouchInt.Add(csvReader.GetRecord<IntouchInt>());
+                                }
+                            }
+                            else if (intouchType == IntouchType.Real)
+                            {
+                                if (discriminator == ":IOReal")
+                                {
+                                    csvReader.ReadHeader();
+                                    csvReader.Read();
+                                }
+                                if (discriminator.Substring(0, 1) != ":" || discriminator != "")
+                                {
+                                    intouchReal.Add(csvReader.GetRecord<IntouchReal>());
+                                }
+                            }
+                            else if (intouchType == IntouchType.Bool)
+                            {
+                                if (discriminator == ":IODisc")
+                                {
+                                    csvReader.ReadHeader();
+                                    csvReader.Read();
+                                }
+                                if (discriminator.Substring(0, 1) != ":" || discriminator != "")
+                                {
+                                    intouchBool.Add(csvReader.GetRecord<IntouchBool>());
+                                }
+                            }
+                        }
+                    }
+                    List<TagDefinitions> allTags = new();
+                    intouchBool = intouchBool.Where(x => x.AccessName.ToLower() == PlcName.ToLower()).ToList();
+                    intouchInt = intouchInt.Where(x => x.AccessName.ToLower() == PlcName.ToLower()).ToList();
+                    intouchReal = intouchReal.Where(x => x.AccessName.ToLower() == PlcName.ToLower()).ToList();
 
-                //        }
-                //    }
-                //}
+                    if (intouchBool.Count > 0)
+                    {
+                        allTags.AddRange(MapIntouchTagsToLogTags(intouchBool));
+                    }
+                    if (intouchInt.Count > 0)
+                    {
+                        allTags.AddRange(MapIntouchTagsToLogTags(intouchInt));
+                    }
+                    if (intouchReal.Count > 0)
+                    {
+                        allTags.AddRange(MapIntouchTagsToLogTags(intouchReal));
+                    }
+
+                    if (allTags.Count > 0)
+                    {
+                        AddTag(allTags);
+                        Redraw();
+                    }
+                }
 
             }
             catch (IOException)
@@ -336,14 +430,118 @@ namespace OptimaValue
             }
         }
 
+        private List<TagDefinitions> MapIntouchTagsToLogTags(List<IntouchInt> intouchInt)
+        {
+            List<TagDefinitions> intList = new();
+            foreach (IntouchInt intouchTag in intouchInt)
+            {
+                if (intouchTag.Logged.ToLower() == "yes")
+                {
+                    var address = intouchTag.ItemName.PLCAddress();
+                    TagDefinitions tag = new()
+                    {
+                        Active = true,
+                        BitAddress = address.bitNumber,
+                        BlockNr = address.dbNumber,
+                        DataType = address.dataType,
+                        StartByte = address.startByte,
+                        VarType = address.varType,
+                        Deadband = intouchTag.LogDeadband,
+                        LogFreq = LogFrequency._1s,
+                        LogType = intouchTag.LogDeadband == 0 ? LogType.Cyclic : LogType.Delta,
+                        Name = intouchTag.Name,
+                        Description = intouchTag.Comment,
+                        PlcName = intouchTag.AccessName,
+                        scaleMin = intouchTag.MinEu,
+                        scaleMax = intouchTag.MaxEu,
+                        TagUnit = intouchTag.EngUnits
+                    };
+                    intList.Add(tag);
+                }
+
+            }
+            return intList;
+        }
+
+        private List<TagDefinitions> MapIntouchTagsToLogTags(List<IntouchReal> intouchReal)
+        {
+            List<TagDefinitions> intList = new();
+            foreach (IntouchReal intouchTag in intouchReal)
+            {
+                if (intouchTag.Logged.ToLower() == "yes")
+                {
+                    var address = intouchTag.ItemName.PLCAddress();
+                    TagDefinitions tag = new()
+                    {
+                        Active = true,
+                        BitAddress = address.bitNumber,
+                        BlockNr = address.dbNumber,
+                        DataType = address.dataType,
+                        StartByte = address.startByte,
+                        VarType = address.varType,
+                        Deadband = intouchTag.LogDeadband,
+                        LogFreq = LogFrequency._1s,
+                        LogType = intouchTag.LogDeadband == 0 ? LogType.Cyclic : LogType.Delta,
+                        Name = intouchTag.Name,
+                        Description = intouchTag.Comment,
+                        PlcName = intouchTag.AccessName,
+                        scaleMin = (int)intouchTag.MinEu,
+                        scaleMax = (int)intouchTag.MaxEu,
+                        TagUnit = intouchTag.EngUnits
+                    };
+                    intList.Add(tag);
+                }
+
+            }
+            return intList;
+        }
+
+        private List<TagDefinitions> MapIntouchTagsToLogTags(List<IntouchBool> intouchBool)
+        {
+            List<TagDefinitions> boolList = new();
+            foreach (IntouchBool intouchTag in intouchBool)
+            {
+                if (intouchTag.Logged.ToLower() == "yes")
+                {
+                    var address = intouchTag.ItemName.PLCAddress();
+                    TagDefinitions tag = new()
+                    {
+                        Active = true,
+                        BitAddress = address.bitNumber,
+                        BlockNr = address.dbNumber,
+                        DataType = address.dataType,
+                        StartByte = address.startByte,
+                        VarType = address.varType,
+                        Deadband = 0,
+                        LogFreq = LogFrequency._1s,
+                        LogType = LogType.Cyclic,
+                        Name = intouchTag.Name,
+                        Description = intouchTag.Comment,
+                        PlcName = intouchTag.AccessName,
+                        scaleMin = 0,
+                        scaleMax = 0,
+                    };
+                    boolList.Add(tag);
+                }
+
+            }
+            return boolList;
+        }
+
         private void AddTag(List<TagDefinitions> newList)
         {
 
             newList = newList.OrderBy(x => x.Name).ToList();
+            List<TagDefinitions> newTags = new();
 
-            var newTags = newList.Except(tags).ToList();
+            if (tags != null)
+            {
+                newTags = newList.Except(tags).ToList();
+                newTags.RemoveAll(a => tags.Contains(a));
+            }
+            else
+                newTags = newList;
 
-            newTags.RemoveAll(a => tags.Contains(a));
 
             if (newTags.Count == 0)
                 return;
@@ -351,9 +549,9 @@ namespace OptimaValue
             foreach (var tag in newTags)
             {
                 var query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.tagConfig ";
-                query += $"(active,name,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
+                query += $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
                 query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
-                query += $"VALUES ('{tag.Active}','{tag.Name}','{tag.LogType}','{tag.TimeOfDay}',";
+                query += $"VALUES ('{tag.Active}','{tag.Name}','{tag.Description}','{tag.LogType}','{tag.TimeOfDay}',";
                 query += $"{tag.Deadband},'{tag.PlcName}','{tag.VarType}',{tag.BlockNr}, ";
                 query += $"'{tag.DataType}',{tag.StartByte},{tag.NrOfElements},";
                 query += $"{tag.BitAddress},'{tag.LogFreq}','{tag.TagUnit}',{tag.EventId},'{tag.IsBooleanTrigger}','";
@@ -371,7 +569,7 @@ namespace OptimaValue
             {
                 var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig ";
                 query += $"SET active='{tag.Active}',name='{tag.Name}',logType='{tag.LogType}',timeOfDay='{tag.TimeOfDay}'";
-                query += $",deadband={tag.Deadband},plcName='{tag.PlcName}',varType='{tag.VarType}',blockNr={tag.BlockNr}" +
+                query += $",deadband={tag.Deadband},plcName='{tag.PlcName}',description='{tag.Description}',varType='{tag.VarType}',blockNr={tag.BlockNr}" +
                     $",dataType='{tag.DataType}',startByte={tag.StartByte},nrOfElements={tag.NrOfElements}" +
                     $",bitAddress={tag.BitAddress},logFreq='{tag.LogFreq}',";
                 query += $"tagUnit='{tag.TagUnit}',eventId={tag.EventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
