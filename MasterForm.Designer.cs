@@ -74,12 +74,12 @@
             this.addPlcMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addPlc});
             this.addPlcMenu.Name = "addPlcMenu";
-            this.addPlcMenu.Size = new System.Drawing.Size(141, 26);
+            this.addPlcMenu.Size = new System.Drawing.Size(160, 28);
             // 
             // addPlc
             // 
             this.addPlc.Name = "addPlc";
-            this.addPlc.Size = new System.Drawing.Size(140, 22);
+            this.addPlc.Size = new System.Drawing.Size(159, 24);
             this.addPlc.Text = "Lägg till PLC";
             this.addPlc.Click += new System.EventHandler(this.addPlc_Click);
             // 
@@ -91,8 +91,8 @@
             this.treeView.ForeColor = System.Drawing.Color.Black;
             this.treeView.ImageIndex = 0;
             this.treeView.ImageList = this.imageList;
-            this.treeView.Location = new System.Drawing.Point(4, 105);
-            this.treeView.Margin = new System.Windows.Forms.Padding(4);
+            this.treeView.Location = new System.Drawing.Point(5, 140);
+            this.treeView.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.treeView.Name = "treeView";
             treeNode1.ContextMenuStrip = this.addPlcMenu;
             treeNode1.Name = "Optima";
@@ -100,7 +100,7 @@
             this.treeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
             treeNode1});
             this.treeView.SelectedImageIndex = 0;
-            this.treeView.Size = new System.Drawing.Size(342, 567);
+            this.treeView.Size = new System.Drawing.Size(390, 756);
             this.treeView.TabIndex = 0;
             this.treeView.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.treeView_MouseDoubleClick);
             // 
@@ -123,10 +123,10 @@
             // 
             this.contentPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
             this.contentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.contentPanel.Location = new System.Drawing.Point(4, 240);
-            this.contentPanel.Margin = new System.Windows.Forms.Padding(4);
+            this.contentPanel.Location = new System.Drawing.Point(5, 320);
+            this.contentPanel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.contentPanel.Name = "contentPanel";
-            this.contentPanel.Size = new System.Drawing.Size(852, 431);
+            this.contentPanel.Size = new System.Drawing.Size(973, 575);
             this.contentPanel.TabIndex = 1;
             // 
             // statusPanel
@@ -138,19 +138,18 @@
             this.statusPanel.Controls.Add(this.txtStatus);
             this.statusPanel.Controls.Add(this.label4);
             this.statusPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.statusPanel.Location = new System.Drawing.Point(4, 4);
-            this.statusPanel.Margin = new System.Windows.Forms.Padding(4);
+            this.statusPanel.Location = new System.Drawing.Point(5, 5);
+            this.statusPanel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.statusPanel.Name = "statusPanel";
-            this.statusPanel.Size = new System.Drawing.Size(852, 228);
+            this.statusPanel.Size = new System.Drawing.Size(973, 305);
             this.statusPanel.TabIndex = 2;
             // 
             // databaseImage
             // 
             this.databaseImage.BackColor = System.Drawing.Color.Transparent;
-            this.databaseImage.Location = new System.Drawing.Point(821, 35);
-            this.databaseImage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.databaseImage.Location = new System.Drawing.Point(938, 47);
             this.databaseImage.Name = "databaseImage";
-            this.databaseImage.Size = new System.Drawing.Size(28, 28);
+            this.databaseImage.Size = new System.Drawing.Size(32, 37);
             this.databaseImage.TabIndex = 15;
             this.databaseImage.TabStop = false;
             // 
@@ -158,10 +157,10 @@
             // 
             this.errorImage.BackColor = System.Drawing.Color.Transparent;
             this.errorImage.Image = ((System.Drawing.Image)(resources.GetObject("errorImage.Image")));
-            this.errorImage.Location = new System.Drawing.Point(778, 4);
-            this.errorImage.Margin = new System.Windows.Forms.Padding(4);
+            this.errorImage.Location = new System.Drawing.Point(889, 5);
+            this.errorImage.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.errorImage.Name = "errorImage";
-            this.errorImage.Size = new System.Drawing.Size(38, 37);
+            this.errorImage.Size = new System.Drawing.Size(43, 49);
             this.errorImage.TabIndex = 14;
             this.errorImage.TabStop = false;
             this.errorImage.Visible = false;
@@ -170,10 +169,10 @@
             // 
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(826, 7);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox1.Location = new System.Drawing.Point(943, 9);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(18, 19);
+            this.pictureBox1.Size = new System.Drawing.Size(21, 25);
             this.pictureBox1.TabIndex = 13;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
@@ -184,12 +183,12 @@
             this.txtStatus.Dock = System.Windows.Forms.DockStyle.Top;
             this.txtStatus.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.txtStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.txtStatus.Location = new System.Drawing.Point(0, 28);
-            this.txtStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.txtStatus.MaximumSize = new System.Drawing.Size(501, 0);
+            this.txtStatus.Location = new System.Drawing.Point(0, 38);
+            this.txtStatus.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.txtStatus.MaximumSize = new System.Drawing.Size(573, 0);
             this.txtStatus.Name = "txtStatus";
-            this.txtStatus.Padding = new System.Windows.Forms.Padding(10, 9, 0, 0);
-            this.txtStatus.Size = new System.Drawing.Size(69, 30);
+            this.txtStatus.Padding = new System.Windows.Forms.Padding(11, 12, 0, 0);
+            this.txtStatus.Size = new System.Drawing.Size(79, 35);
             this.txtStatus.TabIndex = 12;
             this.txtStatus.Text = "Status";
             // 
@@ -201,10 +200,10 @@
             this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
             this.label4.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.label4.Location = new System.Drawing.Point(0, 0);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label4.Name = "label4";
-            this.label4.Padding = new System.Windows.Forms.Padding(24, 4, 24, 0);
-            this.label4.Size = new System.Drawing.Size(117, 28);
+            this.label4.Padding = new System.Windows.Forms.Padding(27, 5, 27, 0);
+            this.label4.Size = new System.Drawing.Size(146, 38);
             this.label4.TabIndex = 11;
             this.label4.Text = "Status";
             // 
@@ -214,10 +213,10 @@
             this.panel1.Controls.Add(this.btnStart);
             this.panel1.Controls.Add(this.btnStop);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(4, 4);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4);
+            this.panel1.Location = new System.Drawing.Point(5, 5);
+            this.panel1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(342, 93);
+            this.panel1.Size = new System.Drawing.Size(390, 125);
             this.panel1.TabIndex = 3;
             // 
             // btnStart
@@ -231,9 +230,9 @@
             this.btnStart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnStart.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnStart.Location = new System.Drawing.Point(0, 0);
-            this.btnStart.Margin = new System.Windows.Forms.Padding(4);
+            this.btnStart.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.btnStart.Name = "btnStart";
-            this.btnStart.Size = new System.Drawing.Size(109, 93);
+            this.btnStart.Size = new System.Drawing.Size(125, 125);
             this.btnStart.TabIndex = 9;
             this.btnStart.UseVisualStyleBackColor = false;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
@@ -247,10 +246,10 @@
             this.btnStop.FlatAppearance.BorderSize = 0;
             this.btnStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnStop.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnStop.Location = new System.Drawing.Point(220, 0);
-            this.btnStop.Margin = new System.Windows.Forms.Padding(4);
+            this.btnStop.Location = new System.Drawing.Point(251, 0);
+            this.btnStop.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.btnStop.Name = "btnStop";
-            this.btnStop.Size = new System.Drawing.Size(122, 93);
+            this.btnStop.Size = new System.Drawing.Size(139, 125);
             this.btnStop.TabIndex = 8;
             this.btnStop.UseVisualStyleBackColor = true;
             this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
@@ -261,13 +260,13 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.treeView, 0, 1);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(14, 34);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(16, 45);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 85F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(350, 676);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(400, 901);
             this.tableLayoutPanel1.TabIndex = 4;
             // 
             // tableLayoutPanel2
@@ -277,14 +276,14 @@
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.Controls.Add(this.statusPanel, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.contentPanel, 0, 1);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(368, 34);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(421, 45);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 3;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 35F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 65F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(860, 676);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(983, 901);
             this.tableLayoutPanel2.TabIndex = 5;
             // 
             // menuStrip
@@ -295,8 +294,8 @@
             this.menuQuestion});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip.Size = new System.Drawing.Size(1228, 24);
+            this.menuStrip.Padding = new System.Windows.Forms.Padding(5, 3, 0, 3);
+            this.menuStrip.Size = new System.Drawing.Size(1403, 32);
             this.menuStrip.TabIndex = 6;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -308,13 +307,13 @@
             this.notifyMenu,
             this.autoStartTool});
             this.menuSettings.Name = "menuSettings";
-            this.menuSettings.Size = new System.Drawing.Size(84, 20);
+            this.menuSettings.Size = new System.Drawing.Size(104, 26);
             this.menuSettings.Text = "Inställningar";
             // 
             // databasToolStripMenuItem
             // 
             this.databasToolStripMenuItem.Name = "databasToolStripMenuItem";
-            this.databasToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            this.databasToolStripMenuItem.Size = new System.Drawing.Size(165, 26);
             this.databasToolStripMenuItem.Text = "Databas...";
             this.databasToolStripMenuItem.Click += new System.EventHandler(this.databasToolStripMenuItem_Click);
             // 
@@ -322,7 +321,7 @@
             // 
             this.debugMenu.CheckOnClick = true;
             this.debugMenu.Name = "debugMenu";
-            this.debugMenu.Size = new System.Drawing.Size(133, 22);
+            this.debugMenu.Size = new System.Drawing.Size(165, 26);
             this.debugMenu.Text = "Debug";
             this.debugMenu.CheckedChanged += new System.EventHandler(this.debugMeny_CheckedChanged);
             // 
@@ -330,7 +329,7 @@
             // 
             this.notifyMenu.CheckOnClick = true;
             this.notifyMenu.Name = "notifyMenu";
-            this.notifyMenu.Size = new System.Drawing.Size(133, 22);
+            this.notifyMenu.Size = new System.Drawing.Size(165, 26);
             this.notifyMenu.Text = "Notify Ikon";
             this.notifyMenu.CheckedChanged += new System.EventHandler(this.notifyMenu_CheckedChanged);
             // 
@@ -338,7 +337,7 @@
             // 
             this.autoStartTool.CheckOnClick = true;
             this.autoStartTool.Name = "autoStartTool";
-            this.autoStartTool.Size = new System.Drawing.Size(133, 22);
+            this.autoStartTool.Size = new System.Drawing.Size(165, 26);
             this.autoStartTool.Text = "Autostart";
             this.autoStartTool.CheckedChanged += new System.EventHandler(this.autoStartTool_CheckedChanged);
             // 
@@ -346,7 +345,7 @@
             // 
             this.menuQuestion.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.menuQuestion.Name = "menuQuestion";
-            this.menuQuestion.Size = new System.Drawing.Size(25, 20);
+            this.menuQuestion.Size = new System.Drawing.Size(32, 26);
             this.menuQuestion.Text = "?";
             this.menuQuestion.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
@@ -366,19 +365,19 @@
             // 
             // MasterForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(1228, 715);
+            this.ClientSize = new System.Drawing.Size(1403, 953);
             this.Controls.Add(this.menuStrip);
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.tableLayoutPanel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(1249, 881);
+            this.MaximumSize = new System.Drawing.Size(1425, 1159);
             this.Name = "MasterForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Optima Value";
