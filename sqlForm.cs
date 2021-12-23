@@ -80,12 +80,20 @@ namespace OptimaValue
                     if (result1)
                     {
                         "Skapade databas".SendStatusMessage(Severity.Success);
+                        Application.UseWaitCursor = false;
+                        this.Close();
                     }
                 }
                 catch (Exception)
                 {
                     "Misslyckades att skapa databas".SendStatusMessage(Severity.Error);
                 }
+            }
+            else
+            {
+                Application.UseWaitCursor = false;
+                "Ansluten till databas".SendStatusMessage(Severity.Success);
+                this.Close();
             }
             Application.UseWaitCursor = false;
             btnSave.Enabled = true;
