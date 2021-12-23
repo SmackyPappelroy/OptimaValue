@@ -42,6 +42,7 @@ namespace OptimaValue
         #region Winform user control events
         private async void btnSave_Click(object sender, EventArgs e)
         {
+            this.ControlBox = false;
             Application.UseWaitCursor = true;
             btnSave.Enabled = false;
             SqlSettings.Default.User = txtUser.Text;
@@ -49,10 +50,20 @@ namespace OptimaValue
             SqlSettings.Default.Server = comboServer.SelectedItem.ToString();
             SqlSettings.Default.Databas = txtDatabas.Text;
             SqlSettings.Default.ConnectionString = ($"Server={@SqlSettings.Default.Server};Database={SqlSettings.Default.Databas};User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
+            SqlSettings.Default.Save();
 
+            string serverString = ($"Server={@SqlSettings.Default.Server};Database=master;User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
+
+            if (!await DatabaseSql.TestConnectionAsync(1000, serverString))
+            {
+                btnSave.Enabled = true;
+                this.ControlBox = true;
+                Application.UseWaitCursor = false;
+                "Ingen anslutning till SQL-server".SendStatusMessage(Severity.Warning);
+                return;
+            }
 
             btnSave.Enabled = false;
-            SqlSettings.Default.Save();
 
             var result = await DatabaseSql.TestConnectionAsync();
             if (!result)
@@ -77,7 +88,8 @@ namespace OptimaValue
                 }
             }
             Application.UseWaitCursor = false;
-
+            btnSave.Enabled = true;
+            this.ControlBox = true;
         }
 
         private void DatabaseCreationEvent_CreatedEvent(object sender, DataBaseCreationEventArgs e)
@@ -192,5 +204,7 @@ namespace OptimaValue
             else
                 btnSave.Enabled = true;
         }
+
+
     }
 }

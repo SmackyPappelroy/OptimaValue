@@ -31,7 +31,7 @@ namespace OptimaValue
         private Image noDatabase;
         private Image okDatabase;
 
-        private string databaseTooltip => databaseImage.Image == okDatabase ? "Ansluten till SQL-server" : "Ingen anslutning till SQL";
+        private string databaseTooltip => DatabaseSql.isConnected ? "Ansluten till SQL-server" : "Ingen anslutning till SQL";
         #endregion
 
         #region Constructor
@@ -63,7 +63,7 @@ namespace OptimaValue
             menuStrip.BackColor = UIColors.ForeGroundLayer1;
             menuQuestion.ForeColor = UIColors.HeaderText;
             menuSettings.ForeColor = UIColors.HeaderText;
-            menuSettings.KeepOpenOnDropdownCheck();
+            //menuSettings.KeepOpenOnDropdownCheck();
 
             menuSettings.ChangeForeColorMenuItem(Color.Black, UIColors.HeaderText);
             menuQuestion.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
@@ -219,7 +219,9 @@ namespace OptimaValue
         private void databasToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (IsOpenSqlForm)
+            {
                 SqlForm.BringToFront();
+            }
             else
             {
                 SqlForm = null;
@@ -228,6 +230,7 @@ namespace OptimaValue
                 SqlForm.Show();
                 IsOpenSqlForm = true;
             }
+            menuSettings.HideDropDown();
         }
         #endregion
 
@@ -663,11 +666,12 @@ namespace OptimaValue
             IsOpenSqlForm = false;
             if (SqlForm.DatabaseCreated == true)
             {
-                databaseImage.Image = okDatabase;
+                //databaseImage.Image = okDatabase;
                 PopulateTree();
             }
-            else
-                databaseImage.Image = noDatabase;
+
+            //else
+            //    databaseImage.Image = noDatabase;
         }
 
         private void PerForm_FormClosed(object sender, FormClosedEventArgs e)

@@ -4,39 +4,65 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OptimaValue;
 
 public static class DatabaseSql
 {
+    public static bool isConnected;
+
+
     /// <summary>
     /// Creates a SQL connection string
     /// </summary>
     /// <returns>A connection string</returns>
     public static string ConnectionString => SqlSettings.Default.ConnectionString;
 
+
     /// <summary>
     /// Test connection asynchronously to the <see cref="Microsoft.SqlServer"/>
     /// </summary>
     /// <returns><code>True</code>If Successfull</returns>
-    public static async Task<bool> TestConnectionAsync()
+    public static async Task<bool> TestConnectionAsync(int timeOut = 1000, string serverString = "")
     {
-        using SqlConnection con = new(ConnectionString);
+        string conString;
+        if (serverString == "")
+        {
+            conString = ConnectionString;
+        }
+        else
+        {
+            conString = serverString;
+        }
+        using SqlConnection con = new(conString);
 
         try
         {
-            await con.OpenAsync();
+            using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.CancelAfter(timeOut);
+
+            await con.OpenAsync(cancellationTokenSource.Token);
+
             DatabaseStatus.isConnected = true;
+            isConnected = true;
             return true;
+        }
+        catch (TaskCanceledException ex1)
+        {
+            DatabaseStatus.isConnected = false;
+            isConnected = false;
+            return false;
         }
         catch (SqlException ex)
         {
-            Apps.Logger.Log(string.Empty, Severity.Error, ex);
             DatabaseStatus.isConnected = false;
+            isConnected = false;
             return false;
         }
     }
+
 
     /// <summary>
     /// Does the tag exist?
