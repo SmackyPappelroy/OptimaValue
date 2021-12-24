@@ -12,7 +12,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private readonly TagDefinitions SingleTag;
         private bool addTagOpen = false;
         private readonly TreeView myTreeView;
-        private AddTag changeTagForm;
+        private AddPlcFromFile changeTagForm;
         private readonly ExtendedPlc MyPlc;
         private bool statFormOpen = false;
         private readonly Image errorImage;
@@ -106,7 +106,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             if (!addTagOpen && !MyPlc.LoggerIsStarted)
             {
-                changeTagForm = new AddTag(SingleTag.PlcName, MyPlc, SingleTag);
+                changeTagForm = new AddPlcFromFile(SingleTag.PlcName, MyPlc, SingleTag);
                 changeTagForm.FormClosing += ChangeTagForm_FormClosing;
                 addTagOpen = true;
                 myTreeView.Enabled = false;

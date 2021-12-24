@@ -5,8 +5,7 @@ using S7.Net;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -22,7 +21,7 @@ namespace OptimaValue
         private List<TagDefinitions> tags;
         private DataTable myTable = new DataTable();
         private readonly TreeView myTreeView;
-        private AddTag addTagForm;
+        private AddPlcFromFile addTagForm;
         private readonly ExtendedPlc myPlc;
         private bool statFormOpen = false;
         private AllTagsStatsForm statForm;
@@ -50,19 +49,40 @@ namespace OptimaValue
 
             this.flowLayoutPanel.DragEnter += TagControl2_DragEnter;
             this.flowLayoutPanel.DragDrop += TagControl2_DragDrop;
+            this.flowLayoutPanel.DragLeave += FlowLayoutPanel_DragLeave;
+        }
+
+        private void FlowLayoutPanel_DragLeave(object sender, EventArgs e)
+        {
+            this.flowLayoutPanel.BackColor = Color.FromArgb(67, 62, 71);
         }
 
         private void TagControl2_DragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
-                e.Effect = DragDropEffects.Copy;
+            {
+                string[] FileList = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+                if (FileList[0].Substring(FileList[0].Length - 3, 3).ToLower() == "csv")
+                {
+                    e.Effect = DragDropEffects.Copy;
+                    this.flowLayoutPanel.BackColor = Color.FromArgb(92, 81, 100);
+                }
+                else
+                {
+                    e.Effect = DragDropEffects.None;
+                }
+            }
             else
+            {
+                this.flowLayoutPanel.BackColor = Color.FromArgb(67, 62, 71);
                 e.Effect = DragDropEffects.None;
+            }
         }
 
         private void TagControl2_DragDrop(object sender, DragEventArgs e)
         {
             string[] FileList = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            this.flowLayoutPanel.BackColor = Color.FromArgb(67, 62, 71);
 
             fileName = FileList[0];
 
@@ -245,7 +265,7 @@ namespace OptimaValue
             }
             if (!addMenuOpen)
             {
-                addTagForm = new AddTag(PlcName, myPlc);
+                addTagForm = new AddPlcFromFile(PlcName, myPlc);
                 addTagForm.FormClosing += AddTagForm_FormClosing;
                 addTagForm.Show();
             }
@@ -305,6 +325,17 @@ namespace OptimaValue
                         try
                         {
                             var records = csvReader.GetRecords<TagDefinitions>().ToList();
+                            if (records == null)
+                            {
+                                $"Hittade inga taggar i {myPlc.PlcName}".SendStatusMessage(Severity.Warning);
+                                return;
+                            }
+                            if (records.Count == 0 || !records.Exists(x => x.PlcName == myPlc.PlcName))
+                            {
+                                $"Hittade inga taggar i {myPlc.PlcName}".SendStatusMessage(Severity.Warning);
+                                return;
+                            }
+
                             AddTag(records);
                             UpdateTag(records);
                             Apps.Logger.Log($"Importerade {myPlc.PlcName}s taggar från {fileName}", Severity.Success);
@@ -319,7 +350,6 @@ namespace OptimaValue
 
 
                 }
-                // TODO: Fixa så man kan läsa intouch taggar
                 using (var sr = new StreamReader(fileName))
                 {
                     var intouchInt = new List<IntouchInt>();

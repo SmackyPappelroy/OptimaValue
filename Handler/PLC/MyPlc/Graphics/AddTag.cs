@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
-    public partial class AddTag : Form
+    public partial class AddPlcFromFile : Form
     {
         private readonly string PlcName = string.Empty;
         private TagDefinitions tag;
@@ -32,7 +32,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             TagChanged?.Invoke(this, e);
         }
-        public AddTag(string plcName, ExtendedPlc myPlc, TagDefinitions taggen = null)
+        public AddPlcFromFile(string plcName, ExtendedPlc myPlc, TagDefinitions taggen = null)
         {
             InitializeComponent();
             PlcName = plcName;

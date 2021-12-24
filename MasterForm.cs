@@ -1,10 +1,15 @@
-﻿using IWshRuntimeLibrary;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using IWshRuntimeLibrary;
 using OptimaValue.Handler.PLC.Graphics;
 using OptimaValue.Handler.PLC.MyPlc.Graphics;
 using OptimaValue.Properties;
 using S7.Net;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -207,13 +212,13 @@ namespace OptimaValue
             }
 
             addPlc.Enabled = false;
+
         }
 
         private void btnStop_Click(object sender, EventArgs e)
         {
             Master.StopLog(false);
             addPlc.Enabled = true;
-
         }
 
         private void databasToolStripMenuItem_Click(object sender, EventArgs e)
@@ -724,5 +729,8 @@ namespace OptimaValue
                 }
             }
         }
+
+
+
     }
 }

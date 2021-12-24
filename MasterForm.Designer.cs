@@ -74,12 +74,12 @@
             this.addPlcMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addPlc});
             this.addPlcMenu.Name = "addPlcMenu";
-            this.addPlcMenu.Size = new System.Drawing.Size(160, 28);
+            this.addPlcMenu.Size = new System.Drawing.Size(211, 56);
             // 
             // addPlc
             // 
             this.addPlc.Name = "addPlc";
-            this.addPlc.Size = new System.Drawing.Size(159, 24);
+            this.addPlc.Size = new System.Drawing.Size(210, 24);
             this.addPlc.Text = "Lägg till PLC";
             this.addPlc.Click += new System.EventHandler(this.addPlc_Click);
             // 
@@ -92,7 +92,7 @@
             this.treeView.ImageIndex = 0;
             this.treeView.ImageList = this.imageList;
             this.treeView.Location = new System.Drawing.Point(5, 140);
-            this.treeView.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.treeView.Margin = new System.Windows.Forms.Padding(5);
             this.treeView.Name = "treeView";
             treeNode1.ContextMenuStrip = this.addPlcMenu;
             treeNode1.Name = "Optima";
@@ -124,7 +124,7 @@
             this.contentPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
             this.contentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.contentPanel.Location = new System.Drawing.Point(5, 320);
-            this.contentPanel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.contentPanel.Margin = new System.Windows.Forms.Padding(5);
             this.contentPanel.Name = "contentPanel";
             this.contentPanel.Size = new System.Drawing.Size(973, 575);
             this.contentPanel.TabIndex = 1;
@@ -139,7 +139,7 @@
             this.statusPanel.Controls.Add(this.label4);
             this.statusPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.statusPanel.Location = new System.Drawing.Point(5, 5);
-            this.statusPanel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.statusPanel.Margin = new System.Windows.Forms.Padding(5);
             this.statusPanel.Name = "statusPanel";
             this.statusPanel.Size = new System.Drawing.Size(973, 305);
             this.statusPanel.TabIndex = 2;
@@ -158,7 +158,7 @@
             this.errorImage.BackColor = System.Drawing.Color.Transparent;
             this.errorImage.Image = ((System.Drawing.Image)(resources.GetObject("errorImage.Image")));
             this.errorImage.Location = new System.Drawing.Point(889, 5);
-            this.errorImage.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.errorImage.Margin = new System.Windows.Forms.Padding(5);
             this.errorImage.Name = "errorImage";
             this.errorImage.Size = new System.Drawing.Size(43, 49);
             this.errorImage.TabIndex = 14;
@@ -170,7 +170,7 @@
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(943, 9);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(5);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(21, 25);
             this.pictureBox1.TabIndex = 13;
@@ -214,7 +214,7 @@
             this.panel1.Controls.Add(this.btnStop);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(5, 5);
-            this.panel1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.panel1.Margin = new System.Windows.Forms.Padding(5);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(390, 125);
             this.panel1.TabIndex = 3;
@@ -230,7 +230,7 @@
             this.btnStart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnStart.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnStart.Location = new System.Drawing.Point(0, 0);
-            this.btnStart.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btnStart.Margin = new System.Windows.Forms.Padding(5);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(125, 125);
             this.btnStart.TabIndex = 9;
@@ -247,7 +247,7 @@
             this.btnStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnStop.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnStop.Location = new System.Drawing.Point(251, 0);
-            this.btnStop.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btnStop.Margin = new System.Windows.Forms.Padding(5);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(139, 125);
             this.btnStop.TabIndex = 8;
@@ -261,7 +261,7 @@
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.treeView, 0, 1);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(16, 45);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(5);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
@@ -277,7 +277,7 @@
             this.tableLayoutPanel2.Controls.Add(this.statusPanel, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.contentPanel, 0, 1);
             this.tableLayoutPanel2.Location = new System.Drawing.Point(421, 45);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(5);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 3;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 35F));
@@ -375,7 +375,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip;
-            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.Margin = new System.Windows.Forms.Padding(5);
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(1425, 1159);
             this.Name = "MasterForm";
