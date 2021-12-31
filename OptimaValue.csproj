@@ -48,15 +48,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OptimaValue.Settings\OptimaValue.Config.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
-    <Compile Update="SqlSettings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>SqlSettings.settings</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -64,10 +63,6 @@
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <None Update="SqlSettings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>SqlSettings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
 

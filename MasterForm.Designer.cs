@@ -74,12 +74,12 @@
             this.addPlcMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.addPlc});
             this.addPlcMenu.Name = "addPlcMenu";
-            this.addPlcMenu.Size = new System.Drawing.Size(211, 56);
+            this.addPlcMenu.Size = new System.Drawing.Size(160, 28);
             // 
             // addPlc
             // 
             this.addPlc.Name = "addPlc";
-            this.addPlc.Size = new System.Drawing.Size(210, 24);
+            this.addPlc.Size = new System.Drawing.Size(159, 24);
             this.addPlc.Text = "Lägg till PLC";
             this.addPlc.Click += new System.EventHandler(this.addPlc_Click);
             // 

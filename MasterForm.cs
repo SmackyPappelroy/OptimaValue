@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using OptimaValue.Config;
 
 namespace OptimaValue
 {
@@ -669,7 +670,7 @@ namespace OptimaValue
         private void SqlForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             IsOpenSqlForm = false;
-            if (SqlForm.DatabaseCreated == true)
+            if (SqlForm.DatabaseCreated == true || DatabaseStatus.isConnected)
             {
                 //databaseImage.Image = okDatabase;
                 PopulateTree();

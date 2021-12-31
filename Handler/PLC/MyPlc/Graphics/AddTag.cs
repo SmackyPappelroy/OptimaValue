@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using OptimaValue.Config;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
