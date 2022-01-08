@@ -705,7 +705,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             startDateTime = oldStartDateTime;
             stopDateTime = oldStopDateTime;
             await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
-            AddTag("", true);
+            AddTag();
             ConfigureChart(false);
             MessageBox.Show("Inga nya rader de senaste 10 minuterna");
             return;
