@@ -507,19 +507,12 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             TextBlock textBlockOverZero = new TextBlock()
             {
                 Margin = new Thickness(0),
-                Text = $"     >0-tid: [{stats.TimeOverZero}]",
+                Text = $"     >0: {stats.NumberOfTimesOverZero}ggr [{stats.TimeOverZero}]",
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Colors.AntiqueWhite),
             };
-            TextBlock textBlockOverZeroTimes = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = $"     >0: {stats.NumberOfTimesOverZero}ggr",
-                Height = 20,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(Colors.AntiqueWhite),
-            };
+      
 
 
             textStackPanel.Children.Add(textBlockTagName);
@@ -536,7 +529,6 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             {
                 textStackPanel.Children.Add(textBlockIntegral);
                 textStackPanel.Children.Add(textBlockOverZero);
-                textStackPanel.Children.Add(textBlockOverZeroTimes);
             }
 
             stackPanel.Children.Add(ellipse);
