@@ -512,7 +512,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Colors.AntiqueWhite),
             };
-      
+
 
 
             textStackPanel.Children.Add(textBlockTagName);
@@ -614,17 +614,20 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         if (startDateTime >= stopDateTime)
             return;
 
-        //foreach (var line in LineSeriesList)
-        //{
-        //    line.LineSeries = null;
-        //}
-
         foreach (var item in Series)
         {
             var glineSerie = item as GLineSeries;
             Series.Remove(item);
             Series.Add(item);
         }
+
+        startDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
+        stopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
+
+        startDatePicker.Text = startDateTime.ToString("yyyy-MM-dd");
+        txtStartTime.Text = startDateTime.ToString("HH:mm");
+        stopDatePicker.Text = stopDateTime.ToString("yyyy-MM-dd");
+        txtStopTime.Text = stopDateTime.ToString("HH:mm");
 
         await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
 
