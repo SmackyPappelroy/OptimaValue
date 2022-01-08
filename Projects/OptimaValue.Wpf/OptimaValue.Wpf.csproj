@@ -16,11 +16,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Extended.Wpf.Toolkit" Version="4.2.0" />
 		<PackageReference Include="LiveCharts.Geared" Version="1.2.9" />
 		<PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
-		<PackageReference Include="MvvmGen" Version="1.1.2" />
 		<PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
 		<PackageReference Include="Serilog.Extensions.Hosting" Version="4.2.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />

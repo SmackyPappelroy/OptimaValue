@@ -1,69 +1,72 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
-    <RootNamespace>OptimaValue</RootNamespace>
-    <AssemblyName>OptimaValue</AssemblyName>
-    <StartupObject>OptimaValue.Program</StartupObject>
-    <ApplicationIcon>Mina Resurser\icons8_gas_idle.ico</ApplicationIcon>
-    <PlatformTarget>x64</PlatformTarget>
-    <AnalysisLevel>latest</AnalysisLevel>
-    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
-  </PropertyGroup>
+		<RootNamespace>OptimaValue</RootNamespace>
+		<AssemblyName>OptimaValue</AssemblyName>
+		<StartupObject>OptimaValue.Program</StartupObject>
+		<ApplicationIcon>Mina Resurser\icons8_gas_idle.ico</ApplicationIcon>
+		<PlatformTarget>x64</PlatformTarget>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="CIP%281%29\**" />
-    <Compile Remove="CIP\**" />
-    <EmbeddedResource Remove="CIP%281%29\**" />
-    <EmbeddedResource Remove="CIP\**" />
-    <None Remove="CIP%281%29\**" />
-    <None Remove="CIP\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="CIP%281%29\**" />
+		<Compile Remove="CIP\**" />
+		<Compile Remove="Projects\**" />
+		<EmbeddedResource Remove="CIP%281%29\**" />
+		<EmbeddedResource Remove="CIP\**" />
+		<EmbeddedResource Remove="Projects\**" />
+		<None Remove="CIP%281%29\**" />
+		<None Remove="CIP\**" />
+		<None Remove="Projects\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <COMReference Include="IWshRuntimeLibrary">
-      <WrapperTool>tlbimp</WrapperTool>
-      <VersionMinor>0</VersionMinor>
-      <VersionMajor>1</VersionMajor>
-      <Guid>f935dc20-1cf0-11d0-adb9-00c04fd58a0b</Guid>
-      <Lcid>0</Lcid>
-      <Isolated>false</Isolated>
-      <EmbedInteropTypes>true</EmbedInteropTypes>
-    </COMReference>
-  </ItemGroup>
+	<ItemGroup>
+		<COMReference Include="IWshRuntimeLibrary">
+			<WrapperTool>tlbimp</WrapperTool>
+			<VersionMinor>0</VersionMinor>
+			<VersionMajor>1</VersionMajor>
+			<Guid>f935dc20-1cf0-11d0-adb9-00c04fd58a0b</Guid>
+			<Lcid>0</Lcid>
+			<Isolated>false</Isolated>
+			<EmbedInteropTypes>true</EmbedInteropTypes>
+		</COMReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Mina Resurser\icons8_gas_idle.ico" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="Mina Resurser\icons8_gas_idle.ico" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CsvHelper" Version="27.2.1" />
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
-    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46521.71" />
-    <PackageReference Include="S7netplus" Version="0.13.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="CsvHelper" Version="27.2.1" />
+		<PackageReference Include="EntityFramework" Version="6.4.4" />
+		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46521.71" />
+		<PackageReference Include="S7netplus" Version="0.13.0" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\OptimaValue.Settings\OptimaValue.Config.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="Projects\OptimaValue.Settings\OptimaValue.Config.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Properties\Settings.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Settings.settings</DependentUpon>
+		</Compile>
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Update="Properties\Settings.settings">
+			<Generator>SettingsSingleFileGenerator</Generator>
+			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
+		</None>
+	</ItemGroup>
 
 </Project>

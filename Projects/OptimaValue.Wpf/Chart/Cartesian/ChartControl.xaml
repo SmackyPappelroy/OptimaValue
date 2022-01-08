@@ -180,7 +180,7 @@
 
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Margin="10" Width="40" Height="40" Name="btnAdd"
+                     <Button Margin="10" Width="40" Height="40" Name="btnAdd"
                 VerticalAlignment="Top" Panel.ZIndex="1"
                     Click="AddOnClick" >
                                 <Button.Template>

@@ -71,7 +71,7 @@ namespace OptimaValue.Wpf
 
         private (Color stroke, Color fill) ChangeColors(byte red, byte green, byte blue)
         {
-            var brightnessFactor = 0.1f;
+            var brightnessFactor = -0.1f;
             Color strokeColor = ChangeColorBrightness(Color.FromArgb(255, red, green, blue), brightnessFactor);
             Color fillColor = ChangeColorBrightness(Color.FromArgb(30, red, green, blue), brightnessFactor);
             return (strokeColor, fillColor);

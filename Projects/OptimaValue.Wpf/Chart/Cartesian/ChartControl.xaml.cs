@@ -372,6 +372,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
 
         foreach (var item in LineSeriesList)
         {
+            // Beräkna integral
             var minDate = item.ChartValues.AsEnumerable().Select(x => x.DateTime).Min();
             var maxDate = item.ChartValues.AsEnumerable().Select(x => x.DateTime).Max();
 
@@ -381,7 +382,9 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
 
             var integral = resultat * antalTimmar;
 
-
+            // Beräkna tid över 0
+            var valuesOverZero = item.ChartValues.AsEnumerable().Where(x => x.Value > 0).ToList().Count;
+            var timeOverZero = TimeSpan.FromSeconds(valuesOverZero);
 
             var tagName = item.LineSeries.Title;
             var brush = item.LineSeries.Stroke;
@@ -501,10 +504,18 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Color.FromArgb(255, 176, 80, 73)),
             };
-            TextBlock textBlockLast = new TextBlock()
+            TextBlock textBlockIntegral = new TextBlock()
             {
                 Margin = new Thickness(0),
                 Text = $"     ∫ {integral.ToString("0.0")}",
+                Height = 20,
+                FontSize = 14,
+                Foreground = new SolidColorBrush(Colors.White),
+            };
+            TextBlock textBlockOverZero = new TextBlock()
+            {
+                Margin = new Thickness(0),
+                Text = $"     >0-tid {timeOverZero}",
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Colors.White),
@@ -521,7 +532,8 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             textStackPanel.Children.Add(textBlockAvg);
             textStackPanel.Children.Add(imageMax);
             textStackPanel.Children.Add(textBlockMax);
-            textStackPanel.Children.Add(textBlockLast);
+            textStackPanel.Children.Add(textBlockIntegral);
+            textStackPanel.Children.Add(textBlockOverZero);
 
             stackPanel.Children.Add(ellipse);
             stackPanel.Children.Add(textStackPanel);
@@ -588,7 +600,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
 
         if (!AddTag())
             return;
-        ConfigureChart();
+        ConfigureChart(false);
     }
 
 
@@ -674,7 +686,10 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
     private async void PlayOnClick(object sender, RoutedEventArgs e)
     {
         if (DisplayedTags == null || DisplayedTags.Count == 0)
+        {
+            MessageBox.Show("Lägg till tag att visa...");
             return;
+        }
 
         oldStartDateTime = startDateTime;
         oldStopDateTime = stopDateTime;
@@ -687,7 +702,15 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         ConfigureChart(false);
 
         if (ChartData.ChartTableAllTags.Rows.Count == 0)
+        {
+            startDateTime = oldStartDateTime;
+            stopDateTime = oldStopDateTime;
+            await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
+            AddTag("", true);
+            ConfigureChart(false);
+            MessageBox.Show("Inga nya rader de senaste 10 minuterna");
             return;
+        }
 
         await StartPlayTask(source);
     }
@@ -983,11 +1006,6 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
 
             LineSeriesList.Add(myLine);
         }
-        //else
-        //{
-        //    var myLine = LineSeriesList.Where(x => x.Tag.Name == tagName).FirstOrDefault();
-        //    myLine.GetChartValues();
-        //}
         else
         {
             LineSeriesList = new();
