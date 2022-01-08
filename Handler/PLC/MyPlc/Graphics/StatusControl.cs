@@ -7,7 +7,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
     {
         private bool isSubscribed = false;
         private readonly string PlcName;
-        private readonly Timer statusTimer = new Timer();
+        private readonly System.Windows.Forms.Timer statusTimer = new System.Windows.Forms.Timer();
         private bool destroyed = false;
 
         public StatusControl(string plcName)

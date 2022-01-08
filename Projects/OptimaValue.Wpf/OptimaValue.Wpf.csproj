@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+		<Nullable>disable</Nullable>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="icons8_area_chart_64.png" />
+	  <None Remove="icons8_gas_idle_64.png" />
+	  <None Remove="Images\average_48px.png" />
+	  <None Remove="Images\maximum_48px.png" />
+	  <None Remove="Images\minimum_value_48px.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Extended.Wpf.Toolkit" Version="4.2.0" />
+		<PackageReference Include="LiveCharts.Geared" Version="1.2.9" />
+		<PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
+		<PackageReference Include="MvvmGen" Version="1.1.2" />
+		<PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
+		<PackageReference Include="Serilog.Extensions.Hosting" Version="4.2.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\OptimaValue.Settings\OptimaValue.Config.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="icons8_area_chart_64.png" />
+	  <Resource Include="icons8_gas_idle_64.png" />
+	  <Resource Include="Images\average_48px.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Resource>
+	  <Resource Include="Images\maximum_48px.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Resource>
+	  <Resource Include="Images\minimum_value_48px.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Resource>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="ExtensionMethods\" />
+	  <Folder Include="ValueConverters\" />
+	</ItemGroup>
+
+</Project>

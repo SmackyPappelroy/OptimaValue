@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue", "OptimaValue.
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupOptimaValue", "..\SetupOptimaValue\SetupOptimaValue.vdproj", "{096B09FA-5A4F-4ED5-8267-101A5A4ADCE8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Wpf", "..\OptimaValue.Wpf\OptimaValue.Wpf.csproj", "{F9320502-AFFF-4700-A761-2616CAC5A2A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Wpf", "Projects\OptimaValue.Wpf\OptimaValue.Wpf.csproj", "{F9320502-AFFF-4700-A761-2616CAC5A2A2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Config", "..\OptimaValue.Settings\OptimaValue.Config.csproj", "{C311D2D1-A13E-4414-8D87-76BBA2E70E8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Config", "Projects\OptimaValue.Settings\OptimaValue.Config.csproj", "{C311D2D1-A13E-4414-8D87-76BBA2E70E8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
