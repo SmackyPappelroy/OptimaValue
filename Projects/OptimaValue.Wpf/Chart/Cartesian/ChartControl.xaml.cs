@@ -344,6 +344,8 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
 
     public List<MyLineSeries> LineSeriesList;
 
+    public StatisticFilter StatFilter { get; set; } = new();
+
 
     /// <summary>
     /// Adds icon with name on top
@@ -351,6 +353,8 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
     private void UpdateTagGraphic()
     {
         List<StackPanel> stackPanels = new List<StackPanel>();
+        var minTid = new DateTime((long)MinValueX);
+        var maxTid = new DateTime((long)MaxValueX);
 
         StackPanel timeStackPanel = new StackPanel()
         {
@@ -361,7 +365,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         TextBlock textBlockTime = new TextBlock()
         {
             Margin = new Thickness(0, 0, 0, 5),
-            Text = (new DateTime((long)MinValueX)) + "     -     " + (new DateTime((long)MaxValueX)),
+            Text = minTid + "     -     " + maxTid + "     [" + (maxTid - minTid) + "]",
             FontSize = 20,
             FontWeight = FontWeights.Bold,
             //TextDecorations = TextDecorations.Underline,
@@ -372,19 +376,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
 
         foreach (var item in LineSeriesList)
         {
-            // Beräkna integral
-            var minDate = item.ChartValues.AsEnumerable().Select(x => x.DateTime).Min();
-            var maxDate = item.ChartValues.AsEnumerable().Select(x => x.DateTime).Max();
-
-            var antalTimmar = (maxDate - minDate).TotalSeconds / 3600;
-
-            var resultat = item.ChartValues.AsEnumerable().Select(x => x.Value).Average();
-
-            var integral = resultat * antalTimmar;
-
-            // Beräkna tid över 0
-            var valuesOverZero = item.ChartValues.AsEnumerable().Where(x => x.Value > 0).ToList().Count;
-            var timeOverZero = TimeSpan.FromSeconds(valuesOverZero);
+            DataStatistics stats = new(StatFilter, item);
 
             var tagName = item.LineSeries.Title;
             var brush = item.LineSeries.Stroke;
@@ -407,7 +399,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             };
 
             var tag = AvailableTags.Where(x => x.Name == tagName).FirstOrDefault();
-            var tagUnitString = tag.Unit == "" ? "" : "[" + tag.Unit + "]";
+            var tagUnitString = tag.Unit == "" ? "" : " " + tag.Unit;
             var descriptionString = tag.Description == "" ? "" : " " + tag.Description + " ";
 
             TextBlock textBlockTagName = new TextBlock()
@@ -469,7 +461,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             TextBlock textBlockMin = new TextBlock()
             {
                 Margin = new Thickness(0),
-                Text = ": " + item.MinValueY.ToString("0.000") + "     ",
+                Text = ": " + item.MinValueY.ToString("0.000") + $"{tagUnitString}     ",
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Color.FromArgb(255, 54, 93, 218)),
@@ -484,7 +476,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             TextBlock textBlockAvg = new TextBlock()
             {
                 Margin = new Thickness(0),
-                Text = ": " + item.AvgValueY.ToString("0.000") + "     ",
+                Text = ": " + item.AvgValueY.ToString("0.000") + $"{tagUnitString}     ",
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Color.FromArgb(255, 104, 218, 54)),
@@ -499,7 +491,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             TextBlock textBlockMax = new TextBlock()
             {
                 Margin = new Thickness(0),
-                Text = ": " + item.MaxValueY.ToString("0.000"),
+                Text = ": " + item.MaxValueY.ToString("0.000") + $"{tagUnitString}     ",
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Color.FromArgb(255, 176, 80, 73)),
@@ -507,23 +499,31 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             TextBlock textBlockIntegral = new TextBlock()
             {
                 Margin = new Thickness(0),
-                Text = $"     ∫ {integral.ToString("0.0")}",
+                Text = $"∫ {stats.Integral.ToString("0.0")}",
                 Height = 20,
                 FontSize = 14,
-                Foreground = new SolidColorBrush(Colors.White),
+                Foreground = new SolidColorBrush(Colors.AntiqueWhite),
             };
             TextBlock textBlockOverZero = new TextBlock()
             {
                 Margin = new Thickness(0),
-                Text = $"     >0-tid {timeOverZero}",
+                Text = $"     >0-tid: [{stats.TimeOverZero}]",
                 Height = 20,
                 FontSize = 14,
-                Foreground = new SolidColorBrush(Colors.White),
+                Foreground = new SolidColorBrush(Colors.AntiqueWhite),
+            };
+            TextBlock textBlockOverZeroTimes = new TextBlock()
+            {
+                Margin = new Thickness(0),
+                Text = $"     >0: {stats.NumberOfTimesOverZero}ggr",
+                Height = 20,
+                FontSize = 14,
+                Foreground = new SolidColorBrush(Colors.AntiqueWhite),
             };
 
 
             textStackPanel.Children.Add(textBlockTagName);
-            textStackPanel.Children.Add(textBlockUnit);
+            //textStackPanel.Children.Add(textBlockUnit);
             textStackPanel.Children.Add(textBlockDesciption);
             textStackPanel.Children.Add(textBlockAfterDesciption);
             textStackPanel.Children.Add(imageMin);
@@ -532,8 +532,12 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             textStackPanel.Children.Add(textBlockAvg);
             textStackPanel.Children.Add(imageMax);
             textStackPanel.Children.Add(textBlockMax);
-            textStackPanel.Children.Add(textBlockIntegral);
-            textStackPanel.Children.Add(textBlockOverZero);
+            if (StatFilter == StatisticFilter.Max)
+            {
+                textStackPanel.Children.Add(textBlockIntegral);
+                textStackPanel.Children.Add(textBlockOverZero);
+                textStackPanel.Children.Add(textBlockOverZeroTimes);
+            }
 
             stackPanel.Children.Add(ellipse);
             stackPanel.Children.Add(textStackPanel);
@@ -659,8 +663,8 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             Series.Clear();
         }
 
-        ConfigureChart();
         DisplayedTags.RemoveAll(x => x.Name == tagName);
+        ConfigureChart();
     }
 
     private async void StopOnClick(object sender, RoutedEventArgs e)
@@ -971,54 +975,49 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
 
     private bool AddTag(string tagName = "", bool update = false)
     {
-        if (string.IsNullOrEmpty(tagName))
-            tagName = comboTag.SelectedValue.ToString();
-
-        var newTag = AvailableTags.Where(x => x.Name == tagName).FirstOrDefault();
-
         if (DisplayedTags == null)
             DisplayedTags = new();
 
-        var tempDisplayedTags = DisplayedTags.ToList();
-
-        if (!tempDisplayedTags.Exists(x => x.Name == tagName))
-        {
-            DisplayedTags.Add(newTag);
-        }
-
-        if (LineSeriesList != null && !update)
-        {
-            if (LineSeriesList.Count > 0)
-            {
-                if (LineSeriesList.Exists(x => x.LineSeries.Title == tagName))
-                    return false;
-            }
-        }
-
-        var temp = DateTime.Now.Ticks;
-
         if (!update)
         {
+            if (string.IsNullOrEmpty(tagName))
+                tagName = comboTag.SelectedValue.ToString();
+
+            var newTag = AvailableTags.Where(x => x.Name == tagName).FirstOrDefault();
+
+            var tempDisplayedTags = DisplayedTags.ToList();
+
+            if (!tempDisplayedTags.Exists(x => x.Name == tagName))
+            {
+                DisplayedTags.Add(newTag);
+            }
+
             MyLineSeries myLine = new(newTag);
             if (!myLine.GetChartValues())
                 return false;
 
+            if (LineSeriesList != null)
+            {
+                if (LineSeriesList.Count > 0)
+                {
+                    if (LineSeriesList.Exists(x => x.LineSeries.Title == tagName))
+                        return false;
+                }
+            }
+
+            LineSeriesList.Add(myLine);
+            return true;
+        }
+
+        LineSeriesList = new();
+        foreach (var item in DisplayedTags)
+        {
+            MyLineSeries myLine = new(item);
+            if (!myLine.GetChartValues())
+                return false;
 
             LineSeriesList.Add(myLine);
         }
-        else
-        {
-            LineSeriesList = new();
-            foreach (var item in DisplayedTags)
-            {
-                MyLineSeries myLine = new(item);
-                if (!myLine.GetChartValues())
-                    return false;
-
-                LineSeriesList.Add(myLine);
-            }
-        }
-
         return true;
     }
 
