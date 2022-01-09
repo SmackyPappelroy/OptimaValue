@@ -18,7 +18,7 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
     </UserControl.Resources>
-    <Grid>
+    <Grid Name="MainGrid">
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width=".35*"></ColumnDefinition>
@@ -36,9 +36,9 @@
                     Margin="25, 10">
             <!--<Path Width="25" Height="25" Stretch="Fill" Fill="#4C4949" Data="F1 M 38,3.16666C 57.2379,3.16666 72.8333,18.7621 72.8333,38C 72.8333,57.2379 57.2379,72.8333 38,72.8333C 18.7621,72.8333 3.16667,57.2379 3.16667,38C 3.16667,18.7621 18.7621,3.16666 38,3.16666 Z M 52.252,18.9974L 36.4164,18.9974L 23.75,39.5833L 34.8333,39.5833L 25.3316,60.1667L 50.6667,34.8333L 38,34.8333L 52.252,18.9974 Z "/>-->
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" MaxHeight="120">
-                <ItemsControl Margin="10 0 10 0" ItemsSource="{Binding MyItemControl.ItemsSource}" 
-                          Background="Transparent" 
-                          Foreground="White" BorderThickness="0" />
+                <Border CornerRadius="10" Background="Black" >
+                    <ItemsControl Margin="10 0 10 0" ItemsSource="{Binding MyItemControl.ItemsSource}" Foreground="White" BorderThickness="0" />
+                </Border>
             </ScrollViewer>
 
 
@@ -48,7 +48,7 @@
         <lvc:CartesianChart 
                             Grid.Row="1"
                             Grid.ColumnSpan="2"
-                            Margin="20"
+                            Margin="20 0 0 20"
                             Series="{Binding Series}"
                             Name="Chart"
                             Zoom="Xy" 
@@ -89,16 +89,16 @@
 
 
 
-        <Border Margin="20" Grid.Row="1"  Grid.Column="2" Background="#644C4C4C"
+        <Border Margin="0 0 20 20" Grid.Row="1"  Grid.Column="2" Background="#644C4C4C"
                 CornerRadius="10">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                 <StackPanel  
                    VerticalAlignment="Top"
                    >
-
+                    <RadioButton x:Name="radioDark" Content="Mörkt Tema" Foreground="White" Margin="20 20 0 0" Click="radioDarkTheme" />
                     <TextBlock Text="Start" Foreground="White"
                        FontSize="20"
-                       Margin="0 10 0 0"
+                       Margin="0 5 0 0"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"/>
                     <Rectangle Stroke="Gray" StrokeThickness="1"  Margin="5"/>

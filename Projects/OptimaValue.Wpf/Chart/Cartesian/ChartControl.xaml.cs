@@ -28,6 +28,7 @@ using LiveCharts.Wpf.Charts.Base;
 using PropertyChanged;
 using Serilog;
 
+
 namespace OptimaValue.Wpf;
 
 /// <summary>
@@ -326,6 +327,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         Series = new SeriesCollection();
         FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss.ff");
         EnableButtons();
+        radioDark.IsChecked = true;
     }
 
 
@@ -697,9 +699,6 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         stopDateTime = DateTime.Now - TimeSpan.FromMinutes(1);
 
         await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
-        AddTag("", true);
-        ConfigureChart(false);
-
         if (ChartData.ChartTableAllTags.Rows.Count == 0)
         {
             startDateTime = oldStartDateTime;
@@ -710,6 +709,10 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             MessageBox.Show("Inga nya rader de senaste 10 minuterna");
             return;
         }
+        AddTag("", true);
+        ConfigureChart(false);
+
+
 
         await StartPlayTask(source);
     }
@@ -1117,6 +1120,19 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         check30Min.IsChecked = false;
     }
 
+    bool wasChecked = false;
+    private void radioDarkTheme(object sender, RoutedEventArgs e)
+    {
+        if ((bool)wasChecked)
+            radioDark.IsChecked = false;
 
+        if (radioDark.IsChecked == true)
+            this.Background = new SolidColorBrush(Colors.Black);
+        else
+            this.Background = new SolidColorBrush(Colors.DimGray);
+
+
+        wasChecked = (bool)radioDark.IsChecked;
+    }
 }
 
