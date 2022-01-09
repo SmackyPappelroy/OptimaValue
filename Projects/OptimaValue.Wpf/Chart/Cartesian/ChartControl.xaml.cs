@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -328,6 +329,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss.ff");
         EnableButtons();
         radioDark.IsChecked = true;
+        StatFilter = StatisticFilter.Max;
     }
 
 
@@ -458,6 +460,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 Height = 20,
                 Width = 20,
                 Stretch = Stretch.UniformToFill,
+                ToolTip = "Minvärde"
             };
 
             TextBlock textBlockMin = new TextBlock()
@@ -467,6 +470,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Color.FromArgb(255, 54, 93, 218)),
+                ToolTip = "Minvärde"
             };
             System.Windows.Controls.Image imageAvg = new()
             {
@@ -474,6 +478,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 Height = 20,
                 Width = 20,
                 Stretch = Stretch.UniformToFill,
+                ToolTip = "Medelvärde"
             };
             TextBlock textBlockAvg = new TextBlock()
             {
@@ -482,6 +487,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Color.FromArgb(255, 104, 218, 54)),
+                ToolTip = "Medelvärde"
             };
             System.Windows.Controls.Image imageMax = new()
             {
@@ -489,6 +495,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 Height = 20,
                 Width = 20,
                 Stretch = Stretch.UniformToFill,
+                ToolTip = "Maxvärde"
             };
             TextBlock textBlockMax = new TextBlock()
             {
@@ -497,15 +504,17 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Color.FromArgb(255, 176, 80, 73)),
+                ToolTip = "Maxvärde"
             };
             var integralPerTimme = stats.Integral / (maxTid - minTid).TotalHours;
             TextBlock textBlockIntegral = new TextBlock()
             {
                 Margin = new Thickness(0),
-                Text = $"∫ {stats.Integral.ToString("0.0")}  ∫/h {integralPerTimme.ToString("0.0")}",
+                Text = $"∫ {stats.Integral.ToString("0.0")}   ∫/h {integralPerTimme.ToString("0.0")}",
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Colors.AntiqueWhite),
+                ToolTip = "Area under graf"
             };
             TextBlock textBlockOverZero = new TextBlock()
             {
@@ -514,6 +523,16 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Colors.AntiqueWhite),
+                ToolTip = "Antal gånger över 0, tid över 0"
+            };
+            TextBlock textBlockStdDev = new TextBlock()
+            {
+                Margin = new Thickness(0),
+                Text = $"    Std.-avvikelse: {stats.StandardDeviation.ToString("0.000")}",
+                Height = 20,
+                FontSize = 14,
+                Foreground = new SolidColorBrush(Colors.AntiqueWhite),
+                ToolTip = "Genomsnittlig avvikelse från medelvärdet"
             };
 
 
@@ -532,6 +551,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             {
                 textStackPanel.Children.Add(textBlockIntegral);
                 textStackPanel.Children.Add(textBlockOverZero);
+                textStackPanel.Children.Add(textBlockStdDev);
             }
 
             stackPanel.Children.Add(ellipse);
@@ -1038,12 +1058,17 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         else
             MaxValueY = maximumValueY + diffY * percentToAddOnY / 100;
 
+        if (MaxValueY == maximumValueY)
+            MaxValueY *= 2;
 
 
-        if (minimumValueY != 0 && diffY >= 0)
-            MinValueY = Math.Round(minimumValueY - diffY * percentToAddOnY / 100, 0);
+
+        if (minimumValueY >= 0 && diffY >= 0)
+            MinValueY = 0;
+        else if (diffY > 0)
+            MinValueY = minimumValueY;
         else
-            MinValueY = -5;
+            MinValueY = maximumValueY - 5;
 
         if (MinValueY == MaxValueY)
         {

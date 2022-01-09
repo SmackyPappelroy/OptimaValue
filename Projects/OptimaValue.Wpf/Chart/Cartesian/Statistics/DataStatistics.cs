@@ -2,6 +2,7 @@
 using LiveCharts.Geared;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace OptimaValue.Wpf
         public double Integral = 0;
         public TimeSpan TimeOverZero = TimeSpan.Zero;
         public double NumberOfTimesOverZero = 0;
+        public double StandardDeviation = 0;
+
 
         public DataStatistics(StatisticFilter filter, MyLineSeries series)
         {
@@ -50,7 +53,6 @@ namespace OptimaValue.Wpf
             TimeOverZero = TimeSpan.FromSeconds(valuesOverZero);
 
             // Beräkna antal gånger över 0
-
             bool lastValueGreaterThanZero = false;
             foreach (var item in Values)
             {
@@ -63,6 +65,10 @@ namespace OptimaValue.Wpf
                 if (item.Value <= 0 && lastValueGreaterThanZero)
                     lastValueGreaterThanZero = false;
             }
+
+            var vals = Values.Select(x => x.Value).ToList();
+            double avg = vals.Average();
+            StandardDeviation = Math.Sqrt(vals.Average(v => Math.Pow(v - avg, 2)));
         }
     }
 }
