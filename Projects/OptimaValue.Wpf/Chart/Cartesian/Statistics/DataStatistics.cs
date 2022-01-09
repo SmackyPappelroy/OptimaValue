@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LiveCharts.Defaults;
+using LiveCharts.Geared;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +17,7 @@ namespace OptimaValue.Wpf
     public class DataStatistics
     {
         public StatisticFilter Filter { get; }
-        public MyLineSeries Series { get; }
+        public GearedValues<DateTimePoint> Values { get; }
 
         public double Integral = 0;
         public TimeSpan TimeOverZero = TimeSpan.Zero;
@@ -24,7 +26,7 @@ namespace OptimaValue.Wpf
         public DataStatistics(StatisticFilter filter, MyLineSeries series)
         {
             Filter = filter;
-            Series = series;
+            Values = series.LineSeries.Values as GearedValues<DateTimePoint>;
             CalculateStatistics();
         }
 
@@ -34,23 +36,23 @@ namespace OptimaValue.Wpf
                 return;
 
             // Integral
-            var minDate = Series.ChartValues.AsEnumerable().Select(x => x.DateTime).Min();
-            var maxDate = Series.ChartValues.AsEnumerable().Select(x => x.DateTime).Max();
+            var minDate = Values.Select(x => x.DateTime).Min();
+            var maxDate = Values.Select(x => x.DateTime).Max();
 
             var antalTimmar = (maxDate - minDate).TotalSeconds / 3600;
 
-            var resultat = Series.ChartValues.AsEnumerable().Select(x => x.Value).Average();
+            var resultat = Values.Select(x => x.Value).Average();
 
             Integral = resultat * antalTimmar;
 
             // Beräkna tid över 0
-            var valuesOverZero = Series.ChartValues.AsEnumerable().Where(x => x.Value > 0).ToList().Count;
+            var valuesOverZero = Values.Where(x => x.Value > 0).ToList().Count;
             TimeOverZero = TimeSpan.FromSeconds(valuesOverZero);
 
             // Beräkna antal gånger över 0
 
             bool lastValueGreaterThanZero = false;
-            foreach (var item in Series.ChartValues)
+            foreach (var item in Values)
             {
                 if (item.Value > 0 && !lastValueGreaterThanZero)
                 {

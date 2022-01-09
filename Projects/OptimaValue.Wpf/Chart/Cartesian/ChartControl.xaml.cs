@@ -498,10 +498,11 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Color.FromArgb(255, 176, 80, 73)),
             };
+            var integralPerTimme = stats.Integral / (maxTid - minTid).TotalHours;
             TextBlock textBlockIntegral = new TextBlock()
             {
                 Margin = new Thickness(0),
-                Text = $"∫ {stats.Integral.ToString("0.0")}",
+                Text = $"∫ {stats.Integral.ToString("0.0")}  ∫/h {integralPerTimme.ToString("0.0")}",
                 Height = 20,
                 FontSize = 14,
                 Foreground = new SolidColorBrush(Colors.AntiqueWhite),
@@ -711,7 +712,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         }
         AddTag("", true);
         ConfigureChart(false);
-
+        check10Min.IsChecked = true;
 
 
         await StartPlayTask(source);
@@ -726,19 +727,19 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         switch (timeInterval)
         {
             case TimeInterval.HourOne:
-                timeSpanStart = TimeSpan.FromHours(1) - TimeSpan.FromMinutes(1);
+                timeSpanStart = TimeSpan.FromHours(1) + TimeSpan.FromMinutes(1);
                 timeSpanStop = TimeSpan.FromMinutes(1);
                 break;
             case TimeInterval.Min30:
-                timeSpanStart = TimeSpan.FromMinutes(30) - TimeSpan.FromMinutes(1);
+                timeSpanStart = TimeSpan.FromMinutes(30) + TimeSpan.FromMinutes(1);
                 timeSpanStop = TimeSpan.FromMinutes(1);
                 break;
             case TimeInterval.Min10:
-                timeSpanStart = TimeSpan.FromMinutes(10) - TimeSpan.FromMinutes(1);
+                timeSpanStart = TimeSpan.FromMinutes(10) + TimeSpan.FromMinutes(1);
                 timeSpanStop = TimeSpan.FromMinutes(1);
                 break;
             case TimeInterval.Min1:
-                timeSpanStart = TimeSpan.FromMinutes(1) - TimeSpan.FromSeconds(10);
+                timeSpanStart = TimeSpan.FromMinutes(1) + TimeSpan.FromSeconds(10);
                 timeSpanStop = TimeSpan.FromSeconds(10);
                 break;
             default:
@@ -803,16 +804,19 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                         switch (timeInterval)
                         {
                             case TimeInterval.HourOne:
-                                timeSpanStart = TimeSpan.FromHours(1) - TimeSpan.FromMinutes(1);
+                                timeSpanStart = TimeSpan.FromHours(1) + TimeSpan.FromMinutes(1);
+                                timeSpanStop = TimeSpan.FromMinutes(1);
                                 break;
                             case TimeInterval.Min30:
-                                timeSpanStart = TimeSpan.FromMinutes(30) - TimeSpan.FromMinutes(1);
+                                timeSpanStart = TimeSpan.FromMinutes(30) + TimeSpan.FromMinutes(1);
+                                timeSpanStop = TimeSpan.FromMinutes(1);
                                 break;
                             case TimeInterval.Min10:
-                                timeSpanStart = TimeSpan.FromMinutes(10) - TimeSpan.FromMinutes(1);
+                                timeSpanStart = TimeSpan.FromMinutes(10) + TimeSpan.FromMinutes(1);
+                                timeSpanStop = TimeSpan.FromMinutes(1);
                                 break;
                             case TimeInterval.Min1:
-                                timeSpanStart = TimeSpan.FromMinutes(1) - TimeSpan.FromSeconds(10);
+                                timeSpanStart = TimeSpan.FromMinutes(1) + TimeSpan.FromSeconds(10);
                                 timeSpanStop = TimeSpan.FromSeconds(10);
                                 stopDateTime = DateTime.Now - timeSpanStop;
                                 break;
@@ -820,6 +824,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                                 break;
                         }
                         startDateTime = DateTime.Now - timeSpanStart;
+                        stopDateTime = DateTime.Now - timeSpanStop;
                     }
                     oldTimeInterval = timeInterval;
                     startDateTime += timeToAdd;
@@ -1120,19 +1125,18 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         check30Min.IsChecked = false;
     }
 
-    bool wasChecked = false;
     private void radioDarkTheme(object sender, RoutedEventArgs e)
     {
-        if ((bool)wasChecked)
-            radioDark.IsChecked = false;
+        radioLight.IsChecked = false;
 
-        if (radioDark.IsChecked == true)
-            this.Background = new SolidColorBrush(Colors.Black);
-        else
-            this.Background = new SolidColorBrush(Colors.DimGray);
+        this.Background = new SolidColorBrush(Colors.Black);
+    }
 
+    private void radioLightTheme(object sender, RoutedEventArgs e)
+    {
+        radioDark.IsChecked = false;
 
-        wasChecked = (bool)radioDark.IsChecked;
+        this.Background = new SolidColorBrush(Colors.DimGray);
     }
 }
 

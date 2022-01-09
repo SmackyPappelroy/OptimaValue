@@ -95,14 +95,28 @@
                 <StackPanel  
                    VerticalAlignment="Top"
                    >
-                    <RadioButton x:Name="radioDark" Content="Mörkt Tema" Foreground="White" Margin="20 20 0 0" Click="radioDarkTheme" />
+                    <StackPanel Orientation="Horizontal" Margin="20 20 0 10" >
+                        <RadioButton x:Name="radioDark" Content="Mörkt Tema" Foreground="White" Margin="0 0 20 0" Click="radioDarkTheme" />
+                        <RadioButton x:Name="radioLight" Content="Ljust Tema" Foreground="White"  Click="radioLightTheme" />
+                    </StackPanel>
+
+
+                    <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
+                        <!-- Underline -->
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#644C4C4C" Offset="0.0"/>
+                                <GradientStop Color="White" Offset="0.5"/>
+                                <GradientStop Color="#644C4C4C" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                    </Border>
                     <TextBlock Text="Start" Foreground="White"
                        FontSize="20"
-                       Margin="0 5 0 0"
+                       Margin="0 5 0 5"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"/>
-                    <Rectangle Stroke="Gray" StrokeThickness="1"  Margin="5"/>
-                    <Grid >
+                    <Grid Margin="0 5 0 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width=".3*"/>
                             <ColumnDefinition Width=".7*"/>
@@ -116,7 +130,7 @@
                             Margin="5 5 20 5 "
                             SelectedDate="{Binding StartDate}"/>
                     </Grid>
-                    <Grid  >
+                    <Grid Margin="0 0 0 10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="4*"/>
@@ -138,13 +152,23 @@
                             </TextBox.Text>
                         </TextBox>
                     </Grid>
+                    <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
+                        <!-- Underline -->
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#644C4C4C" Offset="0.0"/>
+                                <GradientStop Color="White" Offset="0.5"/>
+                                <GradientStop Color="#644C4C4C" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                    </Border>
                     <TextBlock Text="Stopp" Foreground="White"
                        FontSize="20"
-                       Margin="0 10 0 0"
+                       Margin="0 5 0 5"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"/>
-                    <Rectangle Stroke="Gray" StrokeThickness="1"  Margin="5"/>
-                    <Grid >
+
+                    <Grid Margin="0 5 0 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width=".3*"/>
                             <ColumnDefinition Width=".7*"/>
@@ -156,7 +180,7 @@
                             Margin="5 5 20 5"
                             SelectedDate="{Binding StopDate}"/>
                     </Grid>
-                    <Grid >
+                    <Grid Margin="0 0 0 10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="4*"/>
@@ -176,8 +200,17 @@
                             </TextBox.Text>
                         </TextBox>
                     </Grid>
-                    <Rectangle Stroke="Gray" StrokeThickness="1"  Margin="5"/>
-                    <StackPanel Orientation="Horizontal" Margin="0 0 0 20">
+                    <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
+                        <!-- Underline -->
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#644C4C4C" Offset="0.0"/>
+                                <GradientStop Color="White" Offset="0.5"/>
+                                <GradientStop Color="#644C4C4C" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="0 5 0 20">
                         <TextBlock Text="Statistikfilter:" Margin="20 5 5 5" Foreground="White" FontSize="14" VerticalAlignment="Center"/>
                         <ComboBox Name="comboStats" 
                                   ItemsSource="{Binding Source = {StaticResource dataFromEnum}}"
@@ -185,10 +218,19 @@
                                   Width="100"
                                   Grid.Column="1" Margin="10 5 10 0" FontSize="16" FontWeight="Bold" VerticalAlignment="Top"/>
                     </StackPanel>
-
+                    <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
+                        <!-- Underline -->
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#644C4C4C" Offset="0.0"/>
+                                <GradientStop Color="White" Offset="0.5"/>
+                                <GradientStop Color="#644C4C4C" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                    </Border>
                     <TextBlock Text="Tag:" FontSize="18"
                        Foreground="White"
-                       Margin="0 10 0 0"
+                       Margin="0 5 0 0"
                        HorizontalAlignment="Center"/>
                     <ComboBox Grid.Column="1" Margin="10 10 10 10" FontSize="16" FontWeight="Bold"
                     Name="comboTag"/>
