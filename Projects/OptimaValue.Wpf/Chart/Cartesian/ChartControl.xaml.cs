@@ -469,7 +469,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 Text = ": " + item.MinValueY.ToString("0.000") + $"{tagUnitString}     ",
                 Height = 20,
                 FontSize = 14,
-                Foreground = new SolidColorBrush(Color.FromArgb(255, 54, 93, 218)),
+                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 54, 93, 218)),
                 ToolTip = "Minvärde"
             };
             System.Windows.Controls.Image imageAvg = new()
@@ -486,7 +486,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 Text = ": " + item.AvgValueY.ToString("0.000") + $"{tagUnitString}     ",
                 Height = 20,
                 FontSize = 14,
-                Foreground = new SolidColorBrush(Color.FromArgb(255, 104, 218, 54)),
+                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 104, 218, 54)),
                 ToolTip = "Medelvärde"
             };
             System.Windows.Controls.Image imageMax = new()
@@ -503,7 +503,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
                 Text = ": " + item.MaxValueY.ToString("0.000") + $"{tagUnitString}     ",
                 Height = 20,
                 FontSize = 14,
-                Foreground = new SolidColorBrush(Color.FromArgb(255, 176, 80, 73)),
+                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 176, 80, 73)),
                 ToolTip = "Maxvärde"
             };
             var integralPerTimme = stats.Integral / (maxTid - minTid).TotalHours;
@@ -623,13 +623,21 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
     }
 
 
-
+    private bool isUpdating = false;
     private async void UpdateOnClick(object sender, RoutedEventArgs e)
     {
-        await UpdateChartAsync();
+        startDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
+        stopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
+
+        if (!isUpdating)
+        {
+            isUpdating = true;
+            await UpdateChartAsync();
+            isUpdating = false;
+        }
     }
 
-    private async Task UpdateChartAsync(bool changeColor = true)
+    private async Task UpdateChartAsync(bool changeColor = true, bool stop = false)
     {
         if (startDateTime == DateTime.MinValue && stopDateTime == DateTime.MinValue)
             return;
@@ -644,8 +652,16 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             Series.Add(item);
         }
 
-        startDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
-        stopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
+        if (!stop)
+        {
+            startDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
+            stopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
+        }
+        else
+        {
+            startDateTime = oldStartDateTime;
+            stopDateTime = oldStopDateTime;
+        }
 
         startDatePicker.Text = startDateTime.ToString("yyyy-MM-dd");
         txtStartTime.Text = startDateTime.ToString("HH:mm");
@@ -658,6 +674,55 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             return;
 
         ConfigureChart(changeColor);
+    }
+
+    private bool isSaving = false;
+    private async void Button_Save(object sender, RoutedEventArgs e)
+    {
+        if (isSaving)
+            return;
+
+        isSaving = true;
+        var bitmap = ControlToImage(this.MainGrid, 1200, 1200);
+
+        Microsoft.Win32.SaveFileDialog dialog = new Microsoft.Win32.SaveFileDialog();
+        dialog.Filter = "PNG Image|*.png|JPEG Image|*.jpg";
+
+        if (dialog.ShowDialog() == true)
+        {
+            bitmap.Save(dialog.FileName, System.Drawing.Imaging.ImageFormat.Png);
+        }
+        isSaving = false;
+    }
+
+    public static System.Drawing.Bitmap ControlToImage(Visual target, double dpiX, double dpiY)
+    {
+        if (target == null)
+        {
+            return null;
+        }
+        // render control content
+        Rect bounds = VisualTreeHelper.GetDescendantBounds(target);
+        RenderTargetBitmap rtb = new RenderTargetBitmap((int)(bounds.Width * dpiX / 96.0),
+           (int)(bounds.Height * dpiY / 96.0),
+           dpiX,
+           dpiY,
+           PixelFormats.Pbgra32);
+        DrawingVisual dv = new DrawingVisual();
+        using (DrawingContext ctx = dv.RenderOpen())
+        {
+            VisualBrush vb = new VisualBrush(target);
+            ctx.DrawRectangle(vb, null, new Rect(new System.Windows.Point(), bounds.Size));
+        }
+        rtb.Render(dv);
+
+        //convert image format
+        MemoryStream stream = new MemoryStream();
+        BitmapEncoder encoder = new BmpBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(rtb));
+        encoder.Save(stream);
+
+        return new System.Drawing.Bitmap(stream);
     }
 
 
@@ -697,7 +762,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             item.LineSeries = null;
         }
         Series.Clear();
-        await UpdateChartAsync();
+        await UpdateChartAsync(true, true);
     }
 
     private CancellationTokenSource source = new();
@@ -713,8 +778,8 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
             return;
         }
 
-        oldStartDateTime = startDateTime;
-        oldStopDateTime = stopDateTime;
+        oldStartDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
+        oldStopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
 
         startDateTime = DateTime.Now - TimeSpan.FromMinutes(11);
         stopDateTime = DateTime.Now - TimeSpan.FromMinutes(1);
@@ -1163,5 +1228,7 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
 
         this.Background = new SolidColorBrush(Colors.DimGray);
     }
+
+
 }
 

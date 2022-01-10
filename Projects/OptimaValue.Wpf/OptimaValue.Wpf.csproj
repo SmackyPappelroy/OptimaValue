@@ -13,6 +13,7 @@
 	  <None Remove="Images\average_48px.png" />
 	  <None Remove="Images\maximum_48px.png" />
 	  <None Remove="Images\minimum_value_48px.png" />
+	  <None Remove="Images\save_48px.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -38,6 +39,9 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Resource>
 	  <Resource Include="Images\minimum_value_48px.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Resource>
+	  <Resource Include="Images\save_48px.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Resource>
 	</ItemGroup>

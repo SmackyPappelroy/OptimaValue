@@ -9,7 +9,7 @@
              xmlns:geared="clr-namespace:LiveCharts.Geared;assembly=LiveCharts.Geared"
              d:DataContext="{d:DesignInstance Type=local:ChartControl}"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="1000">
+             d:DesignHeight="700" d:DesignWidth="1000">
     <UserControl.Resources>
         <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
                             ObjectType="{x:Type System:Enum}">
@@ -50,7 +50,7 @@
                             Grid.ColumnSpan="2"
                             Margin="20 0 0 20"
                             Series="{Binding Series}"
-                            Name="Chart"
+                            Name="MyChart"
                             Zoom="Xy" 
                             DisableAnimations="True"
                             Hoverable="False">
@@ -366,7 +366,28 @@
 
                     </StackPanel>
 
-
+                    <Button Margin="10 10 10 0" Width="40" Height="40" Name="btnSave"
+                VerticalAlignment="Top" Panel.ZIndex="1"
+                    Click="Button_Save" >
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Grid>
+                                    <Grid.Effect>
+                                        <DropShadowEffect BlurRadius="15" Direction="-90" 
+                                                  RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
+                                    </Grid.Effect>
+                                    <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
+                                        <Ellipse.Effect>
+                                            <DropShadowEffect/>
+                                        </Ellipse.Effect>
+                                    </Ellipse>
+                                    <Image Width="30" Height="30" Source="/Images/save_48px.png" />
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                                </Grid>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
 
                 </StackPanel>
             </ScrollViewer>

@@ -9,7 +9,7 @@
         Background="Transparent"
         WindowStartupLocation="CenterScreen"
         Title="OptimaValue - Graf" 
-        Height="700" 
+        Height="800" 
         MinHeight="600"
         Width="1200" 
         MinWidth="1000" 
