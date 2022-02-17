@@ -521,6 +521,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                 {
                     imageConnection.Image = connectedList.Images[0];
                     connected = false;
+                    $"Ingen anslutning till {MyPlc.PlcName}".SendStatusMessage(Severity.Information);
                 }
                 finally
                 {

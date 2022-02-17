@@ -51,7 +51,7 @@
                             Margin="20 0 0 20"
                             Series="{Binding Series}"
                             Name="MyChart"
-                            Zoom="Xy" 
+                            Zoom="X" 
                             DisableAnimations="True"
                             Hoverable="False">
 
@@ -200,6 +200,30 @@
                             </TextBox.Text>
                         </TextBox>
                     </Grid>
+                    <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
+                        <!-- Underline -->
+                        <Border.BorderBrush>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="#644C4C4C" Offset="0.0"/>
+                                <GradientStop Color="White" Offset="0.5"/>
+                                <GradientStop Color="#644C4C4C" Offset="1.0"/>
+                            </LinearGradientBrush>
+                        </Border.BorderBrush>
+                    </Border>
+
+                    <Button Name="btnUpdateTime" Click="btnUpdateTime_Click" Content="Uppdatera Tid" Margin="10" Width="100" Height="35" 
+                            Background="#4C4949" Foreground="White"
+                            FontSize="14" BorderThickness="0" >
+                        <Button.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="4"/>
+                            </Style>
+                        </Button.Resources>
+                        <Button.Effect>
+                            <DropShadowEffect/>
+                        </Button.Effect>
+                    </Button>
+
                     <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
                         <!-- Underline -->
                         <Border.BorderBrush>

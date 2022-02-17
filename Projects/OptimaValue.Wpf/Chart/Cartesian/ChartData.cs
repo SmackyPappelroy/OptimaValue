@@ -283,37 +283,46 @@ namespace OptimaValue.Wpf
                 if (SourceData == null || SourceData.Rows.Count < 1)
                     return list;
                 //IEnumerable<T> enumerable = SourceData.AsEnumerable().Select(RowConverter);
-                IEnumerable<T> enumerable = SourceData.AsEnumerable().Select(dataRow =>
+                try
                 {
-                    var returnValue = new T();
-                    if (dataRow == null)
+                    IEnumerable<T> enumerable = SourceData.AsEnumerable().Select(dataRow =>
                     {
-                        returnValue = default(T);
-                        lastValue = (T)dataRow[tagName];
-                    }
-                    else if (dataRow[tagName] == DBNull.Value)
-                    {
-                        if (!lastValue.Equals(default))
+                        var returnValue = new T();
+                        if (dataRow == null)
                         {
-                            returnValue = lastValue;
-                            lastValue = default;
+                            returnValue = default(T);
+                            lastValue = (T)dataRow[tagName];
+                        }
+                        else if (dataRow[tagName] == DBNull.Value)
+                        {
+                            if (!lastValue.Equals(default))
+                            {
+                                returnValue = lastValue;
+                                lastValue = default;
+                            }
+                            else
+                            {
+                                returnValue = default;
+                                lastValue = default;
+                            }
                         }
                         else
                         {
-                            returnValue = default;
-                            lastValue = default;
+                            lastValue = (T)dataRow[tagName];
+                            returnValue = lastValue;
                         }
-                    }
-                    else
-                    {
-                        lastValue = (T)dataRow[tagName];
-                        returnValue = lastValue;
-                    }
-                    return returnValue;
-                });
-                if (enumerable == null)
+                        return returnValue;
+                    });
+                    if (enumerable == null)
+                        return list;
+
+
+                    return new List<T>(enumerable);
+                }
+                catch (ArgumentException)
+                {
                     return list;
-                return new List<T>(enumerable);
+                }
             }
         }
 
@@ -356,6 +365,9 @@ namespace OptimaValue.Wpf
 
                 var values = myTbl.ConvertToList<double>(tagName);
                 var logTimes = myTbl.ConvertToList<DateTime>("logTime");
+
+                if (values.Count == 0)
+                    return null;
 
                 for (int i = 0; i < logTimes.Count; i++)
                 {

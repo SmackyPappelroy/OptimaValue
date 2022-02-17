@@ -69,7 +69,7 @@ namespace OptimaValue
         /// <param name="filePath">The path to the file that generated the log message</param>
         /// <param name="ex">Optional exception</param>
         /// <param name="lineNumber">What line number generated the log</param>
-        public void Log(string message, Severity severity = Severity.Normal, Exception ex = null, Level logLevel = Level.Debug, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        public void Log(string message, Severity severity = Severity.Information, Exception ex = null, Level logLevel = Level.Debug, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
         {
             var tiden = DateTime.UtcNow + Logger.UtcOffset;
 
@@ -83,7 +83,8 @@ namespace OptimaValue
 
                 logString = $"[{(severity.ToString() + "]").PadRight(10)}";
                 logString += tiden.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                hmiString = tiden.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                hmiString = "[" + severity.ToString() + "]" + Environment.NewLine;
+                hmiString += tiden.ToString("yyyy-MM-dd HH:mm:ss.fff");
 
                 if (logLevel >= Level.Critical)
                     logString += $"{Environment.NewLine}[{(filePath + "]")}";

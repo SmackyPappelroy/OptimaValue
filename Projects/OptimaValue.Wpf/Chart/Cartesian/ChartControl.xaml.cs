@@ -637,6 +637,16 @@ public partial class ChartControl : UserControl, INotifyPropertyChanged
         }
     }
 
+    private async void btnUpdateTime_Click(object sender, RoutedEventArgs e)
+    {
+        if (!isUpdating)
+        {
+            isUpdating = true;
+            await UpdateChartAsync();
+            isUpdating = false;
+        }
+    }
+
     private async Task UpdateChartAsync(bool changeColor = true, bool stop = false)
     {
         if (startDateTime == DateTime.MinValue && stopDateTime == DateTime.MinValue)

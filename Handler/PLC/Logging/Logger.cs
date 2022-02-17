@@ -182,7 +182,7 @@ namespace OptimaValue
                                         if (MyPlc.IsConnected)
                                         {
                                             MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Ok);
-                                            Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Normal);
+                                            Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Information);
                                             MyPlc.ConnectionStatus = ConnectionStatus.Connected;
                                         }
                                         else

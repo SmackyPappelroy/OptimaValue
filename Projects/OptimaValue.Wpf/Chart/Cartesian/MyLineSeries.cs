@@ -90,7 +90,12 @@ namespace OptimaValue.Wpf
             LineSeries.Values.Clear();
             ChartValues.Clear();
 
-            ChartValues.AddRange(ChartData.AddSeriesValues(Tag.Name));
+            var result = ChartData.AddSeriesValues(Tag.Name);
+
+            if (result == null)
+                return false;
+
+            ChartValues.AddRange(result);
             LineSeries.Values = new GearedValues<DateTimePoint>(ChartValues.AsGearedValues().WithQuality(Quality.Highest));
 
             if (LineSeries.Values.Count == 0)
