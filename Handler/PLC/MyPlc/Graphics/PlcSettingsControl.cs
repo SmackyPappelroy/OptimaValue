@@ -3,6 +3,7 @@ using S7.Net;
 using System;
 using System.ComponentModel;
 using System.Data.SqlClient;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace OptimaValue.Handler.PLC.Graphics
@@ -24,8 +25,8 @@ namespace OptimaValue.Handler.PLC.Graphics
         private SyncPlcTimeForm syncForm;
         private bool syncFormOpen;
 
-        private Timer connectionTimer;
         private Timer timeoutTimer;
+        private bool tryConnect = false;
         private bool connected = false;
 
         private bool PlcExists => DatabaseSql.DoesPlcExist(PlcName);
@@ -37,17 +38,12 @@ namespace OptimaValue.Handler.PLC.Graphics
         {
             InitializeComponent();
 
-            connectionTimer = new Timer()
-            {
-                Interval = 500
-            };
+
             timeoutTimer = new Timer()
             {
                 Interval = 5000
             };
-            connectionTimer.Tick += ConnectionTimer_Tick;
             timeoutTimer.Tick += TimeoutTimer_Tick;
-            connectionTimer.Start();
 
 
             connectionStatus = conStatus;
@@ -78,27 +74,17 @@ namespace OptimaValue.Handler.PLC.Graphics
             this.HandleDestroyed += PlcSettingsControl_HandleDestroyed;
             DeleteConfirmationEvent.DeleteEvent += DeleteConfirmationEvent_DeleteEvent;
 
-            imageConnection.Image = null;
+            imageTest.Image = imageList.Images[0];
+            btnConnect.Enabled = false;
         }
 
         private void TimeoutTimer_Tick(object sender, EventArgs e)
         {
-            imageConnection.Image = null;
+            imageTest.Image = imageList.Images[0];
+            tryConnect = false;
             timeoutTimer.Stop();
         }
 
-        private void ConnectionTimer_Tick(object sender, EventArgs e)
-        {
-            if (imageConnection.Image != null)
-            {
-                if (!connected)
-                {
-                    imageConnection.Visible = !imageConnection.Visible;
-                }
-                else
-                    imageConnection.Visible = true;
-            }
-        }
 
         private void DeleteConfirmationEvent_DeleteEvent(object sender, DeleteEventArgs e)
         {
@@ -169,6 +155,10 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtName, "");
                 }
             }
+            if (!nameOk)
+                btnConnect.Enabled = false;
+            else if (ValidateAll())
+                btnConnect.Enabled = true;
         }
 
         private void txtIp_Validating(object sender, CancelEventArgs e)
@@ -211,6 +201,10 @@ namespace OptimaValue.Handler.PLC.Graphics
                     ipOk = true;
                 }
             }
+            if (!ipOk)
+                btnConnect.Enabled = false;
+            else if (ValidateAll())
+                btnConnect.Enabled = true;
 
 
         }
@@ -255,6 +249,10 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtIp, "");
                 }
             }
+            if (!rackOk)
+                btnConnect.Enabled = false;
+            else if (ValidateAll())
+                btnConnect.Enabled = true;
 
         }
 
@@ -298,6 +296,10 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtRack, "");
                 }
             }
+            if (!slotOk)
+                btnConnect.Enabled = false;
+            else if (ValidateAll())
+                btnConnect.Enabled = true;
 
 
         }
@@ -332,6 +334,10 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(comboCpu, "");
                 }
             }
+            if (!cpuOk)
+                btnConnect.Enabled = false;
+            else if (ValidateAll())
+                btnConnect.Enabled = true;
 
 
         }
@@ -376,8 +382,8 @@ namespace OptimaValue.Handler.PLC.Graphics
             if (!string.IsNullOrEmpty(txtName.Text))
                 nameOk = true;
 
-            btnTestConnection.Visible = (cpuOk && ipOk && slotOk && rackOk && nameOk);
-            return btnTestConnection.Visible;
+            btnConnect.Enabled = (cpuOk && ipOk && slotOk && rackOk && nameOk);
+            return btnConnect.Enabled;
         }
 
         private void SavePlcConfig()
@@ -411,8 +417,7 @@ namespace OptimaValue.Handler.PLC.Graphics
             txtRack.Text = Rack;
             checkActive.Checked = Active;
             comboCpu.SelectedItem = CpuType.ToString();
-            btnTestConnection.Visible = ValidateAll();
-
+            btnConnect.Enabled = ValidateAll();
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
@@ -505,39 +510,47 @@ namespace OptimaValue.Handler.PLC.Graphics
             }
         }
 
-        private async void btnTestConnection_Click(object sender, EventArgs e)
+
+
+        private void PlcSettingsControl_Leave(object sender, EventArgs e)
+        {
+            if (tryConnect)
+            {
+                MyPlc.Close();
+            }
+        }
+
+
+
+        private async void button1_Click(object sender, EventArgs e)
         {
             if (ValidateAll())
             {
+                tableLayoutPanel2.Enabled = false;
                 try
                 {
-                    btnTestConnection.Visible = false;
+                    tryConnect = true;
+                    btnConnect.Enabled = false;
                     Application.UseWaitCursor = true;
                     await MyPlc.OpenAsync();
-                    imageConnection.Image = connectedList.Images[1];
+                    imageTest.Image = imageList.Images[2];
                     connected = true;
                 }
                 catch (Exception ex)
                 {
-                    imageConnection.Image = connectedList.Images[0];
+                    imageTest.Image = imageList.Images[1];
                     connected = false;
                     $"Ingen anslutning till {MyPlc.PlcName}".SendStatusMessage(Severity.Information);
                 }
                 finally
                 {
                     MyPlc.Close();
-                    btnTestConnection.Visible = true;
+                    btnConnect.Enabled = true;
                     timeoutTimer.Start();
                     Application.UseWaitCursor = false;
-                }
-            }
-        }
+                    tableLayoutPanel2.Enabled = true;
 
-        private void PlcSettingsControl_Leave(object sender, EventArgs e)
-        {
-            if (connected)
-            {
-                MyPlc.Close();
+                }
             }
         }
     }
