@@ -518,7 +518,7 @@ namespace OptimaValue
                 return;
             }
             if (e.Created)
-                $"Skapade ny databas {SqlSettings.Default.Databas}".SendStatusMessage();
+                $"Skapade ny databas {SqlSettings.Databas}".SendStatusMessage();
             else
                 $"Sparade inställningarna till SQL".SendStatusMessage();
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace OptimaValue.Config
     public static class SqlMethods
     {
         public static string Server { get; private set; } = "";
-        public static string ConnectionString => ($"Server={Server};Database={SqlSettings.Default.Databas};User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password};;TrustServerCertificate=true; ");
+        public static string ConnectionString => ($"Server={Server};Database={SqlSettings.Databas};User Id={SqlSettings.User};Password={SqlSettings.Password};;TrustServerCertificate=true; ");
 
         public static string CreateConnectionString()
         {
@@ -36,16 +37,31 @@ namespace OptimaValue.Config
                 }
             }
 
-            if (string.IsNullOrEmpty(SqlSettings.Default.Databas) || string.IsNullOrEmpty(SqlSettings.Default.User) || string.IsNullOrEmpty(SqlSettings.Default.Password))
+            if (string.IsNullOrEmpty(SqlSettings.Databas) || string.IsNullOrEmpty(SqlSettings.User) || string.IsNullOrEmpty(SqlSettings.Password))
             {
-                SqlSettings.Default.Databas = "MCValulog";
-                SqlSettings.Default.User = "sa";
-                SqlSettings.Default.Password = "sa";
-                SqlSettings.Default.Save();
+                SqlSettings.Databas = "MCValulog";
+                SqlSettings.User = "sa";
+                SqlSettings.Password = "sa";
             }
 
 
             return ConnectionString;
+        }
+
+        public static async Task<bool> TestSqlConnectionAsync()
+        {
+            try
+            {
+                using (var connection = new SqlConnection(ConnectionString))
+                {
+                    await connection.OpenAsync();
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

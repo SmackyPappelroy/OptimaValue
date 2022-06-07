@@ -20,16 +20,16 @@ namespace OptimaValue
         }
         private void SettingForm_Load(object sender, EventArgs e)
         {
-            comboServer.Text = SqlSettings.Default.Server != string.Empty ? SqlSettings.Default.Server : string.Empty;
+            comboServer.Text = SqlSettings.Server != string.Empty ? SqlSettings.Server : string.Empty;
             if (comboServer.Text != string.Empty)
             {
                 comboServer.Items.Clear();
                 comboServer.Items.Add(comboServer.Text);
                 comboServer.SelectedIndex = 0;
             }
-            txtDatabas.Text = SqlSettings.Default.Databas;
-            txtUser.Text = SqlSettings.Default.User;
-            txtPassword.Text = SqlSettings.Default.Password;
+            txtDatabas.Text = SqlSettings.Databas;
+            txtUser.Text = SqlSettings.User;
+            txtPassword.Text = SqlSettings.Password;
             DatabaseCreationEvent.CreatedEvent += DatabaseCreationEvent_CreatedEvent;
         }
 
@@ -46,14 +46,12 @@ namespace OptimaValue
             this.ControlBox = false;
             Application.UseWaitCursor = true;
             btnSave.Enabled = false;
-            SqlSettings.Default.User = txtUser.Text;
-            SqlSettings.Default.Password = txtPassword.Text;
-            SqlSettings.Default.Server = comboServer.SelectedItem.ToString();
-            SqlSettings.Default.Databas = txtDatabas.Text;
-            SqlSettings.Default.ConnectionString = ($"Server={@SqlSettings.Default.Server};Database={SqlSettings.Default.Databas};User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
-            SqlSettings.Default.Save();
+            SqlSettings.User = txtUser.Text;
+            SqlSettings.Password = txtPassword.Text;
+            SqlSettings.Server = comboServer.SelectedItem.ToString();
+            SqlSettings.Databas = txtDatabas.Text;
 
-            string serverString = ($"Server={@SqlSettings.Default.Server};Database=master;User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
+            string serverString = ($"Server={@SqlSettings.Server};Database=master;User Id={SqlSettings.User};Password={SqlSettings.Password}; ");
 
             if (!await DatabaseSql.TestConnectionAsync(1000, serverString))
             {

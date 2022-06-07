@@ -19,7 +19,7 @@ public static class DatabaseSql
     /// Creates a SQL connection string
     /// </summary>
     /// <returns>A connection string</returns>
-    public static string ConnectionString => SqlSettings.Default.ConnectionString;
+    public static string ConnectionString => SqlSettings.ConnectionString;
 
 
     /// <summary>
@@ -73,7 +73,7 @@ public static class DatabaseSql
     public static bool TagExist(int tagId)
     {
         object result = new object();
-        var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
+        var query = $"SELECT TOP 1 name FROM {SqlSettings.Databas}.dbo.tagConfig ";
         query += $"WHERE id = {tagId}";
         try
         {
@@ -99,7 +99,7 @@ public static class DatabaseSql
     public static DataTable GetTags(string plcName)
     {
         var tbl = new DataTable();
-        var query = $"SELECT * FROM {SqlSettings.Default.Databas}.dbo.tagConfig";
+        var query = $"SELECT * FROM {SqlSettings.Databas}.dbo.tagConfig";
         try
         {
             using SqlConnection con = new(ConnectionString);
@@ -119,7 +119,7 @@ public static class DatabaseSql
             }
             else
             {
-                query = $"SELECT * FROM {SqlSettings.Default.Databas}.dbo.tagConfig WHERE plcName = '{plcName}'";
+                query = $"SELECT * FROM {SqlSettings.Databas}.dbo.tagConfig WHERE plcName = '{plcName}'";
                 using SqlCommand cmd = new(query, con);
 
                 con.Open();
@@ -168,7 +168,7 @@ public static class DatabaseSql
     /// <param name="tagId"></param>
     public static void DeleteTag(int tagId)
     {
-        var query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.logValues ";
+        var query = $"DELETE FROM {SqlSettings.Databas}.dbo.logValues ";
         query += $"WHERE tag_id = {tagId}";
         try
         {
@@ -184,7 +184,7 @@ public static class DatabaseSql
         }
 
 
-        query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
+        query = $"DELETE FROM {SqlSettings.Databas}.dbo.tagConfig ";
         query += $"WHERE id = {tagId}";
         try
         {
@@ -203,7 +203,7 @@ public static class DatabaseSql
     public static bool CheckForDuplicateTagNames(string tagName, string plcName)
     {
         object result = new object();
-        var query = $"SELECT TOP 1 name FROM {SqlSettings.Default.Databas}.dbo.tagConfig ";
+        var query = $"SELECT TOP 1 name FROM {SqlSettings.Databas}.dbo.tagConfig ";
         query += $"WHERE name = '{tagName}' AND plcName = '{plcName}'";
         try
         {
@@ -248,7 +248,7 @@ public static class DatabaseSql
     public static DataTable GetLastTag()
     {
         DataTable tbl = new DataTable();
-        string query = $"SELECT TOP 1 * FROM {SqlSettings.Default.Databas}.dbo.tagConfig ORDER BY id DESC";
+        string query = $"SELECT TOP 1 * FROM {SqlSettings.Databas}.dbo.tagConfig ORDER BY id DESC";
         try
         {
             using SqlConnection con = new(ConnectionString);
@@ -271,7 +271,7 @@ public static class DatabaseSql
     public static DataTable GetPlcDataTable()
     {
         var tbl = new DataTable();
-        string query = "SELECT * FROM " + SqlSettings.Default.Databas + ".dbo.plcConfig";
+        string query = "SELECT * FROM " + SqlSettings.Databas + ".dbo.plcConfig";
         using SqlConnection con = new SqlConnection(ConnectionString);
         using SqlCommand cmd = new SqlCommand(query, con);
         try
@@ -296,7 +296,7 @@ public static class DatabaseSql
     /// <param name="id"></param>
     public static void DeletePlc(int id)
     {
-        var query = $"DELETE FROM {SqlSettings.Default.Databas}.dbo.plcConfig ";
+        var query = $"DELETE FROM {SqlSettings.Databas}.dbo.plcConfig ";
         query += $"WHERE id ='{id}'";
         try
         {
@@ -323,7 +323,7 @@ public static class DatabaseSql
     public static void SavePlcSyncParameters(string syncDb, string syncByte, string syncBool, string activeString, int plcId)
     {
         string query;
-        query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET ";
+        query = $"UPDATE {SqlSettings.Databas}.dbo.plcConfig SET ";
         query += $"syncTimeDbNr={syncDb},syncTimeOffset={syncByte},syncBoolAddress='{syncBool}',syncActive='{activeString}'";
         query += $" WHERE id = {plcId}";
 
@@ -341,7 +341,7 @@ public static class DatabaseSql
     public static bool DoesPlcExist(string plcName)
     {
         object result = new object();
-        var query = $"Select top 1 name FROM {SqlSettings.Default.Databas}.dbo.plcConfig WHERE name ='{plcName}'";
+        var query = $"Select top 1 name FROM {SqlSettings.Databas}.dbo.plcConfig WHERE name ='{plcName}'";
         try
         {
             using SqlConnection con = new SqlConnection(ConnectionString);
@@ -377,7 +377,7 @@ public static class DatabaseSql
         if (DoesPlcExist(name))
         {
             string query;
-            query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET active='{activeString}',name='{name}'";
+            query = $"UPDATE {SqlSettings.Databas}.dbo.plcConfig SET active='{activeString}',name='{name}'";
             query += $",ipAddress='{ip}',cpuType='{cpu}',rack={rack},slot={slot}";
             query += $" WHERE id = {id}";
 
@@ -387,7 +387,7 @@ public static class DatabaseSql
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
-            query = $"UPDATE {SqlSettings.Default.Databas}.dbo.tagConfig SET plcName='{name}' ";
+            query = $"UPDATE {SqlSettings.Databas}.dbo.tagConfig SET plcName='{name}' ";
             query += $"WHERE plcName = '{plcName}'";
             using (SqlConnection con = new(ConnectionString))
             {
@@ -399,7 +399,7 @@ public static class DatabaseSql
         else
         {
             string query;
-            query = $"INSERT INTO {SqlSettings.Default.Databas}.dbo.plcConfig (active,name,ipAddress,cpuType,rack,slot,";
+            query = $"INSERT INTO {SqlSettings.Databas}.dbo.plcConfig (active,name,ipAddress,cpuType,rack,slot,";
             query += $"syncTimeDbNr,syncTimeOffset,syncActive,syncBoolAddress,lastSyncTime)";
             query += $"VALUES ('{activeString}','{name}','{ip}','{cpu}',{rack},{slot},";
             query += $"0,0,'False','DBX0.0','{DateTime.UtcNow - TimeSpan.FromDays(1)}')";
@@ -417,7 +417,7 @@ public static class DatabaseSql
     /// <param name="plcName"></param>
     public static void SaveSyncTime(DateTime tid, string plcName)
     {
-        var query = $"UPDATE {SqlSettings.Default.Databas}.dbo.plcConfig SET lastSyncTime = '{tid}' WHERE name = '{plcName}'";
+        var query = $"UPDATE {SqlSettings.Databas}.dbo.plcConfig SET lastSyncTime = '{tid}' WHERE name = '{plcName}'";
         try
         {
             using SqlConnection con = new(ConnectionString);

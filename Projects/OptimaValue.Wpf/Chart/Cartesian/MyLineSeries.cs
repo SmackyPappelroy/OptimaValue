@@ -52,7 +52,7 @@ namespace OptimaValue.Wpf
             {
                 AreaLimit = 0,
                 PointGeometry = null,
-                StrokeThickness = 1,
+                StrokeThickness = 2,
 
                 Foreground = new SolidColorBrush(Color.FromArgb(107, 48, 48, 48)),
                 Stroke = new SolidColorBrush(Stroke),

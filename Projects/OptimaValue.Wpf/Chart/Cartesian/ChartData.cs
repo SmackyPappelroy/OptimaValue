@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using OptimaValue.Config;
 
 namespace OptimaValue.Wpf
 {
@@ -22,8 +23,6 @@ namespace OptimaValue.Wpf
         private static string queryNewValuesString;
 
         private static string createStoredProcedureString;
-
-        private static string fillGapQueryString;
 
         public static DataTable ChartTableAllTags;
 
@@ -41,14 +40,14 @@ namespace OptimaValue.Wpf
             sb.AppendLine(@"FROM");
             sb.AppendLine(@"(");
             sb.AppendLine(@"    SELECT name AS [Name]");
-            sb.AppendLine(@"    FROM  (SELECT MCValueLog.dbo.tagConfig.name, MCValueLog.dbo.logValues.numericValue, MCValueLog.dbo.logValues.logTime");
-            sb.AppendLine($"	FROM MCValueLog.dbo.logValues INNER JOIN MCValueLog.dbo.tagConfig ON MCValueLog.dbo.logValues.tag_id = MCValueLog.dbo.tagConfig.id WHERE MCValueLog.dbo.logValues.logTime >= '{startDate}' AND MCValueLog.dbo.logValues.logTime <= '{stopDate}') AS p");
+            sb.AppendLine(@$"    FROM  (SELECT {SqlSettings.Databas}.dbo.tagConfig.name, {SqlSettings.Databas}.dbo.logValues.numericValue, {SqlSettings.Databas}.dbo.logValues.logTime");
+            sb.AppendLine($"	FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id WHERE {SqlSettings.Databas}.dbo.logValues.logTime >= '{startDate}' AND {SqlSettings.Databas}.dbo.logValues.logTime <= '{stopDate}') AS p");
             sb.AppendLine(@"    GROUP BY [Name]");
             sb.AppendLine(@") AS x;");
             sb.AppendLine(@"SET @sql = N'");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as logTime, '+STUFF(@columns, 1, 2, '')+' FROM (");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as [logTime], [numericValue] AS [numericValue], [name] as [Name] ");
-            sb.AppendLine($"    FROM MCValueLog.dbo.logValues INNER JOIN MCValueLog.dbo.tagConfig ON MCValueLog.dbo.logValues.tag_id = MCValueLog.dbo.tagConfig.id WHERE MCValueLog.dbo.logValues.logTime >= ''{startDate}'' AND MCValueLog.dbo.logValues.logTime <= ''{stopDate}'') AS j PIVOT (SUM(numericValue) FOR [Name] in ");
+            sb.AppendLine($"    FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id WHERE {SqlSettings.Databas}.dbo.logValues.logTime >= ''{startDate}'' AND {SqlSettings.Databas}.dbo.logValues.logTime <= ''{stopDate}'') AS j PIVOT (SUM(numericValue) FOR [Name] in ");
             sb.AppendLine(@"	   ('+STUFF(REPLACE(@columns, ', p.[', ',['), 1, 1, '')+')) AS p;';");
             sb.AppendLine(@"EXEC sp_executesql @sql");
 
@@ -67,14 +66,14 @@ namespace OptimaValue.Wpf
             sb.AppendLine(@"FROM");
             sb.AppendLine(@"(");
             sb.AppendLine(@"    SELECT name AS [Name]");
-            sb.AppendLine(@"    FROM  (SELECT MCValueLog.dbo.tagConfig.name, MCValueLog.dbo.logValues.numericValue, MCValueLog.dbo.logValues.logTime");
-            sb.AppendLine($"	FROM MCValueLog.dbo.logValues INNER JOIN MCValueLog.dbo.tagConfig ON MCValueLog.dbo.logValues.tag_id = MCValueLog.dbo.tagConfig.id WHERE MCValueLog.dbo.logValues.logTime > '{lastTime}') AS p");
+            sb.AppendLine(@$"    FROM  (SELECT {SqlSettings.Databas}.dbo.tagConfig.name, {SqlSettings.Databas}.dbo.logValues.numericValue, {SqlSettings.Databas}.dbo.logValues.logTime");
+            sb.AppendLine($"	FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id WHERE {SqlSettings.Databas}.dbo.logValues.logTime > '{lastTime}') AS p");
             sb.AppendLine(@"    GROUP BY [Name]");
             sb.AppendLine(@") AS x;");
             sb.AppendLine(@"SET @sql = N'");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as logTime, '+STUFF(@columns, 1, 2, '')+' FROM (");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as [logTime], [numericValue] AS [numericValue], [name] as [Name] ");
-            sb.AppendLine($"    FROM MCValueLog.dbo.logValues INNER JOIN MCValueLog.dbo.tagConfig ON MCValueLog.dbo.logValues.tag_id = MCValueLog.dbo.tagConfig.id WHERE MCValueLog.dbo.logValues.logTime > ''{lastTime}'') AS j PIVOT (SUM(numericValue) FOR [Name] in ");
+            sb.AppendLine($"    FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id WHERE {SqlSettings.Databas}.dbo.logValues.logTime > ''{lastTime}'') AS j PIVOT (SUM(numericValue) FOR [Name] in ");
             sb.AppendLine(@"	   ('+STUFF(REPLACE(@columns, ', p.[', ',['), 1, 1, '')+')) AS p;';");
             sb.AppendLine(@"EXEC sp_executesql @sql");
 
@@ -93,14 +92,14 @@ namespace OptimaValue.Wpf
             sb.AppendLine(@"FROM");
             sb.AppendLine(@"(");
             sb.AppendLine(@"    SELECT name AS [Name]");
-            sb.AppendLine(@"    FROM  (SELECT MCValueLog.dbo.tagConfig.name, MCValueLog.dbo.logValues.numericValue, MCValueLog.dbo.logValues.logTime");
-            sb.AppendLine(@"	FROM MCValueLog.dbo.logValues INNER JOIN MCValueLog.dbo.tagConfig ON MCValueLog.dbo.logValues.tag_id = MCValueLog.dbo.tagConfig.id) AS p");
+            sb.AppendLine(@$"    FROM  (SELECT {SqlSettings.Databas}.dbo.tagConfig.name, {SqlSettings.Databas}.dbo.logValues.numericValue, {SqlSettings.Databas}.dbo.logValues.logTime");
+            sb.AppendLine(@$"	FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id) AS p");
             sb.AppendLine(@"    GROUP BY [Name]");
             sb.AppendLine(@") AS x;");
             sb.AppendLine(@"SET @sql = N'");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as logTime, '+STUFF(@columns, 1, 2, '')+' FROM (");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as [logTime], [numericValue] AS [numericValue], [name] as [Name] ");
-            sb.AppendLine(@"    FROM [MCValueLog].[dbo].[vLogValues]) AS j PIVOT (SUM(numericValue) FOR [Name] in ");
+            sb.AppendLine(@$"    FROM [{SqlSettings.Databas}].[dbo].[vLogValues]) AS j PIVOT (SUM(numericValue) FOR [Name] in ");
             sb.AppendLine(@"	   ('+STUFF(REPLACE(@columns, ', p.[', ',['), 1, 1, '')+')) AS p;';");
             sb.AppendLine(@"EXEC sp_executesql @sql");
             sb.AppendLine(@"END");
@@ -176,7 +175,7 @@ namespace OptimaValue.Wpf
 
             var connectionString = Config.SqlMethods.ConnectionString;
 #if DEBUG
-            connectionString = (@"Server=DESKTOP-4OD098D\MINSERVER;Database=MCValueLog;User Id=sa;Password=sa; ;TrustServerCertificate=true;");
+            connectionString = (@"Server=DESKTOP-4OD098D\MINSERVER;Database={SqlSettings.Databas};User Id=sa;Password=sa; ;TrustServerCertificate=true;");
 #endif
 
 

@@ -25,6 +25,7 @@ namespace OptimaValue.Wpf
 
         public App()
         {
+            SqlSettings.Load();
             host = Host.CreateDefaultBuilder()
            .ConfigureServices((context, services) =>
            {

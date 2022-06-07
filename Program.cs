@@ -19,14 +19,13 @@ static class Program
         if (createdNew)
         {
             Apps.Logger = new FileLogger(@"C:\OptimaValue\", true);
+            SqlSettings.Load();
 #if RELEASE
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 #endif
             ApplicationConfiguration.Initialize();
             try
             {
-                SqlSettings.Default.ConnectionString = ($"Server={@SqlSettings.Default.Server};Database={SqlSettings.Default.Databas};User Id={SqlSettings.Default.User};Password={SqlSettings.Default.Password}; ");
-                SqlSettings.Default.Save();
                 Application.Run(new MasterForm());
             }
             catch (Exception ex)
