@@ -26,6 +26,7 @@ using OptimaValue.Config;
 using System.Windows.Threading;
 using LiveCharts.Wpf;
 using System.Windows.Controls.Primitives;
+using ClosedXML.Excel;
 
 namespace OptimaValue.Wpf;
 
@@ -34,6 +35,8 @@ namespace OptimaValue.Wpf;
 /// </summary>
 public partial class GraphWindow : Window, INotifyPropertyChanged
 {
+    private string directoryPath = @$"C:\OptimaValue";
+    private string filePath => directoryPath + @$"\Trend{DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss")}.xlsx";
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private event Action<bool> OnTimeUpdated;
@@ -99,6 +102,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     /// </summary>
     public StatisticFilter StatFilter { get; set; } = new();
 
+    public ZoomingOptions Zoom { get; set; } = ZoomingOptions.X;
+
     /// <summary>
     /// A line series to plot on the chart
     /// </summary>
@@ -131,16 +136,16 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private string startTimeInputString;
+    private string startTimeString;
     /// <summary>
     /// The start time from the textbox
     /// </summary>
-    public string StartTimeInputString
+    public string StartTimeString
     {
-        get => startTimeInputString;
+        get => startTimeString;
         set
         {
-            startTimeInputString = value;
+            startTimeString = value;
             if (!Validation.GetHasError(txtStartTime))
                 SetStartTime();
             else
@@ -156,7 +161,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     {
         try
         {
-            var intPieces = StartTimeInputString.Split(':');
+            var intPieces = StartTimeString.Split(':');
             var hourPart = int.Parse(intPieces[0]);
             var minutePart = int.Parse(intPieces[1]);
             int secondPart = 0;
@@ -202,6 +207,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         set
         {
             startDate = value;
+            if (!IsLoaded)
+                return;
             if (!Validation.GetHasError(txtStartTime))
                 SetStartTime();
             else
@@ -268,6 +275,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         set
         {
             stopDate = value;
+            if (!IsLoaded)
+                return;
             if (!Validation.GetHasError(txtStopTime))
                 SetStopTime();
             else
@@ -384,7 +393,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         timerClearStatus.Tick += TimerClearStatus_Tick;
         this.Loaded += ChartControl_Loaded;
         InitializeComponent();
-        StartTimeInputString = "00:00";
+        StartTimeString = "00:00";
         StopTimeString = "23:59";
         DataContext = this;
         FormatterY = val => val.ToString("0.000");
@@ -410,7 +419,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     /// <param name="obj"></param>
     private async void GraphWindow_OnTimeUpdated(bool obj)
     {
-        await UpdateChartAsync(ChartUpdateAction.UpdateTime);
+        if (IsLoaded && ChartData.HasData)
+            await UpdateChartAsync(ChartUpdateAction.UpdateTime);
     }
 
     #endregion
@@ -644,6 +654,29 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         if (!DesignerProperties.GetIsInDesignMode(this))
             await GetAvailableTags();
         await SetTimeRange();
+
+        Window w = Window.GetWindow(ControlBorder);
+        // w should not be Null now!
+        if (null != w)
+        {
+            w.LocationChanged += delegate (object sender2, EventArgs args)
+            {
+                var offset = myPopup.HorizontalOffset;
+                // "bump" the offset to cause the popup to reposition itself
+                //   on its own
+                myPopup.HorizontalOffset = offset + 1;
+                myPopup.HorizontalOffset = offset;
+            };
+            // Also handle the window being resized (so the popup's position stays
+            //  relative to its target element if the target element moves upon 
+            //  window resize)
+            w.SizeChanged += delegate (object sender3, SizeChangedEventArgs e2)
+            {
+                var offset = myPopup.HorizontalOffset;
+                myPopup.HorizontalOffset = offset + 1;
+                myPopup.HorizontalOffset = offset;
+            };
+        }
     }
 
     /// <summary>
@@ -662,7 +695,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
                 await con.OpenAsync();
                 using SqlCommand cmd = new SqlCommand(queryMinTid, con);
                 StartDate = (DateTime)cmd.ExecuteScalar();
-                StartTimeInputString = StartDate.ToString("HH:mm");
+                StartTimeString = StartDate.ToString("HH:mm");
                 using SqlCommand cmd2 = new SqlCommand(queryMaxTid, con);
                 StopDate = (DateTime)cmd2.ExecuteScalar();
                 StopTimeString = StopDate.ToString("HH:mm");
@@ -934,7 +967,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         startDateTime = DateTime.Now - TimeSpan.FromMinutes(11);
         stopDateTime = DateTime.Now - TimeSpan.FromMinutes(1);
 
-        await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
+        if (await ChartData.GetChartDataAsync(startDateTime, stopDateTime) == null)
+        {
+            StatusText = "Inga nya rader de senaste 10 minuterna";
+            return;
+        }
         if (ChartData.ChartTableAllTags.Rows.Count == 0)
         {
             startDateTime = oldStartDateTime;
@@ -945,6 +982,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             StatusText = "Inga nya rader de senaste 10 minuterna";
             return;
         }
+        DisableButtons();
         AddTag("", true);
         ConfigureChart();
         check10Min.IsChecked = true;
@@ -1160,6 +1198,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         foreach (var item in TagsPlottedOnChart)
         {
             var gearedValues = ChartData.AddSeriesValues(item.Name, tbl);
+            if (gearedValues == null)
+                return;
             var serie = Series.Where(x => x.Title == item.Name).FirstOrDefault() as GLineSeries;
             var lineSerie = LineSeriesList.Where(x => x.Tag.Name == item.Name).FirstOrDefault();
             serie.Values.Clear();
@@ -1472,6 +1512,14 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
+    private async void comboZoom_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded && ChartData.HasData)
+        {
+            await UpdateChartAsync(ChartUpdateAction.Nothing);
+        }
+    }
+
     /// <summary>
     /// Updates the stopdate to the last logged value logdate
     /// </summary>
@@ -1523,51 +1571,58 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
     private void MoveChartCursorAndToolTip_OnMouseMove(object sender, MouseEventArgs e)
     {
-        if (TagsPlottedOnChart == null)
-            return;
-        if (!IsLoaded || TagsPlottedOnChart.Count == 0)
-            return;
-        if (dontUpdateXCursor)
-            return;
-
-        var chart = sender as CartesianChart;
-
-        if (!TryFindVisualChildElement(chart, out Canvas outerCanvas) ||
-            !TryFindVisualChildElement(outerCanvas, out Canvas graphPlottingArea))
+        try
         {
-            return;
+            if (TagsPlottedOnChart == null)
+                return;
+            if (!IsLoaded || TagsPlottedOnChart.Count == 0)
+                return;
+            if (dontUpdateXCursor)
+                return;
+
+            var chart = sender as CartesianChart;
+
+            if (!TryFindVisualChildElement(chart, out Canvas outerCanvas) ||
+                !TryFindVisualChildElement(outerCanvas, out Canvas graphPlottingArea))
+            {
+                return;
+            }
+
+            Point chartMousePosition = e.GetPosition(chart);
+
+            // Remove visual hover feedback for previous point
+            SelectedChartPoint?.View.OnHoverLeave(SelectedChartPoint);
+
+            // Find current selected chart point for the first x-axis
+            Point chartPoint = chart.ConvertToChartValues(chartMousePosition);
+            SelectedChartPoint = chart.Series[0].ClosestPointTo(chartPoint.X, AxisOrientation.X);
+
+            // Show visual hover feedback for previous point
+            if (SelectedChartPoint != null && SelectedChartPoint.View != null)
+                SelectedChartPoint.View.OnHover(SelectedChartPoint);
+            else
+                return;
+
+
+            // Add the cursor for the x-axis.
+            // Since Chart internally reverses the screen coordinates
+            // to match chart's coordinate system
+            // and this coordinate system orientation applies also to Chart.VisualElements,
+            // the UIElements like Popup and Line are added directly to the plotting canvas.
+            if (chart.TryFindResource("CursorX") is Line cursorX
+              && !graphPlottingArea.Children.Contains(cursorX))
+            {
+                graphPlottingArea.Children.Add(cursorX);
+            }
+
+            if (!(chart.TryFindResource("CursorXToolTip") is FrameworkElement cursorXToolTip))
+            {
+                return;
+            }
         }
-
-        Point chartMousePosition = e.GetPosition(chart);
-
-        // Remove visual hover feedback for previous point
-        SelectedChartPoint?.View.OnHoverLeave(SelectedChartPoint);
-
-        // Find current selected chart point for the first x-axis
-        Point chartPoint = chart.ConvertToChartValues(chartMousePosition);
-        SelectedChartPoint = chart.Series[0].ClosestPointTo(chartPoint.X, AxisOrientation.X);
-
-        // Show visual hover feedback for previous point
-        if (SelectedChartPoint != null)
-            SelectedChartPoint.View.OnHover(SelectedChartPoint);
-        else
-            return;
-
-
-        // Add the cursor for the x-axis.
-        // Since Chart internally reverses the screen coordinates
-        // to match chart's coordinate system
-        // and this coordinate system orientation applies also to Chart.VisualElements,
-        // the UIElements like Popup and Line are added directly to the plotting canvas.
-        if (chart.TryFindResource("CursorX") is Line cursorX
-          && !graphPlottingArea.Children.Contains(cursorX))
+        catch (Exception ex)
         {
-            graphPlottingArea.Children.Add(cursorX);
-        }
-
-        if (!(chart.TryFindResource("CursorXToolTip") is FrameworkElement cursorXToolTip))
-        {
-            return;
+            StatusText = ex.Message;
         }
 
         // Add the cursor for the x-axis.
@@ -1613,6 +1668,44 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
 
         return false;
+    }
+
+    private async Task ExportChartDataToExcel(List<MyLineSeries> MyLineSeries)
+    {
+        using var wb = new XLWorkbook();
+        Directory.CreateDirectory(directoryPath);
+
+        foreach (var lineSeries in MyLineSeries)
+        {
+            var ws = wb.Worksheets.Add(lineSeries.ToDataTable(new DateTime((long)Series.Chart.AxisX.Min().View.MinValue)
+                , new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue)), $"{lineSeries.Tag.Name}");
+
+            ws.Column(1).Style.NumberFormat.Format = "yyyy-mm-dd hh:mm:ss";
+            ws.Columns().AdjustToContents();
+        }
+
+        wb.SaveAs(filePath);
+        await Task.Delay(1);
+    }
+
+
+
+    private async void Button_Excel(object sender, RoutedEventArgs e)
+    {
+        if (TagsPlottedOnChart == null)
+            return;
+        if (IsLoaded && TagsPlottedOnChart.Count > 0)
+        {
+            startDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
+            stopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
+            await UpdateChartAsync(ChartUpdateAction.UpdateTime);
+            await ExportChartDataToExcel(LineSeriesList);
+
+            Dispatcher?.Invoke(() =>
+            {
+                StatusText = $"{filePath} sparades";
+            });
+        }
     }
 }
 

@@ -15,13 +15,15 @@
 	  <None Remove="Images\minimum_value_48px.png" />
 	  <None Remove="Images\save_48px.png" />
 	  <None Remove="Resurser\end_100px.png" />
+	  <None Remove="Resurser\excel_64px.png" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.95.4" />
 		<PackageReference Include="FontAwesome.WPF" Version="4.7.0.9" />
 		<PackageReference Include="LiveCharts.Geared" Version="1.2.9" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-		<PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
+		<PackageReference Include="PropertyChanged.Fody" Version="3.4.1" />
 		<PackageReference Include="Serilog.Extensions.Hosting" Version="4.2.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 		<PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
@@ -49,11 +51,9 @@
 	  <Resource Include="Resurser\end_100px.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Resource>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="ExtensionMethods\" />
-	  <Folder Include="ValueConverters\" />
+	  <Resource Include="Resurser\excel_64px.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Resource>
 	</ItemGroup>
 
 </Project>
