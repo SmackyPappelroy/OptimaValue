@@ -553,5 +553,20 @@ namespace OptimaValue.Handler.PLC.Graphics
                 }
             }
         }
+
+        private void comboCpu_SelectedValueChanged(object sender, EventArgs e)
+        {
+            if (((ComboBox)sender).SelectedItem == "S71500")
+            {
+                txtSlot.Text = "1";
+                txtRack.Text = "0";
+            }
+            else if (((ComboBox)sender).SelectedItem == "S7300")
+            {
+                txtSlot.Text = "2";
+                txtRack.Text = "0";
+            }
+
+        }
     }
 }

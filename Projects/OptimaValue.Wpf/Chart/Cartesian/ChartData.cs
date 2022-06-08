@@ -26,6 +26,7 @@ namespace OptimaValue.Wpf
 
         public static DataTable ChartTableAllTags;
 
+        public static bool HasData => ChartTableAllTags != null && ChartTableAllTags.Rows.Count > 0;
 
         public static List<string> DisplayedTags;
 
@@ -123,7 +124,8 @@ namespace OptimaValue.Wpf
 
             }
         }
-
+        private static DataTable oldChartValues = new();
+        private static List<string> oldDisplayed = new();
         public static async Task<DataTable> GetChartDataAsync(DateTime startTime, DateTime stopTime)
         {
             var connectionString = Config.SqlMethods.ConnectionString;
@@ -132,6 +134,20 @@ namespace OptimaValue.Wpf
 #endif
 
             BuildQueryAllValuesString(startTime, stopTime);
+            if (ChartTableAllTags != null)
+            {
+                if (ChartTableAllTags.Rows.Count > 0)
+                {
+                    oldChartValues = ChartTableAllTags;
+                }
+            }
+            if (DisplayedTags != null)
+            {
+                if (DisplayedTags.Count > 0)
+                {
+                    oldDisplayed = DisplayedTags;
+                }
+            }
 
             ChartTableAllTags = new();
             DisplayedTags = new();
@@ -162,6 +178,14 @@ namespace OptimaValue.Wpf
             catch (Exception ex)
             {
                 Log.Error($"Lyckas ej hämta logvärden från databas i Chartdata.{nameof(GetChartDataAsync)}: {ex.Message}");
+                if (oldChartValues != null)
+                {
+                    ChartTableAllTags = oldChartValues;
+                }
+                if (oldDisplayed != null)
+                {
+                    DisplayedTags = oldDisplayed;
+                }
                 return null;
             }
         }

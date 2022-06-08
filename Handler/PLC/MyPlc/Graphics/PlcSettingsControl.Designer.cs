@@ -157,6 +157,7 @@
             this.comboCpu.Name = "comboCpu";
             this.comboCpu.Size = new System.Drawing.Size(141, 27);
             this.comboCpu.TabIndex = 7;
+            this.comboCpu.SelectedValueChanged += new System.EventHandler(this.comboCpu_SelectedValueChanged);
             this.comboCpu.Validating += new System.ComponentModel.CancelEventHandler(this.comboCpu_Validating);
             // 
             // txtRack

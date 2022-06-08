@@ -15,8 +15,6 @@ namespace OptimaValue.Wpf
         public Color Stroke { get; private set; }
         public Color Fill { get; private set; }
 
-
-
         public Tag()
         {
             CreateRandomColor();
@@ -72,8 +70,12 @@ namespace OptimaValue.Wpf
         private (Color stroke, Color fill) ChangeColors(byte red, byte green, byte blue)
         {
             var brightnessFactor = 0.3f;
+            byte fillColorAlpha = 40;
+            //var fillColorAlpha = 30;
+
+
             Color strokeColor = ChangeColorBrightness(Color.FromArgb(255, red, green, blue), brightnessFactor);
-            Color fillColor = ChangeColorBrightness(Color.FromArgb(30, red, green, blue), brightnessFactor);
+            Color fillColor = ChangeColorBrightness(Color.FromArgb(fillColorAlpha, red, green, blue), brightnessFactor);
             return (strokeColor, fillColor);
         }
 

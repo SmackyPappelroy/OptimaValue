@@ -24,6 +24,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using OptimaValue.Config;
 using System.Windows.Threading;
+using LiveCharts.Wpf;
+using System.Windows.Controls.Primitives;
 
 namespace OptimaValue.Wpf;
 
@@ -46,17 +48,80 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     #endregion
 
     #region Properties
+    private ChartPoint selectedChartPoint;
+    public ChartPoint SelectedChartPoint
+    {
+        get => selectedChartPoint;
+        set
+        {
+            selectedChartPoint = value;
+        }
+    }
+
+    private double cursorScreenPosition;
+    public double CursorScreenPosition
+    {
+        get => cursorScreenPosition;
+        set
+        {
+            cursorScreenPosition = value;
+        }
+    }
+
+    private string chartStartDate;
+    /// <summary>
+    /// The start date of the chart
+    /// </summary>
+    public string ChartStartDate
+    {
+        get => chartStartDate;
+        set
+        {
+            chartStartDate = value;
+        }
+    }
+
+    /// <summary>
+    /// The end date of the chart
+    /// </summary>
+    private string chartStopDate;
+    public string ChartStopDate
+    {
+        get => chartStopDate;
+        set
+        {
+            chartStopDate = value;
+        }
+    }
+
+    /// <summary>
+    /// How much statistics it should be shown in the top window
+    /// </summary>
     public StatisticFilter StatFilter { get; set; } = new();
 
+    /// <summary>
+    /// A line series to plot on the chart
+    /// </summary>
     public List<MyLineSeries> LineSeriesList;
 
     private string statusText = string.Empty;
+    /// <summary>
+    /// The status text to display on the UI
+    /// </summary>
     public string StatusText
     {
         get => statusText;
-        set => statusText = value;
+        set
+        {
+            statusText = value;
+            if (IsLoaded && !string.IsNullOrEmpty(value))
+                timerClearStatus.Start();
+        }
     }
     private SeriesCollection series = new SeriesCollection();
+    /// <summary>
+    /// All the plotted series in the chart
+    /// </summary>
     public SeriesCollection Series
     {
         get => series;
@@ -66,20 +131,16 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private List<DateTime> dates;
-    public List<DateTime> Dates
+    private string startTimeInputString;
+    /// <summary>
+    /// The start time from the textbox
+    /// </summary>
+    public string StartTimeInputString
     {
-        get { return dates; }
-        set { dates = value; }
-    }
-
-    private string startTimeString;
-    public string StartTimeString
-    {
-        get => startTimeString;
+        get => startTimeInputString;
         set
         {
-            startTimeString = value;
+            startTimeInputString = value;
             if (!Validation.GetHasError(txtStartTime))
                 SetStartTime();
             else
@@ -87,11 +148,15 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// Parses the start time from the textbox and the date to a DateTime<para></para>
+    /// Fires an event to update the chart
+    /// </summary>
     private void SetStartTime()
     {
         try
         {
-            var intPieces = StartTimeString.Split(':');
+            var intPieces = StartTimeInputString.Split(':');
             var hourPart = int.Parse(intPieces[0]);
             var minutePart = int.Parse(intPieces[1]);
             int secondPart = 0;
@@ -109,24 +174,28 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
+            StatusText = "Lyckas inte konvertera start-tid till en DateTime";
             startDateTime = DateTime.MinValue;
         }
     }
 
-    private List<Tag> displayedTags;
-    public List<Tag> DisplayedTags
+    private List<Tag> tagsPlottedOnChart;
+    /// <summary>
+    /// The tags that are plotted on the chart 
+    /// </summary>
+    public List<Tag> TagsPlottedOnChart
     {
-        get => displayedTags;
+        get => tagsPlottedOnChart;
         set
         {
-            displayedTags = value;
+            tagsPlottedOnChart = value;
         }
     }
 
-
-    public DateTime StartTime { get; set; }
-
     private DateTime startDate = DateTime.Now - TimeSpan.FromDays(1);
+    /// <summary>
+    /// The start date bound to the <see cref="DatePicker"/>
+    /// </summary>
     public DateTime StartDate
     {
         get => startDate;
@@ -143,6 +212,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     private DateTime startDateTime = DateTime.MinValue;
 
     private string stopTimeString;
+    /// <summary>
+    /// The time bound to the <see cref="TextBox"/> for stop time
+    /// </summary>
     public string StopTimeString
     {
         get => stopTimeString;
@@ -156,6 +228,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// Parses the <see cref="TextBox"/> value for stop time and the <see cref="DatePicker"/> stop date
+    /// </summary>
     private void SetStopTime()
     {
         try
@@ -178,13 +253,15 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
+            StatusText = "Lyckas inte konvertera stopp-tid till en DateTime";
             stopDateTime = DateTime.MinValue;
         }
     }
 
-    public DateTime StopTime { get; set; }
-
     private DateTime stopDate = DateTime.Now;
+    /// <summary>
+    /// The stop date bound to the <see cref="DatePicker"/>
+    /// </summary>
     public DateTime StopDate
     {
         get => stopDate;
@@ -200,28 +277,10 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
     private DateTime stopDateTime = DateTime.MinValue;
 
-    private string tagName = "";
-    public string TagName
-    {
-        get => tagName;
-        set
-        {
-            if (!string.IsNullOrEmpty(value))
-                tagName = value;
-        }
-    }
-
-    private IAxisWindow selectedWindow;
-    public IAxisWindow SelectedWindow
-    {
-        get => selectedWindow;
-        set
-        {
-            selectedWindow = value;
-        }
-    }
-
     private Func<double, string> formatterY { get; set; }
+    /// <summary>
+    /// Formats the labels on the Y-axis
+    /// </summary>
     public Func<double, string> FormatterY
     {
         get => formatterY;
@@ -232,6 +291,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     }
 
     private Func<double, string> formatterX { get; set; }
+    /// <summary>
+    /// Formats the labels on the X-axis for datetime
+    /// </summary>
     public Func<double, string> FormatterX
     {
         get => formatterX;
@@ -241,30 +303,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
-
-    private DateTime initialDateTime = DateTime.Now;
-    public DateTime InitialDateTime
-    {
-        get => initialDateTime;
-        set
-        {
-            initialDateTime = value;
-        }
-    }
-
-    private PeriodUnits period = PeriodUnits.Seconds;
-    public PeriodUnits Period
-    {
-        get => period;
-        set
-        {
-            period = value;
-        }
-    }
-
-
     private double minValueY = 0;
     private double maxValueY = 100;
+    /// <summary>
+    /// The minimum value displayed on the Y-axis
+    /// </summary>
     public double MinValueY
     {
         get => minValueY;
@@ -273,6 +316,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             minValueY = value;
         }
     }
+    /// <summary>
+    /// The maximum value displayed on the Y-axis
+    /// </summary>
     public double MaxValueY
     {
         get => maxValueY;
@@ -284,6 +330,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
     private double minValueX = DateTime.Now.Ticks - TimeSpan.FromDays(1).Ticks;
     private double maxValueX = DateTime.Now.Ticks;
+    /// <summary>
+    /// The minimum value displayed on the X-axis
+    /// </summary>
     public double MinValueX
     {
         get => minValueX;
@@ -292,6 +341,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             minValueX = value;
         }
     }
+    /// <summary>
+    /// The maximum value displayed on the X-axis
+    /// </summary>
     public double MaxValueX
     {
         get => maxValueX;
@@ -301,19 +353,15 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private string dateSpan;
-    public string DateSpan
-    {
-        get => dateSpan;
-        set
-        {
-            dateSpan = value;
-        }
-    }
-
+    /// <summary>
+    /// All the logged tags in Sql
+    /// </summary>
     public List<Tag> AvailableTags;
 
     private ItemsControl myItemControl;
+    /// <summary>
+    /// The container for the tag statistics
+    /// </summary>
     public ItemsControl MyItemControl
     {
         get => myItemControl;
@@ -324,15 +372,19 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     #endregion
 
     #region Constructor
+    /// <summary>
+    /// The default constructor
+    /// </summary>
     public GraphWindow()
     {
-        Dates = new();
+        DataContext = this;
         LineSeriesList = new();
         OnTimeUpdated += GraphWindow_OnTimeUpdated;
         timerClearStatus = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(5) };
+        timerClearStatus.Tick += TimerClearStatus_Tick;
         this.Loaded += ChartControl_Loaded;
         InitializeComponent();
-        StartTimeString = "00:00";
+        StartTimeInputString = "00:00";
         StopTimeString = "23:59";
         DataContext = this;
         FormatterY = val => val.ToString("0.000");
@@ -343,12 +395,23 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         StatFilter = StatisticFilter.Max;
     }
 
+    private void TimerClearStatus_Tick(object sender, EventArgs e)
+    {
+        Dispatcher?.Invoke(() =>
+        {
+            StatusText = "";
+            timerClearStatus.Stop();
+        });
+    }
+
+    /// <summary>
+    /// If the user changes stop or start date / time the chart updates
+    /// </summary>
+    /// <param name="obj"></param>
     private async void GraphWindow_OnTimeUpdated(bool obj)
     {
         await UpdateChartAsync(ChartUpdateAction.UpdateTime);
     }
-
-
 
     #endregion
 
@@ -599,14 +662,14 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
                 await con.OpenAsync();
                 using SqlCommand cmd = new SqlCommand(queryMinTid, con);
                 StartDate = (DateTime)cmd.ExecuteScalar();
-                StartTimeString = StartDate.ToString("HH:mm");
+                StartTimeInputString = StartDate.ToString("HH:mm");
                 using SqlCommand cmd2 = new SqlCommand(queryMaxTid, con);
                 StopDate = (DateTime)cmd2.ExecuteScalar();
                 StopTimeString = StopDate.ToString("HH:mm");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                StatusText = ex.Message;
             }
         }
     }
@@ -644,6 +707,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
         catch (SqlException ex)
         {
+            StatusText = $"Ingen kontakt med databas {SqlMethods.Server}";
             Log.Error($"Ingen kontakt med databas {SqlMethods.Server}");
         }
 
@@ -708,11 +772,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             Series.Add(item);
         }
 
-        //if (chartUpdateAction == ChartUpdateAction.ChangeColor)
-        //{
-        //    startDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
-        //    stopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
-        //}
         if (chartUpdateAction == ChartUpdateAction.Stop)
         {
             startDateTime = oldStartDateTime;
@@ -724,12 +783,19 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         stopDatePicker.Text = stopDateTime.ToString("yyyy-MM-dd");
         txtStopTime.Text = stopDateTime.ToString("HH:mm");
 
-        await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
-
-        if (!AddTag("", true))
+        if (startDateTime == stopDateTime)
+            return;
+        if (await ChartData.GetChartDataAsync(startDateTime, stopDateTime) == null)
             return;
 
-        ConfigureChart(ChartUpdateAction.ChangeColor);
+        //if (!AddTag("", true))
+        //    return;
+        AddTag("", true);
+
+        ConfigureChart(chartUpdateAction);
+
+        ChartStartDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
+        ChartStopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
     }
 
     private bool isSaving = false;
@@ -818,10 +884,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             Series.Clear();
         }
 
-        DisplayedTags.RemoveAll(x => x.Name == tagName);
+        TagsPlottedOnChart.RemoveAll(x => x.Name == tagName);
         ConfigureChart();
     }
 
+    bool dontUpdateXCursor = false;
     /// <summary>
     /// Stops the live feed
     /// </summary>
@@ -830,6 +897,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     private async void StopOnClick(object sender, RoutedEventArgs e)
     {
         source.Cancel();
+        dontUpdateXCursor = false;
         EnableButtons();
         startDateTime = oldStartDateTime;
         stopDateTime = oldStopDateTime;
@@ -854,9 +922,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     /// <param name="e"></param>
     private async void PlayOnClick(object sender, RoutedEventArgs e)
     {
-        if (DisplayedTags == null || DisplayedTags.Count == 0)
+        if (TagsPlottedOnChart == null || TagsPlottedOnChart.Count == 0)
         {
-            MessageBox.Show("Lägg till tag att visa...");
+            StatusText = "Lägg till tag att visa...";
             return;
         }
 
@@ -874,7 +942,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
             AddTag();
             ConfigureChart();
-            MessageBox.Show("Inga nya rader de senaste 10 minuterna");
+            StatusText = "Inga nya rader de senaste 10 minuterna";
             return;
         }
         AddTag("", true);
@@ -892,6 +960,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     /// <returns></returns>
     private async Task StartPlayTask(CancellationTokenSource source)
     {
+        dontUpdateXCursor = true;
         TimeSpan timeToAdd = TimeSpan.FromSeconds(1);
         TimeSpan timeSpanStart = TimeSpan.FromMinutes(11);
         TimeSpan timeSpanStop = TimeSpan.FromMinutes(11);
@@ -941,7 +1010,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
                 {
                     // Gets new data
                     await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
-                    foreach (var tag in DisplayedTags)
+                    foreach (var tag in TagsPlottedOnChart)
                     {
                         var line = new MyLineSeries(tag);
 
@@ -1002,6 +1071,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
                     startDateTime += timeToAdd;
                     stopDateTime += timeToAdd;
                     DataTable tbl = await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
+                    if (tbl == null)
+                    {
+                        StopOnClick(this, new RoutedEventArgs());
+                        break;
+                    }
                     if (tbl.Rows.Count > 0)
                         UpdateAndAddChartAsync(tbl);
                     await Task.Delay(timeToAdd);
@@ -1011,7 +1085,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
         catch (OperationCanceledException ex)
         {
-
+            StatusText = ex.Message;
         }
 
     }
@@ -1029,6 +1103,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         btnRemove.IsEnabled = false;
         btnUpdate.IsEnabled = false;
         comboTag.IsEnabled = false;
+        btnRefresh.IsEnabled = false;
         btnPlay.Visibility = Visibility.Hidden;
         btnStop.Visibility = Visibility.Visible;
         btnAdd.Visibility = Visibility.Hidden;
@@ -1054,6 +1129,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         btnRemove.IsEnabled = true;
         btnUpdate.IsEnabled = true;
         comboTag.IsEnabled = true;
+        btnRefresh.IsEnabled = true;
         btnPlay.Visibility = Visibility.Visible;
         btnStop.Visibility = Visibility.Hidden;
         btnAdd.Visibility = Visibility.Visible;
@@ -1081,7 +1157,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             return;
 
 
-        foreach (var item in DisplayedTags)
+        foreach (var item in TagsPlottedOnChart)
         {
             var gearedValues = ChartData.AddSeriesValues(item.Name, tbl);
             var serie = Series.Where(x => x.Title == item.Name).FirstOrDefault() as GLineSeries;
@@ -1114,6 +1190,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
 
         UpdateTagGraphic();
+
+
     }
 
     /// <summary>
@@ -1125,7 +1203,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
         if (LineSeriesList.Count == 0)
         {
-            DisplayedTags = new();
+            TagsPlottedOnChart = new();
             UpdateTagGraphic();
             return;
         }
@@ -1135,7 +1213,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         foreach (var line in LineSeriesList)
         {
 
-            if (DisplayedTags == null)
+            if (TagsPlottedOnChart == null)
             {
                 Series.Add(line.LineSeries as GLineSeries);
                 continue;
@@ -1170,8 +1248,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     /// <returns></returns>
     private bool AddTag(string tagName = "", bool update = false)
     {
-        if (DisplayedTags == null)
-            DisplayedTags = new();
+        if (TagsPlottedOnChart == null)
+            TagsPlottedOnChart = new();
 
         if (!update)
         {
@@ -1180,11 +1258,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
             var newTag = AvailableTags.Where(x => x.Name == tagName).FirstOrDefault();
 
-            var tempDisplayedTags = DisplayedTags.ToList();
+            var tempDisplayedTags = TagsPlottedOnChart.ToList();
 
             if (!tempDisplayedTags.Exists(x => x.Name == tagName))
             {
-                DisplayedTags.Add(newTag);
+                TagsPlottedOnChart.Add(newTag);
             }
 
             MyLineSeries myLine = new(newTag);
@@ -1205,7 +1283,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
 
         LineSeriesList = new();
-        foreach (var item in DisplayedTags)
+        foreach (var item in TagsPlottedOnChart)
         {
             MyLineSeries myLine = new(item);
             if (!myLine.GetChartValues())
@@ -1380,6 +1458,162 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     }
 
     #endregion
+
+    /// <summary>
+    /// Updates the chart if the statistics filter <see cref="ComboBox"/> changes
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void comboStats_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded && ChartData.HasData)
+        {
+            await UpdateChartAsync(ChartUpdateAction.Nothing);
+        }
+    }
+
+    /// <summary>
+    /// Updates the stopdate to the last logged value logdate
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void GotoEnd_Click(object sender, RoutedEventArgs e)
+    {
+        if (sqlStatus == SqlStatus.Connected)
+        {
+            var queryMaxTid = $"SELECT MAX(logTime) FROM {SqlSettings.Databas}.dbo.logValues";
+            using SqlConnection con = new SqlConnection(SqlMethods.ConnectionString);
+            try
+            {
+                await con.OpenAsync();
+                using SqlCommand cmd2 = new SqlCommand(queryMaxTid, con);
+                StopDate = (DateTime)cmd2.ExecuteScalar();
+                StopTimeString = StopDate.ToString("HH:mm");
+                await UpdateChartAsync(ChartUpdateAction.Nothing);
+            }
+            catch (Exception ex)
+            {
+                StatusText = ex.Message;
+            }
+        }
+    }
+
+    private void MyChart_LayoutUpdated(object sender, EventArgs e)
+    {
+        if (TagsPlottedOnChart == null)
+            return;
+        if (IsLoaded && TagsPlottedOnChart.Count > 0)
+        {
+            ChartStartDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
+            ChartStopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
+        }
+    }
+
+    private async void RefreshOnClick(object sender, RoutedEventArgs e)
+    {
+        if (TagsPlottedOnChart == null)
+            return;
+        if (IsLoaded && TagsPlottedOnChart.Count > 0)
+        {
+            startDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
+            stopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
+            await UpdateChartAsync(ChartUpdateAction.UpdateTime);
+        }
+    }
+
+    private void MoveChartCursorAndToolTip_OnMouseMove(object sender, MouseEventArgs e)
+    {
+        if (TagsPlottedOnChart == null)
+            return;
+        if (!IsLoaded || TagsPlottedOnChart.Count == 0)
+            return;
+        if (dontUpdateXCursor)
+            return;
+
+        var chart = sender as CartesianChart;
+
+        if (!TryFindVisualChildElement(chart, out Canvas outerCanvas) ||
+            !TryFindVisualChildElement(outerCanvas, out Canvas graphPlottingArea))
+        {
+            return;
+        }
+
+        Point chartMousePosition = e.GetPosition(chart);
+
+        // Remove visual hover feedback for previous point
+        SelectedChartPoint?.View.OnHoverLeave(SelectedChartPoint);
+
+        // Find current selected chart point for the first x-axis
+        Point chartPoint = chart.ConvertToChartValues(chartMousePosition);
+        SelectedChartPoint = chart.Series[0].ClosestPointTo(chartPoint.X, AxisOrientation.X);
+
+        // Show visual hover feedback for previous point
+        if (SelectedChartPoint != null)
+            SelectedChartPoint.View.OnHover(SelectedChartPoint);
+        else
+            return;
+
+
+        // Add the cursor for the x-axis.
+        // Since Chart internally reverses the screen coordinates
+        // to match chart's coordinate system
+        // and this coordinate system orientation applies also to Chart.VisualElements,
+        // the UIElements like Popup and Line are added directly to the plotting canvas.
+        if (chart.TryFindResource("CursorX") is Line cursorX
+          && !graphPlottingArea.Children.Contains(cursorX))
+        {
+            graphPlottingArea.Children.Add(cursorX);
+        }
+
+        if (!(chart.TryFindResource("CursorXToolTip") is FrameworkElement cursorXToolTip))
+        {
+            return;
+        }
+
+        // Add the cursor for the x-axis.
+        // Since Chart internally reverses the screen coordinates
+        // to match chart's coordinate system
+        // and this coordinate system orientation applies also to Chart.VisualElements,
+        // the UIElements like Popup and Line are added directly to the plotting canvas.
+        //if (!graphPlottingArea.Children.Contains(cursorXToolTip))
+        //{
+        //    graphPlottingArea.Children.Add(cursorXToolTip);
+        //}
+
+        // Position the ToolTip
+        //Point canvasMousePosition = e.GetPosition(graphPlottingArea);
+        //Canvas.SetLeft(cursorXToolTip, canvasMousePosition.X - cursorXToolTip.ActualWidth);
+        //Canvas.SetTop(cursorXToolTip, canvasMousePosition.Y);
+    }
+
+    // Helper method to traverse the visual tree of an element
+    private bool TryFindVisualChildElement<TChild>(DependencyObject parent, out TChild resultElement)
+      where TChild : DependencyObject
+    {
+        resultElement = null;
+        for (var childIndex = 0; childIndex < VisualTreeHelper.GetChildrenCount(parent); childIndex++)
+        {
+            DependencyObject childElement = VisualTreeHelper.GetChild(parent, childIndex);
+
+            if (childElement is Popup popup)
+            {
+                childElement = popup.Child;
+            }
+
+            if (childElement is TChild)
+            {
+                resultElement = childElement as TChild;
+                return true;
+            }
+
+            if (TryFindVisualChildElement(childElement, out resultElement))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 

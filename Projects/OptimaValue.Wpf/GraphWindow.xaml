@@ -5,14 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         xmlns:System="clr-namespace:System;assembly=mscorlib"
+        xmlns:fa="clr-namespace:FontAwesome.WPF;assembly=FontAwesome.WPF"
         xmlns:local="clr-namespace:OptimaValue.Wpf"
         mc:Ignorable="d"
         Background="Black"
         WindowStartupLocation="CenterScreen"
         Title="OptimaValue - Graf" 
-        Height="800" 
+        Height="850" 
         MinHeight="600"
-        DataContext="this"
         Width="1200" 
         MinWidth="1000" 
         RenderOptions.BitmapScalingMode="Fant"
@@ -25,10 +25,22 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
-        <Color x:Key="GrayBackground">#644C4C4C</Color>
+        <Color x:Key="GrayBackground">#222a31</Color>
         <SolidColorBrush x:Key="BackgroundGray" Color="{DynamicResource GrayBackground}"/>
 
+        <LinearGradientBrush x:Key="horizontalGradient" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#222a31" Offset="0.0"></GradientStop>
+            <GradientStop Color="Black" Offset="0.5"></GradientStop>
+            <GradientStop Color="#222a31" Offset="1.0"></GradientStop>
+        </LinearGradientBrush>
+
+        <BitmapImage x:Key="end" 
+                     UriSource="Resurser/end_100px.png"/>
         <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+
+        <Style x:Key="FontAwesome">
+            <Setter Property="TextElement.FontFamily" Value="/Fonts/fontawesome-webfont.ttf#FontAwesome" />
+        </Style>
     </Window.Resources>
     <Grid>
         <Border CornerRadius="30">
@@ -44,6 +56,7 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height=".9*"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Border Grid.ColumnSpan="3"></Border>
                 <StackPanel Grid.Row="0" Grid.Column="0" 
@@ -52,7 +65,7 @@
                     Margin="25, 10">
                     <!--<Path Width="25" Height="25" Stretch="Fill" Fill="#4C4949" Data="F1 M 38,3.16666C 57.2379,3.16666 72.8333,18.7621 72.8333,38C 72.8333,57.2379 57.2379,72.8333 38,72.8333C 18.7621,72.8333 3.16667,57.2379 3.16667,38C 3.16667,18.7621 18.7621,3.16666 38,3.16666 Z M 52.252,18.9974L 36.4164,18.9974L 23.75,39.5833L 34.8333,39.5833L 25.3316,60.1667L 50.6667,34.8333L 38,34.8333L 52.252,18.9974 Z "/>-->
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden" MaxHeight="120">
-                        <Border CornerRadius="10" Background="Black" >
+                        <Border CornerRadius="10" Background="{DynamicResource  horizontalGradient}">
                             <ItemsControl Margin="10 0 10 0" ItemsSource="{Binding MyItemControl.ItemsSource}" Foreground="White" BorderThickness="0" />
                         </Border>
                     </ScrollViewer>
@@ -65,12 +78,13 @@
                             Grid.Row="1"
                             Grid.RowSpan="2"
                             Grid.ColumnSpan="2"
-                            Margin="20 0 0 20"
+                            Margin="20 0 10 20"
+                            MouseMove="MoveChartCursorAndToolTip_OnMouseMove"
                             Series="{Binding Series}"
                             Name="MyChart"
                             Zoom="X" 
                             DisableAnimations="True"
-                            Hoverable="False">
+                            Hoverable="False" LayoutUpdated="MyChart_LayoutUpdated">
 
                     <lvc:CartesianChart.Resources>
                         <Style TargetType="lvc:Separator">
@@ -78,10 +92,38 @@
                             <Setter Property="Stroke" Value="#FF838383"></Setter>
                             <Style.Triggers>
                                 <Trigger Property="AxisOrientation" Value="X">
-                                    <Setter Property="IsEnabled" Value="False"></Setter>
+                                    <Setter Property="IsEnabled" Value="false"></Setter>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>
+                        <!--#region Vertical X-bar-->
+                        <!-- The cursor for the x-axis that snaps to the nearest chart point -->
+                        <Line x:Key="CursorX"
+            Canvas.ZIndex="2"
+            Canvas.Left="{Binding SelectedChartPoint.ChartLocation.X}"
+            Y1="0"
+            Y2="{Binding ElementName=MyChart, Path=ActualHeight}"
+            Stroke="Gray"
+            StrokeThickness="1" />
+
+                        <!-- The ToolTip that follows the mouse pointer-->
+                        <Border x:Key="CursorXToolTip"
+              Canvas.ZIndex="3"
+              Background="LightGray"
+              Padding="8"
+              CornerRadius="8">
+                            <StackPanel Background="LightGray">
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Height="20" Width="20"
+                  Stretch="UniformToFill"
+                  Data="{Binding SelectedChartPoint.SeriesView.PointGeometry}"
+                  Fill="{Binding SelectedChartPoint.SeriesView.Fill}"
+                  Stroke="{Binding SelectedChartPoint.SeriesView.Stroke}"
+                  StrokeThickness="{Binding SelectedChartPoint.SeriesView.StrokeThickness}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <!--#endregion-->
                     </lvc:CartesianChart.Resources>
                     <lvc:CartesianChart.AxisY>
                         <lvc:Axis LabelFormatter="{Binding FormatterY}"
@@ -98,20 +140,51 @@
                           MaxValue="{Binding MaxValueX, Mode=TwoWay}"
                           Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
                     </lvc:CartesianChart.AxisX>
+                    <lvc:CartesianChart.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#222a31" Offset="0.0"></GradientStop>
+                            <GradientStop Color="Black" Offset="1.0"></GradientStop>
+                        </LinearGradientBrush>
+                    </lvc:CartesianChart.Background>
                 </lvc:CartesianChart>
 
 
+                <TextBlock Grid.Row="4" Grid.Column="0" 
+                           Margin="20 0 0 0"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Visibility="{Binding ChartStartDate,Converter={StaticResource StringToVisibilityConverter}}"
+                    Text="{Binding ChartStartDate}"
+                           Foreground="White" FontSize="16" >
+                </TextBlock>
+                <TextBlock Grid.Row="2" Grid.Column="1" 
+                           Margin="0,0,20,0"
+                           VerticalAlignment="Top"
+                           HorizontalAlignment="Right"
+                           Visibility="{Binding ChartStopDate,Converter={StaticResource StringToVisibilityConverter}}"
+                    Text="{Binding ChartStopDate}"
+                           Foreground="White" FontSize="16" Grid.RowSpan="2" />
 
-
-
+                <Button Margin="10" Width="20" Height="40" Name="btnRefresh"
+                        Grid.Row="4" Grid.ColumnSpan="2"
+                        Visibility="{Binding ChartStopDate,Converter={StaticResource StringToVisibilityConverter}}"
+                        VerticalAlignment="Top" Panel.ZIndex="1"
+                        Click="RefreshOnClick" >
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <fa:ImageAwesome Icon="Refresh" Foreground="LightGray"/>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
 
                 <!-- Control panel -->
-                <Border Margin="0 0 20 20" 
+                <Border Margin="0 0 20 10" 
                         Grid.Row="1" 
                         Grid.RowSpan="1"
                         Grid.Column="2" 
-                        Background="Transparent"
+                        Background="{DynamicResource BackgroundGray}"
                         CornerRadius="10">
+
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                         <StackPanel VerticalAlignment="Top">
                             <StackPanel Orientation="Horizontal" Margin="20 20 0 10" >
@@ -196,14 +269,21 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width=".3*"/>
                                     <ColumnDefinition Width=".7*"/>
+                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" FontSize="14"  
                                    Foreground="White" Text="Datum:" Margin="20 5 5 5"/>
                                 <DatePicker Grid.Column="1" 
                             FontSize="14"
                             Name="stopDatePicker" 
-                            Margin="5 5 20 5"
+                            Margin="5 5 5 5"
                             SelectedDate="{Binding StopDate}"/>
+                                <Viewbox Grid.Column="2" Height="20" Margin="0 0 5 0">
+                                    <Button Click="GotoEnd_Click"
+                                        Margin="0 0 10 0">
+                                        <Image Source = "{DynamicResource end}"/>
+                                    </Button>
+                                </Viewbox>
                             </Grid>
                             <Grid Margin="0 0 0 10">
                                 <Grid.ColumnDefinitions>
@@ -245,7 +325,7 @@
                                   ItemsSource="{Binding Source = {StaticResource dataFromEnum}}"
                                   SelectedItem="{Binding StatFilter}"
                                   Width="100"
-                                  Grid.Column="1" Margin="10 5 10 0" FontSize="16" FontWeight="Bold" VerticalAlignment="Top"/>
+                                  Grid.Column="1" Margin="10 5 10 0" FontSize="16" FontWeight="Bold" VerticalAlignment="Top" SelectionChanged="comboStats_SelectionChanged"/>
                             </StackPanel>
                             <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
                                 <!-- Underline -->
@@ -425,18 +505,33 @@
 
 
                 <!-- Information panel -->
-                <Border 
+                <Border Name="InfoBorder"
                         Visibility="{Binding StatusText
                                     ,Converter={StaticResource StringToVisibilityConverter}}"
-                        Background="{DynamicResource BackgroundGray}"
                         Margin="0 0 20 20" 
                         Grid.Column="2" 
-                        Grid.Row="2" 
+                        Grid.Row="2"
+                        Grid.RowSpan="2"
                         CornerRadius="10">
-                    <TextBlock Text="{Binding StatusText}" 
+                    <TextBlock Text="{Binding StatusText,FallbackValue=asdfasdf}" 
                                Padding="10"
-                               FontSize="24"
-                               Foreground="White"/>
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               MaxWidth="{Binding ActualWidth,ElementName=InfoBorder}"
+                               FontSize="16"
+                               TextWrapping="Wrap"
+                               Foreground="White">
+
+                    </TextBlock>
+                    <Border.Background>
+                        <RadialGradientBrush GradientOrigin="0.5 0.5"
+                                             Center="0.5 0.5"
+                                             RadiusX="0.5"
+                                             RadiusY="0.5">
+                            <GradientStop Color="OrangeRed" Offset="0.005"/>
+                            <GradientStop Color="{DynamicResource GrayBackground}" Offset="0.85"/>
+                        </RadialGradientBrush>
+                    </Border.Background>
                 </Border>
 
 
@@ -445,3 +540,4 @@
         </Border>
     </Grid>
 </Window>
+<!--Background="{DynamicResource BackgroundGray}"-->

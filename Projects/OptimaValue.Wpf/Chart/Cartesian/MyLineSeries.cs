@@ -2,6 +2,7 @@
 using LiveCharts.Defaults;
 using LiveCharts.Geared;
 using LiveCharts.Helpers;
+using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -51,7 +52,8 @@ namespace OptimaValue.Wpf
             LineSeries = new()
             {
                 AreaLimit = 0,
-                PointGeometry = null,
+                PointGeometry = DefaultGeometries.Circle,
+                PointGeometrySize = 10,
                 StrokeThickness = 2,
 
                 Foreground = new SolidColorBrush(Color.FromArgb(107, 48, 48, 48)),
