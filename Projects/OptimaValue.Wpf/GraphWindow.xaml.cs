@@ -184,6 +184,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
+    private int NrOfSeriesOnChart => MyChart.Series.Count;
+
     private List<Tag> tagsPlottedOnChart;
     /// <summary>
     /// The tags that are plotted on the chart 
@@ -400,7 +402,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         Series = new SeriesCollection();
         FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss.ff");
         EnableButtons();
-        radioDark.IsChecked = true;
         StatFilter = StatisticFilter.Max;
     }
 
@@ -955,7 +956,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     /// <param name="e"></param>
     private async void PlayOnClick(object sender, RoutedEventArgs e)
     {
-        if (TagsPlottedOnChart == null || TagsPlottedOnChart.Count == 0)
+        if (TagsPlottedOnChart == null || NrOfSeriesOnChart == 0)
         {
             StatusText = "Lägg till tag att visa...";
             return;
@@ -1473,29 +1474,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         check30Min.IsChecked = false;
     }
 
-    /// <summary>
-    /// Use dark theme
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void radioDarkTheme(object sender, RoutedEventArgs e)
-    {
-        radioLight.IsChecked = false;
-
-        Background = new SolidColorBrush(Colors.Black);
-    }
-
-    /// <summary>
-    /// Use light theme
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void radioLightTheme(object sender, RoutedEventArgs e)
-    {
-        radioDark.IsChecked = false;
-
-        Background = new SolidColorBrush(Colors.DimGray);
-    }
 
     #endregion
 
@@ -1550,7 +1528,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     {
         if (TagsPlottedOnChart == null)
             return;
-        if (IsLoaded && TagsPlottedOnChart.Count > 0)
+        if (IsLoaded && NrOfSeriesOnChart > 0)
         {
             ChartStartDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
             ChartStopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
@@ -1561,7 +1539,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     {
         if (TagsPlottedOnChart == null)
             return;
-        if (IsLoaded && TagsPlottedOnChart.Count > 0)
+        if (IsLoaded && NrOfSeriesOnChart > 0)
         {
             startDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
             stopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
@@ -1575,7 +1553,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         {
             if (TagsPlottedOnChart == null)
                 return;
-            if (!IsLoaded || TagsPlottedOnChart.Count == 0)
+            if (!IsLoaded || NrOfSeriesOnChart == 0)
                 return;
             if (dontUpdateXCursor)
                 return;
@@ -1670,22 +1648,31 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         return false;
     }
 
-    private async Task ExportChartDataToExcel(List<MyLineSeries> MyLineSeries)
+    private async Task<bool> ExportChartDataToExcel(List<MyLineSeries> MyLineSeries)
     {
         using var wb = new XLWorkbook();
         Directory.CreateDirectory(directoryPath);
 
+        int index = 0;
         foreach (var lineSeries in MyLineSeries)
         {
+            index++;
+            var sheetName = "Tag_" + index;
             var ws = wb.Worksheets.Add(lineSeries.ToDataTable(new DateTime((long)Series.Chart.AxisX.Min().View.MinValue)
-                , new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue)), $"{lineSeries.Tag.Name}");
+                , new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue)), sheetName);
 
-            ws.Column(1).Style.NumberFormat.Format = "yyyy-mm-dd hh:mm:ss";
+            ws.Column(2).Style.NumberFormat.Format = "yyyy-mm-dd hh:mm:ss";
             ws.Columns().AdjustToContents();
+        }
+        if (MyLineSeries.Count == 0)
+        {
+            Dispatcher?.Invoke(() => StatusText = "Hittade ingen data att spara");
+            return false;
         }
 
         wb.SaveAs(filePath);
         await Task.Delay(1);
+        return true;
     }
 
 
@@ -1694,17 +1681,18 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     {
         if (TagsPlottedOnChart == null)
             return;
-        if (IsLoaded && TagsPlottedOnChart.Count > 0)
+        if (IsLoaded && NrOfSeriesOnChart > 0)
         {
             startDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
             stopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
             await UpdateChartAsync(ChartUpdateAction.UpdateTime);
-            await ExportChartDataToExcel(LineSeriesList);
-
-            Dispatcher?.Invoke(() =>
+            if (await ExportChartDataToExcel(LineSeriesList))
             {
-                StatusText = $"{filePath} sparades";
-            });
+                Dispatcher?.Invoke(() =>
+                {
+                    StatusText = $"{filePath} sparades";
+                });
+            }
         }
     }
 }

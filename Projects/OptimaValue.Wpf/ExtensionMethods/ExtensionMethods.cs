@@ -12,6 +12,7 @@ namespace OptimaValue.Wpf
         public static DataTable ToDataTable(this MyLineSeries series, DateTime startDate, DateTime stopDate)
         {
             var dataTable = new DataTable();
+            dataTable.Columns.Add("TagNamn", typeof(string));
             dataTable.Columns.Add("DateTime", typeof(DateTime));
             dataTable.Columns.Add("Value", typeof(double));
 
@@ -19,7 +20,7 @@ namespace OptimaValue.Wpf
 
             foreach (var point in filteredData)
             {
-                dataTable.Rows.Add(point.DateTime, point.Value);
+                dataTable.Rows.Add(series.Tag.Name, point.DateTime, point.Value);
             }
             return dataTable;
         }
