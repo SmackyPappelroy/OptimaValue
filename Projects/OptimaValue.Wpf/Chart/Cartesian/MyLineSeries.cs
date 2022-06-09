@@ -19,7 +19,113 @@ namespace OptimaValue.Wpf
     {
         public Tag Tag;
 
+        #region TagControl properties
+        public TagControl TagControl;
+
+        private DateTimePoint cursorValues = new();
+        public DateTimePoint CursorValues
+        {
+            get => cursorValues;
+            set
+            {
+                cursorValues = value;
+                TagControl.ActualValue = value.Value.ToString("0.000");
+            }
+        }
+
+        private string minValue;
+        public string MinValue
+        {
+            get => minValue;
+            set
+            {
+                minValue = value;
+                TagControl.MinValue = value;
+            }
+        }
+
+        private string maxValue;
+        public string MaxValue
+        {
+            get => maxValue;
+            set
+            {
+                maxValue = value;
+                TagControl.MaxValue = value;
+            }
+        }
+
+        private string averageValue;
+        public string AverageValue
+        {
+            get => averageValue;
+            set
+            {
+                averageValue = value;
+                TagControl.AverageValue = value;
+            }
+        }
+
+        private string integral;
+        public string Integral
+        {
+            get => integral;
+            set
+            {
+                integral = value;
+                TagControl.Integral = value;
+            }
+        }
+
+        private string integralPerTimme;
+        public string IntegralPerTimme
+        {
+            get => integralPerTimme;
+            set
+            {
+                integralPerTimme = value;
+                TagControl.IntegralPerTimme = value;
+            }
+        }
+
+        private string overZero;
+        public string OverZero
+        {
+            get => overZero;
+            set
+            {
+                overZero = value;
+                TagControl.OverZero = value;
+            }
+        }
+
+        private TimeSpan overZeroTime;
+        public TimeSpan OverZeroTime
+        {
+            get => overZeroTime;
+            set
+            {
+                overZeroTime = value;
+                TagControl.OverZeroTime = value.ToString();
+            }
+        }
+
+        private string deviation;
+        public string Deviation
+        {
+            get => deviation;
+            set
+            {
+                deviation = value;
+                TagControl.Deviation = value;
+            }
+        }
+
+        #endregion
+
         public GearedValues<DateTimePoint> ChartValues;
+
+        public List<DateTimePoint> FilteredData = new();
 
         public List<DateTimePoint> NewValuesToAdd { get; set; }
 
@@ -46,6 +152,7 @@ namespace OptimaValue.Wpf
         {
             Tag = tag;
 
+
             Color Stroke = tag.Stroke;
             Color Fill = tag.Fill;
 
@@ -60,6 +167,11 @@ namespace OptimaValue.Wpf
                 Stroke = new SolidColorBrush(Stroke),
                 Fill = new SolidColorBrush(Fill),
             };
+            TagControl = new();
+            TagControl.TagName = Tag.Name;
+            TagControl.TagColor = new SolidColorBrush(Stroke);
+            TagControl.Description = Tag.Description;
+            TagControl.TagUnit = Tag.Unit;
 
             ChartData.OnChartChanged += ChartData_OnChartChanged;
         }
@@ -99,6 +211,8 @@ namespace OptimaValue.Wpf
 
             ChartValues.AddRange(result);
             LineSeries.Values = new GearedValues<DateTimePoint>(ChartValues.AsGearedValues().WithQuality(Quality.Highest));
+
+            LineSeries.Name = Tag.Name;
 
             if (LineSeries.Values.Count == 0)
                 return false;

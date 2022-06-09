@@ -27,6 +27,10 @@ using System.Windows.Threading;
 using LiveCharts.Wpf;
 using System.Windows.Controls.Primitives;
 using ClosedXML.Excel;
+using System.Diagnostics;
+using Microsoft.Win32;
+using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 namespace OptimaValue.Wpf;
 
@@ -36,8 +40,13 @@ namespace OptimaValue.Wpf;
 public partial class GraphWindow : Window, INotifyPropertyChanged
 {
     private string directoryPath = @$"C:\OptimaValue";
-    private string filePath => directoryPath + @$"\Trend{DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss")}.xlsx";
+    private string filePath => directoryPath + @$"\Trend {DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss")}.xlsx";
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected void OnPropertyChanged([CallerMemberName] string name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
 
     private event Action<bool> OnTimeUpdated;
 
@@ -51,6 +60,25 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     #endregion
 
     #region Properties
+    private string actualTime = "";
+    public string ActualTime
+    {
+        get => actualTime;
+        set
+        {
+            actualTime = value;
+        }
+    }
+
+    private ObserveCollection<TagControl> tagControls;
+    public ObserveCollection<TagControl> TagControls
+    {
+        get => tagControls;
+        set => tagControls = value;
+    }
+
+    public string MinMaxTidString { get; set; }
+
     private ChartPoint selectedChartPoint;
     public ChartPoint SelectedChartPoint
     {
@@ -104,10 +132,18 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
     public ZoomingOptions Zoom { get; set; } = ZoomingOptions.X;
 
+    private ObservableCollection<MyLineSeries> lineSeriesList;
     /// <summary>
     /// A line series to plot on the chart
     /// </summary>
-    public List<MyLineSeries> LineSeriesList;
+    public ObservableCollection<MyLineSeries> LineSeriesList
+    {
+        get => lineSeriesList;
+        set
+        {
+            lineSeriesList = value;
+        }
+    }
 
     private string statusText = string.Empty;
     /// <summary>
@@ -172,10 +208,10 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             var daySection = StartDate.Date;
 
             startDateTime = daySection.Add(hourSection);
-            if (IsLoaded)
-            {
-                OnTimeUpdated?.Invoke(true);
-            }
+            //if (IsLoaded)
+            //{
+            //    OnTimeUpdated?.Invoke(true);
+            //}
         }
         catch (Exception ex)
         {
@@ -255,10 +291,10 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             var daySection = StopDate.Date;
 
             stopDateTime = daySection.Add(hourSection);
-            if (IsLoaded)
-            {
-                OnTimeUpdated?.Invoke(true);
-            }
+            //if (IsLoaded)
+            //{
+            //    OnTimeUpdated?.Invoke(true);
+            //}
         }
         catch (Exception ex)
         {
@@ -403,6 +439,16 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss.ff");
         EnableButtons();
         StatFilter = StatisticFilter.Max;
+        LineSeriesList.CollectionChanged += LineSeriesList_CollectionChanged;
+    }
+
+    private void LineSeriesList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (LineSeriesList.Count == 0)
+            ActualTime = "";
+
+        IEnumerable<TagControl> temp = lineSeriesList.Select(x => x.TagControl).ToObservableCollection();
+        TagControls = new ObserveCollection<TagControl>(temp);
     }
 
     private void TimerClearStatus_Tick(object sender, EventArgs e)
@@ -420,21 +466,26 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     /// <param name="obj"></param>
     private async void GraphWindow_OnTimeUpdated(bool obj)
     {
-        if (IsLoaded && ChartData.HasData)
+        if (IsLoaded && ChartData.HasData && !isUpdating)
             await UpdateChartAsync(ChartUpdateAction.UpdateTime);
+        else
+            isUpdating = false;
     }
 
     #endregion
 
     #region Private methods
+
     /// <summary>
     /// Adds icon with name on top
     /// </summary>
     private void UpdateTagGraphic()
     {
-        List<StackPanel> stackPanels = new List<StackPanel>();
+        var stackPanels = new List<StackPanel>(); ;
         var minTid = new DateTime((long)MinValueX);
         var maxTid = new DateTime((long)MaxValueX);
+        MinMaxTidString = minTid + "     -     " + maxTid + "     [" + (maxTid - minTid) + "]";
+        // TODO: Ändra så mintid och maxtid tas från grafen
 
         StackPanel timeStackPanel = new StackPanel()
         {
@@ -445,7 +496,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         TextBlock textBlockTime = new TextBlock()
         {
             Margin = new Thickness(0, 0, 0, 5),
-            Text = minTid + "     -     " + maxTid + "     [" + (maxTid - minTid) + "]",
             FontSize = 20,
             FontWeight = FontWeights.Bold,
             //TextDecorations = TextDecorations.Underline,
@@ -458,188 +508,21 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         {
             DataStatistics stats = new(StatFilter, item);
 
-            var tagName = item.LineSeries.Title;
-            var brush = item.LineSeries.Stroke;
-            StackPanel stackPanel = new StackPanel()
-            {
-                Orientation = Orientation.Horizontal,
-                Margin = new Thickness(5, 0, 0, 5),
-            };
 
-            Ellipse ellipse = new Ellipse()
-            {
-                Width = 20,
-                Height = 20,
-                Fill = brush,
-                Margin = new Thickness(5, 0, 5, 0),
-            };
-            var textStackPanel = new StackPanel()
-            {
-                Orientation = Orientation.Horizontal,
-            };
-
-            var tag = AvailableTags.Where(x => x.Name == tagName).FirstOrDefault();
+            var tag = AvailableTags.Where(x => x.Name == item.LineSeries.Title).FirstOrDefault();
             var tagUnitString = tag.Unit == "" ? "" : " " + tag.Unit;
             var descriptionString = tag.Description == "" ? "" : " " + tag.Description + " ";
 
-            TextBlock textBlockTagName = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = tag.Name + " ",
-                FontSize = 14,
-                //FontWeight = FontWeights.Bold,
-                Foreground = new SolidColorBrush(Colors.LightGray),
-            };
-            TextBlock textBlockUnit = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = tagUnitString,
-                Height = 20,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(Colors.Gray),
-            };
-            TextBlock textBlockDesciption = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = descriptionString,
-                Height = 20,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(Colors.Gray),
-            };
-            TextBlock textBlockAfterDesciption = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = "   ",
-                Height = 20,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(Colors.White),
-            };
-
-            var minBitmap = new BitmapImage();
-            minBitmap.BeginInit();
-            minBitmap.UriSource = new Uri(@"/Images/minimum_value_48px.png", UriKind.RelativeOrAbsolute);
-            minBitmap.EndInit();
-
-            var avgBitmap = new BitmapImage();
-            avgBitmap.BeginInit();
-            avgBitmap.UriSource = new Uri(@"/Images/average_48px.png", UriKind.RelativeOrAbsolute);
-            avgBitmap.EndInit();
-
-            var maxBitmap = new BitmapImage();
-            maxBitmap.BeginInit();
-            maxBitmap.UriSource = new Uri(@"/Images/maximum_48px.png", UriKind.RelativeOrAbsolute);
-            maxBitmap.EndInit();
-
-            System.Windows.Controls.Image imageMin = new()
-            {
-                Source = minBitmap,
-                Height = 20,
-                Width = 20,
-                Stretch = Stretch.UniformToFill,
-                ToolTip = "Minvärde"
-            };
-
-            TextBlock textBlockMin = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = ": " + item.MinValueY.ToString("0.000") + $"{tagUnitString}     ",
-                Height = 20,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 54, 93, 218)),
-                ToolTip = "Minvärde"
-            };
-            System.Windows.Controls.Image imageAvg = new()
-            {
-                Source = avgBitmap,
-                Height = 20,
-                Width = 20,
-                Stretch = Stretch.UniformToFill,
-                ToolTip = "Medelvärde"
-            };
-            TextBlock textBlockAvg = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = ": " + item.AvgValueY.ToString("0.000") + $"{tagUnitString}     ",
-                Height = 20,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 104, 218, 54)),
-                ToolTip = "Medelvärde"
-            };
-            System.Windows.Controls.Image imageMax = new()
-            {
-                Source = maxBitmap,
-                Height = 20,
-                Width = 20,
-                Stretch = Stretch.UniformToFill,
-                ToolTip = "Maxvärde"
-            };
-            TextBlock textBlockMax = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = ": " + item.MaxValueY.ToString("0.000") + $"{tagUnitString}     ",
-                Height = 20,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 176, 80, 73)),
-                ToolTip = "Maxvärde"
-            };
+            item.MinValue = item.MinValueY.ToString("0.000");
+            item.AverageValue = item.AvgValueY.ToString("0.000");
+            item.MaxValue = item.MaxValueY.ToString("0.000");
+            item.Integral = stats.Integral.ToString("0.0");
             var integralPerTimme = stats.Integral / (maxTid - minTid).TotalHours;
-            TextBlock textBlockIntegral = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = $"∫ {stats.Integral.ToString("0.0")}   ∫/h {integralPerTimme.ToString("0.0")}",
-                Height = 20,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(Colors.AntiqueWhite),
-                ToolTip = "Area under graf"
-            };
-            TextBlock textBlockOverZero = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = $"     >0: {stats.NumberOfTimesOverZero}ggr [{stats.TimeOverZero}]",
-                Height = 20,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(Colors.AntiqueWhite),
-                ToolTip = "Antal gånger över 0, tid över 0"
-            };
-            TextBlock textBlockStdDev = new TextBlock()
-            {
-                Margin = new Thickness(0),
-                Text = $"    Std.-avvikelse: {stats.StandardDeviation.ToString("0.000")}",
-                Height = 20,
-                FontSize = 14,
-                Foreground = new SolidColorBrush(Colors.AntiqueWhite),
-                ToolTip = "Genomsnittlig avvikelse från medelvärdet"
-            };
-
-
-
-            textStackPanel.Children.Add(textBlockTagName);
-            //textStackPanel.Children.Add(textBlockUnit);
-            textStackPanel.Children.Add(textBlockDesciption);
-            textStackPanel.Children.Add(textBlockAfterDesciption);
-            textStackPanel.Children.Add(imageMin);
-            textStackPanel.Children.Add(textBlockMin);
-            textStackPanel.Children.Add(imageAvg);
-            textStackPanel.Children.Add(textBlockAvg);
-            textStackPanel.Children.Add(imageMax);
-            textStackPanel.Children.Add(textBlockMax);
-            if (StatFilter == StatisticFilter.Max)
-            {
-                textStackPanel.Children.Add(textBlockIntegral);
-                textStackPanel.Children.Add(textBlockOverZero);
-                textStackPanel.Children.Add(textBlockStdDev);
-            }
-
-            stackPanel.Children.Add(ellipse);
-            stackPanel.Children.Add(textStackPanel);
-
-            stackPanels.Add(stackPanel);
+            item.IntegralPerTimme = integralPerTimme.ToString("0.0");
+            item.OverZero = stats.NumberOfTimesOverZero.ToString();
+            item.OverZeroTime = stats.TimeOverZero;
+            item.Deviation = stats.StandardDeviation.ToString("0.000");
         }
-
-        if (MyItemControl == null)
-            MyItemControl = new ItemsControl();
-
-        MyItemControl.ItemsSource = stackPanels;
 
     }
 
@@ -680,6 +563,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
+
+
     /// <summary>
     /// Finds max and minimum <see cref="DateTime"/> of the loged values in the database
     /// </summary>
@@ -688,17 +573,31 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     {
         if (sqlStatus == SqlStatus.Connected)
         {
-            var queryMinTid = $"SELECT MIN(logTime) FROM {SqlSettings.Databas}.dbo.logValues";
             var queryMaxTid = $"SELECT MAX(logTime) FROM {SqlSettings.Databas}.dbo.logValues";
+
             using SqlConnection con = new SqlConnection(SqlMethods.ConnectionString);
             try
             {
                 await con.OpenAsync();
-                using SqlCommand cmd = new SqlCommand(queryMinTid, con);
-                StartDate = (DateTime)cmd.ExecuteScalar();
-                StartTimeString = StartDate.ToString("HH:mm");
                 using SqlCommand cmd2 = new SqlCommand(queryMaxTid, con);
                 StopDate = (DateTime)cmd2.ExecuteScalar();
+
+                // Sätt min tid till en vecka bakåt
+                var minTid = StopDate.Subtract(TimeSpan.FromDays(7));
+                var minTidString = minTid.ToString();
+
+                var queryMinTid = $"SELECT top 1 logTime FROM {SqlSettings.Databas}.dbo.logValues WHERE logTime <= '{minTidString}' order by logTime desc";
+
+                using SqlCommand cmd = new SqlCommand(queryMinTid, con);
+                var result = cmd.ExecuteScalar();
+                if (result == null)
+                {
+                    queryMinTid = $"SELECT top 1 logTime FROM {SqlSettings.Databas}.dbo.logValues where logTime between '{minTid}' and '{StopDate}' order by logTime asc";
+                    using SqlCommand cmd3 = new SqlCommand(queryMinTid, con);
+                    result = cmd3.ExecuteScalar();
+                }
+                StartDate = (DateTime)result;
+                StartTimeString = StartDate.ToString("HH:mm");
                 StopTimeString = StopDate.ToString("HH:mm");
             }
             catch (Exception ex)
@@ -783,10 +682,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         {
             isUpdating = true;
             await UpdateChartAsync(ChartUpdateAction.ChangeColor);
-            isUpdating = false;
         }
     }
 
+
+    private SemaphoreSlim semaphore = new SemaphoreSlim(1);
     /// <summary>
     /// Refreshes the chart
     /// </summary>
@@ -794,6 +694,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     /// <returns></returns>
     private async Task UpdateChartAsync(ChartUpdateAction chartUpdateAction)
     {
+        //semaphore.Wait();
         if (startDateTime == DateTime.MinValue && stopDateTime == DateTime.MinValue)
             return;
 
@@ -830,6 +731,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
         ChartStartDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
         ChartStopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
+        //semaphore.Release();
     }
 
     private bool isSaving = false;
@@ -907,10 +809,10 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             return;
         if (LineSeriesList.Count == 0)
             return;
-        if (!LineSeriesList.Exists(x => x.LineSeries.Title == tagName))
+        if (!LineSeriesList.ToList().Exists(x => x.LineSeries.Title == tagName))
             return;
 
-        var foundList = LineSeriesList.Find(x => x.LineSeries.Title == tagName);
+        var foundList = LineSeriesList.ToList().Find(x => x.LineSeries.Title == tagName);
         var foundSeries = Series.First(x => x.Title == tagName);
         if (foundList != null)
         {
@@ -1314,7 +1216,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             {
                 if (LineSeriesList.Count > 0)
                 {
-                    if (LineSeriesList.Exists(x => x.LineSeries.Title == tagName))
+                    if (LineSeriesList.ToList().Exists(x => x.LineSeries.Title == tagName))
                         return false;
                 }
             }
@@ -1323,7 +1225,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             return true;
         }
 
-        LineSeriesList = new();
+        LineSeriesList.Clear();
         foreach (var item in TagsPlottedOnChart)
         {
             MyLineSeries myLine = new(item);
@@ -1554,6 +1456,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
     private void MoveChartCursorAndToolTip_OnMouseMove(object sender, MouseEventArgs e)
     {
+        if (Mouse.LeftButton == MouseButtonState.Pressed
+            || Mouse.RightButton == MouseButtonState.Pressed
+            || Mouse.MiddleButton == MouseButtonState.Pressed)
+            return;
+
         try
         {
             if (TagsPlottedOnChart == null)
@@ -1579,6 +1486,21 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             // Find current selected chart point for the first x-axis
             Point chartPoint = chart.ConvertToChartValues(chartMousePosition);
             SelectedChartPoint = chart.Series[0].ClosestPointTo(chartPoint.X, AxisOrientation.X);
+            for (int i = 0; i < chart.Series.Count; i++)
+            {
+
+                var chartP = chart.Series[i].ClosestPointTo(chartPoint.X, AxisOrientation.X);
+                var dateTimePoint = (DateTimePoint)chartP.Instance;
+                if (i == 0)
+                    ActualTime = dateTimePoint.DateTime.ToString("yyyy-MM-dd HH:mm:ss");
+                LineSeriesList[i].CursorValues = (DateTimePoint)chartP.Instance;
+            }
+
+            UpdateGraphicActualValues();
+
+
+            var name = chart.Series[0].Title;
+
 
             // Show visual hover feedback for previous point
             if (SelectedChartPoint != null && SelectedChartPoint.View != null)
@@ -1624,6 +1546,13 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         //Canvas.SetTop(cursorXToolTip, canvasMousePosition.Y);
     }
 
+    private void UpdateGraphicActualValues()
+    {
+
+
+
+    }
+
     // Helper method to traverse the visual tree of an element
     private bool TryFindVisualChildElement<TChild>(DependencyObject parent, out TChild resultElement)
       where TChild : DependencyObject
@@ -1655,29 +1584,23 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
     private async Task<bool> ExportChartDataToExcel(List<MyLineSeries> MyLineSeries)
     {
-        using var wb = new XLWorkbook();
-        Directory.CreateDirectory(directoryPath);
-
-        int index = 0;
-        foreach (var lineSeries in MyLineSeries)
+        try
         {
-            index++;
-            var sheetName = "Tag_" + index;
-            var ws = wb.Worksheets.Add(lineSeries.ToDataTable(new DateTime((long)Series.Chart.AxisX.Min().View.MinValue)
-                , new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue)), sheetName);
+            Directory.CreateDirectory(directoryPath);
 
-            ws.Column(2).Style.NumberFormat.Format = "yyyy-mm-dd hh:mm:ss";
-            ws.Columns().AdjustToContents();
+            var startDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
+            var stopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
+            var wb = MyLineSeries.ToWorkSheet(startDate, stopDate);
+
+            wb.SaveAs(filePath);
+            await Task.Delay(1);
+            return true;
         }
-        if (MyLineSeries.Count == 0)
+        catch (Exception)
         {
-            Dispatcher?.Invoke(() => StatusText = "Hittade ingen data att spara");
-            return false;
-        }
 
-        wb.SaveAs(filePath);
-        await Task.Delay(1);
-        return true;
+            throw;
+        }
     }
 
 
@@ -1690,15 +1613,35 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         {
             startDateTime = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
             stopDateTime = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
-            await UpdateChartAsync(ChartUpdateAction.UpdateTime);
-            if (await ExportChartDataToExcel(LineSeriesList))
+            try
+            {
+                await UpdateChartAsync(ChartUpdateAction.UpdateTime);
+
+
+            }
+            catch (Exception ex)
+            {
+                Dispatcher?.Invoke(() =>
+                {
+                    StatusText = ex.Message;
+                });
+            }
+            if (await ExportChartDataToExcel(LineSeriesList.ToList()))
             {
                 Dispatcher?.Invoke(() =>
                 {
                     StatusText = $"{filePath} sparades";
                 });
             }
+
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                Arguments = directoryPath,
+                FileName = "explorer.exe"
+            };
+            Process.Start(startInfo);
         }
+
     }
 }
 
