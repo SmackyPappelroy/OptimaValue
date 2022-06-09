@@ -1490,6 +1490,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
+    /// <summary>
+    /// Change the zoom type of the chart
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private async void comboZoom_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (IsLoaded && ChartData.HasData)

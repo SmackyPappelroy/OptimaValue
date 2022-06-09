@@ -19,86 +19,100 @@
         MinWidth="1000" 
         RenderOptions.BitmapScalingMode="Fant"
         Icon="/icons8_area_chart_64.png" WindowStyle="ThreeDBorderWindow">
-    <Window.Resources>
-        <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
+  <Window.Resources>
+    <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
                             ObjectType="{x:Type System:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="local:StatisticFilter"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
+      <ObjectDataProvider.MethodParameters>
+        <x:Type TypeName="local:StatisticFilter"/>
+      </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
 
-        <ObjectDataProvider x:Key="dataFromZoom" MethodName="GetValues"
+    <ObjectDataProvider x:Key="dataFromZoom" MethodName="GetValues"
                             ObjectType="{x:Type System:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="lv:ZoomingOptions"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
+      <ObjectDataProvider.MethodParameters>
+        <x:Type TypeName="lv:ZoomingOptions"/>
+      </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
 
-        <ObjectDataProvider x:Key="animationData" MethodName="GetValues"
+    <ObjectDataProvider x:Key="animationData" MethodName="GetValues"
                             ObjectType="{x:Type System:Enum}">
-            <ObjectDataProvider.MethodParameters>
-                <x:Type TypeName="local:AnimationEnum"/>
-            </ObjectDataProvider.MethodParameters>
-        </ObjectDataProvider>
+      <ObjectDataProvider.MethodParameters>
+        <x:Type TypeName="local:AnimationEnum"/>
+      </ObjectDataProvider.MethodParameters>
+    </ObjectDataProvider>
 
-        <Color x:Key="GrayBackground">#222a31</Color>
-        <SolidColorBrush x:Key="BackgroundGray" Color="{DynamicResource GrayBackground}"/>
+    <Color x:Key="GrayBackground">#222a31</Color>
+    <SolidColorBrush x:Key="BackgroundGray" Color="{DynamicResource GrayBackground}"/>
 
-        <Color x:Key="GrayBackgroundTransparent">#222a31</Color>
-        <SolidColorBrush x:Key="BackgroundGrayTransparent" Opacity="0.8" Color="{DynamicResource GrayBackground}"/>
+    <Color x:Key="GrayBackgroundTransparent">#222a31</Color>
+    <SolidColorBrush x:Key="BackgroundGrayTransparent" Opacity="0.8" Color="{DynamicResource GrayBackground}"/>
 
-        <LinearGradientBrush x:Key="horizontalGradient" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#222a31" Offset="0.0"></GradientStop>
-            <GradientStop Color="Black" Offset="0.5"></GradientStop>
-            <GradientStop Color="#222a31" Offset="1.0"></GradientStop>
-        </LinearGradientBrush>
+    <LinearGradientBrush x:Key="horizontalGradient" StartPoint="0,0" EndPoint="1,0">
+      <GradientStop Color="#222a31" Offset="0.0"></GradientStop>
+      <GradientStop Color="Black" Offset="0.5"></GradientStop>
+      <GradientStop Color="#222a31" Offset="1.0"></GradientStop>
+    </LinearGradientBrush>
 
-        <BitmapImage x:Key="end" 
+    <BitmapImage x:Key="end" 
                      UriSource="Resurser/end_100px.png"/>
-        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+    <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
 
-        <Style x:Key="FontAwesome">
-            <Setter Property="TextElement.FontFamily" Value="/Fonts/fontawesome-webfont.ttf#FontAwesome" />
-        </Style>
-    </Window.Resources>
-    <Grid>
-        <Border CornerRadius="30">
+    <Style x:Key="FontAwesome">
+      <Setter Property="TextElement.FontFamily" Value="/Fonts/fontawesome-webfont.ttf#FontAwesome" />
+    </Style>
 
-            <Grid Name="MainGrid">
+    <Style x:Key="growButton" TargetType="{x:Type Button}">
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="RenderTransformOrigin" Value="0.5, 0.5"/>
+          <Setter Property="RenderTransform">
+            <Setter.Value>
+              <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
+            </Setter.Value>
+          </Setter>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width=".35*"></ColumnDefinition>
-                    <ColumnDefinition Width=".35*"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height=".9*"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                </Grid.RowDefinitions>
-                <Border Grid.ColumnSpan="3"></Border>
-                <StackPanel Grid.Row="0" Grid.Column="0" 
+  </Window.Resources>
+  <Grid>
+    <Border CornerRadius="30">
+
+      <Grid Name="MainGrid">
+
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width=".35*"></ColumnDefinition>
+          <ColumnDefinition Width=".35*"></ColumnDefinition>
+          <ColumnDefinition Width="Auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"></RowDefinition>
+          <RowDefinition Height=".9*"></RowDefinition>
+          <RowDefinition Height="Auto"></RowDefinition>
+          <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Border Grid.ColumnSpan="3"></Border>
+        <StackPanel Grid.Row="0" Grid.Column="0" 
                     Grid.ColumnSpan="3"
                     Orientation="Horizontal" 
                     Margin="25, 10">
-                    <!--<Path Width="25" Height="25" Stretch="Fill" Fill="#4C4949" Data="F1 M 38,3.16666C 57.2379,3.16666 72.8333,18.7621 72.8333,38C 72.8333,57.2379 57.2379,72.8333 38,72.8333C 18.7621,72.8333 3.16667,57.2379 3.16667,38C 3.16667,18.7621 18.7621,3.16666 38,3.16666 Z M 52.252,18.9974L 36.4164,18.9974L 23.75,39.5833L 34.8333,39.5833L 25.3316,60.1667L 50.6667,34.8333L 38,34.8333L 52.252,18.9974 Z "/>-->
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" 
+          <!--<Path Width="25" Height="25" Stretch="Fill" Fill="#4C4949" Data="F1 M 38,3.16666C 57.2379,3.16666 72.8333,18.7621 72.8333,38C 72.8333,57.2379 57.2379,72.8333 38,72.8333C 18.7621,72.8333 3.16667,57.2379 3.16667,38C 3.16667,18.7621 18.7621,3.16666 38,3.16666 Z M 52.252,18.9974L 36.4164,18.9974L 23.75,39.5833L 34.8333,39.5833L 25.3316,60.1667L 50.6667,34.8333L 38,34.8333L 52.252,18.9974 Z "/>-->
+          <ScrollViewer VerticalScrollBarVisibility="Auto" 
                                   HorizontalScrollBarVisibility="Hidden" 
                                   MaxHeight="120">
-                        <Border CornerRadius="10" 
+            <Border CornerRadius="10" 
                                 Background="{DynamicResource horizontalGradient}">
-                            <ItemsControl Margin="10 0 10 0" 
+              <ItemsControl Margin="10 0 10 0" 
                                           ItemsSource="{Binding MyItemControl.ItemsSource}" 
                                           Foreground="White" BorderThickness="0" />
-                        </Border>
-                    </ScrollViewer>
+            </Border>
+          </ScrollViewer>
 
 
-                </StackPanel>
+        </StackPanel>
 
 
-                <lvc:CartesianChart 
+        <lvc:CartesianChart 
                             Grid.Column="0"
                             Grid.Row="1"
                             Grid.RowSpan="2"
@@ -111,466 +125,473 @@
                             DisableAnimations="True"
                             Hoverable="False" LayoutUpdated="MyChart_LayoutUpdated">
 
-                    <lvc:CartesianChart.Resources>
-                        <Style TargetType="lvc:Separator">
-                            <Setter Property="StrokeThickness" Value="2.5"></Setter>
-                            <Setter Property="Stroke" Value="#FF838383"></Setter>
-                            <Style.Triggers>
-                                <Trigger Property="AxisOrientation" Value="X">
-                                    <Setter Property="IsEnabled" Value="false"></Setter>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                        <!--#region Vertical X-bar-->
-                        <!-- The cursor for the x-axis that snaps to the nearest chart point -->
-                        <Line x:Key="CursorX"
-            Canvas.ZIndex="2"
-            Canvas.Left="{Binding SelectedChartPoint.ChartLocation.X}"
-            Y1="0"
-            Y2="{Binding ElementName=MyChart, Path=ActualHeight}"
-            Stroke="Gray"
-            StrokeThickness="1" />
+          <lvc:CartesianChart.Resources>
+            <Style TargetType="lvc:Separator">
+              <Setter Property="StrokeThickness" Value="2.5"></Setter>
+              <Setter Property="Stroke" Value="#FF838383"></Setter>
+              <Style.Triggers>
+                <Trigger Property="AxisOrientation" Value="X">
+                  <Setter Property="IsEnabled" Value="false"></Setter>
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+            <!--#region Vertical X-bar-->
+            <!-- The cursor for the x-axis that snaps to the nearest chart point -->
+            <Line x:Key="CursorX"
+                  Canvas.ZIndex="2"
+                  Canvas.Left="{Binding SelectedChartPoint.ChartLocation.X}"
+                  Y1="0"
+                  Y2="{Binding ElementName=MyChart, Path=ActualHeight}"
+                  Stroke="Gray"
+                  StrokeThickness="1" />
 
-                        <!-- The ToolTip that follows the mouse pointer-->
-                        <Border x:Key="CursorXToolTip"
+            <!-- The ToolTip that follows the mouse pointer-->
+            <Border x:Key="CursorXToolTip"
               Canvas.ZIndex="3"
               Background="LightGray"
               Padding="8"
               CornerRadius="8">
-                            <StackPanel Background="LightGray">
-                                <StackPanel Orientation="Horizontal">
-                                    <Path Height="20" Width="20"
-                  Stretch="UniformToFill"
-                  Data="{Binding SelectedChartPoint.SeriesView.PointGeometry}"
-                  Fill="{Binding SelectedChartPoint.SeriesView.Fill}"
-                  Stroke="{Binding SelectedChartPoint.SeriesView.Stroke}"
-                  StrokeThickness="{Binding SelectedChartPoint.SeriesView.StrokeThickness}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-                        <!--#endregion-->
-                    </lvc:CartesianChart.Resources>
-                    <lvc:CartesianChart.AxisY>
-                        <lvc:Axis LabelFormatter="{Binding FormatterY}"
+              <StackPanel Background="LightGray">
+                <StackPanel Orientation="Horizontal">
+                  <Path Height="20" Width="20"
+                    Stretch="UniformToFill"
+                    Data="{Binding SelectedChartPoint.SeriesView.PointGeometry}"
+                    Fill="{Binding SelectedChartPoint.SeriesView.Fill}"
+                    Stroke="{Binding SelectedChartPoint.SeriesView.Stroke}"
+                    StrokeThickness="{Binding SelectedChartPoint.SeriesView.StrokeThickness}" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <!--#endregion-->
+          </lvc:CartesianChart.Resources>
+          <lvc:CartesianChart.AxisY>
+            <lvc:Axis LabelFormatter="{Binding FormatterY}"
                           MaxValue="{Binding MaxValueY,Mode=TwoWay}"
                           MinValue="{Binding MinValueY,Mode=TwoWay}"
                           Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"
                               />
-                    </lvc:CartesianChart.AxisY>
-                    <lvc:CartesianChart.AxisX>
-                        <lvc:Axis RangeChanged="Axis_OnRangeChanged"
-                          LabelFormatter="{Binding FormatterX}" 
-                          
-                          MinValue="{Binding MinValueX, Mode=TwoWay}" 
-                          MaxValue="{Binding MaxValueX, Mode=TwoWay}"
-                          Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
-                    </lvc:CartesianChart.AxisX>
-                    <lvc:CartesianChart.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#222a31" Offset="0.0"></GradientStop>
-                            <GradientStop Color="Black" Offset="1.0"></GradientStop>
-                        </LinearGradientBrush>
-                    </lvc:CartesianChart.Background>
-                </lvc:CartesianChart>
+          </lvc:CartesianChart.AxisY>
+          <lvc:CartesianChart.AxisX>
+            <lvc:Axis RangeChanged="Axis_OnRangeChanged"
+                      LabelFormatter="{Binding FormatterX}" 
+                      MinValue="{Binding MinValueX, Mode=TwoWay}" 
+                      MaxValue="{Binding MaxValueX, Mode=TwoWay}"
+                      Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
+          </lvc:CartesianChart.AxisX>
+          <lvc:CartesianChart.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+              <GradientStop Color="#222a31" Offset="0.0"></GradientStop>
+              <GradientStop Color="Black" Offset="1.0"></GradientStop>
+            </LinearGradientBrush>
+          </lvc:CartesianChart.Background>
+        </lvc:CartesianChart>
 
 
-                <TextBlock Grid.Row="4" Grid.Column="0" 
-                           Margin="20 0 0 0"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Top"
-                           Visibility="{Binding ChartStartDate,Converter={StaticResource StringToVisibilityConverter}}"
-                    Text="{Binding ChartStartDate}"
-                           Foreground="LightGray" FontSize="16" >
-                </TextBlock>
-                <TextBlock Grid.Row="2" Grid.Column="1" 
-                           Margin="0,0,20,0"
-                           VerticalAlignment="Top"
-                           HorizontalAlignment="Right"
-                           Visibility="{Binding ChartStopDate,Converter={StaticResource StringToVisibilityConverter}}"
-                    Text="{Binding ChartStopDate}"
-                           Foreground="LightGray" FontSize="16" Grid.RowSpan="2" />
+        <TextBlock Grid.Row="4" Grid.Column="0" 
+                   Margin="20 0 0 0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Visibility="{Binding ChartStartDate,Converter={StaticResource StringToVisibilityConverter}}"
+                   Text="{Binding ChartStartDate}"
+                   Foreground="LightGray" FontSize="16" >
+        </TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="1" 
+                   Margin="0,0,20,0"
+                   VerticalAlignment="Top"
+                   HorizontalAlignment="Right"
+                   Visibility="{Binding ChartStopDate,Converter={StaticResource StringToVisibilityConverter}}"
+                   Text="{Binding ChartStopDate}"
+                   Foreground="LightGray" FontSize="16" Grid.RowSpan="2" />
 
-                <Button Margin="10" Width="20" Height="40" Name="btnRefresh" Grid.Column="0"
-                        Grid.Row="4" Grid.ColumnSpan="2"
-                        Visibility="{Binding ChartStopDate,Converter={StaticResource StringToVisibilityConverter}}"
-                        VerticalAlignment="Top" Panel.ZIndex="1"
-                        Click="RefreshOnClick" >
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <fa:ImageAwesome Icon="Refresh" Foreground="LightGray"/>
-                        </ControlTemplate>
-                    </Button.Template>
-                </Button>
+        <Button Name="btnRefresh" Grid.Column="0"
+                  Margin="10" Width="20" Height="40"
+                  Grid.Row="4" Grid.ColumnSpan="2"
+                  Style="{DynamicResource growButton}"
+                  Visibility="{Binding ChartStopDate,Converter={StaticResource StringToVisibilityConverter}}"
+                  VerticalAlignment="Top" Panel.ZIndex="1"
+                  Click="RefreshOnClick" >
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <fa:ImageAwesome Icon="Refresh" Foreground="LightGray"/>
+            </ControlTemplate>
+          </Button.Template>
+        </Button>
 
-                <!-- Control panel -->
-                <Popup Name="myPopup"
-                       Width="400"
-                       AllowsTransparency="True"
-                       Height="{Binding ElementName=mainWindow ,Path=ActualHeight}"
-                       IsOpen="True"
-                       PlacementTarget="{Binding ElementName=mainWindow}"
-                       Placement="Right">
-                    <StackPanel Orientation="Vertical">
-                        <Border Margin="0 0 20 10" 
+
+        <!-- Control panel -->
+        <Popup Name="myPopup"
+                      Width="400"
+                      AllowsTransparency="True"
+                      Height="{Binding ElementName=mainWindow ,Path=ActualHeight}"
+                      IsOpen="True"
+                      PlacementTarget="{Binding ElementName=mainWindow}"
+                      Placement="Right">
+          <StackPanel Orientation="Vertical">
+            <Border Margin="0 0 20 10" 
                         Name="ControlBorder"
                         Background="{DynamicResource BackgroundGrayTransparent}"
                         CornerRadius="10">
 
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                                <StackPanel VerticalAlignment="Top">
-                                    <!--<StackPanel Orientation="Horizontal" Margin="20 20 0 10" >
-                                        <RadioButton x:Name="radioDark" Content="Mörkt Tema" 
-                                     Foreground="White" Margin="0 0 20 0" 
-                                     Click="radioDarkTheme" />
-                                        <RadioButton x:Name="radioLight" Content="Ljust Tema" 
-                                     Foreground="White"  Click="radioLightTheme" />
-                                    </StackPanel>-->
+              <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <StackPanel VerticalAlignment="Top">
 
-                                    <TextBlock Text="Start" Foreground="White"
-                                               FontSize="20"
-                                               Margin="0 5 0 5"
-                                               VerticalAlignment="Center"
-                                               HorizontalAlignment="Center"/>
+                  <TextBlock Text="Start" Foreground="White"
+                             FontSize="20"
+                             Margin="0 5 0 5"
+                             VerticalAlignment="Center"
+                             HorizontalAlignment="Center"/>
 
-                                    <Grid Margin="20 20 0 10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width=".3*"/>
-                                            <ColumnDefinition Width=".7*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Foreground="White" 
-                                                   FontSize="14"
-                                                   Text="Datum:" Margin="20 5 5 5"/>
-                                        <DatePicker Grid.Column="1" 
-                                                        FontSize="14"
-                                                        Name="startDatePicker" 
-                                                        Margin="5 5 20 5 "
-                                                        SelectedDate="{Binding StartDate}"/>
-                                    </Grid>
-                                    <Grid Margin="0 0 0 10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="4*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock  Grid.Column="0" 
-                                                    FontSize="14"
-                                                    Foreground="White" Text="Tid:" Margin="20 5 5 5"/>
-                                        <TextBox Grid.Column="1" 
-                                                 Margin="50 5 50 5"
-                                                 FontSize="14"
-                                                 TextAlignment="Center"
-                                                 Name="txtStartTime">
-                                            <TextBox.Text>
-                                                <Binding Path="StartTimeString" 
-                                         UpdateSourceTrigger="PropertyChanged">
-                                                    <Binding.ValidationRules>
-                                                        <local:TimeValidationRule/>
-                                                    </Binding.ValidationRules>
-                                                </Binding>
-                                            </TextBox.Text>
-                                        </TextBox>
-                                    </Grid>
-                                    <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
-                                        <!-- Underline -->
-                                        <Border.BorderBrush>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                                <GradientStop Color="#644C4C4C" Offset="0.0"/>
-                                                <GradientStop Color="White" Offset="0.5"/>
-                                                <GradientStop Color="#644C4C4C" Offset="1.0"/>
-                                            </LinearGradientBrush>
-                                        </Border.BorderBrush>
-                                    </Border>
-                                    <TextBlock Text="Stopp" Foreground="White"
+                  <Grid Margin="20 20 0 10">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width=".3*"/>
+                      <ColumnDefinition Width=".7*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Foreground="White" 
+                               FontSize="14"
+                               Text="Datum:" Margin="20 5 5 5"/>
+                    <DatePicker Grid.Column="1" 
+                                FontSize="14"
+                                Name="startDatePicker" 
+                                Margin="5 5 20 5 "
+                                SelectedDate="{Binding StartDate}"/>
+                  </Grid>
+                  <Grid Margin="0 0 0 10">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="4*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock  Grid.Column="0" 
+                                FontSize="14"
+                                Foreground="White" Text="Tid:" Margin="20 5 5 5"/>
+                    <TextBox Grid.Column="1" 
+                             Margin="50 5 50 5"
+                             FontSize="14"
+                             TextAlignment="Center"
+                             Name="txtStartTime">
+                      <TextBox.Text>
+                        <Binding Path="StartTimeString" 
+                                 UpdateSourceTrigger="PropertyChanged">
+                          <Binding.ValidationRules>
+                            <local:TimeValidationRule/>
+                          </Binding.ValidationRules>
+                        </Binding>
+                      </TextBox.Text>
+                    </TextBox>
+                  </Grid>
+                  <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
+                    <!-- Underline -->
+                    <Border.BorderBrush>
+                      <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#644C4C4C" Offset="0.0"/>
+                        <GradientStop Color="White" Offset="0.5"/>
+                        <GradientStop Color="#644C4C4C" Offset="1.0"/>
+                      </LinearGradientBrush>
+                    </Border.BorderBrush>
+                  </Border>
+                  <TextBlock Text="Stopp" Foreground="White"
                        FontSize="20"
                        Margin="0 5 0 5"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Center"/>
 
-                                    <Grid Margin="0 5 0 0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width=".3*"/>
-                                            <ColumnDefinition Width=".7*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" FontSize="14"  
-                                   Foreground="White" Text="Datum:" Margin="20 5 5 5"/>
-                                        <DatePicker Grid.Column="1" 
+                  <Grid Margin="0 5 0 0">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width=".3*"/>
+                      <ColumnDefinition Width=".7*"/>
+                      <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" FontSize="14"  
+                               Foreground="White" Text="Datum:" Margin="20 5 5 5"/>
+                    <DatePicker Grid.Column="1" 
                             FontSize="14"
                             Name="stopDatePicker" 
                             Margin="5 5 5 5"
                             SelectedDate="{Binding StopDate}"/>
-                                        <Viewbox Grid.Column="2" Height="20" Margin="0 0 5 0">
-                                            <Button Click="GotoEnd_Click"
-                                        Margin="0 0 10 0">
-                                                <Image Source = "{DynamicResource end}"/>
-                                            </Button>
-                                        </Viewbox>
-                                    </Grid>
-                                    <Grid Margin="0 0 0 10">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="4*"/>
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" FontSize="14" Foreground="White" Text="Tid:" 
-                                   Margin="20 5 5 5"/>
-                                        <TextBox Grid.Column="1" 
-                         Margin="50 5 50 5" 
-                         FontSize="14"
-                         TextAlignment="Center"
-                         Name="txtStopTime">
-                                            <TextBox.Text>
-                                                <Binding Path="StopTimeString" UpdateSourceTrigger="PropertyChanged">
-                                                    <Binding.ValidationRules>
-                                                        <local:TimeValidationRule/>
-                                                    </Binding.ValidationRules>
-                                                </Binding>
-                                            </TextBox.Text>
-                                        </TextBox>
-                                    </Grid>
-                                    <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
-                                        <!-- Underline -->
-                                        <Border.BorderBrush>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                                <GradientStop Color="#644C4C4C" Offset="0.0"/>
-                                                <GradientStop Color="White" Offset="0.5"/>
-                                                <GradientStop Color="#644C4C4C" Offset="1.0"/>
-                                            </LinearGradientBrush>
-                                        </Border.BorderBrush>
-                                    </Border>
+                    <Viewbox Grid.Column="2" Height="20" Margin="0 0 5 0">
+                      <Button Click="GotoEnd_Click"
+                              Margin="0 0 10 0">
+                        <Image Source = "{DynamicResource end}"/>
+                      </Button>
+                    </Viewbox>
+                  </Grid>
+                  <Grid Margin="0 0 0 10">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="4*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" FontSize="14" Foreground="White" Text="Tid:" 
+                               Margin="20 5 5 5"/>
+                    <TextBox Grid.Column="1" 
+                             Margin="50 5 50 5" 
+                             FontSize="14"
+                             TextAlignment="Center"
+                             Name="txtStopTime">
+                      <TextBox.Text>
+                        <Binding Path="StopTimeString" UpdateSourceTrigger="PropertyChanged">
+                          <Binding.ValidationRules>
+                            <local:TimeValidationRule/>
+                          </Binding.ValidationRules>
+                        </Binding>
+                      </TextBox.Text>
+                    </TextBox>
+                  </Grid>
+                  <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
+                    <!-- Underline -->
+                    <Border.BorderBrush>
+                      <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#644C4C4C" Offset="0.0"/>
+                        <GradientStop Color="White" Offset="0.5"/>
+                        <GradientStop Color="#644C4C4C" Offset="1.0"/>
+                      </LinearGradientBrush>
+                    </Border.BorderBrush>
+                  </Border>
 
 
-                                    <StackPanel Orientation="Horizontal" Margin="0 5 0 5">
-                                        <TextBlock Text="Statistikfilter:" Margin="20 5 5 5" Foreground="White" 
+                  <StackPanel Orientation="Horizontal" Margin="0 5 0 5">
+                    <TextBlock Text="Statistikfilter:" Margin="20 5 5 5" Foreground="White" 
                                    FontSize="14" VerticalAlignment="Center"/>
-                                        <ComboBox Name="comboStats" 
-                                  ItemsSource="{Binding Source = {StaticResource dataFromEnum}}"
-                                  SelectedItem="{Binding StatFilter}"
-                                  Width="100"
-                                  Grid.Column="1" Margin="10 5 10 0" FontSize="16" FontWeight="Bold" VerticalAlignment="Top" SelectionChanged="comboStats_SelectionChanged"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0 5 0 15">
-                                        <TextBlock Text="Zoom-typ:" Margin="20 5 19 5" Foreground="White" 
+                    <ComboBox Name="comboStats" 
+                              ItemsSource="{Binding Source = {StaticResource dataFromEnum}}"
+                              SelectedItem="{Binding StatFilter}"
+                              Width="100"
+                              Grid.Column="1" Margin="10 5 10 0" FontSize="16" FontWeight="Bold" 
+                              VerticalAlignment="Top" SelectionChanged="comboStats_SelectionChanged"/>
+                  </StackPanel>
+                  <StackPanel Orientation="Horizontal" Margin="0 5 0 15">
+                    <TextBlock Text="Zoom-typ:" Margin="20 5 19 5" Foreground="White" 
                                    FontSize="14" VerticalAlignment="Center"/>
-                                        <ComboBox Name="comboZoom" 
+                    <ComboBox Name="comboZoom" 
                                   ItemsSource="{Binding Source = {StaticResource dataFromZoom}}"
                                   SelectedItem="{Binding Zoom}"
                                   Width="100"
                                   Grid.Column="1" Margin="10 5 10 0" FontSize="16" 
-                                          FontWeight="Bold" VerticalAlignment="Top" 
-                                          SelectionChanged="comboZoom_SelectionChanged"/>
-                                    </StackPanel>
+                                  FontWeight="Bold" VerticalAlignment="Top" 
+                                  SelectionChanged="comboZoom_SelectionChanged"/>
+                  </StackPanel>
 
-                                    <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
-                                        <!-- Underline -->
-                                        <Border.BorderBrush>
-                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                                <GradientStop Color="#644C4C4C" Offset="0.0"/>
-                                                <GradientStop Color="White" Offset="0.5"/>
-                                                <GradientStop Color="#644C4C4C" Offset="1.0"/>
-                                            </LinearGradientBrush>
-                                        </Border.BorderBrush>
-                                    </Border>
-                                    <TextBlock Text="Tag:" FontSize="18"
+                  <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
+                    <!-- Underline -->
+                    <Border.BorderBrush>
+                      <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#644C4C4C" Offset="0.0"/>
+                        <GradientStop Color="White" Offset="0.5"/>
+                        <GradientStop Color="#644C4C4C" Offset="1.0"/>
+                      </LinearGradientBrush>
+                    </Border.BorderBrush>
+                  </Border>
+                  <TextBlock Text="Tag:" FontSize="18"
                        Foreground="White"
                        Margin="0 5 0 0"
                        HorizontalAlignment="Center"/>
-                                    <ComboBox Grid.Column="1" Margin="10 10 10 10" FontSize="16" FontWeight="Bold"
+                  <ComboBox Grid.Column="1" Margin="10 10 10 10" FontSize="16" FontWeight="Bold"
                     Name="comboTag"/>
 
-                                    <RadioButton FontSize="14" Name="checkHour" Margin="10 10 10 3" Content="1 Timme" Foreground="White" Checked="OnHourChecked"/>
-                                    <RadioButton FontSize="14" Name="check30Min" Margin="10 0 10 3" Content="30 Minuter" Foreground="White" Checked="On30MinChecked"/>
-                                    <RadioButton FontSize="14" Name="check10Min" Margin="10 0 10 3" Content="10 Minuter" Foreground="White" Checked="On10MinChecked"/>
-                                    <RadioButton FontSize="14" Name="check1Min" Margin="10 0 10 3" Content="1 Minut" Foreground="White" Checked="On1MinChecked"/>
+                  <RadioButton FontSize="14" Name="checkHour" Margin="10 10 10 3" 
+                               Content="1 Timme" Foreground="White" Checked="OnHourChecked"/>
+                  <RadioButton FontSize="14" Name="check30Min" Margin="10 0 10 3" 
+                               Content="30 Minuter" Foreground="White" Checked="On30MinChecked"/>
+                  <RadioButton FontSize="14" Name="check10Min" Margin="10 0 10 3" 
+                               Content="10 Minuter" Foreground="White" Checked="On10MinChecked"/>
+                  <RadioButton FontSize="14" Name="check1Min" Margin="10 0 10 3" 
+                               Content="1 Minut" Foreground="White" Checked="On1MinChecked"/>
 
 
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Margin="10" Width="40" Height="40" Name="btnAdd"
-                                        VerticalAlignment="Top" Panel.ZIndex="1"
-                                        Click="AddOnClick" >
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Grid>
-                                                        <Grid.Effect>
-                                                            <DropShadowEffect BlurRadius="15" Direction="-90" 
-                                                  RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
-                                                        </Grid.Effect>
-                                                        <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949" Name="btnAddEllipse">
-                                                            <Ellipse.Effect>
-                                                                <DropShadowEffect/>
-                                                            </Ellipse.Effect>
-                                                        </Ellipse>
-                                                        <Path Width="20" Height="20" Stretch="Fill" Fill="White" 
+                  <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Margin="10" Width="40" Height="40" Name="btnAdd"
+                            Style="{DynamicResource growButton}"
+                            VerticalAlignment="Top" Panel.ZIndex="1"
+                            Click="AddOnClick" >
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Grid>
+                            <Grid.Effect>
+                              <DropShadowEffect BlurRadius="15" Direction="-90" 
+                                                RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
+                            </Grid.Effect>
+                            <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949" Name="btnAddEllipse">
+                              <Ellipse.Effect>
+                                <DropShadowEffect/>
+                              </Ellipse.Effect>
+                            </Ellipse>
+                            <Path Width="20" Height="20" Stretch="Fill" Fill="White" 
                                   Data="M3.875,0 L5.125,0 5.125,3.875 9,3.875 9,5.125 5.125,5.125 5.125,9 3.875,9 3.875,5.125 0,5.125 0,3.875 3.875,3.875 3.875,0 z"/>
-                                                        <ContentPresenter HorizontalAlignment="Center"
+                            <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                        </Button>
+                          </Grid>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
 
 
-                                        <Button Margin="10" Width="40" Height="40" Name="btnRemove"
-                VerticalAlignment="Top" Panel.ZIndex="1"
-                    Click="RemoveOnClick" >
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Grid>
-                                                        <Grid.Effect>
-                                                            <DropShadowEffect BlurRadius="15" Direction="-90" 
+                    <Button Margin="10" Width="40" Height="40" Name="btnRemove"
+                            VerticalAlignment="Top" Panel.ZIndex="1"
+                            Style="{DynamicResource growButton}"
+                            Click="RemoveOnClick" >
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Grid>
+                            <Grid.Effect>
+                              <DropShadowEffect BlurRadius="15" Direction="-90" 
                                                   RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
-                                                        </Grid.Effect>
-                                                        <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949" >
-                                                            <Ellipse.Effect>
-                                                                <DropShadowEffect/>
-                                                            </Ellipse.Effect>
-                                                        </Ellipse>
-                                                        <Canvas >
-                                                            <Canvas.LayoutTransform>
-                                                                <RotateTransform Angle="90"></RotateTransform>
-                                                            </Canvas.LayoutTransform>
-                                                            <Path Margin="10 10 0 0" Width="20" Height="20" Stretch="Uniform" Fill="White" 
+                            </Grid.Effect>
+                            <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949" >
+                              <Ellipse.Effect>
+                                <DropShadowEffect/>
+                              </Ellipse.Effect>
+                            </Ellipse>
+                            <Canvas >
+                              <Canvas.LayoutTransform>
+                                <RotateTransform Angle="90"></RotateTransform>
+                              </Canvas.LayoutTransform>
+                              <Path Margin="10 10 0 0" Width="20" Height="20" Stretch="Uniform" Fill="White" 
                                       Data="M0,0 L8,0 L8,47 L0,47 z"/>
-                                                        </Canvas>
-                                                        <ContentPresenter HorizontalAlignment="Center"
+                            </Canvas>
+                            <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                        </Button>
-                                        <Button Margin="10" Width="40" Height="40" Name="btnUpdate"
-                VerticalAlignment="Top" Panel.ZIndex="1"
-                    Click="UpdateOnClick" >
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Grid>
-                                                        <Grid.Effect>
-                                                            <DropShadowEffect BlurRadius="15" Direction="-90" 
+                          </Grid>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
+                    <Button Margin="10" Width="40" Height="40" Name="btnUpdate"
+                            VerticalAlignment="Top" Panel.ZIndex="1"
+                            Style="{DynamicResource growButton}"
+                            Click="UpdateOnClick" >
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Grid>
+                            <Grid.Effect>
+                              <DropShadowEffect BlurRadius="15" Direction="-90" 
                                                   RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
-                                                        </Grid.Effect>
-                                                        <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
-                                                            <Ellipse.Effect>
-                                                                <DropShadowEffect/>
-                                                            </Ellipse.Effect>
-                                                        </Ellipse>
-                                                        <Path Width="20" Height="20" Stretch="Fill" Fill="White" Data="F1 M 58,33.5001L 58,27L 49,19L 40,27.5001L 40,33.5001L 46,28.2097L 46,40.5C 46,46.299 41.299,51 35.5,51C 29.701,51 25,46.299 25,40.5C 25,34.8686 29.4332,30.2727 35,30.0117L 35,24.0074C 26.1186,24.2718 19,31.5546 19,40.5C 19,49.6127 26.3873,57 35.5,57C 44.6127,57 52,49.6127 52,40.5L 52,28.125L 58,33.5001 Z "/>
-                                                        <ContentPresenter HorizontalAlignment="Center"
+                            </Grid.Effect>
+                            <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
+                              <Ellipse.Effect>
+                                <DropShadowEffect/>
+                              </Ellipse.Effect>
+                            </Ellipse>
+                            <Path Width="20" Height="20" Stretch="Fill" Fill="White" Data="F1 M 58,33.5001L 58,27L 49,19L 40,27.5001L 40,33.5001L 46,28.2097L 46,40.5C 46,46.299 41.299,51 35.5,51C 29.701,51 25,46.299 25,40.5C 25,34.8686 29.4332,30.2727 35,30.0117L 35,24.0074C 26.1186,24.2718 19,31.5546 19,40.5C 19,49.6127 26.3873,57 35.5,57C 44.6127,57 52,49.6127 52,40.5L 52,28.125L 58,33.5001 Z "/>
+                            <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                        </Button>
+                          </Grid>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
 
-                                        <Button Margin="10" Width="40" Height="40" 
-                VerticalAlignment="Top" Panel.ZIndex="1" Name="btnPlay"
-                    Click="PlayOnClick" >
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Grid>
-                                                        <Grid.Effect>
-                                                            <DropShadowEffect BlurRadius="15" Direction="-90" 
+                    <Button Margin="10" Width="40" Height="40" 
+                            Style="{DynamicResource growButton}"
+                            VerticalAlignment="Top" Panel.ZIndex="1" Name="btnPlay"
+                            Click="PlayOnClick" >
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Grid>
+                            <Grid.Effect>
+                              <DropShadowEffect BlurRadius="15" Direction="-90" 
                                                   RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
-                                                        </Grid.Effect>
-                                                        <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
-                                                            <Ellipse.Effect>
-                                                                <DropShadowEffect/>
-                                                            </Ellipse.Effect>
-                                                        </Ellipse>
-                                                        <Path Width="20" Height="20" Stretch="Fill" Fill="White" Data="M 0,0 L 12,7 0,14 Z"/>
-                                                        <ContentPresenter HorizontalAlignment="Center"
+                            </Grid.Effect>
+                            <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
+                              <Ellipse.Effect>
+                                <DropShadowEffect/>
+                              </Ellipse.Effect>
+                            </Ellipse>
+                            <Path Width="20" Height="20" Stretch="Fill" Fill="White" Data="M 0,0 L 12,7 0,14 Z"/>
+                            <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                        </Button>
+                          </Grid>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
 
-                                        <Button Margin="10 10 10 0" Width="40" Height="40" Name="btnStop"
-                VerticalAlignment="Top" Panel.ZIndex="1"
-                    Click="StopOnClick" >
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Grid>
-                                                        <Grid.Effect>
-                                                            <DropShadowEffect BlurRadius="15" Direction="-90" 
+                    <Button Margin="10 10 10 0" Width="40" Height="40" Name="btnStop"
+                            Style="{DynamicResource growButton}"
+                            VerticalAlignment="Top" Panel.ZIndex="1"
+                            Click="StopOnClick" >
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Grid>
+                            <Grid.Effect>
+                              <DropShadowEffect BlurRadius="15" Direction="-90" 
                                                   RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
-                                                        </Grid.Effect>
-                                                        <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
-                                                            <Ellipse.Effect>
-                                                                <DropShadowEffect/>
-                                                            </Ellipse.Effect>
-                                                        </Ellipse>
-                                                        <Rectangle Width="15" Height="15" Fill="White"/>
-                                                        <ContentPresenter HorizontalAlignment="Center"
+                            </Grid.Effect>
+                            <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
+                              <Ellipse.Effect>
+                                <DropShadowEffect/>
+                              </Ellipse.Effect>
+                            </Ellipse>
+                            <Rectangle Width="15" Height="15" Fill="White"/>
+                            <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                        </Button>
+                          </Grid>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
 
-                                    </StackPanel>
+                  </StackPanel>
 
-                                    <StackPanel Orientation="Horizontal" 
+                  <StackPanel Orientation="Horizontal" 
                                         HorizontalAlignment="Center"
                                         Margin="10 10 20 0">
-                                        <Button  Width="40" Height="40" Name="btnSave"
-                                                 VerticalAlignment="Top" Panel.ZIndex="1"
-                                                 Margin="0 0 20 0"
-                                                 Click="Button_Save" >
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Grid>
-                                                        <Grid.Effect>
-                                                            <DropShadowEffect BlurRadius="15" Direction="-90" 
+                    <Button  Width="40" Height="40" Name="btnSave"
+                             Style="{DynamicResource growButton}"
+                             VerticalAlignment="Top" Panel.ZIndex="1"
+                             Margin="0 0 20 0"
+                             Click="Button_Save" >
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Grid>
+                            <Grid.Effect>
+                              <DropShadowEffect BlurRadius="15" Direction="-90" 
                                                   RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
-                                                        </Grid.Effect>
-                                                        <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
-                                                            <Ellipse.Effect>
-                                                                <DropShadowEffect/>
-                                                            </Ellipse.Effect>
-                                                        </Ellipse>
-                                                        <Image Width="30" Height="30" Source="/Images/save_48px.png" />
-                                                        <ContentPresenter HorizontalAlignment="Center"
+                            </Grid.Effect>
+                            <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
+                              <Ellipse.Effect>
+                                <DropShadowEffect/>
+                              </Ellipse.Effect>
+                            </Ellipse>
+                            <Image Width="30" Height="30" Source="/Images/save_48px.png" />
+                            <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                        </Button>
-                                        <Button  Width="40" Height="40" Name="btnExcel"
-                                         Margin="20 0 20 0"
-                                         VerticalAlignment="Top" Panel.ZIndex="1"
-                                         Click="Button_Excel" >
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Grid>
-                                                        <Grid.Effect>
-                                                            <DropShadowEffect BlurRadius="15" Direction="-90" 
+                          </Grid>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
+                    <Button Width="40" Height="40" Name="btnExcel"
+                            Style="{DynamicResource growButton}"
+                            Margin="20 0 20 0"
+                            VerticalAlignment="Top" Panel.ZIndex="1"
+                            Click="Button_Excel" >
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Grid>
+                            <Grid.Effect>
+                              <DropShadowEffect BlurRadius="15" Direction="-90" 
                                                   RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
-                                                        </Grid.Effect>
-                                                        <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
-                                                            <Ellipse.Effect>
-                                                                <DropShadowEffect/>
-                                                            </Ellipse.Effect>
-                                                        </Ellipse>
-                                                        <Image Width="30" Height="30" Source="/Resurser/excel_64px.png" />
-                                                        <ContentPresenter HorizontalAlignment="Center"
+                            </Grid.Effect>
+                            <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
+                              <Ellipse.Effect>
+                                <DropShadowEffect/>
+                              </Ellipse.Effect>
+                            </Ellipse>
+                            <Image Width="30" Height="30" Source="/Resurser/excel_64px.png" />
+                            <ContentPresenter HorizontalAlignment="Center"
                                   VerticalAlignment="Center"/>
-                                                    </Grid>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                        </Button>
-                                    </StackPanel>
-                                    <TextBlock Height="20" Text=""/>
+                          </Grid>
+                        </ControlTemplate>
+                      </Button.Template>
+                    </Button>
+                  </StackPanel>
+                  <TextBlock Height="20" Text=""/>
 
 
-                                </StackPanel>
-                            </ScrollViewer>
+                </StackPanel>
+              </ScrollViewer>
 
-                        </Border>
-                        <!-- Information panel -->
-                        <Border Name="InfoBorder"
+            </Border>
+            <!-- Information panel -->
+            <Border Name="InfoBorder"
                         Visibility="{Binding StatusText
                                     ,Converter={StaticResource StringToVisibilityConverter}}"
                         Margin="0 0 20 20" 
                         CornerRadius="10">
-                            <TextBlock Text="{Binding StatusText,FallbackValue=asdfasdf}" 
+              <TextBlock Text="{Binding StatusText,FallbackValue=asdfasdf}" 
                                Padding="10"
                                VerticalAlignment="Center"
                                HorizontalAlignment="Center"
@@ -579,24 +600,21 @@
                                TextWrapping="Wrap"
                                Foreground="White">
 
-                            </TextBlock>
-                            <Border.Background>
-                                <RadialGradientBrush GradientOrigin="0.5 0.5"
+              </TextBlock>
+              <Border.Background>
+                <RadialGradientBrush GradientOrigin="0.5 0.5"
                                              Center="0.5 0.5"
                                              RadiusX="0.5"
                                              RadiusY="0.5">
-                                    <GradientStop Color="OrangeRed" Offset="0.005"/>
-                                    <GradientStop Color="{DynamicResource GrayBackground}" Offset="0.85"/>
-                                </RadialGradientBrush>
-                            </Border.Background>
-                        </Border>
-                    </StackPanel>
+                  <GradientStop Color="OrangeRed" Offset="0.005"/>
+                  <GradientStop Color="{DynamicResource GrayBackground}" Offset="0.85"/>
+                </RadialGradientBrush>
+              </Border.Background>
+            </Border>
+          </StackPanel>
 
 
-                </Popup>
-
-
-
+        </Popup>
 
 
 
@@ -605,9 +623,12 @@
 
 
 
-            </Grid>
 
-        </Border>
-    </Grid>
+
+
+      </Grid>
+
+    </Border>
+  </Grid>
 </Window>
 <!--Background="{DynamicResource BackgroundGray}"-->
