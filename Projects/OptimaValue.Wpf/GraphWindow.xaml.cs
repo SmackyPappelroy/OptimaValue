@@ -1573,94 +1573,129 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
+
+    private void MyChart_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        MouseEventArgs me = new MouseEventArgs(e.MouseDevice, e.Timestamp);
+        MoveChartCursorAndToolTip_OnMouseMove(sender, me);
+    }
+
+    private object lockObject = new();
     private void MoveChartCursorAndToolTip_OnMouseMove(object sender, MouseEventArgs e)
     {
-        if (Mouse.LeftButton == MouseButtonState.Pressed
-            || Mouse.RightButton == MouseButtonState.Pressed
-            || Mouse.MiddleButton == MouseButtonState.Pressed)
-            return;
-
-        try
+        lock (lockObject)
         {
-            if (TagsPlottedOnChart == null)
-                return;
-            if (!IsLoaded || NrOfSeriesOnChart == 0)
-                return;
-            if (dontUpdateXCursor)
+            if (Mouse.LeftButton == MouseButtonState.Pressed
+         || Mouse.RightButton == MouseButtonState.Pressed
+         || Mouse.MiddleButton == MouseButtonState.Pressed)
                 return;
 
-            var chart = sender as CartesianChart;
-
-            if (!TryFindVisualChildElement(chart, out Canvas outerCanvas) ||
-                !TryFindVisualChildElement(outerCanvas, out Canvas graphPlottingArea))
+            try
             {
-                return;
+                if (TagsPlottedOnChart == null)
+                    return;
+                if (!IsLoaded || NrOfSeriesOnChart == 0)
+                    return;
+                if (dontUpdateXCursor)
+                    return;
+
+                var chart = sender as CartesianChart;
+
+                if (!TryFindVisualChildElement(chart, out Canvas outerCanvas) ||
+                    !TryFindVisualChildElement(outerCanvas, out Canvas graphPlottingArea))
+                {
+                    return;
+                }
+
+                Point chartMousePosition = e.GetPosition(chart);
+
+                // Remove visual hover feedback for previous point
+                SelectedChartPoint?.View.OnHoverLeave(SelectedChartPoint);
+
+                // Find current selected chart point for the first x-axis
+                Point chartPoint = chart.ConvertToChartValues(chartMousePosition);
+                SelectedChartPoint = chart.Series[0].ClosestPointTo(chartPoint.X, AxisOrientation.X);
+                for (int i = 0; i < chart.Series.Count; i++)
+                {
+                    var chartP = chart.Series[i].ClosestPointTo(chartPoint.X, AxisOrientation.X);
+                    if (chartP == null)
+                        return;
+                    var dateTimePoint = (DateTimePoint)chartP.Instance;
+                    if (i == 0)
+                        ActualTime = dateTimePoint.DateTime.ToString("yyyy-MM-dd HH:mm:ss");
+
+                    // Räkna ut värden för varje serie
+                    LineSeriesList[i].CursorValues = (DateTimePoint)chartP.Instance;
+
+                    var minTid = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
+                    var maxTid = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
+
+                    var values = (GearedValues<DateTimePoint>)chart.Series[i].Values;
+                    var filteredValues = values.Where(x => x.DateTime > minTid && x.DateTime < maxTid);
+                    var gearedValues = new GearedValues<DateTimePoint>(filteredValues);
+
+                    DataStatistics dataStatistics = new DataStatistics(StatFilter, gearedValues);
+
+                    LineSeriesList[i].MinValue = filteredValues.Min(x => x.Value).ToString("0.000");
+                    LineSeriesList[i].AverageValue = filteredValues.Average(x => x.Value).ToString("0.000");
+                    LineSeriesList[i].MaxValue = filteredValues.Max(x => x.Value).ToString("0.000");
+
+                    LineSeriesList[i].Integral = dataStatistics.Integral.ToString("0.0");
+                    var integralPerTimme = dataStatistics.Integral / (maxTid - minTid).TotalHours;
+                    LineSeriesList[i].IntegralPerTimme = integralPerTimme.ToString("0.0");
+                    LineSeriesList[i].OverZero = dataStatistics.NumberOfTimesOverZero.ToString();
+                    LineSeriesList[i].OverZeroTime = dataStatistics.TimeOverZero;
+                    LineSeriesList[i].Deviation = dataStatistics.StandardDeviation.ToString("0.000");
+                }
+
+
+
+
+
+                // Show visual hover feedback for previous point
+                if (SelectedChartPoint != null && SelectedChartPoint.View != null)
+                    SelectedChartPoint.View.OnHover(SelectedChartPoint);
+                else
+                    return;
+
+
+                // Add the cursor for the x-axis.
+                // Since Chart internally reverses the screen coordinates
+                // to match chart's coordinate system
+                // and this coordinate system orientation applies also to Chart.VisualElements,
+                // the UIElements like Popup and Line are added directly to the plotting canvas.
+                if (chart.TryFindResource("CursorX") is Line cursorX
+                  && !graphPlottingArea.Children.Contains(cursorX))
+                {
+                    graphPlottingArea.Children.Add(cursorX);
+                }
+
+                if (!(chart.TryFindResource("CursorXToolTip") is FrameworkElement cursorXToolTip))
+                {
+                    return;
+                }
             }
-
-            Point chartMousePosition = e.GetPosition(chart);
-
-            // Remove visual hover feedback for previous point
-            SelectedChartPoint?.View.OnHoverLeave(SelectedChartPoint);
-
-            // Find current selected chart point for the first x-axis
-            Point chartPoint = chart.ConvertToChartValues(chartMousePosition);
-            SelectedChartPoint = chart.Series[0].ClosestPointTo(chartPoint.X, AxisOrientation.X);
-            for (int i = 0; i < chart.Series.Count; i++)
+            catch (Exception ex)
             {
-
-                var chartP = chart.Series[i].ClosestPointTo(chartPoint.X, AxisOrientation.X);
-                var dateTimePoint = (DateTimePoint)chartP.Instance;
-                if (i == 0)
-                    ActualTime = dateTimePoint.DateTime.ToString("yyyy-MM-dd HH:mm:ss");
-                LineSeriesList[i].CursorValues = (DateTimePoint)chartP.Instance;
+                StatusText = ex.Message;
             }
-
-
-
-
-
-            // Show visual hover feedback for previous point
-            if (SelectedChartPoint != null && SelectedChartPoint.View != null)
-                SelectedChartPoint.View.OnHover(SelectedChartPoint);
-            else
-                return;
-
 
             // Add the cursor for the x-axis.
             // Since Chart internally reverses the screen coordinates
             // to match chart's coordinate system
             // and this coordinate system orientation applies also to Chart.VisualElements,
             // the UIElements like Popup and Line are added directly to the plotting canvas.
-            if (chart.TryFindResource("CursorX") is Line cursorX
-              && !graphPlottingArea.Children.Contains(cursorX))
-            {
-                graphPlottingArea.Children.Add(cursorX);
-            }
+            //if (!graphPlottingArea.Children.Contains(cursorXToolTip))
+            //{
+            //    graphPlottingArea.Children.Add(cursorXToolTip);
+            //}
 
-            if (!(chart.TryFindResource("CursorXToolTip") is FrameworkElement cursorXToolTip))
-            {
-                return;
-            }
-        }
-        catch (Exception ex)
-        {
-            StatusText = ex.Message;
+            // Position the ToolTip
+            //Point canvasMousePosition = e.GetPosition(graphPlottingArea);
+            //Canvas.SetLeft(cursorXToolTip, canvasMousePosition.X - cursorXToolTip.ActualWidth);
+            //Canvas.SetTop(cursorXToolTip, canvasMousePosition.Y);
         }
 
-        // Add the cursor for the x-axis.
-        // Since Chart internally reverses the screen coordinates
-        // to match chart's coordinate system
-        // and this coordinate system orientation applies also to Chart.VisualElements,
-        // the UIElements like Popup and Line are added directly to the plotting canvas.
-        //if (!graphPlottingArea.Children.Contains(cursorXToolTip))
-        //{
-        //    graphPlottingArea.Children.Add(cursorXToolTip);
-        //}
-
-        // Position the ToolTip
-        //Point canvasMousePosition = e.GetPosition(graphPlottingArea);
-        //Canvas.SetLeft(cursorXToolTip, canvasMousePosition.X - cursorXToolTip.ActualWidth);
-        //Canvas.SetTop(cursorXToolTip, canvasMousePosition.Y);
     }
 
 
@@ -1755,6 +1790,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
 
     }
+
+
 }
 
 

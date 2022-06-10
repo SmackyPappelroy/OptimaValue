@@ -126,11 +126,12 @@
                             Grid.ColumnSpan="2"
                             Margin="20 0 10 20"
                             MouseMove="MoveChartCursorAndToolTip_OnMouseMove"
+                            PreviewMouseWheel="MyChart_PreviewMouseWheel"
                             Series="{Binding Series}"
                             Name="MyChart"
                             Zoom="{Binding Zoom}" 
                             DisableAnimations="True"
-                            Hoverable="False" LayoutUpdated="MyChart_LayoutUpdated">
+                            Hoverable="False" LayoutUpdated="MyChart_LayoutUpdated"  >
 
           <lvc:CartesianChart.Resources>
             <Style TargetType="lvc:Separator">

@@ -33,6 +33,13 @@ namespace OptimaValue.Wpf
             CalculateStatistics();
         }
 
+        public DataStatistics(StatisticFilter filter, GearedValues<DateTimePoint> values)
+        {
+            Filter = filter;
+            Values = values;
+            CalculateStatistics();
+        }
+
         private void CalculateStatistics()
         {
             if (Filter == StatisticFilter.Inget)

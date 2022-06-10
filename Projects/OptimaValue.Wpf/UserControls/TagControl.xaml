@@ -16,83 +16,106 @@
     <local:DoubleToVisibilityConverter x:Key="doubleToVisibiltyConverter"/>
   </UserControl.Resources>
   <Grid>
-    <Border Margin="0 5 0 0" VerticalAlignment="Center">
+    <Border Height="20" Margin="0 5 5 0" VerticalAlignment="Center">
       <StackPanel Orientation="Horizontal">
         <Ellipse Width="20" Height="20" Margin="5 0 5 0"
                Fill="{Binding TagColor,
-                      RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"/>
+                      RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}">
+        </Ellipse>
         <TextBlock Text="{Binding TagName,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
                    Margin="0 0 5 0"
+                   VerticalAlignment="Center"
                    FontSize="14" Foreground="LightGray"/>
         <TextBlock Text="{Binding TagUnit,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
                    FontSize="14" Foreground="Gray"
-                   Height="20"/>
+                   VerticalAlignment="Center"/>
         <TextBlock Text="{Binding Description,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
                    Margin="0 0 5 0"
-                   FontSize="14" Foreground="Gray"
-                   Height="20"/>
+                   VerticalAlignment="Center"
+                   
+                   FontSize="14" Foreground="Gray"/>
         <TextBlock Text="Värde: "
-                   FontSize="14" Foreground="AntiqueWhite"
-                   Height="20"/>
+                   VerticalAlignment="Center"
+                   
+                   FontSize="14" Foreground="AntiqueWhite"/>
         <TextBlock Text="{Binding ActualValue,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
-                   FontSize="14" Foreground="Gray"
-                   Margin="0 0 5 0"
-                   Height="20"/>
+                   FontSize="14" Foreground="White"
+                   VerticalAlignment="Center"
+                   
+                   Margin="0 0 5 0"/>
         <Image Source="/Images/minimum_value_48px.png"
                Height="20" Width="20" Stretch="UniformToFill"/>
         <TextBlock Text="{Binding MinValue,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
                    FontSize="14" Foreground="#365dda"
-                   Margin="0 0 10 0"
-                   Height="20"/>
+                   VerticalAlignment="Center"
+                   
+                   Margin="0 0 10 0"/>
         <Image Source="/Images/average_48px.png"
                Height="20" Width="20" Stretch="UniformToFill"/>
         <TextBlock Text="{Binding AverageValue,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
                    FontSize="14" Foreground="#68da36"
-                   Margin="0 0 10 0"
-                   Height="20"/>
+                   VerticalAlignment="Center"
+                   
+                   Margin="0 0 10 0"/>
         <Image Source="/Images/maximum_48px.png"
                Height="20" Width="20" Stretch="UniformToFill"/>
         <TextBlock Text="{Binding MaxValue,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
                    FontSize="14" Foreground="#b05049"
-                   Margin="0 0 10 0"
-                   Height="20"/>
+                   VerticalAlignment="Center"
+                   
+                   Margin="0 0 10 0"/>
         <TextBlock Text="∫ "
+                   VerticalAlignment="Center"
+                   
                    FontSize="14" Foreground="AntiqueWhite"/>
         <TextBlock Text="{Binding Integral,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
                    FontSize="14" Foreground="AntiqueWhite"
-                   Margin="0 0 3 0"
-                   Height="20"/>
+                   VerticalAlignment="Center"
+                   
+                   Margin="0 0 3 0"/>
         <TextBlock Text="∫/h "
+                   VerticalAlignment="Center"
+                   
                    FontSize="14" Foreground="AntiqueWhite"/>
         <TextBlock Text="{Binding IntegralPerTimme,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
                    FontSize="14" Foreground="AntiqueWhite"
-                   Margin="0 0 10 0"
-                   Height="20"/>
+                   VerticalAlignment="Center"
+                   
+                   Margin="0 0 10 0"/>
         <TextBlock Text=">0: "
+                   VerticalAlignment="Center"
+                   
                    FontSize="14" Foreground="AntiqueWhite"/>
         <TextBlock Text="{Binding OverZero,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
                    FontSize="14" Foreground="AntiqueWhite"
-                   Height="20"/>
+                   VerticalAlignment="Center"/>
         <TextBlock Text="ggr ["
+                   VerticalAlignment="Center"
+                   
                    FontSize="14" Foreground="AntiqueWhite"/>
         <TextBlock Text="{Binding OverZeroTime,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
-                   FontSize="14" Foreground="AntiqueWhite"
-                   Height="20"/>
+                   VerticalAlignment="Center"
+                   
+                   FontSize="14" Foreground="AntiqueWhite"/>
         <TextBlock Text="]   Std.-avvikelse: "
+                   VerticalAlignment="Center"
+                   
                    FontSize="14" Foreground="AntiqueWhite"/>
         <TextBlock Text="{Binding Deviation,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
+                   VerticalAlignment="Center"
+                   
                    FontSize="14" Foreground="AntiqueWhite"
                    Height="20"/>
       </StackPanel>
