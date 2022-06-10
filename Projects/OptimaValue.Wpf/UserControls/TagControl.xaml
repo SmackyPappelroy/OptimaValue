@@ -55,6 +55,7 @@
                    VerticalAlignment="Center"
                    
                    Margin="0 0 10 0"/>
+
         <Image Source="/Images/average_48px.png"
                Height="20" Width="20" Stretch="UniformToFill"/>
         <TextBlock Text="{Binding AverageValue,
@@ -63,17 +64,17 @@
                    VerticalAlignment="Center"
                    
                    Margin="0 0 10 0"/>
+
         <Image Source="/Images/maximum_48px.png"
                Height="20" Width="20" Stretch="UniformToFill"/>
         <TextBlock Text="{Binding MaxValue,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"
                    FontSize="14" Foreground="#b05049"
                    VerticalAlignment="Center"
-                   
                    Margin="0 0 10 0"/>
+
         <TextBlock Text="∫ "
                    VerticalAlignment="Center"
-                   
                    FontSize="14" Foreground="AntiqueWhite"/>
         <TextBlock Text="{Binding Integral,
                       RelativeSource ={RelativeSource AncestorType={x:Type local:TagControl}}}"

@@ -10,6 +10,7 @@
         xmlns:local="clr-namespace:OptimaValue.Wpf"
         mc:Ignorable="d"
         Background="Black"
+        WindowStyle="ThreeDBorderWindow"
         Name="mainWindow"
         WindowStartupLocation="CenterScreen"
         Title="OptimaValue - Graf" 
@@ -18,7 +19,7 @@
         Width="1100" 
         MinWidth="1000" 
         RenderOptions.BitmapScalingMode="Fant"
-        Icon="/icons8_area_chart_64.png" WindowStyle="ThreeDBorderWindow">
+        Icon="/icons8_area_chart_64.png" >
   <Window.Resources>
     <ObjectDataProvider x:Key="dataFromEnum" MethodName="GetValues"
                             ObjectType="{x:Type System:Enum}">
@@ -100,7 +101,7 @@
                     Orientation="Vertical" 
                     Margin="25, 5">
             <TextBlock Text="{Binding MinMaxTidString}" Margin="0 0 0 5"
-                           FontSize="20" FontWeight="Bold" Foreground="LightGray"/>
+                           FontSize="20" FontWeight="Bold" Foreground="Gray"/>
             <TextBlock Text="{Binding ActualTime}" Margin="0 0 0 5"
                        ToolTip="Tid vid vertikal bar"
                            FontSize="16" FontWeight="Bold" Foreground="LightGray"/>
@@ -195,7 +196,8 @@
         </lvc:CartesianChart>
 
 
-        <TextBlock Grid.Row="4" Grid.Column="0" 
+
+        <TextBlock  Grid.Row="3"
                    Margin="20 0 0 0"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
@@ -203,7 +205,7 @@
                    Text="{Binding ChartStartDate}"
                    Foreground="LightGray" FontSize="16" >
         </TextBlock>
-        <TextBlock Grid.Row="2" Grid.Column="1" 
+        <TextBlock Grid.Column="1" Grid.Row="3"
                    Margin="0,0,20,0"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Right"
@@ -211,10 +213,10 @@
                    Text="{Binding ChartStopDate}"
                    Foreground="LightGray" FontSize="16" Grid.RowSpan="2" />
 
-        <Button Name="btnRefresh" Grid.Column="0"
+        <Button Name="btnRefresh"  Grid.Row="3"
                 ToolTip="Förnya trend och kopiera start- och stopp-tid till kontrollpanel"
                   Margin="10" Width="20" Height="40"
-                  Grid.Row="4" Grid.ColumnSpan="2"
+                   Grid.ColumnSpan="2"
                   Style="{DynamicResource growButton}"
                   Visibility="{Binding ChartStopDate,Converter={StaticResource StringToVisibilityConverter}}"
                   VerticalAlignment="Top" Panel.ZIndex="1"
@@ -225,6 +227,8 @@
             </ControlTemplate>
           </Button.Template>
         </Button>
+
+
 
 
         <!-- Control panel -->

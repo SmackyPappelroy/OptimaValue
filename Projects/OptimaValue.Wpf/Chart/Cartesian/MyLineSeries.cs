@@ -169,11 +169,19 @@ namespace OptimaValue.Wpf
             };
             TagControl = new();
             TagControl.TagName = Tag.Name;
-            TagControl.TagColor = new SolidColorBrush(Stroke);
+            TagControl.TagColor = UpdateTagControlEllipseColor();
             TagControl.Description = Tag.Description;
             TagControl.TagUnit = Tag.Unit;
 
             ChartData.OnChartChanged += ChartData_OnChartChanged;
+        }
+
+        private LinearGradientBrush UpdateTagControlEllipseColor()
+        {
+            var brush = new LinearGradientBrush();
+            brush.GradientStops.Add(new GradientStop(Tag.Stroke, 0));
+            brush.GradientStops.Add(new GradientStop(Tag.Fill, 1));
+            return brush;
         }
 
         #endregion
@@ -182,6 +190,7 @@ namespace OptimaValue.Wpf
         {
             Tag.UpdateColor();
             LineSeries.Stroke = new SolidColorBrush(Tag.Stroke);
+            TagControl.TagColor = UpdateTagControlEllipseColor();
             LineSeries.Fill = new SolidColorBrush(Tag.Fill);
         }
 

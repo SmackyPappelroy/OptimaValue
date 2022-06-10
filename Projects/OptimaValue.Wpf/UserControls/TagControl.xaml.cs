@@ -30,7 +30,7 @@ namespace OptimaValue.Wpf
 
 
         public static readonly DependencyProperty TagColorProperty = DependencyProperty.Register("TagColor",
-        typeof(SolidColorBrush), typeof(TagControl));
+        typeof(LinearGradientBrush), typeof(TagControl));
 
         public static readonly DependencyProperty TagNameProperty = DependencyProperty.Register("TagName",
         typeof(string), typeof(TagControl));
@@ -44,11 +44,13 @@ namespace OptimaValue.Wpf
         public static readonly DependencyProperty MinValueProperty = DependencyProperty.Register("MinValue",
         typeof(string), typeof(TagControl));
 
+
         public static readonly DependencyProperty AverageValueProperty = DependencyProperty.Register("AverageValue",
         typeof(string), typeof(TagControl));
 
         public static readonly DependencyProperty MaxValueProperty = DependencyProperty.Register("MaxValue",
         typeof(string), typeof(TagControl));
+
 
         public static readonly DependencyProperty IntegralProperty = DependencyProperty.Register("Integral",
         typeof(string), typeof(TagControl));
@@ -70,9 +72,9 @@ namespace OptimaValue.Wpf
 
 
 
-        public SolidColorBrush TagColor
+        public LinearGradientBrush TagColor
         {
-            get => (SolidColorBrush)GetValue(TagColorProperty);
+            get => (LinearGradientBrush)GetValue(TagColorProperty);
             set
             {
                 SetValue(TagColorProperty, value);
@@ -119,6 +121,7 @@ namespace OptimaValue.Wpf
                 OnPropertyChanged();
             }
         }
+
 
         public string AverageValue
         {

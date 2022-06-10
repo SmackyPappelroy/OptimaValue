@@ -437,7 +437,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         DataContext = this;
         FormatterY = val => val.ToString("0.000");
         Series = new SeriesCollection();
-        FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss.ff");
+        FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss");
         EnableButtons();
         StatFilter = StatisticFilter.Max;
         LineSeriesList.CollectionChanged += LineSeriesList_CollectionChanged;
@@ -1400,7 +1400,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
         if (currentRange < TimeSpan.TicksPerDay * 2)
         {
-            FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss.ff");
+            FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss");
             return;
         }
 
@@ -1540,7 +1540,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         return false;
     }
 
-    private async void MyChart_LayoutUpdated(object sender, EventArgs e)
+    private void MyChart_LayoutUpdated(object sender, EventArgs e)
     {
         if (TagsPlottedOnChart == null)
             return;
@@ -1790,8 +1790,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
 
     }
-
-
 }
 
 
