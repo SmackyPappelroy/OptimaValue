@@ -29,7 +29,11 @@ namespace OptimaValue.Wpf
             set
             {
                 cursorValues = value;
-                TagControl.ActualValue = value.Value.ToString("0.000");
+                var doubleValue = Convert.ToDouble(value.Value);
+                if (doubleValue % 1 == 0)
+                    TagControl.ActualValue = value.Value.ToString("0");
+                else
+                    TagControl.ActualValue = value.Value.ToString("0.000");
             }
         }
 

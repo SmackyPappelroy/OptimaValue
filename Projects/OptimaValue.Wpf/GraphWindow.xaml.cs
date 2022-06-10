@@ -1636,16 +1636,52 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
                     DataStatistics dataStatistics = new DataStatistics(StatFilter, gearedValues);
 
-                    LineSeriesList[i].MinValue = filteredValues.Min(x => x.Value).ToString("0.000");
-                    LineSeriesList[i].AverageValue = filteredValues.Average(x => x.Value).ToString("0.000");
-                    LineSeriesList[i].MaxValue = filteredValues.Max(x => x.Value).ToString("0.000");
+                    var minValue = filteredValues.Min(x => x.Value);
+                    var average = filteredValues.Average(x => x.Value);
+                    var maxValue = filteredValues.Max(x => x.Value);
+                    var deviation = dataStatistics.StandardDeviation;
+
+                    if (minValue % 1 == 0)
+                    {
+                        LineSeriesList[i].MinValue = minValue.ToString("0");
+                    }
+                    else
+                    {
+                        LineSeriesList[i].MinValue = minValue.ToString("0.000");
+                    }
+
+                    if (average % 1 == 0)
+                    {
+                        LineSeriesList[i].AverageValue = average.ToString("0");
+                    }
+                    else
+                    {
+                        LineSeriesList[i].AverageValue = average.ToString("0.000");
+                    }
+
+                    if (maxValue % 1 == 0)
+                    {
+                        LineSeriesList[i].MaxValue = maxValue.ToString("0");
+                    }
+                    else
+                    {
+                        LineSeriesList[i].MaxValue = maxValue.ToString("0.000");
+                    }
+
+                    if (deviation % 1 == 0)
+                    {
+                        LineSeriesList[i].Deviation = deviation.ToString("0");
+                    }
+                    else
+                    {
+                        LineSeriesList[i].Deviation = deviation.ToString("0.000");
+                    }
 
                     LineSeriesList[i].Integral = dataStatistics.Integral.ToString("0.0");
                     var integralPerTimme = dataStatistics.Integral / (maxTid - minTid).TotalHours;
                     LineSeriesList[i].IntegralPerTimme = integralPerTimme.ToString("0.0");
                     LineSeriesList[i].OverZero = dataStatistics.NumberOfTimesOverZero.ToString();
                     LineSeriesList[i].OverZeroTime = dataStatistics.TimeOverZero;
-                    LineSeriesList[i].Deviation = dataStatistics.StandardDeviation.ToString("0.000");
                 }
 
 

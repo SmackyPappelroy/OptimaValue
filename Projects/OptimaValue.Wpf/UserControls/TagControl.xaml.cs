@@ -108,6 +108,17 @@ namespace OptimaValue.Wpf
             set
             {
                 SetValue(DescriptionProperty, value);
+                if (string.IsNullOrEmpty(value))
+                {
+                    DescriptionText.Visibility = Visibility.Collapsed;
+                    //this.UpdateLayout();
+                }
+                else
+                {
+                    DescriptionText.Visibility = Visibility.Visible;
+
+                    //this.UpdateLayout();
+                }
                 OnPropertyChanged();
             }
         }
