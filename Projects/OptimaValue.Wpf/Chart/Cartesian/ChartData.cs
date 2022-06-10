@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using OptimaValue.Config;
+using System.Threading;
 
 namespace OptimaValue.Wpf
 {
@@ -25,6 +26,8 @@ namespace OptimaValue.Wpf
         private static string createStoredProcedureString;
 
         public static DataTable ChartTableAllTags;
+        public static DateTime MinDate => ChartTableAllTags.AsEnumerable().Min(x => x.Field<DateTime>("logTime"));
+        public static DateTime MaxDate => ChartTableAllTags.AsEnumerable().Max(x => x.Field<DateTime>("logTime"));
 
         public static bool HasData => ChartTableAllTags != null && ChartTableAllTags.Rows.Count > 0;
 

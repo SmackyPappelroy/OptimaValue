@@ -188,9 +188,12 @@ namespace OptimaValue.Wpf
             set { SetValue(ActualValueProperty, value); OnPropertyChanged(); }
         }
 
+
         public TagControl()
         {
             InitializeComponent();
         }
+
+
     }
 }

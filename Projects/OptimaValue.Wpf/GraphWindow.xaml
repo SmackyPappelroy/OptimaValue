@@ -102,6 +102,7 @@
             <TextBlock Text="{Binding MinMaxTidString}" Margin="0 0 0 5"
                            FontSize="20" FontWeight="Bold" Foreground="LightGray"/>
             <TextBlock Text="{Binding ActualTime}" Margin="0 0 0 5"
+                       ToolTip="Tid vid vertikal bar"
                            FontSize="16" FontWeight="Bold" Foreground="LightGray"/>
             <ScrollViewer VerticalScrollBarVisibility="Auto" 
                         HorizontalScrollBarVisibility="Hidden" 
@@ -210,6 +211,7 @@
                    Foreground="LightGray" FontSize="16" Grid.RowSpan="2" />
 
         <Button Name="btnRefresh" Grid.Column="0"
+                ToolTip="Förnya trend och kopiera start- och stopp-tid till kontrollpanel"
                   Margin="10" Width="20" Height="40"
                   Grid.Row="4" Grid.ColumnSpan="2"
                   Style="{DynamicResource growButton}"
@@ -247,18 +249,19 @@
                              VerticalAlignment="Center"
                              HorizontalAlignment="Center"/>
 
-                  <Grid Margin="20 20 0 10">
+                  <Grid Margin="0 20 0 10">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width=".3*"/>
-                      <ColumnDefinition Width=".7*"/>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="4*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Foreground="White" 
                                FontSize="14"
+                               HorizontalAlignment="Left"
                                Text="Datum:" Margin="20 5 5 5"/>
                     <DatePicker Grid.Column="1" 
                                 FontSize="14"
                                 Name="startDatePicker" 
-                                Margin="5 5 20 5 "
+                                Margin="40 5 50 5 "
                                 SelectedDate="{Binding StartDate}"/>
                   </Grid>
                   <Grid Margin="0 0 0 10">
@@ -270,7 +273,7 @@
                                 FontSize="14"
                                 Foreground="White" Text="Tid:" Margin="20 5 5 5"/>
                     <TextBox Grid.Column="1" 
-                             Margin="50 5 50 5"
+                             Margin="40 5 50 5"
                              FontSize="14"
                              TextAlignment="Center"
                              Name="txtStartTime">
@@ -311,9 +314,9 @@
                     <DatePicker Grid.Column="1" 
                             FontSize="14"
                             Name="stopDatePicker" 
-                            Margin="5 5 5 5"
+                            Margin="10 5 20 5"
                             SelectedDate="{Binding StopDate}"/>
-                    <Viewbox Grid.Column="2" Height="20" Margin="0 0 5 0">
+                    <Viewbox Grid.Column="2" Height="20" Margin="2 0 5 0">
                       <Button Click="GotoEnd_Click"
                               Margin="0 0 10 0">
                         <Image Source = "{DynamicResource end}"/>
@@ -328,7 +331,7 @@
                     <TextBlock Grid.Column="0" FontSize="14" Foreground="White" Text="Tid:" 
                                Margin="20 5 5 5"/>
                     <TextBox Grid.Column="1" 
-                             Margin="50 5 50 5" 
+                             Margin="42 5 50 5" 
                              FontSize="14"
                              TextAlignment="Center"
                              Name="txtStopTime">
@@ -354,14 +357,14 @@
 
 
                   <StackPanel Orientation="Horizontal" Margin="0 5 0 5">
-                    <TextBlock Text="Statistikfilter:" Margin="20 5 5 5" Foreground="White" 
+                    <!--<TextBlock Text="Statistikfilter:" Margin="20 5 5 5" Foreground="White" 
                                    FontSize="14" VerticalAlignment="Center"/>
                     <ComboBox Name="comboStats" 
                               ItemsSource="{Binding Source = {StaticResource dataFromEnum}}"
                               SelectedItem="{Binding StatFilter}"
                               Width="100"
                               Grid.Column="1" Margin="10 5 10 0" FontSize="16" FontWeight="Bold" 
-                              VerticalAlignment="Top" SelectionChanged="comboStats_SelectionChanged"/>
+                              VerticalAlignment="Top" SelectionChanged="comboStats_SelectionChanged"/>-->
                   </StackPanel>
                   <StackPanel Orientation="Horizontal" Margin="0 5 0 15">
                     <TextBlock Text="Zoom-typ:" Margin="20 5 19 5" Foreground="White" 
@@ -405,6 +408,7 @@
                   <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Button Margin="10" Width="40" Height="40" Name="btnAdd"
                             Style="{DynamicResource growButton}"
+                            ToolTip="Lägg till tag"
                             VerticalAlignment="Top" Panel.ZIndex="1"
                             Click="AddOnClick" >
                       <Button.Template>
@@ -432,6 +436,7 @@
                     <Button Margin="10" Width="40" Height="40" Name="btnRemove"
                             VerticalAlignment="Top" Panel.ZIndex="1"
                             Style="{DynamicResource growButton}"
+                            ToolTip="Ta bort aktuell serie"
                             Click="RemoveOnClick" >
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
@@ -458,7 +463,8 @@
                         </ControlTemplate>
                       </Button.Template>
                     </Button>
-                    <Button Margin="10" Width="40" Height="40" Name="btnUpdate"
+
+                    <!--<Button Margin="10" Width="40" Height="40" Name="btnUpdate"
                             VerticalAlignment="Top" Panel.ZIndex="1"
                             Style="{DynamicResource growButton}"
                             Click="UpdateOnClick" >
@@ -480,10 +486,37 @@
                           </Grid>
                         </ControlTemplate>
                       </Button.Template>
+                    </Button>-->
+
+                    <Button Width="40" Height="40" Name="btnUpdate"
+                            Style="{DynamicResource growButton}"
+                            Margin="10"
+                            ToolTip="Ändra färg på serier"
+                            VerticalAlignment="Top" Panel.ZIndex="1"
+                            Click="UpdateOnClick" >
+                      <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                          <Grid>
+                            <Grid.Effect>
+                              <DropShadowEffect BlurRadius="15" Direction="-90" 
+                                                  RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
+                            </Grid.Effect>
+                            <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
+                              <Ellipse.Effect>
+                                <DropShadowEffect/>
+                              </Ellipse.Effect>
+                            </Ellipse>
+                            <Image Width="30" Height="30" Source="/Resurser/color_64px.png" />
+                            <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                          </Grid>
+                        </ControlTemplate>
+                      </Button.Template>
                     </Button>
 
                     <Button Margin="10" Width="40" Height="40" 
                             Style="{DynamicResource growButton}"
+                            ToolTip="Starta live-visning"
                             VerticalAlignment="Top" Panel.ZIndex="1" Name="btnPlay"
                             Click="PlayOnClick" >
                       <Button.Template>
@@ -506,8 +539,10 @@
                       </Button.Template>
                     </Button>
 
+
                     <Button Margin="10 10 10 0" Width="40" Height="40" Name="btnStop"
                             Style="{DynamicResource growButton}"
+                            ToolTip="Stoppa live-visning"
                             VerticalAlignment="Top" Panel.ZIndex="1"
                             Click="StopOnClick" >
                       <Button.Template>
@@ -537,6 +572,7 @@
                                         Margin="10 10 20 0">
                     <Button  Width="40" Height="40" Name="btnSave"
                              Style="{DynamicResource growButton}"
+                             ToolTip="Spara till .PNG-fil"
                              VerticalAlignment="Top" Panel.ZIndex="1"
                              Margin="0 0 20 0"
                              Click="Button_Save" >
@@ -561,6 +597,7 @@
                     </Button>
                     <Button Width="40" Height="40" Name="btnExcel"
                             Style="{DynamicResource growButton}"
+                            ToolTip="Spara aktuell visad trend till excel"
                             Margin="20 0 20 0"
                             VerticalAlignment="Top" Panel.ZIndex="1"
                             Click="Button_Excel" >

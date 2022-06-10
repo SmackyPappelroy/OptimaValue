@@ -14,6 +14,7 @@
 	  <None Remove="Images\maximum_48px.png" />
 	  <None Remove="Images\minimum_value_48px.png" />
 	  <None Remove="Images\save_48px.png" />
+	  <None Remove="Resurser\color_64px.png" />
 	  <None Remove="Resurser\end_100px.png" />
 	  <None Remove="Resurser\excel_64px.png" />
 	</ItemGroup>
@@ -47,6 +48,9 @@
 	  </Resource>
 	  <Resource Include="Images\save_48px.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Resource>
+	  <Resource Include="Resurser\color_64px.png">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </Resource>
 	  <Resource Include="Resurser\end_100px.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

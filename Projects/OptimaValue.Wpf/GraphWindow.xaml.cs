@@ -49,6 +49,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     }
 
     private event Action<bool> OnTimeUpdated;
+    private event Action<DateTime, DateTime> OnStartOrStopDateChanged;
 
     #region Timer
     public DispatcherTimer timerClearStatus;
@@ -468,8 +469,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     {
         if (IsLoaded && ChartData.HasData && !isUpdating)
             await UpdateChartAsync(ChartUpdateAction.UpdateTime);
-        else
-            isUpdating = false;
+
     }
 
     #endregion
@@ -484,7 +484,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         var stackPanels = new List<StackPanel>(); ;
         var minTid = new DateTime((long)MinValueX);
         var maxTid = new DateTime((long)MaxValueX);
-        MinMaxTidString = minTid + "     -     " + maxTid + "     [" + (maxTid - minTid) + "]";
         // TODO: Ändra så mintid och maxtid tas från grafen
 
         StackPanel timeStackPanel = new StackPanel()
@@ -539,6 +538,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             await GetAvailableTags();
         await SetTimeRange();
 
+        MyChart.UpdaterTick += MyChart_UpdaterTick;
+        OnStartOrStopDateChanged += GraphWindow_OnStartOrStopDateChanged;
+
         Window w = Window.GetWindow(ControlBorder);
         // w should not be Null now!
         if (null != w)
@@ -561,6 +563,99 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
                 myPopup.HorizontalOffset = offset;
             };
         }
+    }
+
+    private DateTime oldUpdateTime = DateTime.Now;
+    private CancellationTokenSource tokenSource;
+    private bool taskRunning;
+    private async void GraphWindow_OnStartOrStopDateChanged(DateTime startDate, DateTime stopDate)
+    {
+        if (TagsPlottedOnChart == null)
+            return;
+        if (!IsLoaded || NrOfSeriesOnChart == 0)
+            return;
+        if (dontUpdateXCursor)
+            return;
+        if (taskRunning)
+            return;
+
+        tokenSource = new CancellationTokenSource(5000);
+        var ct = tokenSource.Token;
+
+
+        await Task.Run(async () =>
+       {
+           try
+           {
+               ct.ThrowIfCancellationRequested();
+               taskRunning = true;
+               while (true)
+               {
+                   if (oldUpdateTime.AddSeconds(1) < DateTime.Now)
+                   {
+                       if (await ChartData.GetChartDataAsync(startDate, stopDate) == null)
+                           return;
+                       Dispatcher?.Invoke(() =>
+                           {
+                               AddTag("", true);
+
+                               ConfigureChart(ChartUpdateAction.UpdateTime);
+
+                               var startDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
+                               var stopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
+                               ChartStartDate = startDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
+                               ChartStopDate = stopDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
+                               tokenSource.Cancel();
+                           });
+
+                   }
+                   await Task.Delay(50);
+                   oldUpdateTime = DateTime.Now;
+               }
+           }
+           catch (OperationCanceledException ex)
+           {
+           }
+           catch (Exception ex)
+           {
+               taskRunning = false;
+           }
+           finally
+           {
+               taskRunning = false;
+           }
+       });
+
+
+
+    }
+
+    private void MyChart_UpdaterTick(object sender)
+    {
+
+        //if (Mouse.LeftButton != MouseButtonState.Pressed
+        // && Mouse.RightButton != MouseButtonState.Pressed
+        // && Mouse.MiddleButton != MouseButtonState.Pressed)
+        //    return;
+
+
+        if (TagsPlottedOnChart == null)
+            return;
+        if (!IsLoaded || NrOfSeriesOnChart == 0)
+            return;
+        if (dontUpdateXCursor)
+            return;
+
+        // Find min and max time on chart
+        var chart = sender as CartesianChart;
+        var minPoint = chart.Series[0].ClosestPointTo(chart.AxisX[0].MinValue, AxisOrientation.X);
+        var maxPoint = chart.Series[0].ClosestPointTo(chart.AxisX[0].MaxValue, AxisOrientation.X);
+        var minDateTimePoint = (DateTimePoint)minPoint.Instance;
+        var maxTimePoint = (DateTimePoint)maxPoint.Instance;
+        var minTid = minDateTimePoint.DateTime;
+        var maxTid = maxTimePoint.DateTime;
+
+        MinMaxTidString = minTid + "     -     " + maxTid + "     [" + (maxTid - minTid) + "]";
     }
 
 
@@ -683,6 +778,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             isUpdating = true;
             await UpdateChartAsync(ChartUpdateAction.ChangeColor);
         }
+        isUpdating = false;
+
     }
 
 
@@ -694,7 +791,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     /// <returns></returns>
     private async Task UpdateChartAsync(ChartUpdateAction chartUpdateAction)
     {
-        //semaphore.Wait();
+        await semaphore.WaitAsync();
         if (startDateTime == DateTime.MinValue && stopDateTime == DateTime.MinValue)
             return;
 
@@ -731,7 +828,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
         ChartStartDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
         ChartStopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
-        //semaphore.Release();
+        semaphore.Release();
     }
 
     private bool isSaving = false;
@@ -1430,15 +1527,37 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             }
         }
     }
+    DateTime oldStartDate = DateTime.MinValue;
+    DateTime oldStopDate = DateTime.MinValue;
+    private bool StartOrStopDateHasChanged(DateTime startDate, DateTime stopdate)
+    {
+        if (oldStartDate != startDate || oldStopDate != stopdate)
+        {
+            oldStartDate = startDate;
+            oldStopDate = stopdate;
+            return true;
+        }
+        return false;
+    }
 
-    private void MyChart_LayoutUpdated(object sender, EventArgs e)
+    private async void MyChart_LayoutUpdated(object sender, EventArgs e)
     {
         if (TagsPlottedOnChart == null)
             return;
         if (IsLoaded && NrOfSeriesOnChart > 0)
         {
-            ChartStartDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
-            ChartStopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
+            var startDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
+            var stopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
+            if (StartOrStopDateHasChanged(startDate, stopDate))
+            {
+                ChartStartDate = startDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
+                ChartStopDate = stopDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
+                if (startDate < ChartData.MinDate || stopDate > ChartData.MaxDate)
+                {
+                    OnStartOrStopDateChanged?.Invoke(startDate, stopDate);
+                }
+            }
+
         }
     }
 
@@ -1496,10 +1615,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
                 LineSeriesList[i].CursorValues = (DateTimePoint)chartP.Instance;
             }
 
-            UpdateGraphicActualValues();
 
 
-            var name = chart.Series[0].Title;
 
 
             // Show visual hover feedback for previous point
@@ -1546,12 +1663,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         //Canvas.SetTop(cursorXToolTip, canvasMousePosition.Y);
     }
 
-    private void UpdateGraphicActualValues()
-    {
 
-
-
-    }
 
     // Helper method to traverse the visual tree of an element
     private bool TryFindVisualChildElement<TChild>(DependencyObject parent, out TChild resultElement)
