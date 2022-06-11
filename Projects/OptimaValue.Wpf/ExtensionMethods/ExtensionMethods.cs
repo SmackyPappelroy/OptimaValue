@@ -65,6 +65,8 @@ namespace OptimaValue.Wpf
             }
 
             IXLWorksheet sheet = book.Worksheets.Add(dt, "TrendData");
+            sheet.Row(1).InsertRowsAbove(1);
+
 
             var alphabets = new Dictionary<char, int>()
                             {
@@ -77,25 +79,29 @@ namespace OptimaValue.Wpf
                             };
 
             int index = 1;
+
+            var lastRowUsed = sheet.LastRowUsed().RowNumber();
+            sheet.SheetView.FreezeRows(2);
+
             foreach (var item in series)
             {
                 if (series.Count > alphabets.Count)
                     break;
                 var letter = alphabets.Where(x => x.Value == index).FirstOrDefault().Key;
-                sheet.Range($"{letter}1:{letter}100000").RangeUsed().AddConditionalFormat().DataBar(XLColor.Red)
+                sheet.Range($"{letter}1:{letter}{lastRowUsed}").RangeUsed().AddConditionalFormat().DataBar(XLColor.Red)
                    .LowestValue()
                    .HighestValue();
+
+                sheet.SparklineGroups.Add($"{letter}1", $"{letter}1:{letter}{lastRowUsed}")
+                .SetStyle(XLSparklineTheme.Colorful1)
+                .SetLineWeight(1)
+                .HorizontalAxis
+                .SetVisible(true)
+                .SetColor(XLColor.Red);
 
                 index++;
 
             }
-
-            sheet.Range("B1:B100000").RangeUsed().AddConditionalFormat().DataBar(XLColor.Red)
-                .LowestValue()
-                .HighestValue();
-            sheet.Range("C1:C100000").RangeUsed().AddConditionalFormat().DataBar(XLColor.Red)
-                .LowestValue()
-                .HighestValue();
 
 
 
