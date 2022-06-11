@@ -57,6 +57,7 @@
     <BitmapImage x:Key="end" 
                      UriSource="Resurser/end_100px.png"/>
     <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+    <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
     <Style x:Key="FontAwesome">
       <Setter Property="TextElement.FontFamily" Value="/Fonts/fontawesome-webfont.ttf#FontAwesome" />
@@ -102,12 +103,12 @@
                     Margin="25, 5">
             <TextBlock Text="{Binding MinMaxTidString}" Margin="0 0 0 5"
                            FontSize="20" FontWeight="Bold" Foreground="Gray"/>
-            <TextBlock Text="{Binding ActualTime}" Margin="0 0 0 5"
+            <TextBlock Text="{Binding ActualTime}" Margin="0"
                        ToolTip="Tid vid vertikal bar"
                            FontSize="16" FontWeight="Bold" Foreground="LightGray"/>
             <ScrollViewer VerticalScrollBarVisibility="Auto" 
                         HorizontalScrollBarVisibility="Hidden" 
-                        MaxHeight="120">
+                        MaxHeight="85">
               <ItemsControl ItemsSource="{Binding TagControls}">
                 <ItemsControl.ItemsPanel>
                   <ItemsPanelTemplate>
@@ -118,7 +119,14 @@
             </ScrollViewer>
           </StackPanel>
         </Border>
-
+        <GridSplitter Grid.Row="0" Grid.ColumnSpan="2"
+                      ResizeDirection="Rows"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Bottom"
+              Background="Black" 
+              ShowsPreview="True"
+              Height="10"
+              />
 
         <lvc:CartesianChart 
                             Grid.Column="0"
@@ -228,18 +236,16 @@
           </Button.Template>
         </Button>
 
-
-
-
         <!-- Control panel -->
         <Popup Name="myPopup"
-                      Width="400"
-                      AllowsTransparency="True"
-                      Height="{Binding ElementName=mainWindow ,Path=ActualHeight}"
-                      IsOpen="True"
-                      PlacementTarget="{Binding ElementName=mainWindow}"
-                      Placement="Right">
-          <StackPanel Orientation="Vertical">
+               AllowsTransparency="True"
+               
+               Width="400"
+               Height="{Binding ElementName=mainWindow ,Path=ActualHeight}"
+               IsOpen="True"
+               PlacementTarget="{Binding ElementName=mainWindow}"
+               Placement="Right">
+          <StackPanel Orientation="Vertical" Name="myPopupStack">
             <Border Margin="0 0 20 10" 
                         Name="ControlBorder"
                         Background="{DynamicResource BackgroundGrayTransparent}"
@@ -254,7 +260,7 @@
                              VerticalAlignment="Center"
                              HorizontalAlignment="Center"/>
 
-                  <Grid Margin="0 20 0 10">
+                  <Grid Margin="0 10 0 10">
                     <Grid.ColumnDefinitions>
                       <ColumnDefinition Width="*"/>
                       <ColumnDefinition Width="4*"/>
@@ -319,12 +325,32 @@
                     <DatePicker Grid.Column="1" 
                             FontSize="14"
                             Name="stopDatePicker" 
-                            Margin="10 5 20 5"
+                            Margin="10 5 12 5"
                             SelectedDate="{Binding StopDate}"/>
-                    <Viewbox Grid.Column="2" Height="20" Margin="2 0 5 0">
-                      <Button Click="GotoEnd_Click"
-                              Margin="0 0 10 0">
-                        <Image Source = "{DynamicResource end}"/>
+                    <Viewbox Grid.Column="2" Height="30" Margin="2 0 5 0">
+                      <Button Width="40" Height="40" 
+                            Style="{DynamicResource growButton}"
+                            Margin="10"
+                            VerticalAlignment="Top" Panel.ZIndex="1"
+                            Click="GotoEnd_Click" >
+                        <Button.Template>
+                          <ControlTemplate TargetType="Button">
+                            <Grid>
+                              <Grid.Effect>
+                                <DropShadowEffect BlurRadius="15" Direction="-90" 
+                                                  RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
+                              </Grid.Effect>
+                              <Ellipse Stroke="Black" StrokeThickness="0" Fill="LightGray">
+                                <Ellipse.Effect>
+                                  <DropShadowEffect/>
+                                </Ellipse.Effect>
+                              </Ellipse>
+                              <Image Width="30" Height="30" Source="/Resurser/end_100px.png" />
+                              <ContentPresenter HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"/>
+                            </Grid>
+                          </ControlTemplate>
+                        </Button.Template>
                       </Button>
                     </Viewbox>
                   </Grid>
@@ -469,29 +495,6 @@
                       </Button.Template>
                     </Button>
 
-                    <!--<Button Margin="10" Width="40" Height="40" Name="btnUpdate"
-                            VerticalAlignment="Top" Panel.ZIndex="1"
-                            Style="{DynamicResource growButton}"
-                            Click="UpdateOnClick" >
-                      <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                          <Grid>
-                            <Grid.Effect>
-                              <DropShadowEffect BlurRadius="15" Direction="-90" 
-                                                  RenderingBias="Quality" Opacity=".2" ShadowDepth="1"/>
-                            </Grid.Effect>
-                            <Ellipse Stroke="Black" StrokeThickness="0" Fill="#4C4949">
-                              <Ellipse.Effect>
-                                <DropShadowEffect/>
-                              </Ellipse.Effect>
-                            </Ellipse>
-                            <Path Width="20" Height="20" Stretch="Fill" Fill="White" Data="F1 M 58,33.5001L 58,27L 49,19L 40,27.5001L 40,33.5001L 46,28.2097L 46,40.5C 46,46.299 41.299,51 35.5,51C 29.701,51 25,46.299 25,40.5C 25,34.8686 29.4332,30.2727 35,30.0117L 35,24.0074C 26.1186,24.2718 19,31.5546 19,40.5C 19,49.6127 26.3873,57 35.5,57C 44.6127,57 52,49.6127 52,40.5L 52,28.125L 58,33.5001 Z "/>
-                            <ContentPresenter HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"/>
-                          </Grid>
-                        </ControlTemplate>
-                      </Button.Template>
-                    </Button>-->
 
                     <Button Width="40" Height="40" Name="btnUpdate"
                             Style="{DynamicResource growButton}"
@@ -521,6 +524,7 @@
 
                     <Button Margin="10" Width="40" Height="40" 
                             Style="{DynamicResource growButton}"
+                            Visibility="{Binding PlayButtonVisible,Converter={StaticResource BooleanToVisibilityConverter}}"
                             ToolTip="Starta live-visning"
                             VerticalAlignment="Top" Panel.ZIndex="1" Name="btnPlay"
                             Click="PlayOnClick" >
@@ -660,6 +664,9 @@
               </Border.Background>
             </Border>
           </StackPanel>
+          <!--</Canvas>-->
+
+
 
 
         </Popup>

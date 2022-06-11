@@ -61,6 +61,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     #endregion
 
     #region Properties
+
     private string actualTime = "";
     public string ActualTime
     {
@@ -419,6 +420,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
 
     #endregion
 
+
+    bool isVisibleToUser = false;
     #region Constructor
     /// <summary>
     /// The default constructor
@@ -431,6 +434,41 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         timerClearStatus = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(5) };
         timerClearStatus.Tick += TimerClearStatus_Tick;
         this.Loaded += ChartControl_Loaded;
+        // Om fönstret windowstate ändras
+        this.StateChanged += (sender, e) =>
+        {
+            if (this.WindowState == WindowState.Minimized)
+            {
+                SetPopupVisibility(Visibility.Collapsed);
+            }
+            else if (isVisibleToUser)
+            {
+                SetPopupVisibility(Visibility.Visible);
+            }
+        };
+        // If window gains focus
+        this.Activated += (sender, e) =>
+        {
+
+            if (myPopupStack.Visibility != Visibility.Visible)
+            {
+                myPopupStack.Visibility = Visibility.Visible;
+                isVisibleToUser = true;
+            }
+
+
+        };
+        // If window looses focus
+        this.Deactivated += (sender, e) =>
+        {
+
+            if (myPopupStack.Visibility != Visibility.Collapsed)
+            {
+                myPopupStack.Visibility = Visibility.Collapsed;
+                isVisibleToUser = false;
+            }
+        };
+
         InitializeComponent();
         StartTimeString = "00:00";
         StopTimeString = "23:59";
@@ -443,6 +481,18 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         LineSeriesList.CollectionChanged += LineSeriesList_CollectionChanged;
     }
 
+    private void SetPopupVisibility(Visibility visibility)
+    {
+        if (myPopupStack.Visibility == visibility)
+            return;
+        myPopupStack.Visibility = visibility;
+    }
+
+    /// <summary>
+    /// Uppdatera grafen när tiden ändras
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void LineSeriesList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
         if (LineSeriesList.Count == 0)
@@ -452,6 +502,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         TagControls = new ObserveCollection<TagControl>(temp);
     }
 
+    /// <summary>
+    /// The event from <see cref="DispatcherTimer"/> that is fired when the time is updated 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void TimerClearStatus_Tick(object sender, EventArgs e)
     {
         Dispatcher?.Invoke(() =>
@@ -484,29 +539,10 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         var stackPanels = new List<StackPanel>(); ;
         var minTid = new DateTime((long)MinValueX);
         var maxTid = new DateTime((long)MaxValueX);
-        // TODO: Ändra så mintid och maxtid tas från grafen
-
-        StackPanel timeStackPanel = new StackPanel()
-        {
-            Orientation = Orientation.Horizontal,
-            Margin = new Thickness(5, 0, 0, 5),
-        };
-
-        TextBlock textBlockTime = new TextBlock()
-        {
-            Margin = new Thickness(0, 0, 0, 5),
-            FontSize = 20,
-            FontWeight = FontWeights.Bold,
-            //TextDecorations = TextDecorations.Underline,
-            Foreground = new SolidColorBrush(Colors.LightGray),
-        };
-        timeStackPanel.Children.Add(textBlockTime);
-        stackPanels.Add(timeStackPanel);
 
         foreach (var item in LineSeriesList)
         {
             DataStatistics stats = new(StatFilter, item);
-
 
             var tag = AvailableTags.Where(x => x.Name == item.LineSeries.Title).FirstOrDefault();
             var tagUnitString = tag.Unit == "" ? "" : " " + tag.Unit;
@@ -611,6 +647,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
                    }
                    await Task.Delay(50);
                    oldUpdateTime = DateTime.Now;
+                   ct.ThrowIfCancellationRequested();
                }
            }
            catch (OperationCanceledException ex)
@@ -1826,6 +1863,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
 
     }
+
+
 }
 
 

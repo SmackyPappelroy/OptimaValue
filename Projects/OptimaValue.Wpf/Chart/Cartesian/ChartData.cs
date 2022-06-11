@@ -26,10 +26,12 @@ namespace OptimaValue.Wpf
         private static string createStoredProcedureString;
 
         public static DataTable ChartTableAllTags;
+
         public static DateTime MinDate => ChartTableAllTags.AsEnumerable().Min(x => x.Field<DateTime>("logTime"));
         public static DateTime MaxDate => ChartTableAllTags.AsEnumerable().Max(x => x.Field<DateTime>("logTime"));
 
         public static bool HasData => ChartTableAllTags != null && ChartTableAllTags.Rows.Count > 0;
+        public static bool HasNewData { private set; get; }
 
         public static List<string> DisplayedTags;
 
@@ -192,6 +194,7 @@ namespace OptimaValue.Wpf
                 return null;
             }
         }
+
 
         public static async Task<DataTable> GetNewChartData()
         {

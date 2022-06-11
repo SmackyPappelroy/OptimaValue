@@ -21,30 +21,13 @@ namespace OptimaValue.Wpf
     /// </summary>
     public partial class App : Application
     {
-        private readonly IHost host;
 
         public App()
         {
-            SqlSettings.Load();
-            host = Host.CreateDefaultBuilder()
-           .ConfigureServices((context, services) =>
-           {
-               ConfigureServices(services);
-           })
-           .Build();
+            Master.Instance.Setup();
         }
 
-        private void ConfigureServices(IServiceCollection services)
-        {
-            services.AddSingleton<GraphWindow>();
 
-            Log.Logger = new LoggerConfiguration()
-                        .WriteTo.File(@"C:\OptimaValue\OptimaValueGraf_.txt",
-                            restrictedToMinimumLevel: LogEventLevel.Information,
-                            rollingInterval: RollingInterval.Month,
-                            fileSizeLimitBytes: 100000000)
-                        .CreateLogger();
-        }
 
         protected override async void OnStartup(StartupEventArgs e)
         {
@@ -52,9 +35,9 @@ namespace OptimaValue.Wpf
             {
                 //throw new NotImplementedException();
                 SqlMethods.CreateConnectionString();
-                await host.StartAsync();
+                await Master.Instance.StartAsync();
 
-                var graphWindow = host.Services.GetRequiredService<GraphWindow>();
+                var graphWindow = Master.GetService<GraphWindow>();
                 graphWindow.Show();
 
                 base.OnStartup(e);
@@ -71,13 +54,18 @@ namespace OptimaValue.Wpf
 
         protected override async void OnExit(ExitEventArgs e)
         {
-            using (host)
-            {
-                await host.StopAsync();
-            }
-            Log.CloseAndFlush();
 
-            base.OnExit(e);
+            try
+            {
+                Log.CloseAndFlush();
+                await Master.Instance.StopAsync();
+            }
+            finally
+            {
+
+                base.OnExit(e);
+            }
+
         }
 
 

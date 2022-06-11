@@ -63,7 +63,42 @@ namespace OptimaValue.Wpf
                 }
                 dt.Rows.Add(list.ToArray());
             }
+
             IXLWorksheet sheet = book.Worksheets.Add(dt, "TrendData");
+
+            var alphabets = new Dictionary<char, int>()
+                            {
+                                {'A', 0},{'B', 1},{'C', 2},{'D', 3},
+                                {'E', 4},{'F', 5}, {'G', 6},{'H', 7},
+                                {'I', 8},{'J', 9},{'K', 10}, {'L', 11},
+                                {'M', 12},{'N', 13},{'P', 14},{'Q', 15},
+                                {'R', 16},{'S', 17},{'T', 18},{'U', 19},
+                                {'V', 20},{'X', 21},{'Y', 22},{'Z', 23}
+                            };
+
+            int index = 1;
+            foreach (var item in series)
+            {
+                if (series.Count > alphabets.Count)
+                    break;
+                var letter = alphabets.Where(x => x.Value == index).FirstOrDefault().Key;
+                sheet.Range($"{letter}1:{letter}100000").RangeUsed().AddConditionalFormat().DataBar(XLColor.Red)
+                   .LowestValue()
+                   .HighestValue();
+
+                index++;
+
+            }
+
+            sheet.Range("B1:B100000").RangeUsed().AddConditionalFormat().DataBar(XLColor.Red)
+                .LowestValue()
+                .HighestValue();
+            sheet.Range("C1:C100000").RangeUsed().AddConditionalFormat().DataBar(XLColor.Red)
+                .LowestValue()
+                .HighestValue();
+
+
+
             sheet.Column(1).Style.NumberFormat.Format = "yyyy-mm-dd hh:mm:ss";
             sheet.Columns().AdjustToContents();
             return book;
