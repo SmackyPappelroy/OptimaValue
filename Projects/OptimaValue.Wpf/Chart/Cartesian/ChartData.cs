@@ -138,6 +138,9 @@ namespace OptimaValue.Wpf
             connectionString = (@"Server=DESKTOP-4OD098D\MINSERVER;Database=MCValueLog;User Id=sa;Password=sa; ");
 #endif
 
+            if (!await AnyDataBetweenDatesAsync(startTime, stopTime))
+                return null;
+
             BuildQueryAllValuesString(startTime, stopTime);
             if (ChartTableAllTags != null)
             {
@@ -195,6 +198,29 @@ namespace OptimaValue.Wpf
             }
         }
 
+        private static Task<bool> AnyDataBetweenDatesAsync(DateTime startTime, DateTime stopTime)
+        {
+            try
+            {
+                using SqlConnection con = new SqlConnection(Config.SqlMethods.ConnectionString);
+                var startTimeParameter = new SqlParameter("@startTime", SqlDbType.DateTime) { Value = startTime };
+                var stopTimeParameter = new SqlParameter("@stopTime", SqlDbType.DateTime) { Value = stopTime };
+                using SqlCommand cmd = new SqlCommand(@$"SELECT COUNT(*) FROM [{SqlSettings.Databas}].[dbo].[logValues] WHERE logTime BETWEEN @startTime AND @stopTime", con);
+                cmd.Parameters.Add(startTimeParameter);
+                cmd.Parameters.Add(stopTimeParameter);
+                con.Open();
+                var result = (int)cmd.ExecuteScalar();
+                if (result == 0)
+                    Master.GetService<GraphWindow>().StatusText = "Inga rader mellan de datumen";
+                return Task.FromResult(result > 0);
+            }
+            catch (Exception)
+            {
+                Master.GetService<GraphWindow>().StatusText = "Inga rader mellan de datumen";
+
+            }
+            return Task.FromResult(false);
+        }
 
         public static async Task<DataTable> GetNewChartData()
         {

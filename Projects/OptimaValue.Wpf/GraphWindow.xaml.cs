@@ -31,13 +31,15 @@ using System.Diagnostics;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+using GongSolutions.Wpf.DragDrop;
+using System.Collections;
 
 namespace OptimaValue.Wpf;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class GraphWindow : Window, INotifyPropertyChanged
+public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
 {
     private string directoryPath = @$"C:\OptimaValue";
     private string filePath => directoryPath + @$"\Trend {DateTime.Now.ToString("yyyy-MM-dd HH_mm_ss")}.xlsx";
@@ -72,8 +74,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private ObserveCollection<TagControl> tagControls;
-    public ObserveCollection<TagControl> TagControls
+    private TagControlClass tagControls;
+    public TagControlClass TagControlList
     {
         get => tagControls;
         set => tagControls = value;
@@ -499,7 +501,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             ActualTime = "";
 
         IEnumerable<TagControl> temp = lineSeriesList.Select(x => x.TagControl).ToObservableCollection();
-        TagControls = new ObserveCollection<TagControl>(temp);
+        TagControlList = new() { TagControls = new ObserveCollection<TagControl>(temp) };
+        //TagControls = new ObserveCollection<TagControl>(temp);
     }
 
     /// <summary>
@@ -687,6 +690,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
         var chart = sender as CartesianChart;
         var minPoint = chart.Series[0].ClosestPointTo(chart.AxisX[0].MinValue, AxisOrientation.X);
         var maxPoint = chart.Series[0].ClosestPointTo(chart.AxisX[0].MaxValue, AxisOrientation.X);
+        if (minPoint == null || maxPoint == null)
+            return;
         var minDateTimePoint = (DateTimePoint)minPoint.Instance;
         var maxTimePoint = (DateTimePoint)maxPoint.Instance;
         var minTid = minDateTimePoint.DateTime;
@@ -785,11 +790,18 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     /// <param name="e"></param>
     private async void AddOnClick(object sender, RoutedEventArgs e)
     {
+
         if (startDateTime == DateTime.MinValue && stopDateTime == DateTime.MinValue)
+        {
+            StatusText = "Startdatum och slutdatum är lika";
             return;
+        }
 
         if (startDateTime >= stopDateTime)
+        {
+            StatusText = "Startdatum och slutdatum är lika";
             return;
+        }
 
         await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
 
@@ -829,43 +841,49 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
     private async Task UpdateChartAsync(ChartUpdateAction chartUpdateAction)
     {
         await semaphore.WaitAsync();
-        if (startDateTime == DateTime.MinValue && stopDateTime == DateTime.MinValue)
-            return;
-
-        if (startDateTime >= stopDateTime)
-            return;
-
-        foreach (var item in Series)
+        try
         {
-            Series.Remove(item);
-            Series.Add(item);
-        }
+            if (startDateTime == DateTime.MinValue && stopDateTime == DateTime.MinValue)
+                return;
 
-        if (chartUpdateAction == ChartUpdateAction.Stop)
+            if (startDateTime >= stopDateTime)
+                return;
+
+            foreach (var item in Series)
+            {
+                Series.Remove(item);
+                Series.Add(item);
+            }
+
+            if (chartUpdateAction == ChartUpdateAction.Stop)
+            {
+                startDateTime = oldStartDateTime;
+                stopDateTime = oldStopDateTime;
+            }
+
+            startDatePicker.Text = startDateTime.ToString("yyyy-MM-dd");
+            txtStartTime.Text = startDateTime.ToString("HH:mm");
+            stopDatePicker.Text = stopDateTime.ToString("yyyy-MM-dd");
+            txtStopTime.Text = stopDateTime.ToString("HH:mm");
+
+            if (startDateTime == stopDateTime)
+                return;
+            if (await ChartData.GetChartDataAsync(startDateTime, stopDateTime) == null)
+                return;
+
+            //if (!AddTag("", true))
+            //    return;
+            AddTag("", true);
+
+            ConfigureChart(chartUpdateAction);
+
+            ChartStartDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
+            ChartStopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
+        }
+        finally
         {
-            startDateTime = oldStartDateTime;
-            stopDateTime = oldStopDateTime;
+            semaphore.Release();
         }
-
-        startDatePicker.Text = startDateTime.ToString("yyyy-MM-dd");
-        txtStartTime.Text = startDateTime.ToString("HH:mm");
-        stopDatePicker.Text = stopDateTime.ToString("yyyy-MM-dd");
-        txtStopTime.Text = stopDateTime.ToString("HH:mm");
-
-        if (startDateTime == stopDateTime)
-            return;
-        if (await ChartData.GetChartDataAsync(startDateTime, stopDateTime) == null)
-            return;
-
-        //if (!AddTag("", true))
-        //    return;
-        AddTag("", true);
-
-        ConfigureChart(chartUpdateAction);
-
-        ChartStartDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
-        ChartStopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
-        semaphore.Release();
     }
 
     private bool isSaving = false;
@@ -1862,6 +1880,66 @@ public partial class GraphWindow : Window, INotifyPropertyChanged
             Process.Start(startInfo);
         }
 
+    }
+
+    void IDropTarget.DragOver(IDropInfo dropInfo)
+    {
+        TagControl sourceItem = dropInfo.Data as TagControl;
+        TagControl targetItem = dropInfo.TargetItem as TagControl;
+
+        if (sourceItem.TagName == targetItem.TagName)
+            return;
+
+        if (sourceItem != null && targetItem != null)
+        {
+            dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+            dropInfo.Effects = DragDropEffects.Copy;
+        }
+    }
+
+    void IDropTarget.Drop(IDropInfo dropInfo)
+    {
+        TagControl sourceItem = dropInfo.Data as TagControl;
+        TagControl targetItem = dropInfo.TargetItem as TagControl;
+        //targetItem.TagControls.Add(sourceItem.TagControls);
+
+        int insertIndex = dropInfo.InsertIndex;
+        int sourceItemIndex = TagControlList.TagControls.IndexOf(sourceItem);
+        int targetItemIndex = TagControlList.TagControls.IndexOf(targetItem);
+        TagControlList.TagControls.Move(sourceItemIndex, targetItemIndex);
+
+        //IList destinationList = dropInfo.TargetCollection.Cast<object>().ToList();
+        //if (destinationList[0] is TagControl)
+        //{
+        //    TagControlList.TagControls.OrderBy(x => insertIndex);
+        //}
+        //var temp = "";
+        //IEnumerable data = ExtractData(dropInfo.Data);
+
+        //if (dropInfo.DragInfo.VisualSource == dropInfo.VisualTarget)
+        //{
+        //    IList sourceList = GetList(dropInfo.DragInfo.SourceCollection);
+
+        //    foreach (object o in data)
+        //    {
+        //        int index = sourceList.IndexOf(o);
+
+        //        if (index != -1)
+        //        {
+        //            sourceList.RemoveAt(index);
+
+        //            if (sourceList == destinationList && index < insertIndex)
+        //            {
+        //                --insertIndex;
+        //            }
+        //        }
+        //    }
+        //}
+
+        //foreach (object o in data)
+        //{
+        //    destinationList.Insert(insertIndex++, o);
+        //}
     }
 
 
