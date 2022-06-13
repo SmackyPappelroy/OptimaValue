@@ -134,15 +134,45 @@ namespace OptimaValue.Wpf
         }
         private static DataTable oldChartValues = new();
         private static List<string> oldDisplayed = new();
-        public static async Task<DataTable> GetChartDataAsync(DateTime startTime, DateTime stopTime)
+        private static DateTime lastUpdateTime = DateTime.Now;
+        private static DateTime lastStartTime = DateTime.MinValue;
+        private static DateTime lastStopTime = DateTime.MinValue;
+        public static async Task<DataTable> GetChartDataAsync(DateTime startTime, DateTime stopTime, bool fillEmptyValues = false)
         {
+            if (lastStartTime == DateTime.MinValue)
+            {
+                lastStartTime = startTime;
+                lastStopTime = stopTime;
+            }
+            else
+            {
+                // TODO: Hämta fler värden när man zoomar in
+                // Timespan is less then previous
+                if (startTime > lastStartTime && stopTime < lastStopTime)
+                {
+                    return ChartTableAllTags;
+                }
+            }
+            while (DateTime.Now.Subtract(lastUpdateTime) < TimeSpan.FromMilliseconds(50))
+            {
+                await Task.Delay(10);
+            }
             var connectionString = Config.SqlMethods.ConnectionString;
-#if DEBUG
-            connectionString = (@"Server=DESKTOP-4OD098D\MINSERVER;Database=MCValueLog;User Id=sa;Password=sa; ");
-#endif
+            //#if DEBUG
+            //            connectionString = (@"Server=DESKTOP-4OD098D\MINSERVER;Database=MCValueLog;User Id=sa;Password=sa; ");
+            //#endif
+            try
+            {
+                if (!await AnyDataBetweenDatesAsync(startTime, stopTime))
+                {
+                    lastUpdateTime = DateTime.Now;
+                    lastStartTime = startTime;
+                    lastStopTime = stopTime;
+                    return null;
+                }
+            }
+            catch (Exception) { lastUpdateTime = DateTime.Now; }
 
-            if (!await AnyDataBetweenDatesAsync(startTime, stopTime))
-                return null;
 
             BuildQueryAllValuesString(startTime, stopTime);
             if (ChartTableAllTags != null)
@@ -180,13 +210,14 @@ namespace OptimaValue.Wpf
 
                 var numberOfRows = Convert.ToInt32((stopTime - startTime).TotalSeconds);
 
-
-                ChartTableAllTags = ChartTableAllTags.FillGapsForwards(numberOfRows, stopTime - startTime, startTime, stopTime, graphWindow.MaxPointsPerSeries);
+                if (fillEmptyValues)
+                    ChartTableAllTags = ChartTableAllTags.FillGapsForwards(numberOfRows, stopTime - startTime, startTime, stopTime, graphWindow.MaxPointsPerSeries);
 
                 //CreateStoredProcedure();
 
 
-
+                Log.Logger.Information($"Tabell med all taggar: {ChartTableAllTags.Rows.Count} stycken");
+                Debug.WriteLine($"Tabell med all taggar: {ChartTableAllTags.Rows.Count} stycken");
                 return ChartTableAllTags;
             }
             catch (Exception ex)
@@ -201,6 +232,12 @@ namespace OptimaValue.Wpf
                     DisplayedTags = oldDisplayed;
                 }
                 return null;
+            }
+            finally
+            {
+                lastUpdateTime = DateTime.Now;
+                lastStartTime = startTime;
+                lastStopTime = stopTime;
             }
         }
 
@@ -361,44 +398,47 @@ namespace OptimaValue.Wpf
         }
 
         private static object convertLock = new();
-        public static List<T> ConvertToList<T>(this DataTable SourceData, string tagName) where T : struct
+        public static List<double> ConvertToListDouble<T>(this DataTable SourceData, string tagName, bool? fillMissingValues)
         {
             lock (convertLock)
             {
-                var lastValue = new T();
+                var lastValue = double.NaN;
 
-                lastValue = default;
-
-                List<T> list = new List<T>();
+                List<double> list = new List<double>();
                 if (SourceData == null || SourceData.Rows.Count < 1)
                     return list;
                 //IEnumerable<T> enumerable = SourceData.AsEnumerable().Select(RowConverter);
                 try
                 {
-                    IEnumerable<T> enumerable = SourceData.AsEnumerable().Select(dataRow =>
+                    IEnumerable<double> enumerable = SourceData.AsEnumerable().Select(dataRow =>
                     {
-                        var returnValue = new T();
+                        var returnValue = double.NaN;
                         if (dataRow == null)
                         {
-                            returnValue = default(T);
-                            lastValue = (T)dataRow[tagName];
+                            returnValue = default(double);
+                            lastValue = (double)dataRow[tagName];
                         }
                         else if (dataRow[tagName] == DBNull.Value)
                         {
-                            if (!lastValue.Equals(default))
+                            if ((bool)fillMissingValues)
                             {
-                                returnValue = lastValue;
-                                lastValue = default;
+                                if (!lastValue.Equals(default))
+                                {
+                                    returnValue = lastValue;
+                                    lastValue = default;
+                                }
+                                else
+                                {
+                                    returnValue = default;
+                                    lastValue = default;
+                                }
                             }
                             else
-                            {
-                                returnValue = default;
-                                lastValue = default;
-                            }
+                                returnValue = double.NaN;
                         }
                         else
                         {
-                            lastValue = (T)dataRow[tagName];
+                            lastValue = (double)dataRow[tagName];
                             returnValue = lastValue;
                         }
                         return returnValue;
@@ -407,7 +447,48 @@ namespace OptimaValue.Wpf
                         return list;
 
 
-                    return new List<T>(enumerable);
+                    return new List<double>(enumerable);
+                }
+                catch (ArgumentException)
+                {
+                    return list;
+                }
+            }
+        }
+        public static List<DateTime> ConvertToListDateTime<DateTime>(this DataTable SourceData, string tagName) where DateTime : struct
+        {
+            lock (convertLock)
+            {
+                var lastValue = new DateTime();
+
+                lastValue = default;
+
+                List<DateTime> list = new List<DateTime>();
+                if (SourceData == null || SourceData.Rows.Count < 1)
+                    return list;
+                //IEnumerable<T> enumerable = SourceData.AsEnumerable().Select(RowConverter);
+                try
+                {
+                    IEnumerable<DateTime> enumerable = SourceData.AsEnumerable().Select(dataRow =>
+                    {
+                        var returnValue = new DateTime();
+                        if (dataRow == null)
+                        {
+                            returnValue = default(DateTime);
+                            lastValue = (DateTime)dataRow[tagName];
+                        }
+                        else
+                        {
+                            lastValue = (DateTime)dataRow[tagName];
+                            returnValue = lastValue;
+                        }
+                        return returnValue;
+                    });
+                    if (enumerable == null)
+                        return list;
+
+
+                    return new List<DateTime>(enumerable);
                 }
                 catch (ArgumentException)
                 {
@@ -439,7 +520,7 @@ namespace OptimaValue.Wpf
 
 
         private static object addLock = new object();
-        public static GearedValues<DateTimePoint> AddSeriesValues(string tagName, DataTable tbl = null)
+        public static GearedValues<DateTimePoint> AddSeriesValues(string tagName, DataTable tbl = null, bool fillEmptyValues = false)
         {
             DataTable myTbl = new();
             if (tbl == null)
@@ -453,8 +534,11 @@ namespace OptimaValue.Wpf
             {
                 GearedValues<DateTimePoint> chartValues = new();
 
-                var values = myTbl.ConvertToList<double>(tagName);
-                var logTimes = myTbl.ConvertToList<DateTime>("logTime");
+                var values = myTbl.ConvertToListDouble<double>(tagName, fillEmptyValues);
+                var logTimes = myTbl.ConvertToListDateTime<DateTime>("logTime");
+
+                var valuesCount = values.Count;
+                var logTimesCount = logTimes.Count;
 
                 if (values.Count == 0)
                     return null;

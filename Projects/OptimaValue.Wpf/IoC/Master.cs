@@ -16,7 +16,7 @@ namespace OptimaValue.Wpf
     /// </summary>
     public class Master : IDisposable
     {
-        private readonly string fileLoggerPath = @"C:\OptimaValue\OptimaValueGraf_.txt";
+        private readonly string fileLoggerPath = @$"C:\OptimaValue\OptimaValueGraf_{DateTime.Now.ToString("G")}.txt";
         public IHost host;
         private bool IsConfigured = false;
 
@@ -74,6 +74,7 @@ namespace OptimaValue.Wpf
         {
             try
             {
+                Log.CloseAndFlush();
                 await master.host.StopAsync();
             }
             catch (OperationCanceledException) { }

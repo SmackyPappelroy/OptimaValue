@@ -50,22 +50,28 @@ namespace OptimaValue.Wpf
                 return;
             if (Values.Count == 0)
                 return;
+            var filteredValues = Values.Where(x => x.Value != double.NaN).ToList();
+            if (filteredValues.Count == 0)
+                return;
+
+            Integral = filteredValues.Sum(x => x.Value);
+
             var minDate = Values.Select(x => x.DateTime).Min();
             var maxDate = Values.Select(x => x.DateTime).Max();
 
             var antalTimmar = (maxDate - minDate).TotalSeconds / 3600;
 
-            var resultat = Values.Select(x => x.Value).Average();
+            var resultat = filteredValues.Select(x => x.Value).Average();
 
             Integral = resultat * antalTimmar;
 
             // Beräkna tid över 0
-            var valuesOverZero = Values.Where(x => x.Value > 0).ToList().Count;
+            var valuesOverZero = filteredValues.Where(x => x.Value > 0).ToList().Count;
             TimeOverZero = TimeSpan.FromSeconds(valuesOverZero);
 
             // Beräkna antal gånger över 0
             bool lastValueGreaterThanZero = false;
-            foreach (var item in Values)
+            foreach (var item in filteredValues)
             {
                 if (item.Value > 0 && !lastValueGreaterThanZero)
                 {
@@ -77,7 +83,7 @@ namespace OptimaValue.Wpf
                     lastValueGreaterThanZero = false;
             }
 
-            var vals = Values.Select(x => x.Value).ToList();
+            var vals = filteredValues.Select(x => x.Value).ToList();
             double avg = vals.Average();
             StandardDeviation = Math.Sqrt(vals.Average(v => Math.Pow(v - avg, 2)));
         }

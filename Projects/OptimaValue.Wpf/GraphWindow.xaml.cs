@@ -34,6 +34,7 @@ using System.Runtime.CompilerServices;
 using GongSolutions.Wpf.DragDrop;
 using System.Collections;
 using System.Collections.Specialized;
+using LiveCharts.Definitions.Series;
 
 namespace OptimaValue.Wpf;
 
@@ -51,8 +52,36 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
+    #region Events
     private event Action<bool> OnTimeUpdated;
-    private event Action<DateTime, DateTime> OnStartOrStopDateChanged;
+    private event Action<DateTime, DateTime, bool> OnLayoutUpdated;
+
+    private void StatusMessageEvent_OnStatusTextChanged(object sender, StatusEventArgs e)
+    {
+        Dispatcher?.Invoke(() =>
+        {
+            StatusText = e.Message;
+        });
+    }
+
+    /// <summary>
+    /// Uppdatera grafen när tiden ändras
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void LineSeriesList_ListChanged(object sender, ListChangedEventArgs e)
+    {
+        if (LineSeriesList.Count == 0)
+        {
+            ActualTime = "";
+            return;
+        }
+
+        List<TagControl> temp = LineSeriesList.Select(x => x.TagControl).ToList();
+        TagControlList = new() { TagControls = new BindingList<TagControl>(temp) };
+        //TagControls = new ObserveCollection<TagControl>(temp);
+    }
+    #endregion
 
     #region Timer
     public DispatcherTimer timerClearStatus;
@@ -61,9 +90,14 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
 
     #region Private fields
     private SqlStatus sqlStatus;
+    bool isVisibleToUser = false;
+
     #endregion
 
     #region Properties
+
+    public bool FillEmptyValues;
+
     private int maxPointsPerSeries = 9500;
     public int MaxPointsPerSeries
     {
@@ -436,7 +470,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
     #endregion
 
 
-    bool isVisibleToUser = false;
     #region Constructor
     /// <summary>
     /// The default constructor
@@ -500,13 +533,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
     }
 
 
-    private void StatusMessageEvent_OnStatusTextChanged(object sender, StatusEventArgs e)
-    {
-        Dispatcher?.Invoke(() =>
-        {
-            StatusText = e.Message;
-        });
-    }
+
 
     private void SetPopupVisibility(Visibility visibility)
     {
@@ -515,20 +542,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         myPopupStack.Visibility = visibility;
     }
 
-    /// <summary>
-    /// Uppdatera grafen när tiden ändras
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void LineSeriesList_ListChanged(object sender, ListChangedEventArgs e)
-    {
-        if (LineSeriesList.Count == 0)
-            ActualTime = "";
 
-        IEnumerable<TagControl> temp = lineSeriesList.Select(x => x.TagControl).ToObservableCollection();
-        TagControlList = new() { TagControls = new ObserveCollection<TagControl>(temp) };
-        //TagControls = new ObserveCollection<TagControl>(temp);
-    }
 
     /// <summary>
     /// The event from <see cref="DispatcherTimer"/> that is fired when the time is updated 
@@ -603,7 +617,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         await SetTimeRange();
 
         MyChart.UpdaterTick += MyChart_UpdaterTick;
-        OnStartOrStopDateChanged += GraphWindow_OnStartOrStopDateChanged;
+        OnLayoutUpdated += RefreshDataFromSql;
 
         Window w = Window.GetWindow(ControlBorder);
         // w should not be Null now!
@@ -632,7 +646,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
     private DateTime oldUpdateTime = DateTime.Now;
     private CancellationTokenSource tokenSource;
     private bool taskRunning;
-    private async void GraphWindow_OnStartOrStopDateChanged(DateTime startDate, DateTime stopDate)
+    private async void RefreshDataFromSql(DateTime startDate, DateTime stopDate, bool update = false)
     {
         if (TagsPlottedOnChart == null)
             return;
@@ -657,8 +671,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                {
                    if (oldUpdateTime.AddMilliseconds(500) < DateTime.Now)
                    {
-                       if (await ChartData.GetChartDataAsync(startDate, stopDate) == null)
+                       if (await ChartData.GetChartDataAsync(startDate, stopDate, FillEmptyValues) == null)
                            return;
+
                        Dispatcher?.Invoke(() =>
                            {
                                AddTag("", true);
@@ -812,6 +827,70 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
 
     }
 
+
+
+
+
+
+
+    private SemaphoreSlim semaphore = new SemaphoreSlim(1);
+    /// <summary>
+    /// Refreshes the chart
+    /// </summary>
+    /// <param name="chartUpdateAction"></param>
+    /// <returns></returns>
+    private async Task UpdateChartAsync(ChartUpdateAction chartUpdateAction)
+    {
+        await semaphore.WaitAsync();
+        try
+        {
+            if (startDateTime == DateTime.MinValue && stopDateTime == DateTime.MinValue)
+                return;
+
+            if (startDateTime >= stopDateTime)
+                return;
+
+            //foreach (var item in Series)
+            //{
+            //    Series.Remove(item);
+            //    Series.Add(item);
+            //}
+
+            if (chartUpdateAction == ChartUpdateAction.Stop)
+            {
+                startDateTime = oldStartDateTime;
+                stopDateTime = oldStopDateTime;
+            }
+
+            startDatePicker.Text = startDateTime.ToString("yyyy-MM-dd");
+            txtStartTime.Text = startDateTime.ToString("HH:mm");
+            stopDatePicker.Text = stopDateTime.ToString("yyyy-MM-dd");
+            txtStopTime.Text = stopDateTime.ToString("HH:mm");
+
+            if (startDateTime == stopDateTime)
+                return;
+            if (await ChartData.GetChartDataAsync(startDateTime, stopDateTime, FillEmptyValues) == null)
+                return;
+
+            //if (!AddTag("", true))
+            //    return;
+            AddTag("", true);
+
+            ConfigureChart(chartUpdateAction);
+
+            ChartStartDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
+            ChartStopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
+        }
+        finally
+        {
+            semaphore.Release();
+        }
+    }
+
+    #endregion
+
+    #region Button Presses
+
     /// <summary>
     /// Adds a new lineseries to the chart
     /// </summary>
@@ -832,14 +911,13 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
             return;
         }
 
-        await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
+        await ChartData.GetChartDataAsync(startDateTime, stopDateTime, FillEmptyValues);
 
         if (!AddTag())
             return;
         ConfigureChart();
         Debug.WriteLine($"AddOnClick: {sw.ElapsedMilliseconds} ms");
     }
-
 
     private bool isUpdating = false;
     /// <summary>
@@ -859,61 +937,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         }
         isUpdating = false;
 
-    }
-
-
-    private SemaphoreSlim semaphore = new SemaphoreSlim(1);
-    /// <summary>
-    /// Refreshes the chart
-    /// </summary>
-    /// <param name="chartUpdateAction"></param>
-    /// <returns></returns>
-    private async Task UpdateChartAsync(ChartUpdateAction chartUpdateAction)
-    {
-        await semaphore.WaitAsync();
-        try
-        {
-            if (startDateTime == DateTime.MinValue && stopDateTime == DateTime.MinValue)
-                return;
-
-            if (startDateTime >= stopDateTime)
-                return;
-
-            foreach (var item in Series)
-            {
-                Series.Remove(item);
-                Series.Add(item);
-            }
-
-            if (chartUpdateAction == ChartUpdateAction.Stop)
-            {
-                startDateTime = oldStartDateTime;
-                stopDateTime = oldStopDateTime;
-            }
-
-            startDatePicker.Text = startDateTime.ToString("yyyy-MM-dd");
-            txtStartTime.Text = startDateTime.ToString("HH:mm");
-            stopDatePicker.Text = stopDateTime.ToString("yyyy-MM-dd");
-            txtStopTime.Text = stopDateTime.ToString("HH:mm");
-
-            if (startDateTime == stopDateTime)
-                return;
-            if (await ChartData.GetChartDataAsync(startDateTime, stopDateTime) == null)
-                return;
-
-            //if (!AddTag("", true))
-            //    return;
-            AddTag("", true);
-
-            ConfigureChart(chartUpdateAction);
-
-            ChartStartDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
-            ChartStopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue).ToString("yyyy-MM-dd HH:mm:ss.ff");
-        }
-        finally
-        {
-            semaphore.Release();
-        }
     }
 
     private bool isSaving = false;
@@ -1052,7 +1075,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         startDateTime = DateTime.Now - TimeSpan.FromMinutes(11);
         stopDateTime = DateTime.Now - TimeSpan.FromMinutes(1);
 
-        if (await ChartData.GetChartDataAsync(startDateTime, stopDateTime) == null)
+        if (await ChartData.GetChartDataAsync(startDateTime, stopDateTime, FillEmptyValues) == null)
         {
             StatusText = "Inga nya rader de senaste 10 minuterna";
             return;
@@ -1061,7 +1084,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         {
             startDateTime = oldStartDateTime;
             stopDateTime = oldStopDateTime;
-            await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
+            await ChartData.GetChartDataAsync(startDateTime, stopDateTime, FillEmptyValues);
             AddTag();
             ConfigureChart();
             StatusText = "Inga nya rader de senaste 10 minuterna";
@@ -1132,7 +1155,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                 if (Series.Count == 0)
                 {
                     // Gets new data
-                    await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
+                    await ChartData.GetChartDataAsync(startDateTime, stopDateTime, FillEmptyValues);
                     foreach (var tag in TagsPlottedOnChart)
                     {
                         var line = new MyLineSeries(tag);
@@ -1192,7 +1215,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                     oldTimeInterval = timeInterval;
                     startDateTime += timeToAdd;
                     stopDateTime += timeToAdd;
-                    DataTable tbl = await ChartData.GetChartDataAsync(startDateTime, stopDateTime);
+                    DataTable tbl = await ChartData.GetChartDataAsync(startDateTime, stopDateTime, FillEmptyValues);
                     if (tbl == null)
                     {
                         StopOnClick(this, new RoutedEventArgs());
@@ -1266,6 +1289,115 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         check10Min.IsChecked = true;
     }
 
+    private TimeInterval timeInterval = TimeInterval.Min10;
+
+    /// <summary>
+    /// Show hourly live feed
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void OnHourChecked(object sender, RoutedEventArgs e)
+    {
+        timeInterval = TimeInterval.HourOne;
+        check10Min.IsChecked = false;
+        check10Min.IsChecked = false;
+        check1Min.IsChecked = false;
+    }
+
+    /// <summary>
+    /// Show 30-mins feed
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void On30MinChecked(object sender, RoutedEventArgs e)
+    {
+        timeInterval = TimeInterval.Min30;
+        checkHour.IsChecked = false;
+        check10Min.IsChecked = false;
+        check1Min.IsChecked = false;
+    }
+
+    /// <summary>
+    /// Show 10 mins feed
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void On10MinChecked(object sender, RoutedEventArgs e)
+    {
+        timeInterval = TimeInterval.Min10;
+        checkHour.IsChecked = false;
+        check30Min.IsChecked = false;
+        check1Min.IsChecked = false;
+    }
+
+    /// <summary>
+    /// Show 1 min feed
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void On1MinChecked(object sender, RoutedEventArgs e)
+    {
+        timeInterval = TimeInterval.Min1;
+        checkHour.IsChecked = false;
+        check10Min.IsChecked = false;
+        check30Min.IsChecked = false;
+    }
+
+
+    /// <summary>
+    /// Updates the chart if the statistics filter <see cref="ComboBox"/> changes
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void comboStats_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded && ChartData.HasData)
+        {
+            await UpdateChartAsync(ChartUpdateAction.Nothing);
+        }
+    }
+
+    /// <summary>
+    /// Change the zoom type of the chart
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void comboZoom_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (IsLoaded && ChartData.HasData)
+        {
+            await UpdateChartAsync(ChartUpdateAction.Nothing);
+        }
+    }
+
+    /// <summary>
+    /// Updates the stopdate to the last logged value logdate
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private async void GotoEnd_Click(object sender, RoutedEventArgs e)
+    {
+        if (sqlStatus == SqlStatus.Connected)
+        {
+            var queryMaxTid = $"SELECT MAX(logTime) FROM {SqlSettings.Databas}.dbo.logValues";
+            using SqlConnection con = new SqlConnection(SqlMethods.ConnectionString);
+            try
+            {
+                await con.OpenAsync();
+                using SqlCommand cmd2 = new SqlCommand(queryMaxTid, con);
+                StopDate = (DateTime)cmd2.ExecuteScalar();
+                StopTimeString = StopDate.ToString("HH:mm");
+                await UpdateChartAsync(ChartUpdateAction.Nothing);
+            }
+            catch (Exception ex)
+            {
+                StatusText = ex.Message;
+            }
+        }
+    }
+
+    #endregion
+
     /// <summary>
     /// Updates the chart asynchrously in live feed
     /// </summary>
@@ -1294,12 +1426,14 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
             lineSerie.LineSeries.Values.AddRange(gearedValues);
             var values = lineSerie.LineSeries.Values as GearedValues<DateTimePoint>;
 
-            lineSerie.MinValueY = values.Min(x => x.Value);
-            lineSerie.MaxValueY = values.Max(x => x.Value);
-            lineSerie.AvgValueY = values.Average(x => x.Value);
+            var filteredValues = values.Where(x => !double.IsNaN(x.Value));
 
-            lineSerie.MinValueX = values.Min(x => x.DateTime.Ticks);
-            lineSerie.MaxValueX = values.Max(x => x.DateTime.Ticks);
+            lineSerie.MinValueY = filteredValues.Min(x => x.Value);
+            lineSerie.MaxValueY = filteredValues.Max(x => x.Value);
+            lineSerie.AvgValueY = filteredValues.Average(x => x.Value);
+
+            lineSerie.MinValueX = filteredValues.Min(x => x.DateTime.Ticks);
+            lineSerie.MaxValueX = filteredValues.Max(x => x.DateTime.Ticks);
         }
 
 
@@ -1371,13 +1505,19 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
 
             foreach (var item in LineSeriesList)
             {
-                item.GetChartValues();
+                item.GetChartValues(FillEmptyValues);
+                var series = Series.Where(x => x.Title == item.Tag.Name).FirstOrDefault();
+                Series.Remove(series);
+                Thread.Sleep(100);
+                series = item.LineSeries as GLineSeries;
+                Series.Add(series);
+
             }
 
             // TODO: Ändra detta. Enda sättet jag lyckas trigga CollectionChanged. Fixat... använd BindingList
             var newMylineSeries = new MyLineSeries(new Tag());
-            LineSeriesList.Add(newMylineSeries);
-            LineSeriesList.Remove(newMylineSeries);
+            //LineSeriesList.Add(newMylineSeries);
+            //LineSeriesList.Remove(newMylineSeries);
             ConfigureXAxisRange(minValueX: minValueX, maxValueX: maxValueX);
 
 
@@ -1389,6 +1529,10 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         //Tags = LineSeriesList.Select(x => x.LineSeries.Title).ToArray().ToList();
         UpdateTagGraphic();
     }
+
+
+
+
 
     /// <summary>
     /// Creates a linechart for the sql values
@@ -1529,114 +1673,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss");
     }
 
-    private TimeInterval timeInterval = TimeInterval.Min10;
 
-    /// <summary>
-    /// Show hourly live feed
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void OnHourChecked(object sender, RoutedEventArgs e)
-    {
-        timeInterval = TimeInterval.HourOne;
-        check10Min.IsChecked = false;
-        check10Min.IsChecked = false;
-        check1Min.IsChecked = false;
-    }
-
-    /// <summary>
-    /// Show 30-mins feed
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void On30MinChecked(object sender, RoutedEventArgs e)
-    {
-        timeInterval = TimeInterval.Min30;
-        checkHour.IsChecked = false;
-        check10Min.IsChecked = false;
-        check1Min.IsChecked = false;
-    }
-
-    /// <summary>
-    /// Show 10 mins feed
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void On10MinChecked(object sender, RoutedEventArgs e)
-    {
-        timeInterval = TimeInterval.Min10;
-        checkHour.IsChecked = false;
-        check30Min.IsChecked = false;
-        check1Min.IsChecked = false;
-    }
-
-    /// <summary>
-    /// Show 1 min feed
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void On1MinChecked(object sender, RoutedEventArgs e)
-    {
-        timeInterval = TimeInterval.Min1;
-        checkHour.IsChecked = false;
-        check10Min.IsChecked = false;
-        check30Min.IsChecked = false;
-    }
-
-
-    #endregion
-
-    /// <summary>
-    /// Updates the chart if the statistics filter <see cref="ComboBox"/> changes
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private async void comboStats_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (IsLoaded && ChartData.HasData)
-        {
-            await UpdateChartAsync(ChartUpdateAction.Nothing);
-        }
-    }
-
-    /// <summary>
-    /// Change the zoom type of the chart
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private async void comboZoom_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (IsLoaded && ChartData.HasData)
-        {
-            await UpdateChartAsync(ChartUpdateAction.Nothing);
-        }
-    }
-
-    /// <summary>
-    /// Updates the stopdate to the last logged value logdate
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private async void GotoEnd_Click(object sender, RoutedEventArgs e)
-    {
-        if (sqlStatus == SqlStatus.Connected)
-        {
-            var queryMaxTid = $"SELECT MAX(logTime) FROM {SqlSettings.Databas}.dbo.logValues";
-            using SqlConnection con = new SqlConnection(SqlMethods.ConnectionString);
-            try
-            {
-                await con.OpenAsync();
-                using SqlCommand cmd2 = new SqlCommand(queryMaxTid, con);
-                StopDate = (DateTime)cmd2.ExecuteScalar();
-                StopTimeString = StopDate.ToString("HH:mm");
-                await UpdateChartAsync(ChartUpdateAction.Nothing);
-            }
-            catch (Exception ex)
-            {
-                StatusText = ex.Message;
-            }
-        }
-    }
     DateTime oldStartDate = DateTime.MinValue;
     DateTime oldStopDate = DateTime.MinValue;
     private bool StartOrStopDateHasChanged(DateTime startDate, DateTime stopdate)
@@ -1652,9 +1689,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
 
     private void MyChart_LayoutUpdated(object sender, EventArgs e)
     {
-        var sw = Stopwatch.StartNew();
         if (TagsPlottedOnChart == null)
             return;
+        var sw = Stopwatch.StartNew();
         if (IsLoaded && NrOfSeriesOnChart > 0)
         {
             var startDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
@@ -1665,7 +1702,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                 ChartStopDate = stopDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
                 //if (startDate < ChartData.MinDate || stopDate > ChartData.MaxDate)
                 //{
-                OnStartOrStopDateChanged?.Invoke(startDate, stopDate);
+                OnLayoutUpdated?.Invoke(startDate, stopDate, false);
                 //    }
                 //}
 
@@ -1747,7 +1784,12 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                     var maxTid = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
 
                     var values = (GearedValues<DateTimePoint>)chart.Series[i].Values;
+                    if (values.Count == 0)
+                        return;
                     var filteredValues = values.Where(x => x.DateTime > minTid && x.DateTime < maxTid);
+
+                    if (filteredValues.Count() == 0)
+                        return;
                     //if (filteredValues.ToList().Count > 300)
                     //    continue;
 
@@ -1968,13 +2010,47 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         //targetItem.TagControls.Add(sourceItem.TagControls);
 
         int insertIndex = dropInfo.InsertIndex;
+        var sourceControl = TagControlList.TagControls.Where(x => x.TagName == sourceItem.TagName).FirstOrDefault();
         int sourceItemIndex = TagControlList.TagControls.IndexOf(sourceItem);
         int targetItemIndex = TagControlList.TagControls.IndexOf(targetItem);
-        TagControlList.TagControls.Move(sourceItemIndex, targetItemIndex);
+
+        if (sourceControl != null && targetItem != null)
+        {
+            if (sourceItemIndex < targetItemIndex)
+            {
+                insertIndex = insertIndex - 1;
+            }
+            TagControlList.TagControls.Remove(sourceControl);
+            TagControlList.TagControls.Insert(insertIndex, sourceControl);
+        }
+
 
     }
 
+    bool lastCheckedValue = false;
+    private void FillValues_Checked(object sender, RoutedEventArgs e)
+    {
+        if (taskRunning)
+        {
+            radioFillValues.IsChecked = lastCheckedValue;
+            return;
+        }
+        if ((bool)radioFillValues.IsChecked && lastCheckedValue)
+            radioFillValues.IsChecked = false;
 
+        lastCheckedValue = (bool)radioFillValues.IsChecked;
+
+        FillEmptyValues = (bool)radioFillValues.IsChecked;
+
+        if (!IsLoaded)
+            return;
+        if (TagsPlottedOnChart == null)
+            return;
+        if (TagsPlottedOnChart.Count == 0)
+            return;
+
+        OnLayoutUpdated?.Invoke(startDate, stopDate, true);
+    }
 }
 
 

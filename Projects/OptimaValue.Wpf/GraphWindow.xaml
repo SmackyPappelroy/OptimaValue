@@ -425,6 +425,16 @@
                     <TextBox Text="{Binding MaxPointsPerSeries}" FontSize="14" VerticalAlignment="Center" Padding="5" FontFamily="Bold"
                              TextAlignment="Center"/>
                   </StackPanel>
+                  <StackPanel Orientation="Horizontal" Margin="0 5 0 5">
+                    <TextBlock Text="Fyll saknade värden:" Margin="20 5 5 5" Foreground="White" 
+                                   FontSize="14" VerticalAlignment="Center" MinWidth="50"/>
+                    <RadioButton FontSize="14" VerticalAlignment="Center" 
+                                 Padding="5" 
+                                 FontFamily="Bold"
+                                 Name="radioFillValues"
+                                 Click="FillValues_Checked"
+                                  />
+                  </StackPanel>
 
                   <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
                     <!-- Underline -->

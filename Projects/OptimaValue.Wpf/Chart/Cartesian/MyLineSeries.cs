@@ -206,7 +206,7 @@ namespace OptimaValue.Wpf
             GetChartValues();
         }
 
-        public bool GetChartValues()
+        public bool GetChartValues(bool fillEmptyValues = false)
         {
             LineSeries.Title = Tag.Name;
 
@@ -220,7 +220,7 @@ namespace OptimaValue.Wpf
             LineSeries.Values.Clear();
             ChartValues.Clear();
 
-            var result = ChartData.AddSeriesValues(Tag.Name);
+            var result = ChartData.AddSeriesValues(Tag.Name, null, fillEmptyValues);
 
             if (result == null)
                 return false;
@@ -233,9 +233,10 @@ namespace OptimaValue.Wpf
             if (LineSeries.Values.Count == 0)
                 return false;
 
-            MinValueY = ChartValues.Min(x => x.Value);
-            MaxValueY = ChartValues.Max(x => x.Value);
-            AvgValueY = ChartValues.Average(x => x.Value);
+
+            MinValueY = ChartValues.Where(x => !double.IsNaN(x.Value)).Min(x => x.Value);
+            MaxValueY = ChartValues.Where(x => !double.IsNaN(x.Value)).Max(x => x.Value);
+            AvgValueY = ChartValues.Where(x => !double.IsNaN(x.Value)).Average(x => x.Value);
 
             MinValueX = ChartValues.Min(x => x.DateTime.Ticks);
             MaxValueX = ChartValues.Max(x => x.DateTime.Ticks);
