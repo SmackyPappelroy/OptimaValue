@@ -46,6 +46,10 @@ namespace OptimaValue.Wpf
                 return;
 
             // Integral
+            if (Values == null)
+                return;
+            if (Values.Count == 0)
+                return;
             var minDate = Values.Select(x => x.DateTime).Min();
             var maxDate = Values.Select(x => x.DateTime).Max();
 

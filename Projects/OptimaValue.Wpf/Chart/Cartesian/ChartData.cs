@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using OptimaValue.Config;
 using System.Threading;
+using System.Diagnostics;
 
 namespace OptimaValue.Wpf
 {
@@ -24,6 +25,8 @@ namespace OptimaValue.Wpf
         private static string queryNewValuesString;
 
         private static string createStoredProcedureString;
+
+        private static GraphWindow graphWindow = Master.GetService<GraphWindow>();
 
         public static DataTable ChartTableAllTags;
 
@@ -175,7 +178,10 @@ namespace OptimaValue.Wpf
 
                 ChartTableAllTags = tbl;
 
-                ChartTableAllTags = ChartTableAllTags.FillGaps();
+                var numberOfRows = Convert.ToInt32((stopTime - startTime).TotalSeconds);
+
+
+                ChartTableAllTags = ChartTableAllTags.FillGapsForwards(numberOfRows, stopTime - startTime, startTime, stopTime, graphWindow.MaxPointsPerSeries);
 
                 //CreateStoredProcedure();
 
@@ -211,75 +217,30 @@ namespace OptimaValue.Wpf
                 con.Open();
                 var result = (int)cmd.ExecuteScalar();
                 if (result == 0)
-                    Master.GetService<GraphWindow>().StatusText = "Inga rader mellan de datumen";
+                    StatusMessageEvent.RaiseMessage("Inga rader mellan de datumen");
                 return Task.FromResult(result > 0);
             }
             catch (Exception)
             {
-                Master.GetService<GraphWindow>().StatusText = "Inga rader mellan de datumen";
+                StatusMessageEvent.RaiseMessage("Inga rader mellan de datumen");
 
             }
             return Task.FromResult(false);
         }
 
-        public static async Task<DataTable> GetNewChartData()
+
+        private static DataTable FillGapsForwards(this DataTable tbl, int numberOfRowsIntable, TimeSpan timeLength, DateTime startTime, DateTime stopTime, int allowedNumberOfRows = 9500)
         {
-            if (ChartTableAllTags.Rows.Count == 0)
-                return null;
-
-            BuildQueryNewValuesString();
-
-            var connectionString = Config.SqlMethods.ConnectionString;
-#if DEBUG
-            connectionString = (@"Server=DESKTOP-4OD098D\MINSERVER;Database={SqlSettings.Databas};User Id=sa;Password=sa; ;TrustServerCertificate=true;");
-#endif
-
-
-            DataTable tbl = new DataTable();
-            try
-            {
-                using SqlConnection con = new SqlConnection(Config.SqlMethods.ConnectionString);
-                using SqlCommand cmd = new SqlCommand(queryNewValuesString, con);
-
-                con.Open();
-                var reader = await cmd.ExecuteReaderAsync();
-                tbl.Load(reader);
-
-                tbl.DefaultView.Sort = "logTime";
-                tbl = tbl.DefaultView.ToTable();
-
-                //tbl = tbl.AsEnumerable().Where(r => r.Field<DateTime>("logTime") >= lastDate).CopyToDataTable();
-                var lastDate = ChartTableAllTags.AsEnumerable().Max(r => r.Field<DateTime>("logTime"));
-                var newTblLastDate = tbl.AsEnumerable().Max(r => r.Field<DateTime>("logTime"));
-
-                DataTable newTbl = new();
-                if (tbl.Rows.Count > 0)
-                    newTbl = tbl.AsEnumerable().Where(x => x.Field<DateTime>("logTime") > lastDate).CopyToDataTable();
-
-                if (newTbl.Rows.Count > 0)
-                {
-                    newTbl = newTbl.FillGaps();
-                    ChartTableAllTags.Merge(newTbl);
-                }
-
-
-                //ChartTableAllTags = ChartTableAllTags.FillGaps();
-
-
-                return newTbl;
-            }
-            catch (Exception ex)
-            {
-                return new DataTable();
-            }
-        }
-
-        private static DataTable FillGaps(this DataTable tbl)
-        {
+            var sw = Stopwatch.StartNew();
             DataTable newTable = tbl.Clone();
             DataRow lastRow = tbl.Rows[0];
             DateTime lastTime = DateTime.MinValue;
             var numberOfColumns = tbl.Columns.Count;
+
+            // Calculate timespan for allowedNumberOfRows
+            var timeSpan = TimeSpan.FromSeconds(timeLength.TotalSeconds / allowedNumberOfRows);
+            if (timeSpan < TimeSpan.FromSeconds(1))
+                timeSpan = TimeSpan.FromSeconds(1);
 
             foreach (DataRow row in tbl.Rows)
             {
@@ -306,13 +267,86 @@ namespace OptimaValue.Wpf
 
                 var rowTime = row.Field<DateTime>("logTime");
 
-                if (rowTime - lastTime > TimeSpan.FromSeconds(1))
+                if (rowTime - lastTime > timeSpan)
                 {
-                    while (rowTime != lastTime)
+                    while (rowTime >= lastTime + timeSpan)
                     {
-                        row["logTime"] = lastTime + TimeSpan.FromSeconds(1);
+                        row["logTime"] = lastTime + timeSpan;
                         newTable.ImportRow(row);
-                        lastTime = lastTime + TimeSpan.FromSeconds(1);
+                        lastTime = lastTime + timeSpan;
+                    }
+                }
+                else
+                {
+                    newTable.ImportRow(row);
+                    lastTime = row.Field<DateTime>("logTime");
+                }
+                lastRow = row;
+
+                if (tbl.Rows[tbl.Rows.Count - 1] == row && row.Field<DateTime>("logTime") < stopTime)
+                {
+                    while (row.Field<DateTime>("logTime") < stopTime)
+                    {
+                        row["logTime"] = row.Field<DateTime>("logTime") + timeSpan;
+                        newTable.ImportRow(row);
+                    }
+                }
+
+            }
+            //newTable.FillGapsBackwards(numberOfRowsIntable, timeLength, allowedNumberOfRows);
+
+            return newTable;
+        }
+
+
+        private static DataTable FillGapsBackwards(this DataTable tbl, int numberOfRowsIntable, TimeSpan timeLength, int allowedNumberOfRows = 9500)
+        {
+            var sw = Stopwatch.StartNew();
+
+            var reverseTable = tbl.ReverseOrder();
+
+            DataTable newTable = reverseTable.Clone();
+            DataRow lastRow = reverseTable.Rows[0];
+            DateTime lastTime = DateTime.MinValue;
+            var numberOfColumns = tbl.Columns.Count;
+
+            // Calculate timespan for allowedNumberOfRows
+            var timeSpan = TimeSpan.FromSeconds(timeLength.TotalSeconds / allowedNumberOfRows);
+            if (timeSpan < TimeSpan.FromSeconds(1))
+                timeSpan = TimeSpan.FromSeconds(1);
+
+            foreach (DataRow row in reverseTable.Rows)
+            {
+
+                if (lastTime == DateTime.MinValue)
+                {
+                    newTable.ImportRow(row);
+                    lastRow = row;
+                    lastTime = row.Field<DateTime>("logTime");
+                    continue;
+                }
+                for (int i = 1; i < numberOfColumns; i++)
+                {
+                    if (row[i] == DBNull.Value)
+                    {
+                        if (lastRow[i] != DBNull.Value)
+                        {
+                            row[i] = lastRow[i];
+                        }
+                        else
+                            row[i] = 0;
+                    }
+                }
+
+                var rowTime = row.Field<DateTime>("logTime");
+
+                if (rowTime - lastTime > timeSpan)
+                {
+                    while (rowTime >= lastTime + timeSpan)
+                    {
+                        row["logTime"] = lastTime + timeSpan;
+                        newTable.ImportRow(row);
+                        lastTime = lastTime + timeSpan;
                     }
                 }
                 else
@@ -322,7 +356,8 @@ namespace OptimaValue.Wpf
                 }
                 lastRow = row;
             }
-            return newTable;
+
+            return newTable.ReverseOrder();
         }
 
         private static object convertLock = new();

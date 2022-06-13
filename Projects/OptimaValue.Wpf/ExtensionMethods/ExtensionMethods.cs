@@ -83,25 +83,25 @@ namespace OptimaValue.Wpf
             var lastRowUsed = sheet.LastRowUsed().RowNumber();
             sheet.SheetView.FreezeRows(2);
 
-            foreach (var item in series)
-            {
-                if (series.Count > alphabets.Count)
-                    break;
-                var letter = alphabets.Where(x => x.Value == index).FirstOrDefault().Key;
-                sheet.Range($"{letter}1:{letter}{lastRowUsed}").RangeUsed().AddConditionalFormat().DataBar(XLColor.Red)
-                   .LowestValue()
-                   .HighestValue();
+            //foreach (var item in series)
+            //{
+            //    if (series.Count > alphabets.Count)
+            //        break;
+            //    var letter = alphabets.Where(x => x.Value == index).FirstOrDefault().Key;
+            //    sheet.Range($"{letter}1:{letter}{lastRowUsed}").RangeUsed().AddConditionalFormat().DataBar(XLColor.Red)
+            //       .LowestValue()
+            //       .HighestValue();
 
-                sheet.SparklineGroups.Add($"{letter}1", $"{letter}1:{letter}{lastRowUsed}")
-                .SetStyle(XLSparklineTheme.Colorful1)
-                .SetLineWeight(1)
-                .HorizontalAxis
-                .SetVisible(true)
-                .SetColor(XLColor.Red);
+            //    sheet.SparklineGroups.Add($"{letter}1", $"{letter}1:{letter}{lastRowUsed}")
+            //    .SetStyle(XLSparklineTheme.Colorful1)
+            //    .SetLineWeight(1)
+            //    .HorizontalAxis
+            //    .SetVisible(true)
+            //    .SetColor(XLColor.Red);
 
-                index++;
+            //    index++;
 
-            }
+            //}
 
 
 
@@ -119,5 +119,20 @@ namespace OptimaValue.Wpf
 
             return new ObservableCollection<T>(source);
         }
+
+        public static IEnumerable<T> FastReverse<T>(this IList<T> items)
+        {
+            for (int i = items.Count - 1; i >= 0; i--)
+            {
+                yield return items[i];
+            }
+        }
+
+        public static DataTable ReverseOrder(this DataTable dTable)
+        {
+            return dTable.AsEnumerable().Reverse().CopyToDataTable();
+        }
     }
+
+
 }

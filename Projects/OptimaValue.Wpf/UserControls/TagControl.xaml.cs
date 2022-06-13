@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LiveCharts.Geared;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -69,8 +70,6 @@ namespace OptimaValue.Wpf
 
         public static readonly DependencyProperty ActualValueProperty = DependencyProperty.Register("ActualValue",
         typeof(string), typeof(TagControl));
-
-
 
         public LinearGradientBrush TagColor
         {

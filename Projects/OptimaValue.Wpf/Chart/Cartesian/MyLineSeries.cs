@@ -5,6 +5,7 @@ using LiveCharts.Helpers;
 using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
@@ -15,7 +16,7 @@ using System.Windows.Media;
 
 namespace OptimaValue.Wpf
 {
-    public class MyLineSeries
+    public class MyLineSeries : ICloneable
     {
         public Tag Tag;
 
@@ -151,6 +152,7 @@ namespace OptimaValue.Wpf
         public double MaxValueX;
 
 
+
         #region Constructor
         public MyLineSeries(Tag tag)
         {
@@ -198,6 +200,7 @@ namespace OptimaValue.Wpf
             LineSeries.Fill = new SolidColorBrush(Tag.Fill);
         }
 
+
         private void ChartData_OnChartChanged(bool obj)
         {
             GetChartValues();
@@ -240,6 +243,11 @@ namespace OptimaValue.Wpf
 
         }
 
-
+        public object Clone()
+        {
+            var lineSeries = (MyLineSeries)MemberwiseClone();
+            lineSeries.TagControl = TagControl;
+            return lineSeries;
+        }
     }
 }

@@ -11,6 +11,7 @@ namespace OptimaValue.Wpf
         Nothing,
         ChangeColor,
         Stop,
-        UpdateTime
+        UpdateTime,
+        UpdateData
     }
 }

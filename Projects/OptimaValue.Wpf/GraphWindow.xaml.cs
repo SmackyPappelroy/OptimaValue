@@ -33,6 +33,7 @@ using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using GongSolutions.Wpf.DragDrop;
 using System.Collections;
+using System.Collections.Specialized;
 
 namespace OptimaValue.Wpf;
 
@@ -63,6 +64,18 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
     #endregion
 
     #region Properties
+    private int maxPointsPerSeries = 9500;
+    public int MaxPointsPerSeries
+    {
+        get => maxPointsPerSeries;
+        set
+        {
+            if (value > 500 && value < 20000)
+                maxPointsPerSeries = value;
+        }
+    }
+
+
 
     private string actualTime = "";
     public string ActualTime
@@ -136,11 +149,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
 
     public ZoomingOptions Zoom { get; set; } = ZoomingOptions.X;
 
-    private ObservableCollection<MyLineSeries> lineSeriesList;
+    private BindingList<MyLineSeries> lineSeriesList;
     /// <summary>
     /// A line series to plot on the chart
     /// </summary>
-    public ObservableCollection<MyLineSeries> LineSeriesList
+    public BindingList<MyLineSeries> LineSeriesList
     {
         get => lineSeriesList;
         set
@@ -480,7 +493,19 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss");
         EnableButtons();
         StatFilter = StatisticFilter.Max;
-        LineSeriesList.CollectionChanged += LineSeriesList_CollectionChanged;
+        LineSeriesList.ListChanged += LineSeriesList_ListChanged;
+        StatusMessageEvent.OnStatusTextChanged += StatusMessageEvent_OnStatusTextChanged;
+
+
+    }
+
+
+    private void StatusMessageEvent_OnStatusTextChanged(object sender, StatusEventArgs e)
+    {
+        Dispatcher?.Invoke(() =>
+        {
+            StatusText = e.Message;
+        });
     }
 
     private void SetPopupVisibility(Visibility visibility)
@@ -495,7 +520,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void LineSeriesList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    private void LineSeriesList_ListChanged(object sender, ListChangedEventArgs e)
     {
         if (LineSeriesList.Count == 0)
             ActualTime = "";
@@ -630,7 +655,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                taskRunning = true;
                while (true)
                {
-                   if (oldUpdateTime.AddSeconds(1) < DateTime.Now)
+                   if (oldUpdateTime.AddMilliseconds(500) < DateTime.Now)
                    {
                        if (await ChartData.GetChartDataAsync(startDate, stopDate) == null)
                            return;
@@ -638,12 +663,17 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                            {
                                AddTag("", true);
 
-                               ConfigureChart(ChartUpdateAction.UpdateTime);
+                               ConfigureChart(ChartUpdateAction.UpdateData);
 
                                var startDate = new DateTime((long)Series.Chart.AxisX.Min().View.MinValue);
                                var stopDate = new DateTime((long)Series.Chart.AxisX.Max().View.MaxValue);
                                ChartStartDate = startDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
                                ChartStopDate = stopDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
+                               var numberOfObservablePointsInChart = 0;
+                               numberOfObservablePointsInChart = ChartData.ChartTableAllTags.Rows.Count;
+
+                               Debug.WriteLine($"Antal punkter i trend: {numberOfObservablePointsInChart}");
+
                                tokenSource.Cancel();
                            });
 
@@ -672,7 +702,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
 
     private void MyChart_UpdaterTick(object sender)
     {
-
         //if (Mouse.LeftButton != MouseButtonState.Pressed
         // && Mouse.RightButton != MouseButtonState.Pressed
         // && Mouse.MiddleButton != MouseButtonState.Pressed)
@@ -790,7 +819,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
     /// <param name="e"></param>
     private async void AddOnClick(object sender, RoutedEventArgs e)
     {
-
+        var sw = Stopwatch.StartNew();
         if (startDateTime == DateTime.MinValue && stopDateTime == DateTime.MinValue)
         {
             StatusText = "Startdatum och slutdatum är lika";
@@ -808,6 +837,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         if (!AddTag())
             return;
         ConfigureChart();
+        Debug.WriteLine($"AddOnClick: {sw.ElapsedMilliseconds} ms");
     }
 
 
@@ -1150,9 +1180,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                                 timeSpanStop = TimeSpan.FromMinutes(1);
                                 break;
                             case TimeInterval.Min1:
-                                timeSpanStart = TimeSpan.FromMinutes(1) + TimeSpan.FromSeconds(10);
-                                timeSpanStop = TimeSpan.FromSeconds(10);
-                                stopDateTime = DateTime.Now - timeSpanStop;
+                                timeSpanStart = TimeSpan.FromMinutes(2);
+                                timeSpanStop = TimeSpan.FromMinutes(1);
                                 break;
                             default:
                                 break;
@@ -1257,6 +1286,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                 return;
             var serie = Series.Where(x => x.Title == item.Name).FirstOrDefault() as GLineSeries;
             var lineSerie = LineSeriesList.Where(x => x.Tag.Name == item.Name).FirstOrDefault();
+            if (serie != null)
+                return;
             serie.Values.Clear();
             serie.Values.AddRange(gearedValues);
             lineSerie.LineSeries.Values.Clear();
@@ -1302,8 +1333,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
             UpdateTagGraphic();
             return;
         }
-
-        ConfigureXAxisRange(minValueX: minValueX, maxValueX: maxValueX);
+        if (updateAction != ChartUpdateAction.UpdateData)
+            ConfigureXAxisRange(minValueX: minValueX, maxValueX: maxValueX);
 
         foreach (var line in LineSeriesList)
         {
@@ -1328,6 +1359,30 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                 series.Fill = line.LineSeries.Fill;
             }
         }
+        if (updateAction == ChartUpdateAction.UpdateData)
+        {
+            //var newListLineSeries = new ObservableCollection<MyLineSeries>();
+            //foreach (var line in LineSeriesList)
+            //{
+            //    MyLineSeries newLineSeries = (MyLineSeries)line.Clone();
+            //    newListLineSeries.Add(newLineSeries);
+            //}
+            //LineSeriesList.Clear();
+
+            foreach (var item in LineSeriesList)
+            {
+                item.GetChartValues();
+            }
+
+            // TODO: Ändra detta. Enda sättet jag lyckas trigga CollectionChanged. Fixat... använd BindingList
+            var newMylineSeries = new MyLineSeries(new Tag());
+            LineSeriesList.Add(newMylineSeries);
+            LineSeriesList.Remove(newMylineSeries);
+            ConfigureXAxisRange(minValueX: minValueX, maxValueX: maxValueX);
+
+
+        }
+
 
         CalculateMinMaxXY();
 
@@ -1597,6 +1652,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
 
     private void MyChart_LayoutUpdated(object sender, EventArgs e)
     {
+        var sw = Stopwatch.StartNew();
         if (TagsPlottedOnChart == null)
             return;
         if (IsLoaded && NrOfSeriesOnChart > 0)
@@ -1607,12 +1663,15 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
             {
                 ChartStartDate = startDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
                 ChartStopDate = stopDate.ToString("yyyy-MM-dd HH:mm:ss.ff");
-                if (startDate < ChartData.MinDate || stopDate > ChartData.MaxDate)
-                {
-                    OnStartOrStopDateChanged?.Invoke(startDate, stopDate);
-                }
-            }
+                //if (startDate < ChartData.MinDate || stopDate > ChartData.MaxDate)
+                //{
+                OnStartOrStopDateChanged?.Invoke(startDate, stopDate);
+                //    }
+                //}
 
+            }
+            if (sw.ElapsedMilliseconds > 0)
+                Debug.WriteLine($"MyChart_LayoutUpdated: {sw.ElapsedMilliseconds}ms");
         }
     }
 
@@ -1665,7 +1724,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                 Point chartMousePosition = e.GetPosition(chart);
 
                 // Remove visual hover feedback for previous point
-                SelectedChartPoint?.View.OnHoverLeave(SelectedChartPoint);
+                //if (SelectedChartPoint?.View == null)
+                //    return;
+                SelectedChartPoint?.View?.OnHoverLeave(SelectedChartPoint);
 
                 // Find current selected chart point for the first x-axis
                 Point chartPoint = chart.ConvertToChartValues(chartMousePosition);
@@ -1687,6 +1748,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
 
                     var values = (GearedValues<DateTimePoint>)chart.Series[i].Values;
                     var filteredValues = values.Where(x => x.DateTime > minTid && x.DateTime < maxTid);
+                    //if (filteredValues.ToList().Count > 300)
+                    //    continue;
+
                     var gearedValues = new GearedValues<DateTimePoint>(filteredValues);
 
                     DataStatistics dataStatistics = new DataStatistics(StatFilter, gearedValues);
@@ -1908,38 +1972,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         int targetItemIndex = TagControlList.TagControls.IndexOf(targetItem);
         TagControlList.TagControls.Move(sourceItemIndex, targetItemIndex);
 
-        //IList destinationList = dropInfo.TargetCollection.Cast<object>().ToList();
-        //if (destinationList[0] is TagControl)
-        //{
-        //    TagControlList.TagControls.OrderBy(x => insertIndex);
-        //}
-        //var temp = "";
-        //IEnumerable data = ExtractData(dropInfo.Data);
-
-        //if (dropInfo.DragInfo.VisualSource == dropInfo.VisualTarget)
-        //{
-        //    IList sourceList = GetList(dropInfo.DragInfo.SourceCollection);
-
-        //    foreach (object o in data)
-        //    {
-        //        int index = sourceList.IndexOf(o);
-
-        //        if (index != -1)
-        //        {
-        //            sourceList.RemoveAt(index);
-
-        //            if (sourceList == destinationList && index < insertIndex)
-        //            {
-        //                --insertIndex;
-        //            }
-        //        }
-        //    }
-        //}
-
-        //foreach (object o in data)
-        //{
-        //    destinationList.Insert(insertIndex++, o);
-        //}
     }
 
 
