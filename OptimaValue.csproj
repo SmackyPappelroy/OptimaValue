@@ -28,6 +28,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Mina Resurser\cancel_16px.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<COMReference Include="IWshRuntimeLibrary">
 			<WrapperTool>tlbimp</WrapperTool>
 			<VersionMinor>0</VersionMinor>
@@ -52,6 +56,12 @@
 
 	<ItemGroup>
 		<ProjectReference Include="Projects\OptimaValue.Settings\OptimaValue.Config.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Mina Resurser\cancel_16px.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Resource>
 	</ItemGroup>
 
 	<ItemGroup>

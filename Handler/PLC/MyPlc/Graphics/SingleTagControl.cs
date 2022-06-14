@@ -50,7 +50,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 contextMenuStrip.Enabled = false;
                 statsImage.Enabled = true;
             }
-
         }
 
         private void Tag_ReadErrorEvent(object sender, ReadErrorEventArgs e)
@@ -171,6 +170,32 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private void rensaFelToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SingleTag.ClearScanTime();
+        }
+
+        private void pictureBox2_DoubleClick(object sender, EventArgs e)
+        {
+            var result = MessageBox.Show($"Är du säker?", $"Ta bort '{SingleTag.Name}'", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            if (result == DialogResult.Yes)
+            {
+                if (MyPlc.LoggerIsStarted)
+                    return;
+                DeleteTag();
+                OnTagChanged(EventArgs.Empty);
+            }
+        }
+
+        private void txtName_MouseHover(object sender, EventArgs e)
+        {
+            var txt = "";
+            txt = SingleTag.Name;
+            if (!string.IsNullOrWhiteSpace(SingleTag.Description))
+                txt += $"\n{SingleTag.Description}";
+            toolTip1.Show($"{txt}", txtName);
+        }
+
+        private void txtName_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            changeTagMenu_Click(this, EventArgs.Empty);
         }
     }
 }

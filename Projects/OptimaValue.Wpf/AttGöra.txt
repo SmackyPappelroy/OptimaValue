@@ -1,0 +1,2 @@
+﻿1. När man zoomar ut hoppar den ibland ut till max utzoom
+2. Göra punkter man lagt till manuellt i annan färg

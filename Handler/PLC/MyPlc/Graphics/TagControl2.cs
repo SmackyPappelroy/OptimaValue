@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using OptimaValue.Config;
+using System.Threading.Tasks;
 
 namespace OptimaValue
 {
@@ -651,7 +652,6 @@ namespace OptimaValue
             statFormOpen = false;
             statForm.FormClosing -= StatForm_FormClosing;
         }
-
-
     }
 }
+

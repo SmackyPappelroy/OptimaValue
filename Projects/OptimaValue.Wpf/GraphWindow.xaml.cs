@@ -911,6 +911,9 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
             return;
         }
 
+        if (!await ChartData.DoesTagExistBetweenDates(comboTag.SelectedValue.ToString(), startDateTime, stopDateTime))
+            return;
+
         await ChartData.GetChartDataAsync(startDateTime, stopDateTime, FillEmptyValues);
 
         if (!AddTag())
@@ -1495,13 +1498,6 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         }
         if (updateAction == ChartUpdateAction.UpdateData)
         {
-            //var newListLineSeries = new ObservableCollection<MyLineSeries>();
-            //foreach (var line in LineSeriesList)
-            //{
-            //    MyLineSeries newLineSeries = (MyLineSeries)line.Clone();
-            //    newListLineSeries.Add(newLineSeries);
-            //}
-            //LineSeriesList.Clear();
 
             foreach (var item in LineSeriesList)
             {

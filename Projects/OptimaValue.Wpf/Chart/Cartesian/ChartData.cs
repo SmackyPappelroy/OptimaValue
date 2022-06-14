@@ -29,6 +29,7 @@ namespace OptimaValue.Wpf
         private static GraphWindow graphWindow = Master.GetService<GraphWindow>();
 
         public static DataTable ChartTableAllTags;
+        public static DataTable ChartTableAllTagsNoFill;
 
         public static DateTime MinDate => ChartTableAllTags.AsEnumerable().Min(x => x.Field<DateTime>("logTime"));
         public static DateTime MaxDate => ChartTableAllTags.AsEnumerable().Max(x => x.Field<DateTime>("logTime"));
@@ -150,7 +151,10 @@ namespace OptimaValue.Wpf
                 // Timespan is less then previous
                 if (startTime > lastStartTime && stopTime < lastStopTime)
                 {
-                    return ChartTableAllTags;
+                    if (fillEmptyValues)
+                        return ChartTableAllTags;
+                    else
+                        return ChartTableAllTagsNoFill;
                 }
             }
             while (DateTime.Now.Subtract(lastUpdateTime) < TimeSpan.FromMilliseconds(50))
@@ -191,6 +195,7 @@ namespace OptimaValue.Wpf
             }
 
             ChartTableAllTags = new();
+            ChartTableAllTagsNoFill = new();
             DisplayedTags = new();
 
             DataTable tbl = new DataTable();
@@ -210,15 +215,20 @@ namespace OptimaValue.Wpf
 
                 var numberOfRows = Convert.ToInt32((stopTime - startTime).TotalSeconds);
 
-                if (fillEmptyValues)
-                    ChartTableAllTags = ChartTableAllTags.FillGapsForwards(numberOfRows, stopTime - startTime, startTime, stopTime, graphWindow.MaxPointsPerSeries);
+                ChartTableAllTagsNoFill = ChartTableAllTags.Copy();
+
+                ChartTableAllTags = ChartTableAllTags.FillGapsForwards(numberOfRows, stopTime - startTime, startTime, stopTime, graphWindow.MaxPointsPerSeries);
 
                 //CreateStoredProcedure();
 
 
                 Log.Logger.Information($"Tabell med all taggar: {ChartTableAllTags.Rows.Count} stycken");
                 Debug.WriteLine($"Tabell med all taggar: {ChartTableAllTags.Rows.Count} stycken");
-                return ChartTableAllTags;
+
+                if (fillEmptyValues)
+                    return ChartTableAllTags;
+                else
+                    return ChartTableAllTagsNoFill;
             }
             catch (Exception ex)
             {
@@ -407,7 +417,7 @@ namespace OptimaValue.Wpf
                 List<double> list = new List<double>();
                 if (SourceData == null || SourceData.Rows.Count < 1)
                     return list;
-                //IEnumerable<T> enumerable = SourceData.AsEnumerable().Select(RowConverter);
+
                 try
                 {
                     IEnumerable<double> enumerable = SourceData.AsEnumerable().Select(dataRow =>
@@ -497,35 +507,16 @@ namespace OptimaValue.Wpf
             }
         }
 
-        public static bool UpdateDataByDateTime(DateTime startDate, DateTime stopDate)
-        {
-            var tbl = new DataTable();
-            bool result = false;
-            try
-            {
-                tbl = ChartTableAllTags.AsEnumerable().Where(r => r.Field<DateTime>("logTime") >= startDate && r.Field<DateTime>("logTime") <= stopDate).CopyToDataTable();
-                if (tbl.Rows.Count > 0)
-                {
-                    result = true;
-                    ChartTableAllTags = tbl;
-                    OnChartChanged?.Invoke(true);
-                }
-            }
-            catch
-            {
-                result = false;
-            }
-            return result;
-        }
-
-
         private static object addLock = new object();
         public static GearedValues<DateTimePoint> AddSeriesValues(string tagName, DataTable tbl = null, bool fillEmptyValues = false)
         {
             DataTable myTbl = new();
             if (tbl == null)
             {
-                myTbl = ChartTableAllTags;
+                if (fillEmptyValues)
+                    myTbl = ChartTableAllTags;
+                else
+                    myTbl = ChartTableAllTagsNoFill;
             }
             else
                 myTbl = tbl;
@@ -561,7 +552,32 @@ namespace OptimaValue.Wpf
             }
         }
 
+        internal static Task<bool> DoesTagExistBetweenDates(string tagName, DateTime startTime, DateTime stopTime)
+        {
+            try
+            {
+                using SqlConnection con = new SqlConnection(Config.SqlMethods.ConnectionString);
+                con.Open();
+                var query = $"SELECT id FROM {SqlSettings.Databas}.dbo.tagConfig WHERE name = '{tagName}'";
+                using SqlCommand cmd1 = new SqlCommand(query, con);
+                var tagId = (cmd1.ExecuteScalar()).ToString();
 
+                var startTimeParameter = new SqlParameter("@startTime", SqlDbType.DateTime) { Value = startTime };
+                var stopTimeParameter = new SqlParameter("@stopTime", SqlDbType.DateTime) { Value = stopTime };
+                using SqlCommand cmd = new SqlCommand(@$"SELECT COUNT(*) FROM [{SqlSettings.Databas}].[dbo].[logValues] WHERE tag_id = {tagId} and logTime BETWEEN @startTime AND @stopTime", con);
+                cmd.Parameters.Add(startTimeParameter);
+                cmd.Parameters.Add(stopTimeParameter);
+                var result = (int)cmd.ExecuteScalar();
+                if (result == 0)
+                    StatusMessageEvent.RaiseMessage($"Tag ej loggad mellan {startTime} - {stopTime}");
+                return Task.FromResult(result > 0);
+            }
+            catch (Exception)
+            {
+                StatusMessageEvent.RaiseMessage($"Tag ej loggad mellan {startTime} - {stopTime}");
 
+            }
+            return Task.FromResult(false);
+        }
     }
 }
