@@ -50,7 +50,7 @@ namespace OptimaValue.Wpf
                 return;
             if (Values.Count == 0)
                 return;
-            var filteredValues = Values.Where(x => x.Value != double.NaN).ToList();
+            var filteredValues = Values.Where(x => !double.IsNaN(x.Value)).ToList();
             if (filteredValues.Count == 0)
                 return;
 
