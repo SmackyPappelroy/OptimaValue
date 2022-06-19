@@ -14,12 +14,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using OptimaValue.Config;
+using System.Diagnostics;
 
 namespace OptimaValue
 {
     public partial class MasterForm : Form
     {
         #region Properties
+        private List<TagDefinitions> AvailableTags
+        {
+            get
+            {
+                var activePlcs = PlcConfig.PlcList.Where(p => p.ConnectionStatus == ConnectionStatus.Connected);
+                return TagsToLog.AllLogValues.Where(x => x.PlcName == activePlcs.First().PlcName).ToList();
+            }
+        }
+
+        private AutoCompleteStringCollection stringCollection = new AutoCompleteStringCollection();
         private ExtendedPlc activePlc;
         private PlcSettingsControl settingsControl;
         private StatusControl statusControl;
@@ -62,17 +73,33 @@ namespace OptimaValue
 
             SqlForm = new sqlForm();
             SqlForm.FormClosing += SqlForm_FormClosing;
-            debugMenu.Checked = Settings.Default.Debug;
+            debugMenu.Checked = Properties.Settings.Default.Debug;
             notifyIcon.Visible = true;
             notifyIcon.Icon = Resources.icons8_gas_idle;
 
             menuStrip.BackColor = UIColors.ForeGroundLayer1;
             menuQuestion.ForeColor = UIColors.HeaderText;
+            menuTrend.ForeColor = UIColors.HeaderText;
             menuSettings.ForeColor = UIColors.HeaderText;
+            btnStartTrend.ForeColor = UIColors.HeaderText;
             //menuSettings.KeepOpenOnDropdownCheck();
 
             menuSettings.ChangeForeColorMenuItem(Color.Black, UIColors.HeaderText);
             menuQuestion.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
+            menuTrend.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
+            btnStartTrend.MouseHoverMenuItem(Color.DarkGray, UIColors.HeaderText);
+            comboTrend.Visible = false;
+            btnStartTrend.Visible = false;
+
+        }
+
+        private void AddTrendTags()
+        {
+            stringCollection.AddRange(AvailableTags.Select(x => x.Name).ToArray());
+            comboTrend.Items.AddRange(AvailableTags.Select(x => x.Name).ToArray());
+            comboTrend.AutoCompleteCustomSource = stringCollection;
+            comboTrend.AutoCompleteMode = AutoCompleteMode.Suggest;
+            comboTrend.AutoCompleteSource = AutoCompleteSource.CustomSource;
         }
         #endregion
 
@@ -85,8 +112,8 @@ namespace OptimaValue
             btnStop.Visible = false;
             btnStart.Visible = false;
             startStopButtonVisibilityTimer.Start();
-            notifyMenu.Checked = Settings.Default.notify;
-            autoStartTool.Checked = Settings.Default.AutoStart;
+            notifyMenu.Checked = Properties.Settings.Default.notify;
+            autoStartTool.Checked = Properties.Settings.Default.AutoStart;
 
 
             var result = await DatabaseSql.TestConnectionAsync();
@@ -140,8 +167,8 @@ namespace OptimaValue
 
         private void debugMeny_CheckedChanged(object sender, EventArgs e)
         {
-            Settings.Default.Debug = debugMenu.Checked;
-            Settings.Default.Save();
+            Properties.Settings.Default.Debug = debugMenu.Checked;
+            Properties.Settings.Default.Save();
         }
 
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
@@ -213,7 +240,6 @@ namespace OptimaValue
             }
 
             addPlc.Enabled = false;
-
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -518,7 +544,7 @@ namespace OptimaValue
                 return;
             }
             if (e.Created)
-                $"Skapade ny databas {SqlSettings.Databas}".SendStatusMessage();
+                $"Skapade ny databas {Config.Settings.Databas}".SendStatusMessage();
             else
                 $"Sparade inställningarna till SQL".SendStatusMessage();
 
@@ -611,20 +637,20 @@ namespace OptimaValue
             if (obj.LogSeverity == Severity.Error)
             {
                 var tiden = DateTime.UtcNow + Logger.UtcOffset;
-                if (Settings.Default.notify)
+                if (Properties.Settings.Default.notify)
                     notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Error);
                 errorImage.Visible = true;
             }
             else if (obj.LogSeverity == Severity.Warning)
             {
                 var tiden = DateTime.UtcNow + Logger.UtcOffset;
-                if (Settings.Default.notify)
+                if (Properties.Settings.Default.notify)
                     notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Warning);
                 errorImage.Visible = true;
             }
         }
 
-
+        private bool isConnected = false;
         private void OnlineStatusEvent_NewMessage(object sender, OnlineStatusEventArgs e)
         {
             if (InvokeRequired)
@@ -642,6 +668,9 @@ namespace OptimaValue
                         treeNode.ImageIndex = 1;
                         treeNode.SelectedImageIndex = 1;
                     }
+                    isConnected = false;
+                    comboTrend.Visible = false;
+                    btnStartTrend.Visible = false;
                     break;
                 case ConnectionStatus.Connecting:
                     break;
@@ -651,6 +680,12 @@ namespace OptimaValue
                         treeNode.ImageIndex = 2;
                         treeNode.SelectedImageIndex = 2;
                     }
+                    if (!isConnected)
+                    {
+                        comboTrend.Visible = true;
+                        AddTrendTags();
+                    }
+                    isConnected = true;
                     break;
                 case ConnectionStatus.Disconnecting:
                     break;
@@ -688,16 +723,16 @@ namespace OptimaValue
 
         private void notifyMenu_CheckedChanged(object sender, EventArgs e)
         {
-            Settings.Default.notify = notifyMenu.Checked;
-            Settings.Default.Save();
+            Properties.Settings.Default.notify = notifyMenu.Checked;
+            Properties.Settings.Default.Save();
         }
 
         private void autoStartTool_CheckedChanged(object sender, EventArgs e)
         {
-            if (autoStartTool.Checked != Settings.Default.AutoStart)
+            if (autoStartTool.Checked != Properties.Settings.Default.AutoStart)
             {
-                Settings.Default.AutoStart = autoStartTool.Checked;
-                Settings.Default.Save();
+                Properties.Settings.Default.AutoStart = autoStartTool.Checked;
+                Properties.Settings.Default.Save();
                 if (autoStartTool.Checked)
                 {
                     WshShell wshShell = new WshShell();
@@ -731,6 +766,34 @@ namespace OptimaValue
             }
         }
 
+        private void startaTrendToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Config.Settings.Load();
+            if (!Config.Settings.IsTrendRunning)
+                Process.Start(OptimaValue.Config.Settings.OptimaValueWpfFilePath);
+        }
+
+        private void comboTrend_TextChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(comboTrend.Text))
+                return;
+
+            if (stringCollection.Contains(comboTrend.Text))
+            {
+                btnStartTrend.Visible = true;
+            }
+            else
+            {
+                btnStartTrend.Visible = false;
+            }
+        }
+
+        private void btnStartTrend_Click(object sender, EventArgs e)
+        {
+            var tagId = TagsToLog.AllLogValues.Where(x => x.Name == comboTrend.Text).Select(x => x.Id).First();
+            var trendForm = new TrendTag(tagId);
+            trendForm.Show();
+        }
 
 
     }

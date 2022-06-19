@@ -20,16 +20,16 @@ namespace OptimaValue
         }
         private void SettingForm_Load(object sender, EventArgs e)
         {
-            comboServer.Text = SqlSettings.Server != string.Empty ? SqlSettings.Server : string.Empty;
+            comboServer.Text = Config.Settings.Server != string.Empty ? Config.Settings.Server : string.Empty;
             if (comboServer.Text != string.Empty)
             {
                 comboServer.Items.Clear();
                 comboServer.Items.Add(comboServer.Text);
                 comboServer.SelectedIndex = 0;
             }
-            txtDatabas.Text = SqlSettings.Databas;
-            txtUser.Text = SqlSettings.User;
-            txtPassword.Text = SqlSettings.Password;
+            txtDatabas.Text = Config.Settings.Databas;
+            txtUser.Text = Config.Settings.User;
+            txtPassword.Text = Config.Settings.Password;
             DatabaseCreationEvent.CreatedEvent += DatabaseCreationEvent_CreatedEvent;
         }
 
@@ -46,12 +46,12 @@ namespace OptimaValue
             this.ControlBox = false;
             Application.UseWaitCursor = true;
             btnSave.Enabled = false;
-            SqlSettings.User = txtUser.Text;
-            SqlSettings.Password = txtPassword.Text;
-            SqlSettings.Server = comboServer.SelectedItem.ToString();
-            SqlSettings.Databas = txtDatabas.Text;
+            Config.Settings.User = txtUser.Text;
+            Config.Settings.Password = txtPassword.Text;
+            Config.Settings.Server = comboServer.SelectedItem.ToString();
+            Config.Settings.Databas = txtDatabas.Text;
 
-            string serverString = ($"Server={@SqlSettings.Server};Database=master;User Id={SqlSettings.User};Password={SqlSettings.Password}; ");
+            string serverString = ($"Server={Config.Settings.Server};Database=master;User Id={Config.Settings.User};Password={Config.Settings.Password}; ");
 
             if (!await DatabaseSql.TestConnectionAsync(1000, serverString))
             {

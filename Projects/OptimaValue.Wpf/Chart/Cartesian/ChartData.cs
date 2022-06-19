@@ -50,14 +50,14 @@ namespace OptimaValue.Wpf
             sb.AppendLine(@"FROM");
             sb.AppendLine(@"(");
             sb.AppendLine(@"    SELECT name AS [Name]");
-            sb.AppendLine(@$"    FROM  (SELECT {SqlSettings.Databas}.dbo.tagConfig.name, {SqlSettings.Databas}.dbo.logValues.numericValue, {SqlSettings.Databas}.dbo.logValues.logTime");
-            sb.AppendLine($"	FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id WHERE {SqlSettings.Databas}.dbo.logValues.logTime >= '{startDate}' AND {SqlSettings.Databas}.dbo.logValues.logTime <= '{stopDate}') AS p");
+            sb.AppendLine(@$"    FROM  (SELECT {Settings.Databas}.dbo.tagConfig.name, {Settings.Databas}.dbo.logValues.numericValue, {Settings.Databas}.dbo.logValues.logTime");
+            sb.AppendLine($"	FROM {Settings.Databas}.dbo.logValues INNER JOIN {Settings.Databas}.dbo.tagConfig ON {Settings.Databas}.dbo.logValues.tag_id = {Settings.Databas}.dbo.tagConfig.id WHERE {Settings.Databas}.dbo.logValues.logTime >= '{startDate}' AND {Settings.Databas}.dbo.logValues.logTime <= '{stopDate}') AS p");
             sb.AppendLine(@"    GROUP BY [Name]");
             sb.AppendLine(@") AS x;");
             sb.AppendLine(@"SET @sql = N'");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as logTime, '+STUFF(@columns, 1, 2, '')+' FROM (");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as [logTime], [numericValue] AS [numericValue], [name] as [Name] ");
-            sb.AppendLine($"    FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id WHERE {SqlSettings.Databas}.dbo.logValues.logTime >= ''{startDate}'' AND {SqlSettings.Databas}.dbo.logValues.logTime <= ''{stopDate}'') AS j PIVOT (SUM(numericValue) FOR [Name] in ");
+            sb.AppendLine($"    FROM {Settings.Databas}.dbo.logValues INNER JOIN {Settings.Databas}.dbo.tagConfig ON {Settings.Databas}.dbo.logValues.tag_id = {Settings.Databas}.dbo.tagConfig.id WHERE {Settings.Databas}.dbo.logValues.logTime >= ''{startDate}'' AND {Settings.Databas}.dbo.logValues.logTime <= ''{stopDate}'') AS j PIVOT (SUM(numericValue) FOR [Name] in ");
             sb.AppendLine(@"	   ('+STUFF(REPLACE(@columns, ', p.[', ',['), 1, 1, '')+')) AS p;';");
             sb.AppendLine(@"EXEC sp_executesql @sql");
 
@@ -76,14 +76,14 @@ namespace OptimaValue.Wpf
             sb.AppendLine(@"FROM");
             sb.AppendLine(@"(");
             sb.AppendLine(@"    SELECT name AS [Name]");
-            sb.AppendLine(@$"    FROM  (SELECT {SqlSettings.Databas}.dbo.tagConfig.name, {SqlSettings.Databas}.dbo.logValues.numericValue, {SqlSettings.Databas}.dbo.logValues.logTime");
-            sb.AppendLine($"	FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id WHERE {SqlSettings.Databas}.dbo.logValues.logTime > '{lastTime}') AS p");
+            sb.AppendLine(@$"    FROM  (SELECT {Settings.Databas}.dbo.tagConfig.name, {Settings.Databas}.dbo.logValues.numericValue, {Settings.Databas}.dbo.logValues.logTime");
+            sb.AppendLine($"	FROM {Settings.Databas}.dbo.logValues INNER JOIN {Settings.Databas}.dbo.tagConfig ON {Settings.Databas}.dbo.logValues.tag_id = {Settings.Databas}.dbo.tagConfig.id WHERE {Settings.Databas}.dbo.logValues.logTime > '{lastTime}') AS p");
             sb.AppendLine(@"    GROUP BY [Name]");
             sb.AppendLine(@") AS x;");
             sb.AppendLine(@"SET @sql = N'");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as logTime, '+STUFF(@columns, 1, 2, '')+' FROM (");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as [logTime], [numericValue] AS [numericValue], [name] as [Name] ");
-            sb.AppendLine($"    FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id WHERE {SqlSettings.Databas}.dbo.logValues.logTime > ''{lastTime}'') AS j PIVOT (SUM(numericValue) FOR [Name] in ");
+            sb.AppendLine($"    FROM {Settings.Databas}.dbo.logValues INNER JOIN {Settings.Databas}.dbo.tagConfig ON {Settings.Databas}.dbo.logValues.tag_id = {Settings.Databas}.dbo.tagConfig.id WHERE {Settings.Databas}.dbo.logValues.logTime > ''{lastTime}'') AS j PIVOT (SUM(numericValue) FOR [Name] in ");
             sb.AppendLine(@"	   ('+STUFF(REPLACE(@columns, ', p.[', ',['), 1, 1, '')+')) AS p;';");
             sb.AppendLine(@"EXEC sp_executesql @sql");
 
@@ -102,14 +102,14 @@ namespace OptimaValue.Wpf
             sb.AppendLine(@"FROM");
             sb.AppendLine(@"(");
             sb.AppendLine(@"    SELECT name AS [Name]");
-            sb.AppendLine(@$"    FROM  (SELECT {SqlSettings.Databas}.dbo.tagConfig.name, {SqlSettings.Databas}.dbo.logValues.numericValue, {SqlSettings.Databas}.dbo.logValues.logTime");
-            sb.AppendLine(@$"	FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id) AS p");
+            sb.AppendLine(@$"    FROM  (SELECT {Settings.Databas}.dbo.tagConfig.name, {Settings.Databas}.dbo.logValues.numericValue, {Settings.Databas}.dbo.logValues.logTime");
+            sb.AppendLine(@$"	FROM {Settings.Databas}.dbo.logValues INNER JOIN {Settings.Databas}.dbo.tagConfig ON {Settings.Databas}.dbo.logValues.tag_id = {Settings.Databas}.dbo.tagConfig.id) AS p");
             sb.AppendLine(@"    GROUP BY [Name]");
             sb.AppendLine(@") AS x;");
             sb.AppendLine(@"SET @sql = N'");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as logTime, '+STUFF(@columns, 1, 2, '')+' FROM (");
             sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as [logTime], [numericValue] AS [numericValue], [name] as [Name] ");
-            sb.AppendLine(@$"    FROM [{SqlSettings.Databas}].[dbo].[vLogValues]) AS j PIVOT (SUM(numericValue) FOR [Name] in ");
+            sb.AppendLine(@$"    FROM [{Settings.Databas}].[dbo].[vLogValues]) AS j PIVOT (SUM(numericValue) FOR [Name] in ");
             sb.AppendLine(@"	   ('+STUFF(REPLACE(@columns, ', p.[', ',['), 1, 1, '')+')) AS p;';");
             sb.AppendLine(@"EXEC sp_executesql @sql");
             sb.AppendLine(@"END");
@@ -258,7 +258,7 @@ namespace OptimaValue.Wpf
                 using SqlConnection con = new SqlConnection(Config.SqlMethods.ConnectionString);
                 var startTimeParameter = new SqlParameter("@startTime", SqlDbType.DateTime) { Value = startTime };
                 var stopTimeParameter = new SqlParameter("@stopTime", SqlDbType.DateTime) { Value = stopTime };
-                using SqlCommand cmd = new SqlCommand(@$"SELECT COUNT(*) FROM [{SqlSettings.Databas}].[dbo].[logValues] WHERE logTime BETWEEN @startTime AND @stopTime", con);
+                using SqlCommand cmd = new SqlCommand(@$"SELECT COUNT(*) FROM [{Settings.Databas}].[dbo].[logValues] WHERE logTime BETWEEN @startTime AND @stopTime", con);
                 cmd.Parameters.Add(startTimeParameter);
                 cmd.Parameters.Add(stopTimeParameter);
                 con.Open();
@@ -558,13 +558,13 @@ namespace OptimaValue.Wpf
             {
                 using SqlConnection con = new SqlConnection(Config.SqlMethods.ConnectionString);
                 con.Open();
-                var query = $"SELECT id FROM {SqlSettings.Databas}.dbo.tagConfig WHERE name = '{tagName}'";
+                var query = $"SELECT id FROM {Settings.Databas}.dbo.tagConfig WHERE name = '{tagName}'";
                 using SqlCommand cmd1 = new SqlCommand(query, con);
                 var tagId = (cmd1.ExecuteScalar()).ToString();
 
                 var startTimeParameter = new SqlParameter("@startTime", SqlDbType.DateTime) { Value = startTime };
                 var stopTimeParameter = new SqlParameter("@stopTime", SqlDbType.DateTime) { Value = stopTime };
-                using SqlCommand cmd = new SqlCommand(@$"SELECT COUNT(*) FROM [{SqlSettings.Databas}].[dbo].[logValues] WHERE tag_id = {tagId} and logTime BETWEEN @startTime AND @stopTime", con);
+                using SqlCommand cmd = new SqlCommand(@$"SELECT COUNT(*) FROM [{Settings.Databas}].[dbo].[logValues] WHERE tag_id = {tagId} and logTime BETWEEN @startTime AND @stopTime", con);
                 cmd.Parameters.Add(startTimeParameter);
                 cmd.Parameters.Add(stopTimeParameter);
                 var result = (int)cmd.ExecuteScalar();

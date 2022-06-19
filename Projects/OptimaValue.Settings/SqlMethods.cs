@@ -11,7 +11,7 @@ namespace OptimaValue.Config
     public static class SqlMethods
     {
         public static string Server { get; private set; } = "";
-        public static string ConnectionString => ($"Server={Server};Database={SqlSettings.Databas};User Id={SqlSettings.User};Password={SqlSettings.Password};;TrustServerCertificate=true; ");
+        public static string ConnectionString => ($"Server={Server};Database={Settings.Databas};User Id={Settings.User};Password={Settings.Password};;TrustServerCertificate=true; ");
 
         public static string CreateConnectionString()
         {
@@ -37,11 +37,11 @@ namespace OptimaValue.Config
                 }
             }
 
-            if (string.IsNullOrEmpty(SqlSettings.Databas) || string.IsNullOrEmpty(SqlSettings.User) || string.IsNullOrEmpty(SqlSettings.Password))
+            if (string.IsNullOrEmpty(Settings.Databas) || string.IsNullOrEmpty(Settings.User) || string.IsNullOrEmpty(Settings.Password))
             {
-                SqlSettings.Databas = "MCValulog";
-                SqlSettings.User = "sa";
-                SqlSettings.Password = "sa";
+                Settings.Databas = "MCValuelog";
+                Settings.User = "sa";
+                Settings.Password = "sa";
             }
 
 

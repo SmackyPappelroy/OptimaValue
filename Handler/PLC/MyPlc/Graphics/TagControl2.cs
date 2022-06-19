@@ -580,7 +580,7 @@ namespace OptimaValue
 
             foreach (var tag in newTags)
             {
-                var query = $"INSERT INTO {SqlSettings.Databas}.dbo.tagConfig ";
+                var query = $"INSERT INTO {Settings.Databas}.dbo.tagConfig ";
                 query += $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
                 query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
                 query += $"VALUES ('{tag.Active}','{tag.Name}','{tag.Description}','{tag.LogType}','{tag.TimeOfDay}',";
@@ -599,7 +599,7 @@ namespace OptimaValue
         {
             foreach (var tag in list)
             {
-                var query = $"UPDATE {SqlSettings.Databas}.dbo.tagConfig ";
+                var query = $"UPDATE {Settings.Databas}.dbo.tagConfig ";
                 query += $"SET active='{tag.Active}',name='{tag.Name}',logType='{tag.LogType}',timeOfDay='{tag.TimeOfDay}'";
                 query += $",deadband={tag.Deadband},plcName='{tag.PlcName}',description='{tag.Description}',varType='{tag.VarType}',blockNr={tag.BlockNr}" +
                     $",dataType='{tag.DataType}',startByte={tag.StartByte},nrOfElements={tag.NrOfElements}" +

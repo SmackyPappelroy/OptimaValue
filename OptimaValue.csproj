@@ -50,6 +50,7 @@
 	<ItemGroup>
 		<PackageReference Include="CsvHelper" Version="27.2.1" />
 		<PackageReference Include="EntityFramework" Version="6.4.4" />
+		<PackageReference Include="LiveCharts.WinForms.NetCore3" Version="0.9.7" />
 		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46521.71" />
 		<PackageReference Include="S7netplus" Version="0.13.0" />
 	</ItemGroup>

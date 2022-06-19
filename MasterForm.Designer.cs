@@ -53,7 +53,10 @@
             this.debugMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.autoStartTool = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuTrend = new System.Windows.Forms.ToolStripMenuItem();
             this.menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
+            this.comboTrend = new System.Windows.Forms.ToolStripComboBox();
+            this.btnStartTrend = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.databaseImageList = new System.Windows.Forms.ImageList(this.components);
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
@@ -292,11 +295,14 @@
             this.menuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuSettings,
-            this.menuQuestion});
+            this.menuTrend,
+            this.menuQuestion,
+            this.comboTrend,
+            this.btnStartTrend});
             this.menuStrip.Location = new System.Drawing.Point(0, 0);
             this.menuStrip.Name = "menuStrip";
             this.menuStrip.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip.Size = new System.Drawing.Size(1228, 24);
+            this.menuStrip.Size = new System.Drawing.Size(1228, 32);
             this.menuStrip.TabIndex = 6;
             this.menuStrip.Text = "menuStrip1";
             // 
@@ -308,7 +314,7 @@
             this.notifyMenu,
             this.autoStartTool});
             this.menuSettings.Name = "menuSettings";
-            this.menuSettings.Size = new System.Drawing.Size(84, 20);
+            this.menuSettings.Size = new System.Drawing.Size(84, 28);
             this.menuSettings.Text = "Inställningar";
             // 
             // databasToolStripMenuItem
@@ -342,13 +348,34 @@
             this.autoStartTool.Text = "Autostart";
             this.autoStartTool.CheckedChanged += new System.EventHandler(this.autoStartTool_CheckedChanged);
             // 
+            // menuTrend
+            // 
+            this.menuTrend.Name = "menuTrend";
+            this.menuTrend.Size = new System.Drawing.Size(80, 28);
+            this.menuTrend.Text = "Starta trend";
+            this.menuTrend.Click += new System.EventHandler(this.startaTrendToolStripMenuItem_Click);
+            // 
             // menuQuestion
             // 
             this.menuQuestion.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.menuQuestion.Name = "menuQuestion";
-            this.menuQuestion.Size = new System.Drawing.Size(25, 20);
+            this.menuQuestion.Size = new System.Drawing.Size(25, 28);
             this.menuQuestion.Text = "?";
             this.menuQuestion.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
+            // 
+            // comboTrend
+            // 
+            this.comboTrend.Name = "comboTrend";
+            this.comboTrend.Size = new System.Drawing.Size(121, 28);
+            this.comboTrend.TextChanged += new System.EventHandler(this.comboTrend_TextChanged);
+            // 
+            // btnStartTrend
+            // 
+            this.btnStartTrend.Image = ((System.Drawing.Image)(resources.GetObject("btnStartTrend.Image")));
+            this.btnStartTrend.Name = "btnStartTrend";
+            this.btnStartTrend.Size = new System.Drawing.Size(95, 28);
+            this.btnStartTrend.Text = "Visa trend";
+            this.btnStartTrend.Click += new System.EventHandler(this.btnStartTrend_Click);
             // 
             // notifyIcon
             // 
@@ -428,5 +455,8 @@
         private System.Windows.Forms.ImageList databaseImageList;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.ToolStripMenuItem autoStartTool;
+        private System.Windows.Forms.ToolStripMenuItem menuTrend;
+        private System.Windows.Forms.ToolStripComboBox comboTrend;
+        private System.Windows.Forms.ToolStripMenuItem btnStartTrend;
     }
 }

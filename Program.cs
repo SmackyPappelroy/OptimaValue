@@ -19,7 +19,8 @@ static class Program
         if (createdNew)
         {
             Apps.Logger = new FileLogger(@"C:\OptimaValue\", true);
-            SqlSettings.Load();
+            Settings.Load();
+            Settings.OptimaValueFilePath = Application.ExecutablePath;
 #if RELEASE
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 #endif

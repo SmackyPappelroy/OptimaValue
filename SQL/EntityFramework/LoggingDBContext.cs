@@ -11,7 +11,7 @@ namespace OptimaValue
         public DbSet<plcConfig> plcConfig { get; set; }
         public DbSet<tagConfig> tagConfig { get; set; }
 
-        public LoggingDBContext() : base(SqlSettings.ConnectionString)
+        public LoggingDBContext() : base(Settings.ConnectionString)
         {
         }
 

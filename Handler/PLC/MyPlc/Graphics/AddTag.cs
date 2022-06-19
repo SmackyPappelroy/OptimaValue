@@ -399,7 +399,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             var deadband = paraDeadband.ParameterValue.Replace(",", ".");
 
-            var query = $"INSERT INTO {SqlSettings.Databas}.dbo.tagConfig ";
+            var query = $"INSERT INTO {Settings.Databas}.dbo.tagConfig ";
             query += $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
             query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
             query += $"VALUES ('{checkActive.Checked}','{paraName.ParameterValue}','{paraDescription.ParameterValue}','{paraLogType.comboBoxen.SelectedItem}','{paraLogTime.ParameterValue}',";
@@ -478,7 +478,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             var temp = paraDeadband.ParameterValue.Replace(',', '.');
 
-            var query = $"UPDATE {SqlSettings.Databas}.dbo.tagConfig ";
+            var query = $"UPDATE {Settings.Databas}.dbo.tagConfig ";
             query += $"SET active='{checkActive.Checked}',name='{paraName.ParameterValue}',description='{paraDescription.ParameterValue}',logType='{paraLogType.comboBoxen.SelectedItem}',timeOfDay='{paraLogTime.ParameterValue}'";
             query += $",deadband={temp},plcName='{PlcName}',varType='{paraVarType.comboBoxen.SelectedItem}',blockNr={int.Parse(paraBlockNr.ParameterValue)}" +
                 $",dataType='{paraDataType.comboBoxen.SelectedItem}',startByte={int.Parse(paraStartAddress.ParameterValue)},nrOfElements={int.Parse(paraNrOfValues.ParameterValue)}" +

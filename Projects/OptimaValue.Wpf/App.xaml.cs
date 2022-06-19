@@ -31,6 +31,12 @@ namespace OptimaValue.Wpf
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+            bool createdNew;
+
+            using Mutex mutex = new Mutex(true, "OptimaValueWpf", out createdNew);
+            if (!createdNew)
+                Current.Shutdown();
+
             try
             {
                 //throw new NotImplementedException();

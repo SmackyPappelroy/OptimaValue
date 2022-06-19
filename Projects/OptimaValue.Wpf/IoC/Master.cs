@@ -5,6 +5,7 @@ using Serilog;
 using Serilog.Events;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -55,7 +56,11 @@ namespace OptimaValue.Wpf
     {
         public static Master Setup(this Master master)
         {
-            SqlSettings.Load();
+            // Find project file path
+            var filePath = Process.GetCurrentProcess().MainModule.FileName;
+            Settings.Load();
+            Settings.OptimaValueWpfFilePath = filePath;
+            Settings.IsTrendRunning = true;
             master.host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
@@ -74,6 +79,7 @@ namespace OptimaValue.Wpf
         {
             try
             {
+                Settings.IsTrendRunning = false;
                 Log.CloseAndFlush();
                 await master.host.StopAsync();
             }

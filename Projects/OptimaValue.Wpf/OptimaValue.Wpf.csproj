@@ -10,13 +10,10 @@
 	<ItemGroup>
 	  <None Remove="icons8_area_chart_64.png" />
 	  <None Remove="icons8_gas_idle_64.png" />
-	  <None Remove="Images\average_48px.png" />
-	  <None Remove="Images\maximum_48px.png" />
-	  <None Remove="Images\minimum_value_48px.png" />
-	  <None Remove="Images\save_48px.png" />
-	  <None Remove="Resurser\color_64px.png" />
-	  <None Remove="Resurser\end_100px.png" />
-	  <None Remove="Resurser\excel_64px.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Properties\PublishProfiles\FolderProfile.pubxml.user" />
 	</ItemGroup>
 
 	<ItemGroup>

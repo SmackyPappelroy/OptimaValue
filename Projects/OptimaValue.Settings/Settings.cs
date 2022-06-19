@@ -14,9 +14,14 @@ namespace OptimaValue.Config
         public string? Database { get; set; }
         public string? User { get; set; }
         public string? Password { get; set; }
+        public string? OptimaValueFilePath { get; set; }
+        public string? OptimaValueWpfFilePath { get; set; }
+        public bool IsTrendRunning { get; set; }
+        public bool IsOptimaValueRunning { get; set; }
+
     }
 
-    public static class SqlSettings
+    public static class Settings
     {
         public static object lockObject = new();
 
@@ -29,7 +34,63 @@ namespace OptimaValue.Config
         private static readonly string fileName = "SqlSettings.json";
         private static string fullPathName => filePath + "\\" + fileName;
 
-        public static string ConnectionString => ($"Server={@SqlSettings.Server};Database={SqlSettings.Databas};User Id={SqlSettings.User};Password={SqlSettings.Password}; ");
+        public static string ConnectionString => ($"Server={Settings.Server};Database={Settings.Databas};User Id={Settings.User};Password={Settings.Password}; ");
+
+        private static bool isOptimaValueRunning;
+        public static bool IsOptimaValueRunning
+        {
+            get
+            {
+                return isOptimaValueRunning;
+            }
+            set
+            {
+                isOptimaValueRunning = value;
+                Save();
+            }
+        }
+
+        private static bool isTrendRunning;
+        public static bool IsTrendRunning
+        {
+            get
+            {
+                return isTrendRunning;
+            }
+            set
+            {
+                isTrendRunning = value;
+                Save();
+            }
+        }
+
+        private static string? optimaValueFilePath;
+        public static string OptimaValueFilePath
+        {
+            get
+            {
+                return optimaValueFilePath;
+            }
+            set
+            {
+                optimaValueFilePath = value;
+                Save();
+            }
+        }
+
+        private static string? optimaValueWpfFilePath;
+        public static string OptimaValueWpfFilePath
+        {
+            get
+            {
+                return optimaValueWpfFilePath;
+            }
+            set
+            {
+                optimaValueWpfFilePath = value;
+                Save();
+            }
+        }
 
         private static string? server;
         public static string Server
@@ -95,7 +156,11 @@ namespace OptimaValue.Config
                 Server = Server,
                 Database = Databas,
                 User = User,
-                Password = Password
+                Password = Password,
+                OptimaValueFilePath = OptimaValueFilePath,
+                OptimaValueWpfFilePath = OptimaValueWpfFilePath,
+                IsTrendRunning = IsTrendRunning,
+                IsOptimaValueRunning = IsOptimaValueRunning
             };
 
             File.WriteAllText(fullPathName, JsonSerializer.Serialize(settings));
@@ -114,6 +179,10 @@ namespace OptimaValue.Config
                     Databas = settings.Database;
                     User = settings.User;
                     Password = settings.Password;
+                    OptimaValueFilePath = settings.OptimaValueFilePath;
+                    OptimaValueWpfFilePath = settings.OptimaValueWpfFilePath;
+                    IsTrendRunning = settings.IsTrendRunning;
+                    IsOptimaValueRunning = settings.IsOptimaValueRunning;
                 }
                 else
                 {
@@ -122,7 +191,11 @@ namespace OptimaValue.Config
                         Server = string.Empty,
                         Database = string.Empty,
                         User = string.Empty,
-                        Password = string.Empty
+                        Password = string.Empty,
+                        OptimaValueFilePath = string.Empty,
+                        OptimaValueWpfFilePath = string.Empty,
+                        IsTrendRunning = false,
+                        IsOptimaValueRunning = false
                     };
                     File.WriteAllText(fullPathName, JsonSerializer.Serialize(settings));
                 }

@@ -522,14 +522,12 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         StopTimeString = "23:59";
         DataContext = this;
         FormatterY = val => val.ToString("0.000");
-        Series = new SeriesCollection();
         FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss");
+        Series = new SeriesCollection();
         EnableButtons();
         StatFilter = StatisticFilter.Max;
         LineSeriesList.ListChanged += LineSeriesList_ListChanged;
         StatusMessageEvent.OnStatusTextChanged += StatusMessageEvent_OnStatusTextChanged;
-
-
     }
 
 
@@ -754,7 +752,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
     {
         if (sqlStatus == SqlStatus.Connected)
         {
-            var queryMaxTid = $"SELECT MAX(logTime) FROM {SqlSettings.Databas}.dbo.logValues";
+            var queryMaxTid = $"SELECT MAX(logTime) FROM {Settings.Databas}.dbo.logValues";
 
             using SqlConnection con = new SqlConnection(SqlMethods.ConnectionString);
             try
@@ -763,17 +761,17 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                 using SqlCommand cmd2 = new SqlCommand(queryMaxTid, con);
                 StopDate = (DateTime)cmd2.ExecuteScalar();
 
-                // Sätt min tid till en vecka bakåt
-                var minTid = StopDate.Subtract(TimeSpan.FromDays(7));
+                // Sätt min tid till en dag bakåt
+                var minTid = StopDate.Subtract(TimeSpan.FromDays(1));
                 var minTidString = minTid.ToString();
 
-                var queryMinTid = $"SELECT top 1 logTime FROM {SqlSettings.Databas}.dbo.logValues WHERE logTime <= '{minTidString}' order by logTime desc";
+                var queryMinTid = $"SELECT top 1 logTime FROM {Settings.Databas}.dbo.logValues WHERE logTime <= '{minTidString}' order by logTime desc";
 
                 using SqlCommand cmd = new SqlCommand(queryMinTid, con);
                 var result = cmd.ExecuteScalar();
                 if (result == null)
                 {
-                    queryMinTid = $"SELECT top 1 logTime FROM {SqlSettings.Databas}.dbo.logValues where logTime between '{minTid}' and '{StopDate}' order by logTime asc";
+                    queryMinTid = $"SELECT top 1 logTime FROM {Settings.Databas}.dbo.logValues where logTime between '{minTid}' and '{StopDate}' order by logTime asc";
                     using SqlCommand cmd3 = new SqlCommand(queryMinTid, con);
                     result = cmd3.ExecuteScalar();
                 }
@@ -794,7 +792,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
     /// <returns></returns>
     private async Task GetAvailableTags()
     {
-        var query = $"SELECT DISTINCT {SqlSettings.Databas}.dbo.tagConfig.name,{SqlSettings.Databas}.dbo.tagConfig.description,{SqlSettings.Databas}.dbo.tagConfig.tagUnit FROM {SqlSettings.Databas}.dbo.logValues INNER JOIN {SqlSettings.Databas}.dbo.tagConfig ON {SqlSettings.Databas}.dbo.logValues.tag_id = {SqlSettings.Databas}.dbo.tagConfig.id";
+        var query = $"SELECT DISTINCT {Settings.Databas}.dbo.tagConfig.name,{Settings.Databas}.dbo.tagConfig.description,{Settings.Databas}.dbo.tagConfig.tagUnit FROM {Settings.Databas}.dbo.logValues INNER JOIN {Settings.Databas}.dbo.tagConfig ON {Settings.Databas}.dbo.logValues.tag_id = {Settings.Databas}.dbo.tagConfig.id";
         var connectionString = Config.SqlMethods.ConnectionString;
         //#if DEBUG
         //        connectionString = (@"Server=DESKTOP-4OD098D\MINSERVER;Database=MCValueLogOrig;User Id=sa;Password=sa; ");
@@ -1382,7 +1380,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
     {
         if (sqlStatus == SqlStatus.Connected)
         {
-            var queryMaxTid = $"SELECT MAX(logTime) FROM {SqlSettings.Databas}.dbo.logValues";
+            var queryMaxTid = $"SELECT MAX(logTime) FROM {Settings.Databas}.dbo.logValues";
             using SqlConnection con = new SqlConnection(SqlMethods.ConnectionString);
             try
             {
