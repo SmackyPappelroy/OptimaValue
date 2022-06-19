@@ -36,6 +36,8 @@ public class TrendModel
     public TrendTag windowsForm { get; init; }
     public CancellationTokenSource source = new CancellationTokenSource();
 
+    public bool HasDecimal => ChartValuesDateTimePoints == null ? false : ChartValuesDateTimePoints.Any(x => !(x.Value % 1 == 0));
+
     public Func<double, string> FormatterY { get; set; }
     public Func<double, string> FormatterX { get; set; }
     public int NumberOfValues => ChartValuesDateTimePoints.Count;
@@ -52,6 +54,7 @@ public class TrendModel
     public double MaxValueY { get; private set; }
     public SolidColorBrush Stroke { get; private set; }
     public SolidColorBrush Fill { get; private set; }
+    public bool PlayActive { get; set; } = true;
 
 
     public TrendModel(int id, TimeSpan duration)
@@ -105,7 +108,7 @@ public class TrendModel
 
                 GetNewSqlData();
 
-                if (SqlValues.Rows.Count > 1)
+                if (SqlValues.Rows.Count > 1 && PlayActive)
                     UpdateChart();
 
                 if (internalDuration != Duration)
@@ -231,6 +234,8 @@ public class TrendModel
     internal async void WindowsForm_Load(object sender, EventArgs e)
     {
         windowsForm.txtTimeSpan.Text = Duration.ToString();
+        windowsForm.txtStartTime.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        windowsForm.txtStopTime.Text = DateTime.Now.Add(TimeSpan.FromSeconds(30)).ToString("yyyy-MM-dd HH:mm:ss");
 
         await Task.Run(async () =>
         {
@@ -256,14 +261,27 @@ public class TrendModel
         if (!TimeSpan.TryParse(value, out TimeSpan result))
         {
             e.Cancel = true;
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "Invalid timespan");
             return;
         }
-        if (result > TimeSpan.Zero)
+        if (result > TimeSpan.FromSeconds(20))
         {
             internalDuration = result;
+            windowsForm.errorProvider1.Clear();
             windowsForm.Focus();
         }
+        else
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "För lågt spann");
 
+    }
+
+    internal void Button1_Click(object sender, EventArgs e)
+    {
+        PlayActive = !PlayActive;
+        if (PlayActive)
+            windowsForm.btnPlay.ImageIndex = 0;
+        else
+            windowsForm.btnPlay.ImageIndex = 1;
     }
 }
 
@@ -279,6 +297,7 @@ public static class TrendExtensions
         windowsForm.Load += trendModel.WindowsForm_Load;
         windowsForm.FormClosing += trendModel.WindowsForm_FormClosing;
         windowsForm.txtTimeSpan.Validating += trendModel.TxtTimeSpan_Validating;
+        windowsForm.btnPlay.Click += trendModel.Button1_Click;
         return trendModel;
     }
 

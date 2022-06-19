@@ -31,6 +31,7 @@ namespace OptimaValue
             chart.DisableAnimations = true;
             trendModel = trendModel.Create(this, tagId, TimeSpan.FromSeconds(30));
             trendModel.OnValuesUpdated += TrendModel_OnValuesUpdated;
+            Text = trendModel.TagName;
         }
 
         private void TrendModel_OnValuesUpdated(bool obj)
@@ -53,7 +54,7 @@ namespace OptimaValue
                     txtStartTime.Text = startTime.ToString("yyyy-MM-dd HH:mm:ss");
                     txtStopTime.Text = stopTime.ToString("yyyy-MM-dd HH:mm:ss");
                     lblTimeSpan.Text = (stopTime - startTime).ToString();
-                    Text = trendModel.TagName;
+
                 }
 
                 if (trendModel.MinValueX < trendModel.MaxValueX)
@@ -68,6 +69,15 @@ namespace OptimaValue
             });
         }
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData.HasFlag(Keys.Enter))
+            {
+                SelectNextControl(ActiveControl, true, true, true, true);
+                return true; //Stops the beeping
+            }
 
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
     }
 }
