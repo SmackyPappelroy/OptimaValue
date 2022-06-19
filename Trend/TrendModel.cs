@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -28,11 +29,13 @@ public class TrendModel
     /// Points to map to the Lineseries in the trend
     /// </summary>
     public ChartValues<DateTimePoint> ChartValuesDateTimePoints { get; set; }
+    public ChartValues<DateTimePoint> ChartSetpointDateTimePoints { get; set; } = new();
     /// <summary>
     /// Values from Sql
     /// </summary>
     public List<DateTimePoint> DateTimePointsToTrend { get; private set; }
     public LineSeries LineSeries { get; set; }
+    public LineSeries LineSeriesSetpoint { get; set; }
     public TrendTag windowsForm { get; init; }
     public CancellationTokenSource source = new CancellationTokenSource();
 
@@ -55,6 +58,9 @@ public class TrendModel
     public SolidColorBrush Stroke { get; private set; }
     public SolidColorBrush Fill { get; private set; }
     public bool PlayActive { get; set; } = true;
+    public double Setpoint { get; private set; } = double.MinValue;
+    public double Minimum { get; private set; } = double.MinValue;
+    public double Maximum { get; private set; } = double.MaxValue;
 
 
     public TrendModel(int id, TimeSpan duration)
@@ -85,7 +91,21 @@ public class TrendModel
         {
             Fill = Fill,
             Stroke = Stroke,
-            Title = TagName
+            Title = TagName,
+            AreaLimit = 0,
+            PointGeometry = DefaultGeometries.Circle,
+            PointGeometrySize = 10,
+            StrokeThickness = 2,
+        };
+        LineSeriesSetpoint = new LineSeries()
+        {
+            Values = ChartSetpointDateTimePoints,
+            Stroke = Brushes.Red,
+            StrokeThickness = 2,
+            PointGeometry = null,
+            LineSmoothness = 0,
+            StrokeDashArray = new DoubleCollection() { 2, 2 },
+            Title = "Setpoint"
         };
         Duration = internalDuration = duration;
     }
@@ -138,13 +158,38 @@ public class TrendModel
 
                 windowsForm.Invoke((MethodInvoker)delegate
                 {
-                    DateTimePointsToTrend = SqlValues.DataTableToDateTimePoints(Duration, TimeSpan.FromSeconds(30));
+                    DateTimePointsToTrend = SqlValues.DataTableToDateTimePoints(Duration, TimeSpan.FromSeconds(15));
                     if (DateTimePointsToTrend != null)
                     {
                         ChartValuesDateTimePoints.Clear();
                         if (DateTimePointsToTrend.Count != 0)
                         {
                             ChartValuesDateTimePoints.AddRange(DateTimePointsToTrend);
+
+                            // No decimals
+                            if (DateTimePointsToTrend.Any(x => (x.Value % 1 == 0)))
+                            {
+                                FormatterY = val => val.ToString("0");
+
+                            }
+                            else
+                                FormatterY = val => val.ToString("0.0");
+
+
+                            if (Setpoint != double.MinValue)
+                            {
+                                ChartSetpointDateTimePoints.Clear();
+                                foreach (var item in DateTimePointsToTrend)
+                                {
+                                    DateTime dateTime = item.DateTime;
+
+                                    ChartSetpointDateTimePoints.Add(new DateTimePoint(dateTime, Setpoint));
+                                }
+                            }
+                            else if (ChartSetpointDateTimePoints.Count > 0)
+                            {
+                                ChartSetpointDateTimePoints.Clear();
+                            }
 
                             MinValueX = ChartValuesDateTimePoints.Min(x => x.DateTime.Ticks);
                             MaxValueX = ChartValuesDateTimePoints.Max(x => x.DateTime.Ticks);
@@ -237,6 +282,7 @@ public class TrendModel
         windowsForm.txtStartTime.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         windowsForm.txtStopTime.Text = DateTime.Now.Add(TimeSpan.FromSeconds(30)).ToString("yyyy-MM-dd HH:mm:ss");
 
+
         await Task.Run(async () =>
         {
             await StartUpdaterAsync(source);
@@ -275,6 +321,81 @@ public class TrendModel
 
     }
 
+    internal void TxtSetpoint_Validating(object sender, CancelEventArgs e)
+    {
+        var value = ((TextBox)sender).Text;
+        if (string.IsNullOrEmpty(value))
+        {
+            Setpoint = double.MinValue;
+            return;
+        }
+        // Remove whitespace
+        value = value.Replace(" ", "");
+        if (!double.TryParse(value, out double result))
+        {
+            e.Cancel = true;
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "Fel format");
+            return;
+        }
+        Setpoint = result;
+        windowsForm.errorProvider1.Clear();
+        windowsForm.Focus();
+    }
+
+    internal void TxtMax_Validating(object sender, CancelEventArgs e)
+    {
+        var value = ((TextBox)sender).Text;
+        if (string.IsNullOrEmpty(value))
+        {
+            Maximum = double.MaxValue;
+            return;
+        }
+        // Remove whitespace
+        value = value.Replace(" ", "");
+        if (!double.TryParse(value, out double result))
+        {
+            e.Cancel = true;
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "Fel format");
+            return;
+        }
+        else if (result < Minimum)
+        {
+            e.Cancel = true;
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "Måste vara större än minimum");
+            return;
+        }
+        Maximum = result;
+        windowsForm.errorProvider1.Clear();
+        windowsForm.Focus();
+    }
+
+    internal void TxtMin_Validating(object sender, CancelEventArgs e)
+    {
+        var value = ((TextBox)sender).Text;
+        if (string.IsNullOrEmpty(value))
+        {
+            Minimum = double.MinValue;
+            return;
+        }
+        // Remove whitespace
+        value = value.Replace(" ", "");
+        if (!double.TryParse(value, out double result))
+        {
+            e.Cancel = true;
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "Fel format");
+            return;
+        }
+        else if (result > Maximum)
+        {
+            e.Cancel = true;
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "Måste vara mindre än maximum");
+            return;
+        }
+        Minimum = result;
+        windowsForm.errorProvider1.Clear();
+        windowsForm.Focus();
+    }
+
     internal void Button1_Click(object sender, EventArgs e)
     {
         PlayActive = !PlayActive;
@@ -283,6 +404,8 @@ public class TrendModel
         else
             windowsForm.btnPlay.ImageIndex = 1;
     }
+
+
 }
 
 public static class TrendExtensions
@@ -297,6 +420,9 @@ public static class TrendExtensions
         windowsForm.Load += trendModel.WindowsForm_Load;
         windowsForm.FormClosing += trendModel.WindowsForm_FormClosing;
         windowsForm.txtTimeSpan.Validating += trendModel.TxtTimeSpan_Validating;
+        windowsForm.txtSetpoint.Validating += trendModel.TxtSetpoint_Validating;
+        windowsForm.txtMin.Validating += trendModel.TxtMin_Validating;
+        windowsForm.txtMax.Validating += trendModel.TxtMax_Validating;
         windowsForm.btnPlay.Click += trendModel.Button1_Click;
         return trendModel;
     }

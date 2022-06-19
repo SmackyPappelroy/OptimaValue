@@ -38,16 +38,26 @@ namespace OptimaValue
         {
             this.Invoke((MethodInvoker)delegate
             {
-                if (chart.AxisX.Count > 0)
+                if (chart.AxisX.Count > 0 && trendModel.PlayActive)
                 {
                     chart.AxisX.First().MaxValue = trendModel.MaxValueX;
                     chart.AxisX.First().MinValue = trendModel.MinValueX;
-                    chart.AxisY.First().MaxValue = trendModel.MaxValueY;
-                    chart.AxisY.First().MinValue = trendModel.MinValueY;
+                    if (trendModel.Minimum > double.MinValue && trendModel.Maximum < double.MaxValue)
+                    {
+                        chart.AxisY.First().MinValue = trendModel.Minimum;
+                        chart.AxisY.First().MaxValue = trendModel.Maximum;
+                    }
+                    else
+                    {
+                        chart.AxisY.First().MaxValue = trendModel.MaxValueY;
+                        chart.AxisY.First().MinValue = trendModel.MinValueY;
+                    }
+
                     chart.AxisX.First().Separator = DefaultAxes.CleanSeparator;
                     chart.AxisX.First().LabelFormatter = trendModel.FormatterX;
                     chart.AxisY.First().LabelFormatter = trendModel.FormatterY;
                     chart.AxisY.First().Separator = DefaultAxes.CleanSeparator;
+
 
                     var startTime = new DateTime((long)trendModel.MinValueX);
                     var stopTime = new DateTime((long)trendModel.MaxValueX);
@@ -57,13 +67,28 @@ namespace OptimaValue
 
                 }
 
-                if (trendModel.MinValueX < trendModel.MaxValueX)
+                if (trendModel.MinValueX < trendModel.MaxValueX && trendModel.PlayActive)
                 {
                     trendModel.LineSeries.Values = trendModel.ChartValuesDateTimePoints;
                     if (chart.Series.Count == 0)
                         chart.Series.Add(trendModel.LineSeries);
                     else
                         chart.Series[0].Values = trendModel.ChartValuesDateTimePoints;
+                    if (trendModel.ChartSetpointDateTimePoints.Count > 0)
+                    {
+                        if (chart.Series.Count == 1)
+                        {
+                            chart.Series.Add(trendModel.LineSeriesSetpoint);
+                        }
+                    }
+                    else
+                    {
+                        if (chart.Series.Count == 2)
+                        {
+                            chart.Series.RemoveAt(1);
+                        }
+                    }
+
                 }
 
             });

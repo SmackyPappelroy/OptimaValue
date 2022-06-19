@@ -101,6 +101,11 @@ namespace OptimaValue
             comboTrend.AutoCompleteMode = AutoCompleteMode.Suggest;
             comboTrend.AutoCompleteSource = AutoCompleteSource.CustomSource;
         }
+        private void ClearTrendTags()
+        {
+            comboTrend.Items.Clear();
+
+        }
         #endregion
 
         #region Form
@@ -670,6 +675,7 @@ namespace OptimaValue
                     }
                     isConnected = false;
                     comboTrend.Visible = false;
+                    ClearTrendTags();
                     btnStartTrend.Visible = false;
                     break;
                 case ConnectionStatus.Connecting:
