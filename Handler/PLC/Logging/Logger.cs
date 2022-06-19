@@ -229,6 +229,7 @@ namespace OptimaValue
                 }
                 await Task.Delay((int)((float)FastestLogTime * 0.125f));
                 ct.ThrowIfCancellationRequested();
+
             }
         }
 
