@@ -1,6 +1,8 @@
 ﻿using LiveCharts;
 using LiveCharts.Configurations;
 using LiveCharts.Defaults;
+using LiveCharts.Geared;
+using LiveCharts.Helpers;
 using LiveCharts.Wpf;
 using System;
 using System.Collections.Concurrent;
@@ -28,24 +30,27 @@ public class TrendModel
     /// <summary>
     /// Points to map to the Lineseries in the trend
     /// </summary>
-    public ChartValues<DateTimePoint> ChartValuesDateTimePoints { get; set; }
-    public ChartValues<DateTimePoint> ChartSetpointDateTimePoints { get; set; } = new();
+    public GearedValues<DateTimePoint> ChartValuesDateTimePoints { get; set; }
+    public GearedValues<DateTimePoint> ChartSetpointDateTimePoints { get; set; } = new();
     /// <summary>
     /// Values from Sql
     /// </summary>
-    public List<DateTimePoint> DateTimePointsToTrend { get; private set; }
+    public GearedValues<DateTimePoint> DateTimePointsToTrend { get; private set; }
     public LineSeries LineSeries { get; set; }
     public LineSeries LineSeriesSetpoint { get; set; }
     public TrendTag windowsForm { get; init; }
     public CancellationTokenSource source = new CancellationTokenSource();
 
-    public bool HasDecimal => ChartValuesDateTimePoints == null ? false : ChartValuesDateTimePoints.Any(x => !(x.Value % 1 == 0));
 
     public Func<double, string> FormatterY { get; set; }
     public Func<double, string> FormatterX { get; set; }
     public int NumberOfValues => ChartValuesDateTimePoints.Count;
+    public DateTime FirstLoggedDate { get; private set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
+    public DateTime InputStartDate { get; set; } = DateTime.MinValue;
+
+    public bool InputDatesOk => InputStartDate > DateTime.MinValue;
     public TimeSpan Duration { get; set; }
     private TimeSpan internalDuration { get; set; }
 
@@ -68,13 +73,15 @@ public class TrendModel
         TagId = id;
         // Get tagname from the ID-number from SQL
         TagName = GetTagNameFromSql(id);
+        // Get first occurence in the database
+        FirstLoggedDate = GetStartDateFromSql(id);
 
         // Map x values to datetime and y values to double
         RowSeriesConfiguration = Mappers.Xy<DateTimePoint>()
             .X(dateTimePoint => dateTimePoint.DateTime.Ticks)
             .Y(dateTimePoint => dateTimePoint.Value);
         // The rowseries, maps to LineSeries.Values
-        ChartValuesDateTimePoints = new ChartValues<DateTimePoint>();
+        ChartValuesDateTimePoints = new GearedValues<DateTimePoint>();
         // Name of trend
         RowSeriesLabel = TagName;
 
@@ -110,6 +117,8 @@ public class TrendModel
         Duration = internalDuration = duration;
     }
 
+
+
     /// <summary>
     /// The cyclic <see cref="Task"/><para></para> Gets new data from Sql
     /// <para></para> Updates chart
@@ -128,8 +137,13 @@ public class TrendModel
 
                 GetNewSqlData();
 
-                if (SqlValues.Rows.Count > 1 && PlayActive)
-                    UpdateChart();
+                if (SqlValues.Rows.Count > 1)
+                {
+                    if (PlayActive)
+                        UpdateChart();
+                    if (InputStartDate < DateTime.MaxValue)
+                        UpdateChart();
+                }
 
                 if (internalDuration != Duration)
                 {
@@ -158,7 +172,7 @@ public class TrendModel
 
                 windowsForm.Invoke((MethodInvoker)delegate
                 {
-                    DateTimePointsToTrend = SqlValues.DataTableToDateTimePoints(Duration, TimeSpan.FromSeconds(15));
+                    DateTimePointsToTrend = SqlValues.DataTableToDateTimePoints(Duration, TimeSpan.FromSeconds(15), InputDatesOk, InputStartDate);
                     if (DateTimePointsToTrend != null)
                     {
                         ChartValuesDateTimePoints.Clear();
@@ -219,7 +233,11 @@ public class TrendModel
         DataTable tempTable = new();
         var tiden = DateTime.Now;
         var startTime = tiden.Subtract(Duration * 5);
-        var timeString = $" logTime BETWEEN '{startTime}' AND '{tiden}'";
+        var timeString = "";
+        if (!InputDatesOk)
+            timeString = $" logTime BETWEEN '{startTime}' AND '{tiden}'";
+        else
+            timeString = $" logTime BETWEEN '{InputStartDate}' AND '{InputStartDate.Add(Duration * 5)}'";
         var query = $"SELECT * FROM {Config.Settings.Databas}.dbo.logValues WHERE tag_id = {TagId} AND{timeString}";
         using SqlConnection con = new SqlConnection(Config.Settings.ConnectionString);
         con.Open();
@@ -276,17 +294,36 @@ public class TrendModel
         return cmd.ExecuteScalar().ToString();
     }
 
+    private DateTime GetStartDateFromSql(int id)
+    {
+        var query = $"SELECT MIN(logTime) FROM {Config.Settings.Databas}.dbo.logValues WHERE tag_id = {id}";
+        using SqlConnection con = new SqlConnection(Config.Settings.ConnectionString);
+        con.Open();
+        using SqlCommand cmd = new SqlCommand(query, con);
+        return Convert.ToDateTime(cmd.ExecuteScalar());
+    }
+
     internal async void WindowsForm_Load(object sender, EventArgs e)
     {
         windowsForm.txtTimeSpan.Text = Duration.ToString();
-        windowsForm.txtStartTime.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-        windowsForm.txtStopTime.Text = DateTime.Now.Add(TimeSpan.FromSeconds(30)).ToString("yyyy-MM-dd HH:mm:ss");
-
+        windowsForm.lblStartTime.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        windowsForm.lblStopTime.Text = DateTime.Now.Add(TimeSpan.FromSeconds(30)).ToString("yyyy-MM-dd HH:mm:ss");
+        SetupStartAndStopDate(FirstLoggedDate, DateTime.Now);
 
         await Task.Run(async () =>
         {
             await StartUpdaterAsync(source);
         }).ConfigureAwait(false);
+
+    }
+
+    private void SetupStartAndStopDate(DateTime firstLoggedDate, DateTime now)
+    {
+
+        windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
+        {
+            windowsForm.txtStartDate.Text = firstLoggedDate.ToString("yyyy-MM-dd HH:mm:ss");
+        });
 
     }
 
@@ -400,12 +437,63 @@ public class TrendModel
     {
         PlayActive = !PlayActive;
         if (PlayActive)
+        {
             windowsForm.btnPlay.ImageIndex = 0;
+            windowsForm.txtStartDate.Visible = false;
+            windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
+            {
+                windowsForm.txtStartDate.Text = string.Empty;
+            });
+        }
         else
+        {
             windowsForm.btnPlay.ImageIndex = 1;
+            windowsForm.txtStartDate.Visible = true;
+        }
     }
 
 
+
+    internal void TxtStartDate_Validating(object sender, CancelEventArgs e)
+    {
+        var value = ((TextBox)sender).Text;
+        if (string.IsNullOrEmpty(value))
+        {
+            InputStartDate = DateTime.MinValue;
+            return;
+        }
+
+        if (!DateTime.TryParse(value, out DateTime result))
+        {
+            e.Cancel = true;
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "Fel datumformat");
+            return;
+        }
+        else if (result > DateTime.Now.Subtract(Duration))
+        {
+            e.Cancel = true;
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "Sätt ett mindre datum");
+            return;
+        }
+        else if (result < FirstLoggedDate)
+        {
+            e.Cancel = true;
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "Kan ej vara tidigare än första loggningen");
+            return;
+        }
+
+        InputStartDate = result;
+        windowsForm.errorProvider1.Clear();
+        windowsForm.Focus();
+    }
+
+    internal void TrackBar_ValueChanged(object sender, EventArgs e)
+    {
+        windowsForm.Invoke((MethodInvoker)delegate
+        {
+            windowsForm.Opacity = windowsForm.trackBar.Value / 100.0;
+        });
+    }
 }
 
 public static class TrendExtensions
@@ -423,15 +511,17 @@ public static class TrendExtensions
         windowsForm.txtSetpoint.Validating += trendModel.TxtSetpoint_Validating;
         windowsForm.txtMin.Validating += trendModel.TxtMin_Validating;
         windowsForm.txtMax.Validating += trendModel.TxtMax_Validating;
+        windowsForm.txtStartDate.Validating += trendModel.TxtStartDate_Validating;
         windowsForm.btnPlay.Click += trendModel.Button1_Click;
+        windowsForm.trackBar.ValueChanged += trendModel.TrackBar_ValueChanged;
         return trendModel;
     }
 
-    public static List<DateTimePoint> DataTableToDateTimePoints(this DataTable tbl, TimeSpan duration, TimeSpan timeOffset)
+    public static GearedValues<DateTimePoint> DataTableToDateTimePoints(this DataTable tbl, TimeSpan duration, TimeSpan timeOffset, bool inputDatesOk, DateTime inputDate)
     {
 
 
-        var dateTimePoints = new List<DateTimePoint>();
+        var dateTimePoints = new GearedValues<DateTimePoint>();
         tbl.DefaultView.Sort = "logTime";
         tbl = tbl.DefaultView.ToTable();
 
@@ -451,16 +541,22 @@ public static class TrendExtensions
                 dateTimePoints.Add(dtPoint);
             }
         }
+        List<DateTimePoint> filteredValues = new();
+        if (!inputDatesOk)
+            filteredValues = dateTimePoints.Where(x => x.DateTime >= (DateTime.Now.Subtract(duration + timeOffset))
+                                 && x.DateTime <= DateTime.Now.Subtract(timeOffset)).ToList();
+        else
+            filteredValues = dateTimePoints.Where(x => x.DateTime >= (inputDate)
+                                     && x.DateTime <= inputDate.Add(duration)).ToList();
 
-        var filteredValues = dateTimePoints.Where(x => x.DateTime >= (DateTime.Now.Subtract(duration + timeOffset))
-                             && x.DateTime <= DateTime.Now.Subtract(timeOffset)).ToList();
+        var returnValues = filteredValues.AsChartValues().AsGearedValues();
         if (filteredValues.Count == 0)
         {
             return default;
         }
         else
         {
-            return filteredValues;
+            return returnValues;
         }
     }
 }

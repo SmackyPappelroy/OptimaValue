@@ -38,7 +38,7 @@ namespace OptimaValue
         {
             this.Invoke((MethodInvoker)delegate
             {
-                if (chart.AxisX.Count > 0 && trendModel.PlayActive)
+                if (chart.AxisX.Count > 0 && (trendModel.PlayActive || trendModel.InputDatesOk))
                 {
                     chart.AxisX.First().MaxValue = trendModel.MaxValueX;
                     chart.AxisX.First().MinValue = trendModel.MinValueX;
@@ -61,13 +61,13 @@ namespace OptimaValue
 
                     var startTime = new DateTime((long)trendModel.MinValueX);
                     var stopTime = new DateTime((long)trendModel.MaxValueX);
-                    txtStartTime.Text = startTime.ToString("yyyy-MM-dd HH:mm:ss");
-                    txtStopTime.Text = stopTime.ToString("yyyy-MM-dd HH:mm:ss");
+                    lblStartTime.Text = startTime.ToString("yyyy-MM-dd HH:mm:ss");
+                    lblStopTime.Text = stopTime.ToString("yyyy-MM-dd HH:mm:ss");
                     lblTimeSpan.Text = (stopTime - startTime).ToString();
 
                 }
 
-                if (trendModel.MinValueX < trendModel.MaxValueX && trendModel.PlayActive)
+                if (trendModel.MinValueX < trendModel.MaxValueX && (trendModel.PlayActive || trendModel.InputDatesOk))
                 {
                     trendModel.LineSeries.Values = trendModel.ChartValuesDateTimePoints;
                     if (chart.Series.Count == 0)
