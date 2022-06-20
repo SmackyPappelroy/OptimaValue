@@ -440,6 +440,7 @@ public class TrendModel
         {
             windowsForm.btnPlay.ImageIndex = 0;
             windowsForm.txtStartDate.Visible = false;
+            InputStartDate = DateTime.MinValue;
             windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
             {
                 windowsForm.txtStartDate.Text = string.Empty;
@@ -449,6 +450,10 @@ public class TrendModel
         {
             windowsForm.btnPlay.ImageIndex = 1;
             windowsForm.txtStartDate.Visible = true;
+            windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
+            {
+                windowsForm.txtStartDate.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            });
         }
     }
 
@@ -462,29 +467,32 @@ public class TrendModel
             InputStartDate = DateTime.MinValue;
             return;
         }
+        if (value.Length >= 19)
+        {
+            if (!DateTime.TryParse(value, out DateTime result))
+            {
+                e.Cancel = true;
+                windowsForm.errorProvider1.SetError(((TextBox)sender), "Fel datumformat");
+                return;
+            }
+            else if (result > DateTime.Now.Subtract(Duration))
+            {
+                e.Cancel = true;
+                windowsForm.errorProvider1.SetError(((TextBox)sender), "Sätt ett mindre datum");
+                return;
+            }
+            else if (result < FirstLoggedDate)
+            {
+                e.Cancel = true;
+                windowsForm.errorProvider1.SetError(((TextBox)sender), "Kan ej vara tidigare än första loggningen");
+                return;
+            }
 
-        if (!DateTime.TryParse(value, out DateTime result))
-        {
-            e.Cancel = true;
-            windowsForm.errorProvider1.SetError(((TextBox)sender), "Fel datumformat");
-            return;
-        }
-        else if (result > DateTime.Now.Subtract(Duration))
-        {
-            e.Cancel = true;
-            windowsForm.errorProvider1.SetError(((TextBox)sender), "Sätt ett mindre datum");
-            return;
-        }
-        else if (result < FirstLoggedDate)
-        {
-            e.Cancel = true;
-            windowsForm.errorProvider1.SetError(((TextBox)sender), "Kan ej vara tidigare än första loggningen");
-            return;
+            InputStartDate = result;
+            windowsForm.errorProvider1.Clear();
+            windowsForm.Focus();
         }
 
-        InputStartDate = result;
-        windowsForm.errorProvider1.Clear();
-        windowsForm.Focus();
     }
 
     internal void TrackBar_ValueChanged(object sender, EventArgs e)

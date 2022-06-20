@@ -41,13 +41,13 @@
             this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.btnPlay = new System.Windows.Forms.Button();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.trackBar = new System.Windows.Forms.TrackBar();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.txtMin = new System.Windows.Forms.TextBox();
             this.txtSetpoint = new System.Windows.Forms.TextBox();
             this.txtMax = new System.Windows.Forms.TextBox();
             this.txtStartDate = new System.Windows.Forms.TextBox();
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.topPanel.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -100,7 +100,7 @@
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 48F));
@@ -209,6 +209,14 @@
             this.btnPlay.TabIndex = 5;
             this.btnPlay.UseVisualStyleBackColor = true;
             // 
+            // imageList1
+            // 
+            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "Stop Squared_64px.png");
+            this.imageList1.Images.SetKeyName(1, "Play Button Circled_64px.png");
+            // 
             // trackBar
             // 
             this.tableLayoutPanel3.SetColumnSpan(this.trackBar, 2);
@@ -277,14 +285,6 @@
             this.txtStartDate.Size = new System.Drawing.Size(349, 26);
             this.txtStartDate.TabIndex = 10;
             this.txtStartDate.Visible = false;
-            // 
-            // imageList1
-            // 
-            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
-            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList1.Images.SetKeyName(0, "Stop Squared_64px.png");
-            this.imageList1.Images.SetKeyName(1, "Play Button Circled_64px.png");
             // 
             // errorProvider1
             // 
