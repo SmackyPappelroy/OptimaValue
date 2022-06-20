@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -25,13 +26,35 @@ public class TrendModel
 
     private CartesianMapper<DateTimePoint> RowSeriesConfiguration { get; set; }
     private string RowSeriesLabel { get; set; }
+
+    private TagInfo TagInfo { get; set; }
+
+    public System.Windows.Forms.Timer timerStatusText;
+    private string statusText;
+    public string StatusText
+    {
+        get => statusText;
+        set
+        {
+            statusText = value;
+            if (!string.IsNullOrEmpty(value))
+            {
+                windowsForm.txtStatus.Invoke((MethodInvoker)delegate
+                {
+                    windowsForm.txtStatus.Visible = true;
+                    windowsForm.txtStatus.Text = value;
+                    timerStatusText.Start();
+                });
+            }
+        }
+    }
     private DataTable SqlValues = new();
     public event Action<bool> OnValuesUpdated;
     /// <summary>
     /// Points to map to the Lineseries in the trend
     /// </summary>
     public GearedValues<DateTimePoint> ChartValuesDateTimePoints { get; set; }
-    public GearedValues<DateTimePoint> ChartSetpointDateTimePoints { get; set; } = new();
+    public GearedValues<DateTimePoint> ChartSetpointDateTimePoints { get; set; } = new() { };
     /// <summary>
     /// Values from Sql
     /// </summary>
@@ -72,14 +95,14 @@ public class TrendModel
     {
         TagId = id;
         // Get tagname from the ID-number from SQL
-        TagName = GetTagNameFromSql(id);
+        TagInfo = GetTagInfoFromSql(id);
+        TagName = TagInfo.TagName;
         // Get first occurence in the database
         FirstLoggedDate = GetStartDateFromSql(id);
 
-        // Map x values to datetime and y values to double
-        RowSeriesConfiguration = Mappers.Xy<DateTimePoint>()
-            .X(dateTimePoint => dateTimePoint.DateTime.Ticks)
-            .Y(dateTimePoint => dateTimePoint.Value);
+
+
+
         // The rowseries, maps to LineSeries.Values
         ChartValuesDateTimePoints = new GearedValues<DateTimePoint>();
         // Name of trend
@@ -88,7 +111,24 @@ public class TrendModel
         // Format Y-axis
         FormatterY = val => val.ToString("0.0");
         // Format X-axis
-        FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss");
+        if ((int)TagInfo.LogFrequency < 1000)
+        {
+            // Map x values to datetime and y values to double
+            RowSeriesConfiguration = Mappers.Xy<DateTimePoint>()
+                .X(dateTimePoint => dateTimePoint.DateTime.Ticks)
+                .Y(dateTimePoint => dateTimePoint.Value);
+            FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss.fff");
+        }
+        else
+        {
+            // Map x values to datetime and y values to double
+            RowSeriesConfiguration = Mappers.Xy<DateTimePoint>()
+                .X(dateTimePoint => dateTimePoint.DateTime.Ticks)
+                .Y(dateTimePoint => dateTimePoint.Value);
+            FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        var temp = DateTime.Now.Ticks.ToString("yyyy-MM-dd HH:mm:ss ff");
 
         // Create color
         (Stroke, Fill) = new ColorCreator().CreateRandomColor();
@@ -150,7 +190,7 @@ public class TrendModel
                     Duration = internalDuration;
                     DateTimePointsToTrend = new();
                 }
-                await Task.Delay(1000);
+                await Task.Delay((int)TagInfo.LogFrequency);
             }
             catch (Exception)
             { }
@@ -172,7 +212,7 @@ public class TrendModel
 
                 windowsForm.Invoke((MethodInvoker)delegate
                 {
-                    DateTimePointsToTrend = SqlValues.DataTableToDateTimePoints(Duration, TimeSpan.FromSeconds(15), InputDatesOk, InputStartDate);
+                    DateTimePointsToTrend = SqlValues.DataTableToDateTimePoints(Duration, TimeSpan.FromSeconds(15), InputDatesOk, InputStartDate, TagInfo);
                     if (DateTimePointsToTrend != null)
                     {
                         ChartValuesDateTimePoints.Clear();
@@ -213,7 +253,10 @@ public class TrendModel
                             OnValuesUpdated?.Invoke(true);
                         }
                     }
-
+                    else if (InputStartDate > DateTime.MinValue)
+                    {
+                        StatusText = "Ingen data";
+                    }
 
                 });
                 break;
@@ -270,13 +313,8 @@ public class TrendModel
                 if (item.DateTime < StartDate)
                     ChartValuesDateTimePoints.Remove(item);
             }
-
         }
         ChartValuesDateTimePoints.AddRange(dateTimePoints);
-
-
-
-
     }
 
     public void UpdateTime()
@@ -285,13 +323,28 @@ public class TrendModel
         StartDate = DateTime.Now - Duration;
     }
 
-    private string GetTagNameFromSql(int tagId)
+    private TagInfo GetTagInfoFromSql(int tagId)
     {
-        var query = $"SELECT name FROM {Config.Settings.Databas}.dbo.tagConfig WHERE id = {tagId}";
+        var query = $"SELECT * FROM {Config.Settings.Databas}.dbo.tagConfig WHERE id = {tagId}";
         using SqlConnection con = new SqlConnection(Config.Settings.ConnectionString);
         con.Open();
         using SqlCommand cmd = new SqlCommand(query, con);
-        return cmd.ExecuteScalar().ToString();
+        using SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+        DataTable tempTable = new();
+        var tagInfo = new TagInfo();
+        adapter.Fill(tempTable);
+        if (tempTable.Rows.Count > 0)
+        {
+            tagInfo.TagId = (int)tempTable.Rows[0]["id"];
+            tagInfo.TagName = (string)tempTable.Rows[0]["name"];
+            Enum.TryParse((string)tempTable.Rows[0]["logFreq"], out LogFrequency logFrequency);
+            tagInfo.LogFrequency = logFrequency;
+            Enum.TryParse((string)tempTable.Rows[0]["logType"], out LogType logType);
+            tagInfo.LogType = logType;
+        }
+
+
+        return tagInfo;
     }
 
     private DateTime GetStartDateFromSql(int id)
@@ -308,6 +361,8 @@ public class TrendModel
         windowsForm.txtTimeSpan.Text = Duration.ToString();
         windowsForm.lblStartTime.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         windowsForm.lblStopTime.Text = DateTime.Now.Add(TimeSpan.FromSeconds(30)).ToString("yyyy-MM-dd HH:mm:ss");
+        windowsForm.txtStatus.Text = string.Empty;
+        windowsForm.chart.Series.Configuration = RowSeriesConfiguration;
         SetupStartAndStopDate(FirstLoggedDate, DateTime.Now);
 
         await Task.Run(async () =>
@@ -329,8 +384,11 @@ public class TrendModel
 
     internal void WindowsForm_FormClosing(object sender, FormClosingEventArgs e)
     {
+        timerStatusText.Tick -= OnStatus_TextChanged;
         source.Cancel();
     }
+
+    #region Validation
 
     internal void TxtTimeSpan_Validating(object sender, System.ComponentModel.CancelEventArgs e)
     {
@@ -347,14 +405,14 @@ public class TrendModel
             windowsForm.errorProvider1.SetError(((TextBox)sender), "Invalid timespan");
             return;
         }
-        if (result > TimeSpan.FromSeconds(20))
+        if (result > TimeSpan.FromSeconds(10))
         {
             internalDuration = result;
             windowsForm.errorProvider1.Clear();
             windowsForm.Focus();
         }
         else
-            windowsForm.errorProvider1.SetError(((TextBox)sender), "För lågt spann");
+            windowsForm.errorProvider1.SetError(((TextBox)sender), "För lågt spann (större än 10 sekunder)");
 
     }
 
@@ -433,32 +491,6 @@ public class TrendModel
         windowsForm.Focus();
     }
 
-    internal void Button1_Click(object sender, EventArgs e)
-    {
-        PlayActive = !PlayActive;
-        if (PlayActive)
-        {
-            windowsForm.btnPlay.ImageIndex = 0;
-            windowsForm.txtStartDate.Visible = false;
-            InputStartDate = DateTime.MinValue;
-            windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
-            {
-                windowsForm.txtStartDate.Text = string.Empty;
-            });
-        }
-        else
-        {
-            windowsForm.btnPlay.ImageIndex = 1;
-            windowsForm.txtStartDate.Visible = true;
-            windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
-            {
-                windowsForm.txtStartDate.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            });
-        }
-    }
-
-
-
     internal void TxtStartDate_Validating(object sender, CancelEventArgs e)
     {
         var value = ((TextBox)sender).Text;
@@ -467,7 +499,7 @@ public class TrendModel
             InputStartDate = DateTime.MinValue;
             return;
         }
-        if (value.Length >= 19)
+        if (value.Length >= 16)
         {
             if (!DateTime.TryParse(value, out DateTime result))
             {
@@ -494,12 +526,54 @@ public class TrendModel
         }
 
     }
+    #endregion
+
+    internal void Button1_Click(object sender, EventArgs e)
+    {
+        PlayActive = !PlayActive;
+        if (PlayActive)
+        {
+            windowsForm.btnPlay.ImageIndex = 0;
+            windowsForm.txtStartDate.Visible = false;
+            InputStartDate = DateTime.MinValue;
+            windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
+            {
+                windowsForm.txtStartDate.Text = string.Empty;
+            });
+        }
+        else
+        {
+            windowsForm.btnPlay.ImageIndex = 1;
+            windowsForm.txtStartDate.Visible = true;
+            windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
+            {
+                var tid = DateTime.Now - Duration;
+                windowsForm.txtStartDate.Text = tid.ToString("yyyy-MM-dd HH:mm:ss");
+                InputStartDate = tid;
+            });
+        }
+    }
+
+
+
+
 
     internal void TrackBar_ValueChanged(object sender, EventArgs e)
     {
         windowsForm.Invoke((MethodInvoker)delegate
         {
             windowsForm.Opacity = windowsForm.trackBar.Value / 100.0;
+        });
+    }
+
+    internal void OnStatus_TextChanged(object sender, EventArgs e)
+    {
+        windowsForm.txtStatus.Invoke((MethodInvoker)delegate
+        {
+            windowsForm.txtStatus.Text = string.Empty;
+            timerStatusText.Stop();
+            windowsForm.txtStatus.Visible = false;
+
         });
     }
 }
@@ -513,6 +587,7 @@ public static class TrendExtensions
             windowsForm = windowsForm,
         };
 
+        trendModel.timerStatusText = new() { Interval = 3000 };
         windowsForm.Load += trendModel.WindowsForm_Load;
         windowsForm.FormClosing += trendModel.WindowsForm_FormClosing;
         windowsForm.txtTimeSpan.Validating += trendModel.TxtTimeSpan_Validating;
@@ -522,16 +597,16 @@ public static class TrendExtensions
         windowsForm.txtStartDate.Validating += trendModel.TxtStartDate_Validating;
         windowsForm.btnPlay.Click += trendModel.Button1_Click;
         windowsForm.trackBar.ValueChanged += trendModel.TrackBar_ValueChanged;
+        trendModel.timerStatusText.Tick += trendModel.OnStatus_TextChanged;
         return trendModel;
     }
 
-    public static GearedValues<DateTimePoint> DataTableToDateTimePoints(this DataTable tbl, TimeSpan duration, TimeSpan timeOffset, bool inputDatesOk, DateTime inputDate)
+    public static GearedValues<DateTimePoint> DataTableToDateTimePoints(this DataTable tbl, TimeSpan duration, TimeSpan timeOffset, bool inputDatesOk, DateTime inputDate, TagInfo tagInfo)
     {
-
-
         var dateTimePoints = new GearedValues<DateTimePoint>();
         tbl.DefaultView.Sort = "logTime";
         tbl = tbl.DefaultView.ToTable();
+        CultureInfo cultureInfo = CultureInfo.InvariantCulture;
 
         foreach (DataRow row in tbl.Rows)
         {
@@ -539,17 +614,35 @@ public static class TrendExtensions
             bool conversionOk = true;
             if (!double.TryParse(row["numericValue"].ToString(), out double value))
                 conversionOk = false;
-            if (!DateTime.TryParse(row["logTime"].ToString(), out DateTime time))
-                conversionOk = false;
-
-            if (conversionOk)
+            if ((int)tagInfo.LogFrequency < 1000)
             {
+                // Tryparse with milliseconds
+                var dateTime = row["logTime"];
+
+                DateTime time = (DateTime)dateTime;
+
                 dtPoint.DateTime = time;
                 dtPoint.Value = value;
                 dateTimePoints.Add(dtPoint);
             }
+            else
+            {
+                // Tryparse with seconds
+                if (!DateTime.TryParse(row["logTime"].ToString(), out DateTime time))
+                    conversionOk = false;
+
+                if (conversionOk)
+                {
+                    dtPoint.DateTime = time;
+                    dtPoint.Value = value;
+                    dateTimePoints.Add(dtPoint);
+                }
+            }
         }
+
         List<DateTimePoint> filteredValues = new();
+
+
         if (!inputDatesOk)
             filteredValues = dateTimePoints.Where(x => x.DateTime >= (DateTime.Now.Subtract(duration + timeOffset))
                                  && x.DateTime <= DateTime.Now.Subtract(timeOffset)).ToList();
@@ -566,5 +659,21 @@ public static class TrendExtensions
         {
             return returnValues;
         }
+    }
+
+    public static string ToReadableString(this TimeSpan span)
+    {
+        string formatted = string.Format("{0} {1} {2} {3} {4}",
+            span.Duration().Days > 0 ? string.Format("{0:0} day{1}, ", span.Days, span.Days == 1 ? string.Empty : "s") : string.Empty,
+            span.Duration().Hours > 0 ? string.Format("{0:0} hour{1}, ", span.Hours, span.Hours == 1 ? string.Empty : "s") : string.Empty,
+            span.Duration().Minutes > 0 ? string.Format("{0:0} min{1}, ", span.Minutes, span.Minutes == 1 ? string.Empty : "s") : string.Empty,
+            span.Duration().Seconds > 0 ? string.Format("{0:0}{1}", span.Seconds, span.Seconds == 1 ? string.Empty : "s") : string.Empty,
+            span.Duration().Milliseconds > 0 ? string.Format("{0:0} m{1}", span.Milliseconds, span.Milliseconds == 1 ? string.Empty : "s") : string.Empty);
+
+        if (formatted.EndsWith(", ")) formatted = formatted.Substring(0, formatted.Length - 2);
+
+        if (string.IsNullOrEmpty(formatted)) formatted = "0 seconds";
+
+        return formatted;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using LiveCharts.Defaults;
+using LiveCharts.Geared;
 using LiveCharts.WinForms;
 using LiveCharts.Wpf;
 using System;
@@ -63,7 +64,7 @@ namespace OptimaValue
                     var stopTime = new DateTime((long)trendModel.MaxValueX);
                     lblStartTime.Text = startTime.ToString("yyyy-MM-dd HH:mm:ss");
                     lblStopTime.Text = stopTime.ToString("yyyy-MM-dd HH:mm:ss");
-                    lblTimeSpan.Text = (stopTime - startTime).ToString();
+                    lblTimeSpan.Text = (stopTime - startTime).ToReadableString();
 
                 }
 

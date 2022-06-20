@@ -48,6 +48,7 @@
             this.txtSetpoint = new System.Windows.Forms.TextBox();
             this.txtMax = new System.Windows.Forms.TextBox();
             this.txtStartDate = new System.Windows.Forms.TextBox();
+            this.txtStatus = new System.Windows.Forms.Label();
             this.errorProvider1 = new System.Windows.Forms.ErrorProvider(this.components);
             this.topPanel.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
@@ -63,10 +64,10 @@
             this.tableLayoutPanel1.SetColumnSpan(this.topPanel, 3);
             this.topPanel.Controls.Add(this.chart);
             this.topPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.topPanel.Location = new System.Drawing.Point(4, 52);
+            this.topPanel.Location = new System.Drawing.Point(4, 80);
             this.topPanel.Margin = new System.Windows.Forms.Padding(4);
             this.topPanel.Name = "topPanel";
-            this.topPanel.Size = new System.Drawing.Size(1056, 396);
+            this.topPanel.Size = new System.Drawing.Size(1056, 368);
             this.topPanel.TabIndex = 0;
             // 
             // chart
@@ -76,7 +77,7 @@
             this.chart.Location = new System.Drawing.Point(0, 0);
             this.chart.Margin = new System.Windows.Forms.Padding(4);
             this.chart.Name = "chart";
-            this.chart.Size = new System.Drawing.Size(1056, 396);
+            this.chart.Size = new System.Drawing.Size(1056, 368);
             this.chart.TabIndex = 600;
             this.chart.Text = "cartesianChart1";
             // 
@@ -87,19 +88,21 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Controls.Add(this.topPanel, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.lblStartTime, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.lblStopTime, 2, 3);
-            this.tableLayoutPanel1.Controls.Add(this.lblTimeSpan, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.topPanel, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.lblStartTime, 0, 4);
+            this.tableLayoutPanel1.Controls.Add(this.lblStopTime, 2, 4);
+            this.tableLayoutPanel1.Controls.Add(this.lblTimeSpan, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel2, 1, 0);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel3, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.tableLayoutPanel4, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.txtStartDate, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.txtStartDate, 0, 3);
+            this.tableLayoutPanel1.Controls.Add(this.txtStatus, 0, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowCount = 5;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -194,7 +197,7 @@
             this.tableLayoutPanel3.Location = new System.Drawing.Point(712, 3);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel3.Size = new System.Drawing.Size(349, 42);
             this.tableLayoutPanel3.TabIndex = 7;
             // 
@@ -204,6 +207,7 @@
             this.btnPlay.ImageIndex = 0;
             this.btnPlay.ImageList = this.imageList1;
             this.btnPlay.Location = new System.Drawing.Point(3, 3);
+            this.btnPlay.Margin = new System.Windows.Forms.Padding(3, 3, 3, 10);
             this.btnPlay.Name = "btnPlay";
             this.btnPlay.Size = new System.Drawing.Size(75, 36);
             this.btnPlay.TabIndex = 5;
@@ -214,7 +218,7 @@
             this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
             this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
             this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList1.Images.SetKeyName(0, "Stop Squared_64px.png");
+            this.imageList1.Images.SetKeyName(0, "stop_squared_64px.png");
             this.imageList1.Images.SetKeyName(1, "Play Button Circled_64px.png");
             // 
             // trackBar
@@ -225,7 +229,7 @@
             this.trackBar.Maximum = 100;
             this.trackBar.Minimum = 70;
             this.trackBar.Name = "trackBar";
-            this.trackBar.Size = new System.Drawing.Size(227, 36);
+            this.trackBar.Size = new System.Drawing.Size(227, 45);
             this.trackBar.TabIndex = 6;
             this.trackBar.TickStyle = System.Windows.Forms.TickStyle.None;
             this.trackBar.Value = 100;
@@ -286,6 +290,18 @@
             this.txtStartDate.TabIndex = 10;
             this.txtStartDate.Visible = false;
             // 
+            // txtStatus
+            // 
+            this.txtStatus.AutoSize = true;
+            this.tableLayoutPanel1.SetColumnSpan(this.txtStatus, 3);
+            this.txtStatus.ForeColor = System.Drawing.Color.White;
+            this.txtStatus.Location = new System.Drawing.Point(5, 53);
+            this.txtStatus.Margin = new System.Windows.Forms.Padding(5);
+            this.txtStatus.Name = "txtStatus";
+            this.txtStatus.Size = new System.Drawing.Size(50, 18);
+            this.txtStatus.TabIndex = 11;
+            this.txtStatus.Text = "label2";
+            // 
             // errorProvider1
             // 
             this.errorProvider1.ContainerControl = this;
@@ -337,5 +353,6 @@
         internal System.Windows.Forms.TextBox txtMax;
         internal System.Windows.Forms.TextBox txtStartDate;
         internal System.Windows.Forms.TrackBar trackBar;
+        internal System.Windows.Forms.Label txtStatus;
     }
 }
