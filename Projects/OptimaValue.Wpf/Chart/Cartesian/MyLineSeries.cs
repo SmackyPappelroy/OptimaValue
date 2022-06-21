@@ -228,7 +228,7 @@ namespace OptimaValue.Wpf
             ChartValues.AddRange(result);
             LineSeries.Values = new GearedValues<DateTimePoint>(ChartValues.AsGearedValues().WithQuality(Quality.Highest));
 
-            LineSeries.Name = Tag.Name;
+            LineSeries.Name = Tag.Name.Replace(" ", "_");
 
             if (LineSeries.Values.Count == 0)
                 return false;

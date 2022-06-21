@@ -222,13 +222,11 @@ public class TrendModel
 
                             // No decimals
                             if (DateTimePointsToTrend.Any(x => (x.Value % 1 == 0)))
-                            {
                                 FormatterY = val => val.ToString("0");
-
-                            }
                             else
-                                FormatterY = val => val.ToString("0.0");
-
+                                FormatterY = val => val.ToString("0.00");
+                            if (DateTimePointsToTrend.All(x => x.Value < 10))
+                                FormatterY = val => val.ToString("0.000");
 
                             if (Setpoint != double.MinValue)
                             {
@@ -553,10 +551,6 @@ public class TrendModel
             });
         }
     }
-
-
-
-
 
     internal void TrackBar_ValueChanged(object sender, EventArgs e)
     {

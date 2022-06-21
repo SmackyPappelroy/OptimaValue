@@ -485,11 +485,15 @@ namespace OptimaValue.Wpf
                         if (dataRow == null)
                         {
                             returnValue = default(DateTime);
-                            lastValue = (DateTime)dataRow[tagName];
+                            var tempValue = dataRow[tagName];
+                            DateTime temp2 = (DateTime)tempValue;
+                            lastValue = temp2;
                         }
                         else
                         {
-                            lastValue = (DateTime)dataRow[tagName];
+                            var tempValue = dataRow[tagName];
+                            DateTime temp2 = (DateTime)tempValue;
+                            lastValue = temp2;
                             returnValue = lastValue;
                         }
                         return returnValue;
