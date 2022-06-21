@@ -24,7 +24,6 @@ namespace OptimaValue
         private DataTable tbl = new();
         private TrendModel trendModel;
 
-
         public TrendTag(int _tagId)
         {
             InitializeComponent();

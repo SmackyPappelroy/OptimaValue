@@ -533,6 +533,10 @@ public class TrendModel
         {
             windowsForm.btnPlay.ImageIndex = 0;
             windowsForm.txtStartDate.Visible = false;
+            windowsForm.btnLeft.Visible = false;
+            windowsForm.btnRight.Visible = false;
+            windowsForm.btnEnd.Visible = false;
+            windowsForm.panelButton.Visible = false;
             InputStartDate = DateTime.MinValue;
             windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
             {
@@ -543,6 +547,10 @@ public class TrendModel
         {
             windowsForm.btnPlay.ImageIndex = 1;
             windowsForm.txtStartDate.Visible = true;
+            windowsForm.btnLeft.Visible = true;
+            windowsForm.btnRight.Visible = true;
+            windowsForm.btnEnd.Visible = true;
+            windowsForm.panelButton.Visible = true;
             windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
             {
                 var tid = DateTime.Now - Duration;
@@ -570,6 +578,34 @@ public class TrendModel
 
         });
     }
+
+    internal void BtnLeft_Click(object sender, EventArgs e)
+    {
+        InputStartDate = InputStartDate.Subtract(Duration);
+        windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
+        {
+            windowsForm.txtStartDate.Text = InputStartDate.ToString("yyyy-MM-dd HH:mm:ss");
+        });
+    }
+
+    internal void BtnRight_Click(object sender, EventArgs e)
+    {
+        if (!(InputStartDate.Add(Duration) > DateTime.Now))
+            InputStartDate = InputStartDate.Add(Duration);
+        windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
+        {
+            windowsForm.txtStartDate.Text = InputStartDate.ToString("yyyy-MM-dd HH:mm:ss");
+        });
+    }
+
+    internal void BtnEnd_Click(object sender, EventArgs e)
+    {
+        InputStartDate = DateTime.Now.Subtract(Duration);
+        windowsForm.txtStartDate.Invoke((MethodInvoker)delegate
+        {
+            windowsForm.txtStartDate.Text = InputStartDate.ToString("yyyy-MM-dd HH:mm:ss");
+        });
+    }
 }
 
 public static class TrendExtensions
@@ -592,6 +628,9 @@ public static class TrendExtensions
         windowsForm.btnPlay.Click += trendModel.Button1_Click;
         windowsForm.trackBar.ValueChanged += trendModel.TrackBar_ValueChanged;
         trendModel.timerStatusText.Tick += trendModel.OnStatus_TextChanged;
+        windowsForm.btnLeft.Click += trendModel.BtnLeft_Click;
+        windowsForm.btnRight.Click += trendModel.BtnRight_Click;
+        windowsForm.btnEnd.Click += trendModel.BtnEnd_Click;
         return trendModel;
     }
 
