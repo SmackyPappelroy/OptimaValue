@@ -383,7 +383,7 @@
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "TrendTag";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "jjhlkkjlhg";
+            this.Text = "Tag";
             this.topPanel.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();

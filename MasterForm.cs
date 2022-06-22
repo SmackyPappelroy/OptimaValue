@@ -21,13 +21,43 @@ namespace OptimaValue
     public partial class MasterForm : Form
     {
         #region Properties
-        private List<TagDefinitions> AvailableTags
+        private object lockObject = new();
+        private List<TagDefinitions> AvailableTagsTrend
         {
             get
             {
-                var activePlcs = PlcConfig.PlcList.Where(p => p.ConnectionStatus == ConnectionStatus.Connected);
-                return TagsToLog.AllLogValues.Where(x => x.PlcName == activePlcs.First().PlcName).ToList();
+                lock (lockObject)
+                {
+                    var activePlcs = PlcConfig.PlcList.Where(p => p.ConnectionStatus == ConnectionStatus.Connected);
+                    var tags = TagsToLog.AllLogValues.Where(x => x.PlcName == activePlcs.First().PlcName).ToList();
+                    tags = tags.OrderBy(x => x.PlcName).ThenBy(x => x.Name).ToList();
+                    return tags;
+                }
             }
+        }
+        private List<TagId> TagIds => GetTagIds();
+
+        private List<TagId> GetTagIds()
+        {
+            List<TagId> ids = new();
+            if (AvailableTagsTrend == null)
+                return ids;
+            foreach (var item in AvailableTagsTrend)
+            {
+                var id = new TagId()
+                {
+                    Id = item.Id,
+                    Name = item.Name
+                };
+                ids.Add(id);
+            }
+            return ids;
+        }
+
+        private class TagId
+        {
+            public string Name { get; set; }
+            public int Id { get; set; }
         }
 
         private AutoCompleteStringCollection stringCollection = new AutoCompleteStringCollection();
@@ -95,17 +125,20 @@ namespace OptimaValue
 
         private void AddTrendTags()
         {
-            stringCollection.AddRange(AvailableTags.Select(x => x.Name).ToArray());
-            comboTrend.Items.AddRange(AvailableTags.Select(x => x.Name).ToArray());
+            stringCollection.AddRange(AvailableTagsTrend.Select(x => x.Name).ToArray());
+            //comboTrend.Items.AddRange(AvailableTagsTrend.Select(x => x.Name).ToArray());
+            comboTrend.ComboBox.DataSource = TagIds;
+            comboTrend.ComboBox.DisplayMember = "Name";
+            comboTrend.ComboBox.ValueMember = "Id";
             comboTrend.AutoCompleteCustomSource = stringCollection;
             comboTrend.AutoCompleteMode = AutoCompleteMode.Suggest;
             comboTrend.AutoCompleteSource = AutoCompleteSource.CustomSource;
         }
-        private void ClearTrendTags()
-        {
-            comboTrend.Items.Clear();
+        //private void ClearTrendTags()
+        //{
+        //    comboTrend.Items.Clear();
 
-        }
+        //}
         #endregion
 
         #region Form
@@ -675,7 +708,7 @@ namespace OptimaValue
                     }
                     isConnected = false;
                     comboTrend.Visible = false;
-                    ClearTrendTags();
+                    //ClearTrendTags();
                     btnStartTrend.Visible = false;
                     break;
                 case ConnectionStatus.Connecting:
@@ -796,8 +829,9 @@ namespace OptimaValue
 
         private void btnStartTrend_Click(object sender, EventArgs e)
         {
-            var tagId = TagsToLog.AllLogValues.Where(x => x.Name == comboTrend.Text).Select(x => x.Id).First();
-            var trendForm = new TrendTag(tagId);
+            //var tagId = AvailableTagsTrend.Where(x => x.Name == comboTrend.Text).Select(x => x.Id).First();
+            var tagId = TagIds.Where(x => x.Id == (int)comboTrend.ComboBox.SelectedValue).First();
+            var trendForm = new TrendTag(tagId.Id);
             trendForm.Show();
         }
 

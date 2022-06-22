@@ -819,8 +819,8 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         }
         catch (SqlException ex)
         {
-            StatusText = $"Ingen kontakt med databas {SqlMethods.Server}";
-            Log.Error($"Ingen kontakt med databas {SqlMethods.Server}");
+            StatusText = $"Ingen kontakt med server {Settings.Server}";
+            Log.Error($"Ingen kontakt med server {Settings.Server}");
         }
 
     }

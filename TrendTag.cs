@@ -71,7 +71,9 @@ namespace OptimaValue
                 {
                     trendModel.LineSeries.Values = trendModel.ChartValuesDateTimePoints;
                     if (chart.Series.Count == 0)
+                    {
                         chart.Series.Add(trendModel.LineSeries);
+                    }
                     else
                         chart.Series[0].Values = trendModel.ChartValuesDateTimePoints;
                     if (trendModel.ChartSetpointDateTimePoints.Count > 0)
