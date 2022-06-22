@@ -53,7 +53,6 @@
             this.debugMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.autoStartTool = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuTrend = new System.Windows.Forms.ToolStripMenuItem();
             this.menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
             this.comboTrend = new System.Windows.Forms.ToolStripComboBox();
             this.btnStartTrend = new System.Windows.Forms.ToolStripMenuItem();
@@ -295,7 +294,6 @@
             this.menuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menuSettings,
-            this.menuTrend,
             this.menuQuestion,
             this.comboTrend,
             this.btnStartTrend});
@@ -347,13 +345,6 @@
             this.autoStartTool.Size = new System.Drawing.Size(133, 22);
             this.autoStartTool.Text = "Autostart";
             this.autoStartTool.CheckedChanged += new System.EventHandler(this.autoStartTool_CheckedChanged);
-            // 
-            // menuTrend
-            // 
-            this.menuTrend.Name = "menuTrend";
-            this.menuTrend.Size = new System.Drawing.Size(80, 28);
-            this.menuTrend.Text = "Starta trend";
-            this.menuTrend.Click += new System.EventHandler(this.startaTrendToolStripMenuItem_Click);
             // 
             // menuQuestion
             // 
@@ -455,7 +446,6 @@
         private System.Windows.Forms.ImageList databaseImageList;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.ToolStripMenuItem autoStartTool;
-        private System.Windows.Forms.ToolStripMenuItem menuTrend;
         private System.Windows.Forms.ToolStripComboBox comboTrend;
         private System.Windows.Forms.ToolStripMenuItem btnStartTrend;
     }

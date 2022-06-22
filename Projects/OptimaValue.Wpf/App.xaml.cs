@@ -40,7 +40,6 @@ namespace OptimaValue.Wpf
             try
             {
                 //throw new NotImplementedException();
-                SqlMethods.CreateConnectionString();
                 await Master.Instance.StartAsync();
 
                 var graphWindow = Master.GetService<GraphWindow>();

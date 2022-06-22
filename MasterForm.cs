@@ -109,14 +109,12 @@ namespace OptimaValue
 
             menuStrip.BackColor = UIColors.ForeGroundLayer1;
             menuQuestion.ForeColor = UIColors.HeaderText;
-            menuTrend.ForeColor = UIColors.HeaderText;
             menuSettings.ForeColor = UIColors.HeaderText;
             btnStartTrend.ForeColor = UIColors.HeaderText;
             //menuSettings.KeepOpenOnDropdownCheck();
 
             menuSettings.ChangeForeColorMenuItem(Color.Black, UIColors.HeaderText);
             menuQuestion.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
-            menuTrend.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
             btnStartTrend.MouseHoverMenuItem(Color.DarkGray, UIColors.HeaderText);
             comboTrend.Visible = false;
             btnStartTrend.Visible = false;
