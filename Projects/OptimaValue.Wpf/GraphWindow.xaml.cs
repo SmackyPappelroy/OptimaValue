@@ -183,11 +183,11 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
 
     public ZoomingOptions Zoom { get; set; } = ZoomingOptions.X;
 
-    private BindingList<MyLineSeries> lineSeriesList;
+    private BindingList<Line> lineSeriesList;
     /// <summary>
     /// A line series to plot on the chart
     /// </summary>
-    public BindingList<MyLineSeries> LineSeriesList
+    public BindingList<Line> LineSeriesList
     {
         get => lineSeriesList;
         set
@@ -451,10 +451,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         }
     }
 
-    /// <summary>
-    /// All the logged tags in Sql
-    /// </summary>
-    public List<Tag> AvailableTags;
+
 
     private ItemsControl myItemControl;
     /// <summary>
@@ -584,7 +581,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         {
             DataStatistics stats = new(StatFilter, item);
 
-            var tag = AvailableTags.Where(x => x.Name == item.LineSeries.Title).FirstOrDefault();
+            var tag = StaticClass.AvailableTags.Where(x => x.Name == item.LineSeries.Title).FirstOrDefault();
             var tagUnitString = tag.Unit == "" ? "" : " " + tag.Unit;
             var descriptionString = tag.Description == "" ? "" : " " + tag.Description + " ";
 
@@ -792,7 +789,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
     /// <returns></returns>
     private async Task GetAvailableTags()
     {
-        var query = $"SELECT DISTINCT {Settings.Databas}.dbo.tagConfig.name,{Settings.Databas}.dbo.tagConfig.description,{Settings.Databas}.dbo.tagConfig.tagUnit FROM {Settings.Databas}.dbo.logValues INNER JOIN {Settings.Databas}.dbo.tagConfig ON {Settings.Databas}.dbo.logValues.tag_id = {Settings.Databas}.dbo.tagConfig.id";
+        var query = $"SELECT DISTINCT {Settings.Databas}.dbo.tagConfig.name,{Settings.Databas}.dbo.tagConfig.description,{Settings.Databas}.dbo.tagConfig.tagUnit,{Settings.Databas}.dbo.tagConfig.id FROM {Settings.Databas}.dbo.logValues INNER JOIN {Settings.Databas}.dbo.tagConfig ON {Settings.Databas}.dbo.logValues.tag_id = {Settings.Databas}.dbo.tagConfig.id";
         var connectionString = Config.SqlMethods.ConnectionString;
         //#if DEBUG
         //        connectionString = (@"Server=DESKTOP-4OD098D\MINSERVER;Database=MCValueLogOrig;User Id=sa;Password=sa; ");
@@ -804,17 +801,18 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
             await con.OpenAsync();
             var reader = await cmd.ExecuteReaderAsync();
 
-            AvailableTags = new();
+            StaticClass.AvailableTags = new();
             while (reader.Read())
             {
-                AvailableTags.Add(new Tag()
+                StaticClass.AvailableTags.Add(new Tag()
                 {
                     Name = reader["name"].ToString(),
                     Description = reader["description"].ToString(),
-                    Unit = reader["tagUnit"].ToString()
+                    Unit = reader["tagUnit"].ToString(),
+                    TagId = (int)reader["id"]
                 });
             }
-            comboTag.ItemsSource = AvailableTags.AsEnumerable().Select(x => x.Name);
+            comboTag.ItemsSource = StaticClass.AvailableTags.AsEnumerable().Select(x => x.Name);
             comboTag.SelectedIndex = 0;
         }
         catch (SqlException ex)
@@ -1159,7 +1157,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
                     await ChartData.GetChartDataAsync(startDateTime, stopDateTime, FillEmptyValues);
                     foreach (var tag in TagsPlottedOnChart)
                     {
-                        var line = new MyLineSeries(tag);
+                        var line = new Line(tag);
 
                         // Gets value for each tag
                         line.GetChartValues();
@@ -1544,7 +1542,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
             if (string.IsNullOrEmpty(tagName))
                 tagName = comboTag.SelectedValue.ToString();
 
-            var newTag = AvailableTags.Where(x => x.Name == tagName).FirstOrDefault();
+            var newTag = StaticClass.AvailableTags.Where(x => x.Name == tagName).FirstOrDefault();
 
             var tempDisplayedTags = TagsPlottedOnChart.ToList();
 
@@ -1920,7 +1918,7 @@ public partial class GraphWindow : Window, INotifyPropertyChanged, IDropTarget
         return false;
     }
 
-    private async Task<bool> ExportChartDataToExcel(List<MyLineSeries> MyLineSeries)
+    private async Task<bool> ExportChartDataToExcel(List<Line> MyLineSeries)
     {
         try
         {

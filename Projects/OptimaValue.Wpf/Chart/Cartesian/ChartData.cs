@@ -64,32 +64,6 @@ namespace OptimaValue.Wpf
             queryAllValuesString = sb.ToString();
         }
 
-        public static void BuildQueryNewValuesString()
-        {
-            DateTime lastTime = new();
-            lastTime = ChartTableAllTags.AsEnumerable().Max(x => x.Field<DateTime>("logTime"));
-
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine(@"DECLARE @columns NVARCHAR(MAX), @sql NVARCHAR(MAX);");
-            sb.AppendLine(@"SET @columns = N'';");
-            sb.AppendLine(@"SELECT @columns+=N', p.'+QUOTENAME([Name])");
-            sb.AppendLine(@"FROM");
-            sb.AppendLine(@"(");
-            sb.AppendLine(@"    SELECT name AS [Name]");
-            sb.AppendLine(@$"    FROM  (SELECT {Settings.Databas}.dbo.tagConfig.name, {Settings.Databas}.dbo.logValues.numericValue, {Settings.Databas}.dbo.logValues.logTime");
-            sb.AppendLine($"	FROM {Settings.Databas}.dbo.logValues INNER JOIN {Settings.Databas}.dbo.tagConfig ON {Settings.Databas}.dbo.logValues.tag_id = {Settings.Databas}.dbo.tagConfig.id WHERE {Settings.Databas}.dbo.logValues.logTime > '{lastTime}') AS p");
-            sb.AppendLine(@"    GROUP BY [Name]");
-            sb.AppendLine(@") AS x;");
-            sb.AppendLine(@"SET @sql = N'");
-            sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as logTime, '+STUFF(@columns, 1, 2, '')+' FROM (");
-            sb.AppendLine(@"SELECT DATEADD(ms, -DATEPART(ms, logTime), logTime) as [logTime], [numericValue] AS [numericValue], [name] as [Name] ");
-            sb.AppendLine($"    FROM {Settings.Databas}.dbo.logValues INNER JOIN {Settings.Databas}.dbo.tagConfig ON {Settings.Databas}.dbo.logValues.tag_id = {Settings.Databas}.dbo.tagConfig.id WHERE {Settings.Databas}.dbo.logValues.logTime > ''{lastTime}'') AS j PIVOT (SUM(numericValue) FOR [Name] in ");
-            sb.AppendLine(@"	   ('+STUFF(REPLACE(@columns, ', p.[', ',['), 1, 1, '')+')) AS p;';");
-            sb.AppendLine(@"EXEC sp_executesql @sql");
-
-            queryNewValuesString = sb.ToString();
-        }
-
         private static void BuildStoredProcedureString()
         {
             StringBuilder sb = new StringBuilder();

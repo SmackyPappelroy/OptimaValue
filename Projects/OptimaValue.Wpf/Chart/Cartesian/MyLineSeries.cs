@@ -16,7 +16,7 @@ using System.Windows.Media;
 
 namespace OptimaValue.Wpf
 {
-    public class MyLineSeries : ICloneable
+    public class MyLineSeriesOld
     {
         public Tag Tag;
 
@@ -154,7 +154,7 @@ namespace OptimaValue.Wpf
 
 
         #region Constructor
-        public MyLineSeries(Tag tag)
+        public MyLineSeriesOld(Tag tag)
         {
             Tag = tag;
 
@@ -244,11 +244,6 @@ namespace OptimaValue.Wpf
 
         }
 
-        public object Clone()
-        {
-            var lineSeries = (MyLineSeries)MemberwiseClone();
-            lineSeries.TagControl = TagControl;
-            return lineSeries;
-        }
+
     }
 }

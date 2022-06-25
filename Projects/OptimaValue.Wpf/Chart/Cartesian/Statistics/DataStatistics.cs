@@ -26,10 +26,17 @@ namespace OptimaValue.Wpf
         public double StandardDeviation = 0;
 
 
-        public DataStatistics(StatisticFilter filter, MyLineSeries series)
+        public DataStatistics(StatisticFilter filter, MyLineSeriesOld series)
         {
             Filter = filter;
             Values = series.LineSeries.Values as GearedValues<DateTimePoint>;
+            CalculateStatistics();
+        }
+
+        public DataStatistics(Line line)
+        {
+            Filter = StatisticFilter.Max;
+            Values = line.GLineSeries.Values as GearedValues<DateTimePoint>;
             CalculateStatistics();
         }
 
@@ -40,7 +47,7 @@ namespace OptimaValue.Wpf
             CalculateStatistics();
         }
 
-        private void CalculateStatistics()
+        public void CalculateStatistics()
         {
             if (Filter == StatisticFilter.Inget)
                 return;
