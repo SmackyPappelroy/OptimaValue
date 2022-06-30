@@ -12,6 +12,8 @@ using OptimaValue.Config;
 using System.Threading;
 using Serilog;
 using Serilog.Events;
+using System.Windows.Markup;
+using System.Globalization;
 
 namespace OptimaValue.Wpf
 {
@@ -31,6 +33,12 @@ namespace OptimaValue.Wpf
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+            FrameworkElement.LanguageProperty.OverrideMetadata(
+               typeof(FrameworkElement),
+               new FrameworkPropertyMetadata(
+                   XmlLanguage.GetLanguage(
+                   CultureInfo.CurrentCulture.IetfLanguageTag)));
+
             bool createdNew;
 
             using Mutex mutex = new Mutex(true, "OptimaValueWpf", out createdNew);

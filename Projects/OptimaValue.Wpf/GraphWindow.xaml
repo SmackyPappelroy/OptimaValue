@@ -59,6 +59,9 @@
                      UriSource="Resurser/end_100px.png"/>
     <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
     <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    <local:StringToTimeOnlyConverter x:Key="StringToTimeOnlyConverter"/>
+    <local:DateTimeToVisibilityConverter x:Key="DateTimeToVisibilityConverter"/>
+    <local:DoubleToVisibilityConverter x:Key="DoubleToVisibilityConverter"/>
 
     <Style x:Key="FontAwesome">
       <Setter Property="TextElement.FontFamily" Value="/Fonts/fontawesome-webfont.ttf#FontAwesome" />
@@ -79,11 +82,14 @@
 
   </Window.Resources>
   <Grid>
+
     <Border CornerRadius="30">
 
       <Grid Name="MainGrid">
 
         <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"></ColumnDefinition>
+          <ColumnDefinition Width="Auto"></ColumnDefinition>
           <ColumnDefinition Width=".35*"></ColumnDefinition>
           <ColumnDefinition Width=".35*"></ColumnDefinition>
           <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -95,9 +101,29 @@
           <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
 
-
+        <Slider Grid.Column="0" Grid.Row="0" Grid.RowSpan="4" Orientation="Vertical"
+             Minimum="{Binding MinValueGraph}" Maximum="{Binding MaxValueGraph}"
+             Visibility="{Binding MinValueGraph,Converter={StaticResource DoubleToVisibilityConverter}}"
+             TickPlacement="None"
+             Value="{Binding MinSliderValue}"
+             IsSnapToTickEnabled="False"
+             Name="MinSlider"
+             Margin="10 5 5 5"
+             BorderThickness="1"
+             />
+        <Slider Grid.Column="1" Grid.Row="0" Grid.RowSpan="4" Orientation="Vertical"
+             Visibility="{Binding MinValueGraph,Converter={StaticResource DoubleToVisibilityConverter}}"
+             Value="{Binding MaxSliderValue}"
+             Minimum="{Binding MinValueGraph}" Maximum="{Binding MaxValueGraph}"
+             TickPlacement="None"
+             IsSnapToTickEnabled="False"
+             Margin="5"
+             Name="MaxSlider"
+             BorderThickness="1"
+             />
 
         <Border CornerRadius="10" Grid.ColumnSpan="2" Margin="10"
+                Grid.Column="2"
                     Background="{DynamicResource horizontalGradient}">
           <ScrollViewer VerticalScrollBarVisibility="Auto" 
                         Margin="0 5 5 5"
@@ -108,10 +134,17 @@
                     Orientation="Vertical" 
                     Margin="25, 5">
 
-              <TextBlock Text="{Binding MinMaxTidString}" 
+              <TextBlock  Visibility="{Binding MinDateGraph,Converter={StaticResource DateTimeToVisibilityConverter}}"
                        Grid.Row="0"
                        Margin="0 0 0 5"
-                       FontSize="20" FontWeight="Bold" Foreground="Gray"/>
+                       FontSize="20" FontWeight="Bold" Foreground="Gray">
+                <TextBlock.Text>
+                  <MultiBinding StringFormat="{}{0} - {1}">
+                    <Binding Path = "MinDateGraph"/>
+                    <Binding Path = "MaxDateGraph"/>
+                  </MultiBinding>
+                </TextBlock.Text>
+              </TextBlock>
               <TextBlock Text="{Binding ActualTime}" Margin="0"
                        Grid.Column="0"
                        ToolTip="Tid vid vertikal bar"
@@ -131,6 +164,7 @@
           </ScrollViewer>
         </Border>
         <GridSplitter Grid.Row="0" Grid.ColumnSpan="2"
+                      Grid.Column="2"
                       ResizeDirection="Rows"
               HorizontalAlignment="Stretch"
               VerticalAlignment="Bottom"
@@ -139,7 +173,7 @@
               Height="10"
               />
 
-        <lvc:CartesianChart 
+        <!--<lvc:CartesianChart 
                             Grid.Column="0"
                             Grid.Row="1"
                             Grid.RowSpan="2"
@@ -151,8 +185,18 @@
                             Name="MyChart"
                             Zoom="{Binding Zoom}" 
                             DisableAnimations="True"
-                            Hoverable="False" LayoutUpdated="MyChart_LayoutUpdated"  >
-
+                            Hoverable="False" LayoutUpdated="MyChart_LayoutUpdated">-->
+        <lvc:CartesianChart 
+                            Grid.Column="2"
+                            Grid.Row="1"
+                            Grid.RowSpan="2"
+                            Grid.ColumnSpan="2"
+                            Margin="20 0 10 20"
+                            Series="{Binding Series}"
+                            x:Name="MyChart"
+                            Zoom="{Binding Zoom}" 
+                            DisableAnimations="True"
+                            Hoverable="False">
           <lvc:CartesianChart.Resources>
             <Style TargetType="lvc:Separator">
               <Setter Property="StrokeThickness" Value="2.5"></Setter>
@@ -192,7 +236,7 @@
             </Border>
             <!--#endregion-->
           </lvc:CartesianChart.Resources>
-          <lvc:CartesianChart.AxisY>
+          <!--<lvc:CartesianChart.AxisY>
             <lvc:Axis LabelFormatter="{Binding FormatterY}"
                           MaxValue="{Binding MaxValueY,Mode=OneWay}"
                           MinValue="{Binding MinValueY,Mode=OneWay}"
@@ -200,12 +244,19 @@
                               />
           </lvc:CartesianChart.AxisY>
           <lvc:CartesianChart.AxisX>
-            <lvc:Axis RangeChanged="Axis_OnRangeChanged"
+            -->
+          <!--<lvc:Axis RangeChanged="Axis_OnRangeChanged"
+                      LabelFormatter="{Binding FormatterX}" 
+                      MinValue="{Binding MinValueX, Mode=TwoWay}" 
+                      MaxValue="{Binding MaxValueX, Mode=TwoWay}"
+                      Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>-->
+          <!--
+            <lvc:Axis 
                       LabelFormatter="{Binding FormatterX}" 
                       MinValue="{Binding MinValueX, Mode=TwoWay}" 
                       MaxValue="{Binding MaxValueX, Mode=TwoWay}"
                       Separator="{x:Static lvc:DefaultAxes.CleanSeparator}"/>
-          </lvc:CartesianChart.AxisX>
+          </lvc:CartesianChart.AxisX>-->
           <lvc:CartesianChart.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
               <GradientStop Color="#222a31" Offset="0.0"></GradientStop>
@@ -217,29 +268,40 @@
 
 
         <TextBlock  Grid.Row="3"
+                    Grid.Column="2"
                    Margin="20 0 0 0"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Visibility="{Binding ChartStartDate,Converter={StaticResource StringToVisibilityConverter}}"
-                   Text="{Binding ChartStartDate}"
+                   Visibility="{Binding MinDateSeries,Converter={StaticResource DateTimeToVisibilityConverter}}"
+                   Text="{Binding MinDateSeries}"
                    Foreground="LightGray" FontSize="16" >
         </TextBlock>
-        <TextBlock Grid.Column="1" Grid.Row="3"
+        <TextBlock Grid.Column="3" Grid.Row="3"
                    Margin="0,0,20,0"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Right"
-                   Visibility="{Binding ChartStopDate,Converter={StaticResource StringToVisibilityConverter}}"
-                   Text="{Binding ChartStopDate}"
+                   Visibility="{Binding MaxDateSeries,Converter={StaticResource DateTimeToVisibilityConverter}}"
+                   Text="{Binding MaxDateSeries}"
                    Foreground="LightGray" FontSize="16" Grid.RowSpan="2" />
 
-        <Button Name="btnRefresh"  Grid.Row="3"
+        <!--<Button Name="btnRefresh"  Grid.Row="3"
                 ToolTip="Förnya trend och kopiera start- och stopp-tid till kontrollpanel"
                   Margin="10" Width="20" Height="40"
                    Grid.ColumnSpan="2"
                   Style="{DynamicResource growButton}"
                   Visibility="{Binding ChartStopDate,Converter={StaticResource StringToVisibilityConverter}}"
                   VerticalAlignment="Top" Panel.ZIndex="1"
-                  Click="RefreshOnClick" >
+                  Click="RefreshOnClick" >-->
+        <Button Name="btnRefresh"  Grid.Row="3"
+                Grid.Column="2"
+                Command="{Binding RefreshCommand}"
+                ToolTip="Förnya trend och kopiera start- och stopp-tid till kontrollpanel"
+                Margin="10" Width="20" Height="40"
+                Grid.ColumnSpan="2"
+                Style="{DynamicResource growButton}"
+                Visibility="{Binding MinValueGraph,Converter={StaticResource DoubleToVisibilityConverter}}"
+                VerticalAlignment="Top" Panel.ZIndex="1">
+
           <Button.Template>
             <ControlTemplate TargetType="Button">
               <fa:ImageAwesome Icon="Refresh" Foreground="LightGray"/>
@@ -284,7 +346,7 @@
                                 FontSize="14"
                                 Name="startDatePicker" 
                                 Margin="40 5 50 5 "
-                                SelectedDate="{Binding StartDate}"/>
+                                SelectedDate="{Binding InputStartDate}"/>
                   </Grid>
                   <Grid Margin="0 0 0 10">
                     <Grid.ColumnDefinitions>
@@ -298,15 +360,9 @@
                              Margin="40 5 50 5"
                              FontSize="14"
                              TextAlignment="Center"
+                             Text="{Binding InputStartTime,Converter={StaticResource StringToTimeOnlyConverter}}"
                              Name="txtStartTime">
-                      <TextBox.Text>
-                        <Binding Path="StartTimeString" 
-                                 UpdateSourceTrigger="PropertyChanged">
-                          <Binding.ValidationRules>
-                            <local:TimeValidationRule/>
-                          </Binding.ValidationRules>
-                        </Binding>
-                      </TextBox.Text>
+
                     </TextBox>
                   </Grid>
                   <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
@@ -337,13 +393,18 @@
                             FontSize="14"
                             Name="stopDatePicker" 
                             Margin="10 5 12 5"
-                            SelectedDate="{Binding StopDate}"/>
+                            SelectedDate="{Binding InputEndDate}"/>
                     <Viewbox Grid.Column="2" Height="30" Margin="2 0 5 0">
+                      <!--<Button Width="40" Height="40" 
+                            Style="{DynamicResource growButton}"
+                            Margin="10"
+                            VerticalAlignment="Top" Panel.ZIndex="1"
+                            Click="GotoEnd_Click" >-->
                       <Button Width="40" Height="40" 
                             Style="{DynamicResource growButton}"
                             Margin="10"
                             VerticalAlignment="Top" Panel.ZIndex="1"
-                            Click="GotoEnd_Click" >
+                            >
                         <Button.Template>
                           <ControlTemplate TargetType="Button">
                             <Grid>
@@ -376,14 +437,9 @@
                              Margin="42 5 50 5" 
                              FontSize="14"
                              TextAlignment="Center"
-                             Name="txtStopTime">
-                      <TextBox.Text>
-                        <Binding Path="StopTimeString" UpdateSourceTrigger="PropertyChanged">
-                          <Binding.ValidationRules>
-                            <local:TimeValidationRule/>
-                          </Binding.ValidationRules>
-                        </Binding>
-                      </TextBox.Text>
+                             Name="txtStopTime"
+                             Text="{Binding InputEndTime,Converter={StaticResource StringToTimeOnlyConverter}}">
+
                     </TextBox>
                   </Grid>
                   <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
@@ -411,13 +467,20 @@
                   <StackPanel Orientation="Horizontal" Margin="0 5 0 15">
                     <TextBlock Text="Zoom-typ:" Margin="20 5 19 5" Foreground="White" 
                                    FontSize="14" VerticalAlignment="Center"/>
+                    <!--<ComboBox Name="comboZoom" 
+                                  ItemsSource="{Binding Source = {StaticResource dataFromZoom}}"
+                                  SelectedItem="{Binding Zoom}"
+                                  Width="100"
+                                  Grid.Column="1" Margin="10 5 10 0" FontSize="16" 
+                                  FontWeight="Bold" VerticalAlignment="Top" 
+                                  SelectionChanged="comboZoom_SelectionChanged"/>-->
                     <ComboBox Name="comboZoom" 
                                   ItemsSource="{Binding Source = {StaticResource dataFromZoom}}"
                                   SelectedItem="{Binding Zoom}"
                                   Width="100"
                                   Grid.Column="1" Margin="10 5 10 0" FontSize="16" 
                                   FontWeight="Bold" VerticalAlignment="Top" 
-                                  SelectionChanged="comboZoom_SelectionChanged"/>
+                                  />
                   </StackPanel>
                   <StackPanel Orientation="Horizontal" Margin="0 5 0 5">
                     <TextBlock Text="Antal punkter per serie:" Margin="20 5 5 5" Foreground="White" 
@@ -428,12 +491,16 @@
                   <StackPanel Orientation="Horizontal" Margin="0 5 0 5">
                     <TextBlock Text="Fyll saknade värden:" Margin="20 5 5 5" Foreground="White" 
                                    FontSize="14" VerticalAlignment="Center" MinWidth="50"/>
+                    <!--<RadioButton FontSize="14" VerticalAlignment="Center" 
+                                 Padding="5" 
+                                 FontFamily="Bold"
+                                 Name="radioFillValues"
+                                 Click="FillValues_Checked"/>-->
                     <RadioButton FontSize="14" VerticalAlignment="Center" 
                                  Padding="5" 
                                  FontFamily="Bold"
                                  Name="radioFillValues"
-                                 Click="FillValues_Checked"
-                                  />
+                                 />
                   </StackPanel>
 
                   <Border  Height="3" BorderThickness="0 1 0 0" Margin="5 0 5 0" CornerRadius="1">
@@ -451,24 +518,40 @@
                        Margin="0 5 0 0"
                        HorizontalAlignment="Center"/>
                   <ComboBox Grid.Column="1" Margin="10 10 10 10" FontSize="16" FontWeight="Bold"
-                    Name="comboTag"/>
+                            IsTextSearchEnabled="True"
+                            Name="comboTag"/>
 
-                  <RadioButton FontSize="14" Name="checkHour" Margin="10 10 10 3" 
+                  <!--<RadioButton FontSize="14" Name="checkHour" Margin="10 10 10 3" 
                                Content="1 Timme" Foreground="White" Checked="OnHourChecked"/>
                   <RadioButton FontSize="14" Name="check30Min" Margin="10 0 10 3" 
                                Content="30 Minuter" Foreground="White" Checked="On30MinChecked"/>
                   <RadioButton FontSize="14" Name="check10Min" Margin="10 0 10 3" 
                                Content="10 Minuter" Foreground="White" Checked="On10MinChecked"/>
                   <RadioButton FontSize="14" Name="check1Min" Margin="10 0 10 3" 
-                               Content="1 Minut" Foreground="White" Checked="On1MinChecked"/>
+                               Content="1 Minut" Foreground="White" Checked="On1MinChecked"/>-->
+
+                  <RadioButton FontSize="14" Name="checkHour" Margin="10 10 10 3" 
+                               Content="1 Timme" Foreground="White" />
+                  <RadioButton FontSize="14" Name="check30Min" Margin="10 0 10 3" 
+                               Content="30 Minuter" Foreground="White" />
+                  <RadioButton FontSize="14" Name="check10Min" Margin="10 0 10 3" 
+                               Content="10 Minuter" Foreground="White"/>
+                  <RadioButton FontSize="14" Name="check1Min" Margin="10 0 10 3" 
+                               Content="1 Minut" Foreground="White" />
 
 
                   <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button Margin="10" Width="40" Height="40" Name="btnAdd"
+                    <!--<Button Margin="10" Width="40" Height="40" Name="btnAdd"
                             Style="{DynamicResource growButton}"
                             ToolTip="Lägg till tag"
                             VerticalAlignment="Top" Panel.ZIndex="1"
-                            Click="AddOnClick" >
+                            Click="AddOnClick" >-->
+                    <Button Margin="10" Width="40" Height="40" Name="btnAdd"
+                            Style="{DynamicResource growButton}"
+                            ToolTip="Lägg till tag"
+                            Command="{Binding AddLineCommand}"
+                            CommandParameter="{Binding ElementName=comboTag,Path=SelectedValue}"
+                            VerticalAlignment="Top" Panel.ZIndex="1" >
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
                           <Grid>
@@ -491,11 +574,17 @@
                     </Button>
 
 
-                    <Button Margin="10" Width="40" Height="40" Name="btnRemove"
+                    <!--<Button Margin="10" Width="40" Height="40" Name="btnRemove"
                             VerticalAlignment="Top" Panel.ZIndex="1"
                             Style="{DynamicResource growButton}"
                             ToolTip="Ta bort aktuell serie"
-                            Click="RemoveOnClick" >
+                            Click="RemoveOnClick" >-->
+                    <Button Margin="10" Width="40" Height="40" Name="btnRemove"
+                            Command="{Binding RemoveLineCommand}"
+                            CommandParameter="{Binding ElementName=comboTag,Path=SelectedValue}"
+                            VerticalAlignment="Top" Panel.ZIndex="1"
+                            Style="{DynamicResource growButton}"
+                            ToolTip="Ta bort aktuell serie" >
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
                           <Grid>
@@ -523,12 +612,17 @@
                     </Button>
 
 
-                    <Button Width="40" Height="40" Name="btnUpdate"
+                    <!--<Button Width="40" Height="40" Name="btnUpdate"
                             Style="{DynamicResource growButton}"
                             Margin="10"
                             ToolTip="Ändra färg på serier"
                             VerticalAlignment="Top" Panel.ZIndex="1"
-                            Click="UpdateOnClick" >
+                            Click="UpdateOnClick" >-->
+                    <Button Width="40" Height="40" Name="btnUpdate"
+                            Style="{DynamicResource growButton}"
+                            Margin="10"
+                            ToolTip="Ändra färg på serier"
+                            VerticalAlignment="Top" Panel.ZIndex="1">
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
                           <Grid>
@@ -549,12 +643,17 @@
                       </Button.Template>
                     </Button>
 
-                    <Button Margin="10" Width="40" Height="40" 
+                    <!--<Button Margin="10" Width="40" Height="40" 
                             Style="{DynamicResource growButton}"
                             Visibility="{Binding PlayButtonVisible,Converter={StaticResource BooleanToVisibilityConverter}}"
                             ToolTip="Starta live-visning"
                             VerticalAlignment="Top" Panel.ZIndex="1" Name="btnPlay"
-                            Click="PlayOnClick" >
+                            Click="PlayOnClick" >-->
+                    <Button Margin="10" Width="40" Height="40" 
+                            Style="{DynamicResource growButton}"
+                            Visibility="{Binding PlayButtonVisible,Converter={StaticResource BooleanToVisibilityConverter}}"
+                            ToolTip="Starta live-visning"
+                            VerticalAlignment="Top" Panel.ZIndex="1" Name="btnPlay">
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
                           <Grid>
@@ -576,11 +675,15 @@
                     </Button>
 
 
-                    <Button Margin="10 10 10 0" Width="40" Height="40" Name="btnStop"
+                    <!--<Button Margin="10 10 10 0" Width="40" Height="40" Name="btnStop"
                             Style="{DynamicResource growButton}"
                             ToolTip="Stoppa live-visning"
                             VerticalAlignment="Top" Panel.ZIndex="1"
-                            Click="StopOnClick" >
+                            Click="StopOnClick" >-->
+                    <Button Margin="10 10 10 0" Width="40" Height="40" Name="btnStop"
+                            Style="{DynamicResource growButton}"
+                            ToolTip="Stoppa live-visning"
+                            VerticalAlignment="Top" Panel.ZIndex="1">
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
                           <Grid>
@@ -606,12 +709,17 @@
                   <StackPanel Orientation="Horizontal" 
                                         HorizontalAlignment="Center"
                                         Margin="10 10 20 0">
-                    <Button  Width="40" Height="40" Name="btnSave"
+                    <!--<Button  Width="40" Height="40" Name="btnSave"
                              Style="{DynamicResource growButton}"
                              ToolTip="Spara till .PNG-fil"
                              VerticalAlignment="Top" Panel.ZIndex="1"
                              Margin="0 0 20 0"
-                             Click="Button_Save" >
+                             Click="Button_Save" >-->
+                    <Button  Width="40" Height="40" Name="btnSave"
+                             Style="{DynamicResource growButton}"
+                             ToolTip="Spara till .PNG-fil"
+                             VerticalAlignment="Top" Panel.ZIndex="1"
+                             Margin="0 0 20 0">
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
                           <Grid>
@@ -631,12 +739,17 @@
                         </ControlTemplate>
                       </Button.Template>
                     </Button>
-                    <Button Width="40" Height="40" Name="btnExcel"
+                    <!--<Button Width="40" Height="40" Name="btnExcel"
                             Style="{DynamicResource growButton}"
                             ToolTip="Spara aktuell visad trend till excel"
                             Margin="20 0 20 0"
                             VerticalAlignment="Top" Panel.ZIndex="1"
-                            Click="Button_Excel" >
+                            Click="Button_Excel" >-->
+                    <Button Width="40" Height="40" Name="btnExcel"
+                            Style="{DynamicResource growButton}"
+                            ToolTip="Spara aktuell visad trend till excel"
+                            Margin="20 0 20 0"
+                            VerticalAlignment="Top" Panel.ZIndex="1">
                       <Button.Template>
                         <ControlTemplate TargetType="Button">
                           <Grid>

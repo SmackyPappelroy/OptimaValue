@@ -191,7 +191,7 @@ namespace OptimaValue.Wpf
 
                 ChartTableAllTagsNoFill = ChartTableAllTags.Copy();
 
-                ChartTableAllTags = ChartTableAllTags.FillGapsForwards(numberOfRows, stopTime - startTime, startTime, stopTime, graphWindow.MaxPointsPerSeries);
+                //ChartTableAllTags = ChartTableAllTags.FillGapsForwards(numberOfRows, stopTime - startTime, startTime, stopTime, graphWindow.MaxPointsPerSeries);
 
                 //CreateStoredProcedure();
 

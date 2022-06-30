@@ -1,6 +1,8 @@
-﻿using LiveCharts.Defaults;
+﻿using LiveCharts;
+using LiveCharts.Defaults;
 using LiveCharts.Geared;
 using LiveCharts.Helpers;
+using LiveCharts.Wpf;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,14 +14,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace OptimaValue.Wpf;
 
-public class Line
+public class Line : INotifyPropertyChanged
 {
+    private GraphWindow window;
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
     public DataTable DataTableSql;
     public List<DateTimePoint> DateTimePointsSql;
+    public readonly TimeSpan ExtraTimeInSql = TimeSpan.FromHours(1);
+
     public GLineSeries GLineSeries { get; set; }
+    public GearedValues<DateTimePoint> ChartValues;
     public Tag Tag { get; private set; }
     public DateTime MaxDate { get; internal set; }
     public DateTime MinDate { get; internal set; }
@@ -30,10 +40,14 @@ public class Line
     public DateTime GlineSeriesMaxDateTime { get; internal set; } = DateTime.MinValue;
     public DataStatistics DataStatistics { get; internal set; }
     public TagControl TagControl { get; internal set; }
+    public Func<double, string> FormatterY { get; internal set; }
+    public Func<double, string> FormatterX { get; internal set; }
 
-    public Line(int id)
+    public Line(int id, TimeSpan extraTimeInSql)
     {
+        ExtraTimeInSql = extraTimeInSql;
         Tag = StaticClass.AvailableTags.FirstOrDefault(t => t.TagId == id);
+        window = Master.GetService<GraphWindow>();
     }
 
 
@@ -59,7 +73,285 @@ public class Line
         return HashCode.Combine(Tag.TagId);
     }
 
+    public override string ToString()
+    {
+        return Tag.Name;
+    }
 
+    public void CreateLine()
+    {
+        TagControl = new();
+        TagControl.TagName = Tag.Name;
+        TagControl.TagColor = UpdateTagControlEllipseColor();
+        TagControl.Description = Tag.Description;
+        TagControl.TagUnit = Tag.Unit;
+
+        GLineSeries = new()
+        {
+            AreaLimit = 0,
+            PointGeometry = DefaultGeometries.Circle,
+            PointGeometrySize = 10,
+            StrokeThickness = 2,
+
+            Foreground = new SolidColorBrush(Color.FromArgb(107, 48, 48, 48)),
+            Stroke = new SolidColorBrush(Tag.Stroke),
+            Fill = new SolidColorBrush(Tag.Fill),
+            Title = Tag.Name,
+            Values = new GearedValues<DateTimePoint>().WithQuality(Quality.Highest)
+        };
+        // Format XY-axis
+        FormatterY = val => val.ToString("0.0");
+        FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss.fff");
+        ChartValues = new GearedValues<DateTimePoint>().WithQuality(Quality.Highest);
+    }
+
+
+    public async Task SetupLine(DateTime startDate, DateTime stopDate, int maxRows = 0)
+    {
+        CreateLine();
+        await GetSqlData(startDate.Subtract(ExtraTimeInSql), stopDate.Add(ExtraTimeInSql), maxRows);
+        await GetValuesFromTable(startDate, stopDate);
+        await GetMinMaxAvg();
+        await UpdateDataStatistics();
+    }
+
+    /// <summary>
+    /// Gets data from sql between <paramref name="startDate"/> and <paramref name="stopDate"/>
+    /// </summary>
+    /// <param name="line"></param>
+    /// <param name="startDate"></param>
+    /// <param name="stopDate"></param>
+    /// <param name="maxRows"></param>
+    /// <returns></returns>
+    /// <exception cref="ChartNoDataInSqlException"></exception>
+    public async Task GetSqlData(DateTime startDate, DateTime stopDate, int maxRows = 0)
+    {
+        var tbl = new DataTable();
+        tbl.Clear();
+        string query = string.Empty;
+        if (maxRows > 0)
+        {
+            query = $"SELECT TOP {maxRows} FROM {Config.Settings.Databas}.dbo.[logValues] WHERE tag_id = {Tag.TagId} AND logTime >= '{startDate}' AND logTime <= '{stopDate}' ORDER by logTime";
+        }
+        else
+            query = $"SELECT * FROM {Config.Settings.Databas}.dbo.[logValues] WHERE tag_id = {Tag.TagId} AND logTime >= '{startDate}' AND logTime <= '{stopDate}'";
+
+        using var con = new SqlConnection(Config.Settings.ConnectionString);
+        using var cmd = new SqlCommand(query, con);
+        con.Open();
+        var reader = await cmd.ExecuteReaderAsync();
+        tbl.Load(reader);
+
+        if (tbl == null || tbl.Rows.Count == 0)
+            throw new ChartNoDataInSqlException(this, string.Empty, startDate, stopDate);
+
+        tbl.DefaultView.Sort = "logTime";
+        tbl = tbl.DefaultView.ToTable();
+
+
+        DataTableSql = tbl;
+
+        MaxDate = (DateTime)tbl.AsEnumerable().Select(x => x["logTime"]).Max();
+        MinDate = (DateTime)tbl.AsEnumerable().Select(x => x["logTime"]).Min();
+
+        if (tbl != null)
+        {
+            if (tbl.Rows.Count > 0)
+                UpdateRequiredSql = false;
+        }
+        await Task.Run(() =>
+        {
+            DateTimePointsSql = tbl.AsEnumerable().Select(x => new DateTimePoint((DateTime)x["logTime"], (double)x["numericValue"]))?.ToList();
+        });
+
+        return;
+    }
+
+    /// <summary>
+    /// <para></para>
+    /// Gets values from the <see cref="Line.DataTableSql"/> and adds them to a <see cref="GLineSeries"/>
+    /// <para></para>
+    /// Creates the <see cref="GLineSeries"/> if it is null
+    /// </summary>
+    /// <param name="line"></param>
+    /// <param name="startDate"></param>
+    /// <param name="stopDate"></param>
+    /// <returns></returns>
+    /// <exception cref="ChartSqlTableNotCreatedException"></exception>
+    /// <exception cref="ChartDateTimeException"></exception>
+    public async Task GetValuesFromTable(DateTime startDate, DateTime stopDate)
+    {
+        if (DataTableSql == null)
+            throw new ChartSqlTableNotCreatedException(this);
+
+        if (startDate > stopDate)
+            throw new ChartDateTimeException(this, "Startdatum är större än slutdatum");
+
+        if (MaxDate < startDate || MinDate > stopDate)
+            throw new ChartDateTimeException(this, "Datumet är utanför tidsintervalet");
+
+
+        GearedValues<DateTimePoint> values = new GearedValues<DateTimePoint>();
+        // Create async Task to get the data from the datatable
+        await Task.Run(() =>
+        {
+            var tbl = DataTableSql.AsEnumerable().Where(x => (DateTime)x["logTime"] >= startDate && (DateTime)x["logTime"] <= stopDate).CopyToDataTable();
+            try
+            {
+
+                ChartValues = tbl.AsEnumerable().Select(x => new DateTimePoint((DateTime)x["logTime"], (double)x["numericValue"])).ToList().AsGearedValues().WithQuality(Quality.Highest);
+            }
+            catch (Exception ex)
+            {
+                var mes = ex;
+            }
+
+
+        });
+        GLineSeries.Values = ChartValues;
+        return;
+    }
+
+    /// <summary>
+    /// Updates the data with a new time span <paramref name="duration"/>
+    /// </summary>
+    /// <param name="line"></param>
+    /// <param name="duration"></param>
+    /// <returns></returns>
+    /// <exception cref="ChartOutOfRangeSqlException"></exception>
+    public async Task UpdateValues(TimeSpan duration)
+    {
+        if (MaxDate < GlineSeriesMaxDateTime + duration)
+        {
+            UpdateRequiredSql = true;
+            throw new ChartOutOfRangeSqlException(this);
+        }
+
+        var nrOfValues = 0;
+        // Add new values
+        await Task.Run(() =>
+        {
+            try
+            {
+                var firstHigherValue = DateTimePointsSql.Where(x => (x.DateTime > GlineSeriesMaxDateTime) && (x.DateTime <= (GlineSeriesMaxDateTime + duration))).ToList();
+                nrOfValues = firstHigherValue.Count;
+                if (firstHigherValue.Count > 0)
+                {
+                    nrOfValues = firstHigherValue.Count;
+                    ChartValues.AddRange(firstHigherValue);
+                    while (nrOfValues > 0)
+                    {
+                        nrOfValues--;
+                        ChartValues.RemoveAt(0);
+                    }
+                }
+            }
+            catch (ArgumentNullException)
+            {
+                UpdateRequiredSql = true;
+                throw new ChartOutOfRangeSqlException(this);
+
+            }
+        });
+        GLineSeries.Values = ChartValues;
+        return;
+    }
+
+    /// <summary>
+    /// Adds one value to the line
+    /// </summary>
+    /// <param name="line"></param>
+    /// <param name="timeSpan"></param>
+    /// <returns></returns>
+    /// <exception cref="ChartOutOfRangeSqlException"></exception>
+    public void AddOneValueRemoveOldest()
+    {
+        GlineSeriesMaxDateTime = new DateTime((long)GLineSeries.ChartPoints.AsEnumerable().Select(x => x.X).Max());
+        if (GlineSeriesMaxDateTime > MaxDate)
+        {
+            UpdateRequiredSql = true;
+            throw new ChartOutOfRangeSqlException(this);
+        }
+        var nextValueFromSql = DataTableSql.AsEnumerable().Where(x => (DateTime)x["logTime"] > GlineSeriesMaxDateTime).FirstOrDefault();
+        if (nextValueFromSql != null)
+        {
+            var nextValue = new DateTimePoint((DateTime)nextValueFromSql["logTime"], (double)nextValueFromSql["logValue"]);
+            ChartValues.Add(nextValue);
+            ChartValues.RemoveAt(0);
+        }
+        else
+        {
+            UpdateRequiredSql = true;
+            throw new ChartOutOfRangeSqlException(this);
+        }
+        GLineSeries.Values = ChartValues;
+        return;
+    }
+
+    /// <summary>
+    /// Gets the min, max and average value for the line
+    /// </summary>
+    /// <param name="line"></param>
+    /// <returns></returns>
+    public async Task GetMinMaxAvg()
+    {
+        if (GLineSeries.Values.Count == 0)
+            return;
+
+        await Task.Run(() =>
+        {
+            window.Dispatcher?.Invoke(() =>
+            {
+                MinValue = ChartValues.AsEnumerable().Select(x => x.Value).Min();
+                MaxValue = ChartValues.AsEnumerable().Select(x => x.Value).Max();
+                AvgValue = ChartValues.AsEnumerable().Select(x => x.Value).Average();
+                MinDate = ChartValues.AsEnumerable().Select(x => x.DateTime).Min();
+                MaxDate = ChartValues.AsEnumerable().Select(x => x.DateTime).Max();
+
+                TagControl.MinValue = MinValue.ToString("0.00");
+                TagControl.MaxValue = MaxValue.ToString("0.00");
+                TagControl.AverageValue = AvgValue.ToString("0.00");
+            });
+        });
+
+    }
+
+    /// <summary>
+    /// Updates the line color
+    /// </summary>
+    /// <param name="line"></param>
+    /// <returns></returns>
+    public void UpdateLineColor()
+    {
+        Tag.UpdateColor();
+        TagControl.TagColor = UpdateTagControlEllipseColor();
+    }
+
+    /// <summary>
+    /// Updates the statistics for the series view
+    /// </summary>
+    /// <param name="line"></param>
+    /// <returns></returns>
+    public async Task UpdateDataStatistics()
+    {
+        await Task.Run(() =>
+        {
+            if (DataStatistics == null)
+                DataStatistics = new DataStatistics(this);
+            else
+                DataStatistics.CalculateStatistics();
+        });
+
+
+        // Update TagControl
+        TagControl.Integral = DataStatistics.Integral.ToString("0.00");
+        var integralPerTimme = DataStatistics.Integral / (MaxDate - MinDate).TotalHours;
+        TagControl.IntegralPerTimme = integralPerTimme.ToString("0.00");
+        TagControl.OverZero = DataStatistics.NumberOfTimesOverZero.ToString("0.00");
+        TagControl.OverZeroTime = DataStatistics.TimeOverZero.ToString();
+        TagControl.Deviation = DataStatistics.StandardDeviation.ToString("0.00");
+        return;
+    }
 }
 
 public static class StaticClass
@@ -74,10 +366,14 @@ public static class StaticClass
     public static void AddLine(Line line)
     {
         if (Lines == null)
+        {
             Lines = new();
+        }
 
         if (!Lines.Contains(line))
+        {
             Lines.Add(line);
+        }
         else
         {
             Lines.Remove(line);
@@ -96,196 +392,5 @@ public static class StaticClass
 
 public static class LinesExtensions
 {
-    public static Line CreateLine(this Line line, int tagId)
-    {
-        if (line == null)
-            line = new Line(tagId);
 
-        line.TagControl = new();
-        line.TagControl.TagName = line.Tag.Name;
-        line.TagControl.TagColor = line.UpdateTagControlEllipseColor();
-        line.TagControl.Description = line.Tag.Description;
-        line.TagControl.TagUnit = line.Tag.Unit;
-
-        return line;
-    }
-
-    public static async Task<Line> GetSqlData(this Line line, DateTime startDate, DateTime stopDate, int maxRows = 0)
-    {
-        var tbl = new DataTable();
-        tbl.Clear();
-        string query = string.Empty;
-        if (maxRows > 0)
-        {
-            query = $"SELECT TOP {maxRows} FROM {Config.Settings.Databas}.[logValues] WHERE TagId = {line.Tag.TagId} AND DateTime >= '{startDate}' AND DateTime <= '{stopDate}' ORDER by logTime";
-        }
-        else
-            query = $"SELECT * FROM {Config.Settings.Databas}.[logValues] WHERE TagId = {line.Tag.TagId} AND DateTime >= '{startDate}' AND DateTime <= '{stopDate}'";
-
-        using var con = new SqlConnection(Config.Settings.ConnectionString);
-        using var cmd = new SqlCommand(query, con);
-        con.Open();
-        var reader = await cmd.ExecuteReaderAsync();
-        tbl.Load(reader);
-
-        tbl.DefaultView.Sort = "logTime";
-        tbl = tbl.DefaultView.ToTable();
-
-        line.DataTableSql = tbl;
-
-        line.MaxDate = (DateTime)tbl.AsEnumerable().Select(x => x["logTime"]).Max();
-        line.MinDate = (DateTime)tbl.AsEnumerable().Select(x => x["logTime"]).Min();
-
-        if (tbl != null)
-        {
-            if (tbl.Rows.Count > 0)
-                line.UpdateRequiredSql = false;
-        }
-        await Task.Run(() =>
-        {
-            line.DateTimePointsSql = tbl.AsEnumerable().Select(x => new DateTimePoint((DateTime)x["logTime"], (double)x["numericValue"])).ToList();
-        });
-
-        return line;
-    }
-
-    public static Line CreateGlineSeries(this Line line)
-    {
-        if (line.DataTableSql == null)
-            throw new NotImplementedException("Ej skapat DataTable");
-
-        line.GLineSeries.Title = line.Tag.Name;
-
-        line.GLineSeries.Values = new GearedValues<DateTimePoint>().WithQuality(Quality.Highest);
-
-        return line;
-    }
-
-    public static async Task<Line> GetValuesFromTable(this Line line, DateTime startDate, DateTime stopDate)
-    {
-        if (line.DataTableSql == null)
-            throw new ChartSqlTableNotCreatedException(line);
-
-        if (startDate > stopDate)
-            throw new ChartDateTimeException(line, "Startdatum är större än slutdatum");
-
-        if (line.MaxDate < startDate || line.MinDate > stopDate)
-            throw new ChartDateTimeException(line, "Datumet är utanför tidsintervalet");
-
-        // Create async Task to get the data from the datatable
-        await Task.Run(() =>
-        {
-            var tbl = line.DataTableSql.AsEnumerable().Where(x => (DateTime)x["logTime"] >= startDate && (DateTime)x["logTime"] <= stopDate).CopyToDataTable();
-            line.GLineSeries.Values = tbl.AsEnumerable().Select(x => new DateTimePoint((DateTime)x["logTime"], (double)x["logValue"])).ToList().AsGearedValues().WithQuality(Quality.Highest);
-        });
-
-        return line;
-    }
-
-    public static async Task<Line> UpdateValuesFromTable(this Line line, TimeSpan duration)
-    {
-        if (line.MaxDate < line.GlineSeriesMaxDateTime + duration)
-        {
-            line.UpdateRequiredSql = true;
-            throw new ChartOutOfRangeSqlException(line);
-        }
-
-        var nrOfValues = 0;
-        // Add new values
-        await Task.Run(() =>
-        {
-            try
-            {
-                var firstHigherValue = line.DateTimePointsSql.Where(x => (x.DateTime > line.GlineSeriesMaxDateTime) && (x.DateTime <= (line.GlineSeriesMaxDateTime + duration))).ToList();
-                nrOfValues = firstHigherValue.Count;
-                if (firstHigherValue.Count > 0)
-                {
-                    nrOfValues = firstHigherValue.Count;
-                    line.GLineSeries.Values.AddRange(firstHigherValue);
-                    while (nrOfValues > 0)
-                    {
-                        nrOfValues--;
-                        line.GLineSeries.Values.RemoveAt(0);
-                    }
-                }
-            }
-            catch (ArgumentNullException)
-            {
-                line.UpdateRequiredSql = true;
-                throw new ChartOutOfRangeSqlException(line);
-
-            }
-        });
-        return line;
-    }
-
-    public static Line AddOneValue(this Line line, TimeSpan timeSpan)
-    {
-        line.GlineSeriesMaxDateTime = new DateTime((long)line.GLineSeries.ChartPoints.AsEnumerable().Select(x => x.X).Max());
-        if (line.GlineSeriesMaxDateTime > line.MaxDate)
-        {
-            line.UpdateRequiredSql = true;
-            throw new ChartOutOfRangeSqlException(line);
-        }
-        var nextValueFromSql = line.DataTableSql.AsEnumerable().Where(x => (DateTime)x["logTime"] > line.GlineSeriesMaxDateTime).FirstOrDefault();
-        if (nextValueFromSql != null)
-        {
-            var nextValue = new DateTimePoint((DateTime)nextValueFromSql["logTime"], (double)nextValueFromSql["logValue"]);
-            line.GLineSeries.Values.Add(nextValue);
-        }
-        else
-        {
-            line.UpdateRequiredSql = true;
-            throw new ChartOutOfRangeSqlException(line);
-        }
-        return line;
-    }
-
-    public static async Task<Line> GetMinMaxAvg(this Line line)
-    {
-        if (line.GLineSeries.Values.Count == 0)
-            return line;
-
-        await Task.Run(() =>
-        {
-            line.MinValue = line.GLineSeries.ChartPoints.AsEnumerable().Select(x => x.Y).Min();
-            line.MaxValue = line.GLineSeries.ChartPoints.AsEnumerable().Select(x => x.Y).Max();
-            line.AvgValue = line.GLineSeries.ChartPoints.AsEnumerable().Select(x => x.Y).Average();
-            line.MinDate = new DateTime((long)line.GLineSeries.ChartPoints.AsEnumerable().Select(x => x.X).Min());
-            line.MaxDate = new DateTime((long)line.GLineSeries.ChartPoints.AsEnumerable().Select(x => x.X).Max());
-            line.TagControl.MinValue = line.MinValue.ToString("0.00");
-            line.TagControl.MaxValue = line.MaxValue.ToString("0.00");
-            line.TagControl.AverageValue = line.AvgValue.ToString("0.00");
-        });
-
-        return line;
-    }
-
-    public static Line UpdateLineColor(this Line line)
-    {
-        line.Tag.UpdateColor();
-        line.TagControl.TagColor = line.UpdateTagControlEllipseColor();
-        return line;
-    }
-
-    public static async Task<Line> UpdateDataStatistics(this Line line)
-    {
-        await Task.Run(() =>
-        {
-            if (line.DataStatistics == null)
-                line.DataStatistics = new DataStatistics(line);
-            else
-                line.DataStatistics.CalculateStatistics();
-        });
-
-
-        // Update TagControl
-        line.TagControl.Integral = line.DataStatistics.Integral.ToString("0.00");
-        var integralPerTimme = line.DataStatistics.Integral / (line.MaxDate - line.MinDate).TotalHours;
-        line.TagControl.IntegralPerTimme = integralPerTimme.ToString("0.00");
-        line.TagControl.OverZero = line.DataStatistics.NumberOfTimesOverZero.ToString("0.00");
-        line.TagControl.OverZeroTime = line.DataStatistics.TimeOverZero.ToString("0.00");
-        line.TagControl.Deviation = line.DataStatistics.StandardDeviation.ToString("0.00");
-        return line;
-    }
 }

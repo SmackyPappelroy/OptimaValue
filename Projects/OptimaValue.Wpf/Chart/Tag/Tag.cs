@@ -13,6 +13,8 @@ namespace OptimaValue.Wpf
         public string Name { get; set; }
         public string Description { get; set; }
         public string Unit { get; set; }
+        public string PlcName { get; set; }
+        public TimeSpan UpdateTime { get; set; }
         public Color Stroke { get; private set; }
         public Color Fill { get; private set; }
 

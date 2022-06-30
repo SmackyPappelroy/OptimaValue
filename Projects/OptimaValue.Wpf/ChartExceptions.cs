@@ -32,12 +32,20 @@ namespace OptimaValue.Wpf
 
     internal class ChartDateTimeException : BaseChartException
     {
-
-
         public ChartDateTimeException(Line line, string message)
           : base($"{line}: {message}")
         {
 
         }
+    }
+
+    internal class ChartNoDataInSqlException : BaseChartException
+    {
+        public ChartNoDataInSqlException(Line line, string message)
+          : base($"{line}: Ingen data hämtad från SQL{Environment.NewLine}{message}")
+        { }
+        public ChartNoDataInSqlException(Line line, string message, DateTime startDate, DateTime endDate)
+         : base($"{line}: Ingen data hämtad mellan {startDate} - {endDate}{Environment.NewLine}{message}")
+        { }
     }
 }

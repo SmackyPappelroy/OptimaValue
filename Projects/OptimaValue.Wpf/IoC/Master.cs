@@ -86,6 +86,8 @@ namespace OptimaValue.Wpf
             catch (OperationCanceledException) { }
 
         }
+
+
     }
 }
 

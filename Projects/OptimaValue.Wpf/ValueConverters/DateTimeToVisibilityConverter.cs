@@ -9,12 +9,15 @@ using System.Windows.Data;
 
 namespace OptimaValue.Wpf
 {
-    public class DoubleToVisibilityConverter : IValueConverter
+    public class DateTimeToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return (double)value == 0 ? Visibility.Collapsed : Visibility.Visible;
-
+            if ((DateTime)value == DateTime.MinValue)
+            {
+                return Visibility.Hidden;
+            }
+            return Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
