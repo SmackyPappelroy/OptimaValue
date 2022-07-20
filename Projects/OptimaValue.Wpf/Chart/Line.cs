@@ -33,8 +33,26 @@ public class Line : INotifyPropertyChanged
     public Tag Tag { get; private set; }
     public DateTime MaxDate { get; internal set; }
     public DateTime MinDate { get; internal set; }
-    public double MinValue { get; internal set; }
-    public double MaxValue { get; internal set; }
+    private double minValue;
+    public double MinValue
+    {
+        get => minValue;
+        internal set
+        {
+            minValue = value;
+            (AxisY ??= new()).MinValue = value;
+        }
+    }
+    private double maxValue;
+    public double MaxValue
+    {
+        get => maxValue;
+        internal set
+        {
+            maxValue = value;
+            (AxisY ??= new()).MaxValue = value;
+        }
+    }
     public double AvgValue { get; internal set; }
     public bool UpdateRequiredSql { get; internal set; }
     public DateTime GlineSeriesMaxDateTime { get; internal set; } = DateTime.MinValue;
@@ -42,6 +60,7 @@ public class Line : INotifyPropertyChanged
     public TagControl TagControl { get; internal set; }
     public Func<double, string> FormatterY { get; internal set; }
     public Func<double, string> FormatterX { get; internal set; }
+    public Axis AxisY { get; set; }
 
     public Line(int id, TimeSpan extraTimeInSql)
     {
@@ -103,6 +122,15 @@ public class Line : INotifyPropertyChanged
         FormatterY = val => val.ToString("0.0");
         FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss.fff");
         ChartValues = new GearedValues<DateTimePoint>().WithQuality(Quality.Highest);
+        AxisY = new()
+        {
+            Separator = DefaultAxes.CleanSeparator,
+            Name = Tag.Name,
+            LabelFormatter = FormatterY,
+        };
+        AxisY.Separator.StrokeThickness = 0;
+        AxisY.Foreground = new SolidColorBrush(Tag.Stroke);
+        AxisY.Separator.Stroke = new SolidColorBrush(Tag.Stroke);
     }
 
 
@@ -390,7 +418,4 @@ public static class StaticClass
     }
 }
 
-public static class LinesExtensions
-{
 
-}

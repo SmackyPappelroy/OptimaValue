@@ -33,7 +33,8 @@ namespace OptimaValue.Wpf
             if (IsConfigured)
                 return;
 
-            services.AddSingleton<GraphWindow>();
+            services.AddSingleton<TrendWindow>();
+            services.AddSingleton<TagListControlViewModel>();
 
             Log.Logger = new LoggerConfiguration()
                         .WriteTo.File(fileLoggerPath,

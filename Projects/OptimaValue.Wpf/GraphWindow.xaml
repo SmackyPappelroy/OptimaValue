@@ -193,6 +193,7 @@
                             Grid.ColumnSpan="2"
                             Margin="20 0 10 20"
                             Series="{Binding Series}"
+                            AxisY="{Binding AxisCollection}"
                             x:Name="MyChart"
                             Zoom="{Binding Zoom}" 
                             DisableAnimations="True"
@@ -312,12 +313,12 @@
         <!-- Control panel -->
         <Popup Name="myPopup"
                AllowsTransparency="True"
-               
                Width="400"
                Height="{Binding ElementName=mainWindow ,Path=ActualHeight}"
                IsOpen="True"
                PlacementTarget="{Binding ElementName=mainWindow}"
                Placement="Right">
+
           <StackPanel Orientation="Vertical" Name="myPopupStack">
             <Border Margin="0 0 20 10" 
                         Name="ControlBorder"
@@ -517,9 +518,10 @@
                        Foreground="White"
                        Margin="0 5 0 0"
                        HorizontalAlignment="Center"/>
-                  <ComboBox Grid.Column="1" Margin="10 10 10 10" FontSize="16" FontWeight="Bold"
+                  <ListBox Grid.Column="1" Margin="10 10 10 10" FontSize="14" 
+                           Height="50"
                             IsTextSearchEnabled="True"
-                            Name="comboTag"/>
+                            Name="listBoxTag"/>
 
                   <!--<RadioButton FontSize="14" Name="checkHour" Margin="10 10 10 3" 
                                Content="1 Timme" Foreground="White" Checked="OnHourChecked"/>

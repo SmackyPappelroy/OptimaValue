@@ -39,10 +39,10 @@ namespace OptimaValue.Wpf
                 AvailableTags = new();
                 AvailableTags = await SqlHelper.GetDistinctTags();
                 StaticClass.AvailableTags = AvailableTags;
-                // Map distinct tags to combobox
+                // Map distinct tags to listBox
                 Dispatcher.CurrentDispatcher?.Invoke(() =>
                 {
-                    MapTagsToComboBox();
+                    MapTagsToListBox();
                 });
                 // Clear status message after 5 seconds
                 statusMessageTimer = new DispatcherTimer();
@@ -153,6 +153,7 @@ namespace OptimaValue.Wpf
                         MinSliderValue = window.MaxSlider.Value;
                     }
                     window.MyChart.AxisY[0].MinValue = MinSliderValue;
+
                 });
                 window.MaxSlider.ValueChanged += ((sender, e) =>
                 {
@@ -174,6 +175,7 @@ namespace OptimaValue.Wpf
                     }
                     window.MyChart.AxisY[0].MaxValue = MaxSliderValue;
 
+
                 });
                 // Window is loaded
                 isLoaded = true;
@@ -184,14 +186,14 @@ namespace OptimaValue.Wpf
 
 
 
-        private void MapTagsToComboBox()
+        private void MapTagsToListBox()
         {
             // Run on UI-thread
             Dispatcher.CurrentDispatcher?.Invoke(() =>
             {
-                window.comboTag.ItemsSource = AvailableTags;
-                window.comboTag.DisplayMemberPath = nameof(Tag.Name);
-                window.comboTag.SelectedValuePath = nameof(Tag.TagId);
+                window.listBoxTag.ItemsSource = AvailableTags;
+                window.listBoxTag.DisplayMemberPath = nameof(Tag.Name);
+                window.listBoxTag.SelectedValuePath = nameof(Tag.TagId);
             });
 
         }
@@ -202,6 +204,7 @@ namespace OptimaValue.Wpf
             statusMessageTimer.Start();
         }
         public BindingList<Line> Lines { get; set; }
+        public AxesCollection AxisCollection { get; set; } = new();
         public DateTime MinDateGraph { get; set; }
         public DateTime MaxDateGraph { get; set; }
         public DateTime MinDateSeries { get; set; }
@@ -325,6 +328,7 @@ namespace OptimaValue.Wpf
                 {
                     Series.Add(line.GLineSeries);
                     Lines.Add(line);
+                    AxisCollection.Add(line.AxisY);
                     FormatSeries();
                 }
             }
@@ -351,6 +355,7 @@ namespace OptimaValue.Wpf
                 MinDateGraph = MaxDateGraph = MinDateSeries = MaxDateSeries = DateTime.MinValue;
                 return;
             }
+            var temp = window.MyChart.AxisX;
             window.MyChart.AxisY.First().MaxValue = Lines.Select(x => x.MaxValue).Max();
             window.MyChart.AxisY.First().MinValue = Lines.Select(x => x.MinValue).Min();
             window.MyChart.AxisX.First().Separator = DefaultAxes.CleanSeparator;

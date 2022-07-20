@@ -50,8 +50,8 @@ namespace OptimaValue.Wpf
                 //throw new NotImplementedException();
                 await Master.Instance.StartAsync();
 
-                var graphWindow = Master.GetService<GraphWindow>();
-                graphWindow.Show();
+                var trendWindow = Master.GetService<TrendWindow>();
+                trendWindow.Show();
 
                 base.OnStartup(e);
 
