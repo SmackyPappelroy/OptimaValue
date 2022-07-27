@@ -12,8 +12,10 @@
 		<None Remove="Resurser\falling_edge_24px.png" />
 		<None Remove="Resurser\flash_on_24px.png" />
 		<None Remove="Resurser\moon_symbol_24px.png" />
+		<None Remove="Resurser\opened_folder_24px.png" />
 		<None Remove="Resurser\refresh_24px.png" />
 		<None Remove="Resurser\rising_edge_24px.png" />
+		<None Remove="Resurser\save_24px.png" />
 		<None Remove="Resurser\scale_24px.png" />
 		<None Remove="Resurser\sun_24px.png" />
 	</ItemGroup>
@@ -44,11 +46,17 @@
 		<Resource Include="Resurser\moon_symbol_24px.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Resource>
+		<Resource Include="Resurser\opened_folder_24px.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
 		<Resource Include="Resurser\refresh_24px.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Resource>
 		<Resource Include="Resurser\rising_edge_24px.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Resurser\save_24px.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Resource>
 		<Resource Include="Resurser\scale_24px.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
