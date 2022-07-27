@@ -1,0 +1,67 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net6.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Remove="icons8_area_chart_64.png" />
+		<None Remove="Resurser\falling_edge_24px.png" />
+		<None Remove="Resurser\flash_on_24px.png" />
+		<None Remove="Resurser\moon_symbol_24px.png" />
+		<None Remove="Resurser\refresh_24px.png" />
+		<None Remove="Resurser\rising_edge_24px.png" />
+		<None Remove="Resurser\scale_24px.png" />
+		<None Remove="Resurser\sun_24px.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Extended.Wpf.Toolkit" Version="4.3.0" />
+		<PackageReference Include="gong-wpf-dragdrop" Version="3.1.1" />
+		<PackageReference Include="LiveCharts.Geared" Version="1.2.9" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+		<PackageReference Include="PropertyChanged.Fody" Version="3.4.1" />
+		<PackageReference Include="Serilog.Extensions.Hosting" Version="5.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\OptimaValue.Settings\OptimaValue.Config.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Resource Include="icons8_area_chart_64.png" />
+		<Resource Include="Resurser\falling_edge_24px.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Resurser\flash_on_24px.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Resurser\moon_symbol_24px.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Resurser\refresh_24px.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Resurser\rising_edge_24px.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Resurser\scale_24px.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+		<Resource Include="Resurser\sun_24px.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="ViewModels\MainWindowViewModel.cs">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Compile>
+	</ItemGroup>
+
+</Project>
