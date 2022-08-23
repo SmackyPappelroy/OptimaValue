@@ -20,6 +20,7 @@ namespace OptimaValue.Trend;
 
 public class Line : INotifyPropertyChanged
 {
+    private static Quality Quality = Quality.High;
     private MainWindow window;
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -64,12 +65,17 @@ public class Line : INotifyPropertyChanged
     public Func<double, string> FormatterX { get; internal set; }
     public Axis AxisY { get; set; }
 
-    public Line(int id, TimeSpan extraTimeInSql, MainWindowViewModel viewModel)
+    public Line(int id, MainWindowViewModel viewModel, string lineColor = "", string fillColor = "")
     {
         view = viewModel;
         AvailableTags = view.AvailableItems;
-        ExtraTimeInSql = extraTimeInSql;
+        ExtraTimeInSql = TimeSpan.FromHours(1);
         Tag = AvailableTags.FirstOrDefault(t => t.id == id);
+        if (lineColor != "")
+        {
+            Tag.LineColor = lineColor;
+            Tag.FillColor = fillColor;
+        }
         window = Master.GetService<MainWindow>();
     }
 
@@ -111,12 +117,12 @@ public class Line : INotifyPropertyChanged
             Fill = Tag.StringToSolidColorBrush(Tag.FillColor),
             Title = Tag.name,
             Tag = Tag.id,
-            Values = new GearedValues<DateTimePoint>().WithQuality(Quality.Highest)
+            Values = new GearedValues<DateTimePoint>().WithQuality(Quality)
         };
         // Format XY-axis
         FormatterY = val => val.ToString("0.0");
         FormatterX = x => new DateTime((long)x).ToString("yyyy-MM-dd HH:mm:ss.fff");
-        ChartValues = new GearedValues<DateTimePoint>().WithQuality(Quality.Highest);
+        ChartValues = new GearedValues<DateTimePoint>().WithQuality(Quality);
         AxisY = new()
         {
             Separator = DefaultAxes.CleanSeparator,
@@ -234,7 +240,7 @@ public class Line : INotifyPropertyChanged
             try
             {
 
-                ChartValues = tbl.AsEnumerable().Select(x => new DateTimePoint((DateTime)x["logTime"], (double)x["numericValue"])).ToList().AsGearedValues().WithQuality(Quality.Highest);
+                ChartValues = tbl.AsEnumerable().Select(x => new DateTimePoint((DateTime)x["logTime"], (double)x["numericValue"])).ToList().AsGearedValues().WithQuality(Quality);
             }
             catch (Exception ex)
             {
@@ -373,39 +379,6 @@ public class Line : INotifyPropertyChanged
         //TagControl.OverZeroTime = DataStatistics.TimeOverZero.ToString();
         //TagControl.Deviation = DataStatistics.StandardDeviation.ToString("0.00");
         return;
-    }
-}
-
-public static class StaticClass
-{
-    public static DateTime MinDateSeries;
-    public static DateTime MaxDateSeries;
-    public static BindingList<Line> Lines { get; internal set; }
-
-    public static void AddLine(Line line)
-    {
-        if (Lines == null)
-        {
-            Lines = new();
-        }
-
-        if (!Lines.Contains(line))
-        {
-            Lines.Add(line);
-        }
-        else
-        {
-            Lines.Remove(line);
-            Lines.Add(line);
-        }
-    }
-
-    public static void RemoveLine(Line line)
-    {
-        if (Lines == null)
-            return;
-        if (Lines.Contains(line))
-            Lines.Remove(line);
     }
 }
 

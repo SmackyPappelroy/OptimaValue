@@ -50,6 +50,7 @@ namespace OptimaValue.Trend
             {
                 if (value != mScaleMin)
                 {
+
                     OnScaleMinChanged?.Invoke(value);
                     mScaleMin = value;
                 }
@@ -127,6 +128,8 @@ namespace OptimaValue.Trend
                 }
             }
         }
+
+        public int SeriesIndex { get; set; }
 
         public GridItem()
         {

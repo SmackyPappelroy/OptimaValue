@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Config", "Proje
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Trend", "Projects\OptimaValue.Trend\OptimaValue.Trend.csproj", "{B4CE7D70-DF89-46A7-99A8-C68B41483F29}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup.OptimaValue", "Projects\Setup.OptimaValue\Setup.OptimaValue.vdproj", "{662CA6D1-F553-4636-9D1C-2177F938F80B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,30 +123,6 @@ Global
 		{B4CE7D70-DF89-46A7-99A8-C68B41483F29}.Release|x64.Build.0 = Release|Any CPU
 		{B4CE7D70-DF89-46A7-99A8-C68B41483F29}.Release|x86.ActiveCfg = Release|Any CPU
 		{B4CE7D70-DF89-46A7-99A8-C68B41483F29}.Release|x86.Build.0 = Release|Any CPU
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Debug|Any CPU.ActiveCfg = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Debug|Any CPU.Build.0 = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Debug|arm64.ActiveCfg = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Debug|arm64.Build.0 = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Debug|x64.ActiveCfg = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Debug|x64.Build.0 = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Debug|x86.ActiveCfg = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Debug|x86.Build.0 = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.DefaultBuild|Any CPU.ActiveCfg = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.DefaultBuild|Any CPU.Build.0 = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.DefaultBuild|arm64.ActiveCfg = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.DefaultBuild|arm64.Build.0 = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.DefaultBuild|x64.ActiveCfg = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.DefaultBuild|x64.Build.0 = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.DefaultBuild|x86.ActiveCfg = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.DefaultBuild|x86.Build.0 = Debug
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Release|Any CPU.ActiveCfg = Release
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Release|Any CPU.Build.0 = Release
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Release|arm64.ActiveCfg = Release
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Release|arm64.Build.0 = Release
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Release|x64.ActiveCfg = Release
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Release|x64.Build.0 = Release
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Release|x86.ActiveCfg = Release
-		{662CA6D1-F553-4636-9D1C-2177F938F80B}.Release|x86.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

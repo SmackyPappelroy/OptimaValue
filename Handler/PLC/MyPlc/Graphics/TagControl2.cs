@@ -98,45 +98,55 @@ namespace OptimaValue
         }
 
 
-        private void TagControl2_Load(object sender, EventArgs e)
+        private async void TagControl2_Load(object sender, EventArgs e)
         {
-            PopulateTags();
+            await PopulateTagsAsync();
         }
 
-        private void PopulateTags()
+        private async Task PopulateTagsAsync()
         {
-            if (myPlc != null)
-            {
-                if (myPlc.LoggerIsStarted)
+            await Task.Run(() =>
                 {
-                    foreach (TagDefinitions tag in TagsToLog.AllLogValues)
+                    if (myPlc != null)
                     {
-                        if (tag.PlcName == myPlc.PlcName)
+                        if (myPlc.LoggerIsStarted)
                         {
-                            var newTag = new SingleTagControl(tag, myPlc, myTreeView);
-                            newTag.TagChanged -= NewTag_TagChanged;
-                            newTag.TagChanged += NewTag_TagChanged;
-                            flowLayoutPanel.Controls.Add(newTag);
+                            foreach (TagDefinitions tag in TagsToLog.AllLogValues)
+                            {
+                                if (tag.PlcName == myPlc.PlcName)
+                                {
+                                    var newTag = new SingleTagControl(tag, myPlc, myTreeView);
+                                    newTag.TagChanged -= NewTag_TagChanged;
+                                    newTag.TagChanged += NewTag_TagChanged;
+                                    flowLayoutPanel.Invoke((MethodInvoker)delegate
+                                    {
+                                        flowLayoutPanel.Controls.Add(newTag);
+                                    });
+                                }
+                            }
+                            return;
                         }
                     }
-                    return;
-                }
-            }
 
-            FetchTagsFromSql();
-            if (myTable != null)
-            {
-                if (myTable.Rows.Count > 0)
-                {
-                    foreach (TagDefinitions tag in tags)
+                    FetchTagsFromSql();
+                    if (myTable != null)
                     {
-                        var newTag = new SingleTagControl(tag, myPlc, myTreeView);
-                        newTag.TagChanged -= NewTag_TagChanged;
-                        newTag.TagChanged += NewTag_TagChanged;
-                        flowLayoutPanel.Controls.Add(newTag);
+                        if (myTable.Rows.Count > 0)
+                        {
+                            foreach (TagDefinitions tag in tags)
+                            {
+                                var newTag = new SingleTagControl(tag, myPlc, myTreeView);
+                                newTag.TagChanged -= NewTag_TagChanged;
+                                newTag.TagChanged += NewTag_TagChanged;
+                                flowLayoutPanel.Invoke((MethodInvoker)delegate
+                                {
+                                    flowLayoutPanel.Controls.Add(newTag);
+                                });
+                            }
+                        }
                     }
-                }
-            }
+                });
+
         }
 
         private void Redraw()

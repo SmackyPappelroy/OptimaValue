@@ -6,14 +6,15 @@
         xmlns:local="clr-namespace:OptimaValue.Trend"
         xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
         xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
-        xmlns:xctk="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+        xmlns:xctk="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit" 
+        d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel}"
         mc:Ignorable="d"
         Background="LightGray"
         WindowStyle="ThreeDBorderWindow"
         x:Name="mainWindow"
         AllowsTransparency="False"
         WindowStartupLocation="CenterScreen"
-        Title="OptimaValueTrend" 
+        Title="{Binding WindowTitle}" 
         Height="850" 
         MinHeight="600"
         Width="1100" 
@@ -22,7 +23,9 @@
         Icon="/icons8_area_chart_64.png" >
 
   <Window.Resources>
+    <local:SeriesToVisibilityConverter x:Key="SeriesToVisibilityConverter" />
     <local:ValueToColorConverter x:Key="ValueToColorConverter" />
+    <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
     <local:ValidationResultToBooleanConverter x:Key="ValidationResultToBooleanConverter" />
     <local:StartEndDateValidationRule x:Key="StartEndDateValidationRule" />
     <local:StringToTimeOnlyConverter x:Key="StringToTimeOnlyConverter" />
@@ -126,14 +129,16 @@
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto"/>
+      <RowDefinition Height="Auto"/>
       <RowDefinition Height="40"/>
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="4*"/>
       <RowDefinition Height="*"/>
     </Grid.RowDefinitions>
 
-    <StackPanel Margin="10 0" Orientation="Horizontal" Panel.ZIndex="40">
+    <StackPanel Grid.Row="1" Margin="10 0" Orientation="Horizontal" Panel.ZIndex="40">
       <Button Height="30" Width="30" BorderThickness="0" Background="Transparent"
+              Command="{Binding LoadCommand}"
               ToolTip="Öppna trend">
         <Image Source="Resurser/opened_folder_24px.png">
           <Image.Effect>
@@ -142,7 +147,8 @@
         </Image>
       </Button>
       <Button Margin="5" Height="30" Width="30" BorderThickness="0" Background="Transparent"
-              ToolTip="Spara trend">
+              ToolTip="Spara trend"
+              Command="{Binding SaveCommand}">
         <Image Source="Resurser/save_24px.png">
           <Image.Effect>
             <DropShadowEffect BlurRadius="20" Direction="270"/>
@@ -151,7 +157,7 @@
       </Button>
     </StackPanel>
 
-    <Button Command="{Binding DarkThemeCommand}"
+    <Button Grid.Row="1" Command="{Binding DarkThemeCommand}"
             ToolTip="Toggla DarkMode"
             Grid.Column="1" HorizontalAlignment="Right" Width="30" Height="30" Margin="10,0" BorderThickness="0" 
             Background="Transparent" Panel.ZIndex="30">
@@ -163,7 +169,7 @@
     </Button>
 
     <StackPanel Orientation="Horizontal"
-                Grid.Row="1"
+                Grid.Row="2"
                 Grid.Column="0"
                 Grid.ColumnSpan="2"
                 Visibility="{Binding SelectedItem,Converter={StaticResource SelectedItemToVisibilityConverter}}">
@@ -177,7 +183,11 @@
               Background="Transparent"
               BorderThickness="0"
               Command="{Binding MoveDownCommand}" >
-        <Image Source="Resurser/falling_edge_24px.png"/>
+        <Image Source="Resurser/falling_edge_24px.png">
+          <Image.Effect>
+            <DropShadowEffect BlurRadius="10" Direction="270"/>
+          </Image.Effect>
+        </Image>
       </Button>
       <Button
               ToolTip="Flytta vald trend uppåt"
@@ -189,7 +199,11 @@
               Background="Transparent"
               BorderThickness="0"
               Command="{Binding MoveUpCommand}" >
-        <Image Source="Resurser/rising_edge_24px.png"/>
+        <Image Source="Resurser/rising_edge_24px.png">
+          <Image.Effect>
+            <DropShadowEffect BlurRadius="10" Direction="270"/>
+          </Image.Effect>
+        </Image>
       </Button>
       <Button
               ToolTip="Skalera till original storlek"
@@ -217,14 +231,18 @@
               Background="Transparent"
               BorderThickness="0"
               Command="{Binding AutoScaleCommand}" >
-        <Image Source="Resurser/scale_24px.png"/>
+        <Image Source="Resurser/scale_24px.png">
+          <Image.Effect>
+            <DropShadowEffect BlurRadius="10" Direction="270"/>
+          </Image.Effect>
+        </Image>
       </Button>
     </StackPanel>
 
-    <GridSplitter Grid.Column="0" Grid.Row="2" Grid.RowSpan="2" Width="3"
+    <GridSplitter Grid.Column="0" Grid.Row="3" Grid.RowSpan="2" Width="3"
                   HorizontalAlignment="Right"
                   VerticalAlignment="Stretch" />
-    <GridSplitter Grid.Row="3"
+    <GridSplitter Grid.Row="4"
                   Grid.Column="1"
                   ResizeDirection="Rows"
                   ResizeBehavior="BasedOnAlignment"
@@ -235,13 +253,14 @@
                   ShowsPreview="True"/>
 
     <!-- Top bar -->
-    <Grid Grid.ColumnSpan="2">
+    <Grid Grid.Row="0" Grid.ColumnSpan="2">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*"/>
         <ColumnDefinition Width="Auto"/>
       </Grid.ColumnDefinitions>
 
-      <TextBlock Margin="5" Grid.Column="1" Text="{Binding StatusMessage}" HorizontalAlignment="Right"/>
+      <TextBlock  Visibility="{Binding StatusMessage,Converter={StaticResource StringToVisibilityConverter}}"
+                  Margin="5" Grid.Column="1" Text="{Binding StatusMessage}" HorizontalAlignment="Right"/>
     </Grid>
 
 
@@ -249,7 +268,7 @@
     <DataGrid x:Name="DataGrid"
               Grid.Column="0"  
               Grid.RowSpan="3"
-              Grid.Row="2" 
+              Grid.Row="3" 
               AutoGenerateColumns="False"
               VerticalAlignment="Stretch" 
               Margin="6" 
@@ -274,7 +293,7 @@
     <DataGrid x:Name="DataGridTags"
               dd:DragDrop.DropHandler="{Binding}"
               Grid.Column="1"
-              Grid.Row="4"
+              Grid.Row="5"
               ItemsSource="{Binding SelectedItems}"
               SelectionMode="Single"
               AutoGenerateColumns="False"
@@ -349,7 +368,7 @@
     </DataGrid>
 
     <!-- Tid -->
-    <Grid  Grid.Row="1" Grid.Column="1" Margin="10,0">
+    <Grid  Grid.Row="2" Grid.Column="1" Margin="10,0">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="*" />
@@ -357,9 +376,10 @@
       <StackPanel Orientation="Horizontal" 
                 Margin="10,0"
                 VerticalAlignment="Center">
-        <DatePicker SelectedDate="{Binding InputStartDate}" FontSize="16"
+        <DatePicker SelectedDate="{Binding InputStartDate}" FontSize="16" ToolTip="Startdatum att hämta från databas"
                     Margin="10,0"/>
         <TextBox Text="{Binding InputStartTime,Converter={StaticResource StringToTimeOnlyConverter}}"
+                 ToolTip="Starttid att hämta från databas"
                  VerticalAlignment="Center"
                  Padding="2"
                  FontSize="16"
@@ -369,10 +389,11 @@
       <StackPanel Orientation="Horizontal" Grid.Column="1" 
                   HorizontalAlignment="Right"
                   VerticalAlignment="Center">
-        <DatePicker SelectedDate="{Binding InputEndDate}"
+        <DatePicker SelectedDate="{Binding InputEndDate}" ToolTip="Slutdatum att hämta från databas"
                     FontSize="16"
                     Margin="10,0"/>
         <TextBox Text="{Binding InputEndTime,Converter={StaticResource StringToTimeOnlyConverter}}" 
+                 ToolTip="Sluttid att hämta från databas"
                  VerticalAlignment="Center"
                  Padding="2"
                  FontSize="16"
@@ -382,7 +403,7 @@
 
 
     <!-- Top på graf -->
-    <Grid Grid.Column="1" Grid.Row="2" VerticalAlignment="Top"
+    <Grid Grid.Column="1" Grid.Row="3" VerticalAlignment="Top"
           Visibility="{Binding Series,Converter={StaticResource NotNullToVisibilityConverter},UpdateSourceTrigger=PropertyChanged}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="Auto"/>
@@ -418,6 +439,7 @@
                  HorizontalAlignment="Center" FontSize="16" Foreground="Black"/>
         <!-- Ladda om tid -->
         <Button Command="{Binding LoadDataCommand}"
+                ToolTip="Hämta nya värden från databas"
                 Margin="0,4"
                 BorderThickness="0"
                 Grid.ColumnSpan="2" HorizontalAlignment="Center" Width="24" Height="24"
@@ -429,10 +451,12 @@
 
     </Grid>
     <!-- Trend graf -->
+    <!--MouseMove="UIElement_OnMouseMove"-->
+
     <lvc:CartesianChart     Background="{Binding TrendBackGround}"
                             Grid.Column="1"
-                            Grid.Row="3"
-                            Margin="0 0 0 0"
+                            Grid.Row="4"
+                            Margin="0 0 5 0"
                             Series="{Binding Series}"
                             AxisY="{Binding AxisCollection}"
                             x:Name="MyChart"

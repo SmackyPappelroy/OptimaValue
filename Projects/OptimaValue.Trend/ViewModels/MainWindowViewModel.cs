@@ -8,13 +8,16 @@ using LiveCharts.Defaults;
 using LiveCharts.Geared;
 using LiveCharts.Helpers;
 using LiveCharts.Wpf;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -27,9 +30,14 @@ namespace OptimaValue.Trend
 {
     public class MainWindowViewModel : INotifyPropertyChanged, IDropTarget
     {
+        public double XPointer { get; set; }
+        public double YPointer { get; set; }
+        private DispatcherTimer timerStatusMessage;
+        public string WindowTitle { get; set; } = "OptimaValueTrend";
         public int DarkTheme { get; set; }
+        public bool HasData => Lines?.Count > 0;
         public LinearGradientBrush TrendBackGround { get; set; }
-        public ZoomingOptions Zoom { get; set; } = ZoomingOptions.X;
+        public ZoomingOptions Zoom { get; set; } = ZoomingOptions.None;
         public AxesCollection AxisCollection { get; set; } = new();
         public SeriesCollection Series { get; set; }
         public BindingList<Line> Lines { get; set; }
@@ -70,7 +78,7 @@ namespace OptimaValue.Trend
 
         private void UpdateTime()
         {
-            if (Series.Count == 0)
+            if (Series == null || Series.Count == 0)
                 return;
 
             window.MyChart.AxisX[0].MinValue = MinDateSeries.Ticks;
@@ -133,9 +141,30 @@ namespace OptimaValue.Trend
 
         }
 
+
+
         private void MainWindowViewModel_OnStatusMessage(string obj)
         {
             StatusMessage = obj;
+            if (timerStatusMessage == null)
+            {
+                timerStatusMessage = new()
+                {
+                    Interval = TimeSpan.FromSeconds(5),
+                };
+
+
+
+            }
+            timerStatusMessage.Tick += ((sender, e) =>
+            {
+                StatusMessage = String.Empty;
+                timerStatusMessage.Stop();
+            });
+            if (StatusMessage != String.Empty)
+            {
+                timerStatusMessage.Start();
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -162,6 +191,61 @@ namespace OptimaValue.Trend
         }
         public ObservableCollection<GridItem> SelectedItems { get; set; } = new();
         public GridItem SelectedItem { get; set; }
+
+        private ICommand saveCommand;
+        public ICommand SaveCommand
+        {
+            get
+            {
+                if (saveCommand == null)
+                    saveCommand = new RelayCommand((obj) => SaveTrend());
+                return saveCommand;
+            }
+        }
+        private ICommand loadCommand;
+        public ICommand LoadCommand
+        {
+            get
+            {
+                if (loadCommand == null)
+                    loadCommand = new RelayCommand(async (obj) => await LoadTrend());
+                return loadCommand;
+            }
+        }
+
+        private async Task LoadTrend()
+        {
+            var dialog = new OpenFileDialog();
+            dialog.Filter = "Trend files (*.trend)|*.trend";
+            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    await SaveClass.LoadData(this, dialog.FileName);
+
+                    OnStatusMessage?.Invoke($"Laddade trend: {dialog.FileName}");
+
+                }
+                catch (Exception ex)
+                {
+                    OnStatusMessage?.Invoke($"Error loading trend: {ex.Message}");
+                }
+            }
+        }
+
+        private void SaveTrend()
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+            dialog.Filter = "Trend files (*.trend)|*.trend";
+            if (dialog.ShowDialog() == true)
+            {
+                var fileName = dialog.FileName;
+
+                SaveClass.SaveData(this, fileName);
+                OnStatusMessage?.Invoke($"Sparade {fileName}");
+            }
+        }
 
         private ICommand darkThemeCommand;
         public ICommand DarkThemeCommand
@@ -349,9 +433,14 @@ namespace OptimaValue.Trend
                     await line.RefreshData(MinDateSeries, MaxDateSeries);
                 }
                 FormatSeries();
+                InputStartDate = new DateTime((long)window.MyChart.AxisX[0].MinValue).StartOfDay();
+                InputStartTime = TimeOnly.FromDateTime(new DateTime((long)window.MyChart.AxisX[0].MinValue));
+                InputEndDate = new DateTime((long)window.MyChart.AxisX[0].MaxValue).StartOfDay();
+                InputEndTime = TimeOnly.FromDateTime(new DateTime((long)window.MyChart.AxisX[0].MaxValue));
             }
 
         }
+
 
         /// <summary>
         /// Add a lineseries to the list
@@ -383,7 +472,7 @@ namespace OptimaValue.Trend
                 return;
             }
 
-            Line line = new(tagId, TimeSpan.FromHours(1), this);
+            Line line = new(tagId, this);
             StaticClass.AddLine(line);
 
             try
@@ -407,6 +496,8 @@ namespace OptimaValue.Trend
                 if (line.GLineSeries != null)
                 {
                     Series.Add(line.GLineSeries);
+                    var myIndex = Series.IndexOf(line.GLineSeries);
+                    line.Tag.SeriesIndex = myIndex;
                     Lines.Add(line);
                     AxisCollection.Add(line.AxisY);
                     FormatSeries();
@@ -423,6 +514,8 @@ namespace OptimaValue.Trend
                 return;
             }
         }
+        public Func<double, string> FormatterY;
+
 
         public void FormatSeries(int id = int.MinValue, int offset = 0)
         {
@@ -551,6 +644,7 @@ namespace OptimaValue.Trend
                 sourceItem.active = true;
                 targetItems.Add(sourceItem);
                 AddLine(sourceItem.id);
+
                 sourceItem.OnSmoothingChanged += ((smoothing) =>
                 {
                     var line = Series.Where(x => x.Title == sourceItem.name).FirstOrDefault() as GLineSeries;
@@ -585,6 +679,7 @@ namespace OptimaValue.Trend
                 sourceItem.OnLineColorChanged += ((lineColor) =>
                 {
                     var line = Series.Where(x => x.Title == sourceItem.name).FirstOrDefault() as GLineSeries;
+                    if (line == null) return;
                     line.Stroke = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(lineColor));
                     var axisY = AxisCollection.Where(x => (int)x.Tag == sourceItem.id).FirstOrDefault();
                     axisY.Foreground = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(lineColor));
