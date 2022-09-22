@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Config", "Proje
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Trend", "Projects\OptimaValue.Trend\OptimaValue.Trend.csproj", "{B4CE7D70-DF89-46A7-99A8-C68B41483F29}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "OptimaValue.Setup", "..\OptimaValue.Setup\OptimaValue.Setup.vdproj", "{96302CCE-FD57-4EF3-98F8-7350F6C02B83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,6 +125,18 @@ Global
 		{B4CE7D70-DF89-46A7-99A8-C68B41483F29}.Release|x64.Build.0 = Release|Any CPU
 		{B4CE7D70-DF89-46A7-99A8-C68B41483F29}.Release|x86.ActiveCfg = Release|Any CPU
 		{B4CE7D70-DF89-46A7-99A8-C68B41483F29}.Release|x86.Build.0 = Release|Any CPU
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.Debug|Any CPU.ActiveCfg = Debug
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.Debug|arm64.ActiveCfg = Debug
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.Debug|x64.ActiveCfg = Debug
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.Debug|x86.ActiveCfg = Debug
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.DefaultBuild|Any CPU.ActiveCfg = Debug
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.DefaultBuild|arm64.ActiveCfg = Debug
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.DefaultBuild|x64.ActiveCfg = Debug
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.DefaultBuild|x86.ActiveCfg = Debug
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.Release|Any CPU.ActiveCfg = Release
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.Release|arm64.ActiveCfg = Release
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.Release|x64.ActiveCfg = Release
+		{96302CCE-FD57-4EF3-98F8-7350F6C02B83}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
