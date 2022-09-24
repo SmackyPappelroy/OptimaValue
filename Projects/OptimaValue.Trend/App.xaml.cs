@@ -25,7 +25,7 @@ namespace OptimaValue.Trend
 
 
 
-             protected override async void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             FrameworkElement.LanguageProperty.OverrideMetadata(
                typeof(FrameworkElement),

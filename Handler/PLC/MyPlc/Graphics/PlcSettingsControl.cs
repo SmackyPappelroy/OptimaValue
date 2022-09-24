@@ -52,9 +52,12 @@ namespace OptimaValue.Handler.PLC.Graphics
             Slot = slot;
             Rack = rack;
             Active = active;
-            CpuType = cpuType;
             Id = id;
             MyPlc = myPlc;
+            if (MyPlc != null)
+                CpuType = MyPlc.isOpc ? CpuType.OPC : cpuType;
+            else
+                CpuType = CpuType.S71500;
             btnSyncTime.Visible = false;
             if (MyPlc != null)
             {
@@ -170,9 +173,9 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtIp, "Fältet får ej va tomt");
                     ipOk = false;
                 }
-                else if (!InputValidation.CheckIPValid(txtIp.Text))
+                else if (!InputValidation.CheckIPValid(txtIp.Text) && !txtIp.Text.ToLower().StartsWith("opc.tcp://"))
                 {
-                    errorProvider.SetError(txtIp, "Ingen giltig IP-adress");
+                    errorProvider.SetError(txtIp, "Ingen giltig IP-adress / OPC UA adress");
                     ipOk = false;
                 }
                 else if (MyPlc.LoggerIsStarted)
@@ -190,9 +193,9 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtIp, "Fältet får ej va tomt");
                     ipOk = false;
                 }
-                else if (!InputValidation.CheckIPValid(txtIp.Text))
+                else if (!InputValidation.CheckIPValid(txtIp.Text) && !txtIp.Text.ToLower().StartsWith("opc.tcp://"))
                 {
-                    errorProvider.SetError(txtIp, "Ingen giltig IP-adress");
+                    errorProvider.SetError(txtIp, "Ingen giltig IP-adress / OPC UA adress");
                     ipOk = false;
                 }
                 else
@@ -373,7 +376,7 @@ namespace OptimaValue.Handler.PLC.Graphics
         {
             if (comboCpu.SelectedItem != null)
                 cpuOk = true;
-            if (txtIp.Text.CheckValidIpAddress())
+            if (txtIp.Text.CheckValidIpAddress() || txtIp.Text.ToLower().StartsWith("opc.tcp://"))
                 ipOk = true;
             if (short.TryParse(txtSlot.Text, out _))
                 slotOk = true;
@@ -394,6 +397,8 @@ namespace OptimaValue.Handler.PLC.Graphics
             else
                 activeString = "False";
 
+            var ip = "";
+
 
             DatabaseSql.SavePlcConfig(activeString,
                 name: txtName.Text,
@@ -412,12 +417,34 @@ namespace OptimaValue.Handler.PLC.Graphics
         private void PlcSettingsControl_Load(object sender, EventArgs e)
         {
             txtName.Text = PlcName;
-            txtIp.Text = PlcIp;
+            if (MyPlc == null)
+                txtIp.Text = PlcIp;
+            else if (!MyPlc.isOpc)
+                txtIp.Text = PlcIp;
+            else
+                txtIp.Text = MyPlc.ConnectionString;
             txtSlot.Text = Slot;
             txtRack.Text = Rack;
             checkActive.Checked = Active;
             comboCpu.SelectedItem = CpuType.ToString();
             btnConnect.Enabled = ValidateAll();
+
+            if (MyPlc != null && MyPlc.isOpc)
+            {
+                lblIpAddress.Text = "Connection string";
+                lblSlot.Visible = false;
+                txtSlot.Visible = false;
+                lblRack.Visible = false;
+                txtRack.Visible = false;
+            }
+            else
+            {
+                lblIpAddress.Text = "IP-adress";
+                lblSlot.Visible = false;
+                txtSlot.Visible = false;
+                lblRack.Visible = false;
+                txtRack.Visible = false;
+            }
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
@@ -532,7 +559,12 @@ namespace OptimaValue.Handler.PLC.Graphics
                     tryConnect = true;
                     btnConnect.Enabled = false;
                     Application.UseWaitCursor = true;
-                    await MyPlc.OpenAsync();
+                    if (!MyPlc.isOpc)
+                        await MyPlc.OpenAsync();
+                    else
+                    {
+                        MyPlc.OpcUaClient.Connect();
+                    }
                     imageTest.Image = imageList.Images[2];
                     connected = true;
                 }
@@ -544,7 +576,10 @@ namespace OptimaValue.Handler.PLC.Graphics
                 }
                 finally
                 {
-                    MyPlc.Close();
+                    if (!MyPlc.isOpc)
+                        MyPlc.Close();
+                    else
+                        MyPlc.OpcUaClient.Dispose();
                     btnConnect.Enabled = true;
                     timeoutTimer.Start();
                     Application.UseWaitCursor = false;
@@ -556,6 +591,22 @@ namespace OptimaValue.Handler.PLC.Graphics
 
         private void comboCpu_SelectedValueChanged(object sender, EventArgs e)
         {
+            if (comboCpu.SelectedItem.ToString() == "OPC")
+            {
+                lblIpAddress.Text = "Connection string";
+                lblSlot.Visible = false;
+                txtSlot.Visible = false;
+                lblRack.Visible = false;
+                txtRack.Visible = false;
+            }
+            else
+            {
+                lblIpAddress.Text = "IP-adress";
+                lblSlot.Visible = true;
+                txtSlot.Visible = true;
+                lblRack.Visible = true;
+                txtRack.Visible = true;
+            }
             //if (((ComboBox)sender).SelectedItem == "S71500")
             //{
             //    txtSlot.Text = "1";

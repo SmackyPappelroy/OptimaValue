@@ -70,6 +70,8 @@ namespace OptimaValue
 
         private List<int> subscribedTags = new List<int>();
         [Name("SubscribedTags")]
+
+        public string OpcTagName => PlcName + "." + Name;
         public List<int> SubscribedTags
         {
             get

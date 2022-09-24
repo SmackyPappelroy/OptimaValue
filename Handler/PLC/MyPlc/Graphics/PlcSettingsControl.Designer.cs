@@ -151,7 +151,8 @@
             "S7300",
             "S7400",
             "S71200",
-            "S71500"});
+            "S71500",
+            "OPC"});
             this.comboCpu.Location = new System.Drawing.Point(264, 120);
             this.comboCpu.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.comboCpu.Name = "comboCpu";

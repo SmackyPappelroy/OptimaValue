@@ -263,6 +263,12 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var okScaleMax = false;
             var okScaleOffset = false;
 
+            if (!string.IsNullOrEmpty(paraName.ParameterValue) && paraName.ParameterValue.Length <= 50)
+                okName = true;
+
+            if (MyPlc.isOpc && okName)
+                return true;
+
             if (int.TryParse(paraScaleMin.ParameterValue, out int _))
                 okScaleMin = true;
 
@@ -275,8 +281,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (paraUnit.ParameterValue.Length <= 30)
                 okUnit = true;
 
-            if (!string.IsNullOrEmpty(paraName.ParameterValue) && paraName.ParameterValue.Length <= 50)
-                okName = true;
 
             if (!string.IsNullOrEmpty(paraLogType.comboBoxen.SelectedItem.ToString()))
                 okLogType = true;
@@ -387,6 +391,12 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             float analogValue = 0;
             string boolTrigger = "OnTrue";
             string analogTrigger = "Equal";
+
+            int blockNr = MyPlc.isOpc ? 0 : int.Parse(paraBlockNr.ParameterValue);
+            int startAddress = MyPlc.isOpc ? 0 : int.Parse(paraStartAddress.ParameterValue);
+            int nrOfValues = MyPlc.isOpc ? 0 : int.Parse(paraNrOfValues.ParameterValue);
+            byte bitAddress = (byte)(MyPlc.isOpc ? 0 : byte.Parse(paraBitAddress.ParameterValue));
+            string varType = MyPlc.isOpc ? "Opc" : paraVarType.comboBoxen.SelectedItem.ToString();
             if (!(tag == null))
             {
                 tagEventId = tag.EventId;
@@ -394,8 +404,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 analogTrigger = tag.AnalogTrigger.ToString();
                 boolTrigger = tag.BoolTrigger.ToString();
                 analogValue = tag.AnalogValue;
-
             }
+
 
             var deadband = paraDeadband.ParameterValue.Replace(",", ".");
 
@@ -403,9 +413,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             query += $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
             query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
             query += $"VALUES ('{checkActive.Checked}','{paraName.ParameterValue}','{paraDescription.ParameterValue}','{paraLogType.comboBoxen.SelectedItem}','{paraLogTime.ParameterValue}',";
-            query += $"{deadband},'{PlcName}','{paraVarType.comboBoxen.SelectedItem}',{int.Parse(paraBlockNr.ParameterValue)}, ";
-            query += $"'{paraDataType.comboBoxen.SelectedItem}',{int.Parse(paraStartAddress.ParameterValue)},{int.Parse(paraNrOfValues.ParameterValue)},";
-            query += $"{byte.Parse(paraBitAddress.ParameterValue)},'{paraFreq.comboBoxen.SelectedItem}','{paraUnit.ParameterValue}',{tagEventId},'{isBoolTrigger}','";
+            query += $"{deadband},'{PlcName}','{varType}',{blockNr}, ";
+            query += $"'{paraDataType.comboBoxen.SelectedItem}',{startAddress},{nrOfValues},";
+            query += $"{bitAddress},'{paraFreq.comboBoxen.SelectedItem}','{paraUnit.ParameterValue}',{tagEventId},'{isBoolTrigger}','";
             query += $"{boolTrigger}','{analogTrigger}',{analogValue},{paraScaleMin.ParameterValue},{paraScaleMax.ParameterValue},{paraScaleOffset.ParameterValue})";
 
             DatabaseSql.AddTag(query);
@@ -525,15 +535,29 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             tbl.Columns.Add("scaleMax", typeof(int));
             tbl.Columns.Add("scaleOffset", typeof(int));
 
+            if (!MyPlc.isOpc)
+            {
+                tbl.Rows.Add(checkActive.Checked, paraName.ParameterValue, paraDescription.ParameterValue, paraLogType.comboBoxen.SelectedItem.ToString(),
+               TimeSpan.Parse(paraLogTime.ParameterValue), float.Parse(paraDeadband.ParameterValue),
+               PlcName, paraVarType.comboBoxen.SelectedItem.ToString(), int.Parse(paraBlockNr.ParameterValue),
+               paraDataType.comboBoxen.SelectedItem.ToString(), int.Parse(paraStartAddress.ParameterValue),
+               int.Parse(paraNrOfValues.ParameterValue), byte.Parse(paraBitAddress.ParameterValue),
+               paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue, int.Parse(paraScaleMin.ParameterValue),
+               int.Parse(paraScaleMax.ParameterValue), int.Parse(paraScaleOffset.ParameterValue));
+                return tbl;
+            }
+            else
+            {
+                tbl.Rows.Add(checkActive.Checked, paraName.ParameterValue, paraDescription.ParameterValue, paraLogType.comboBoxen.SelectedItem.ToString(),
+               TimeSpan.Parse(paraLogTime.ParameterValue), float.Parse(paraDeadband.ParameterValue),
+               PlcName, "", 0,
+               "", 0,
+               1, byte.Parse(paraBitAddress.ParameterValue),
+               paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue, int.Parse(paraScaleMin.ParameterValue),
+               int.Parse(paraScaleMax.ParameterValue), int.Parse(paraScaleOffset.ParameterValue));
+                return tbl;
+            }
 
-            tbl.Rows.Add(checkActive.Checked, paraName.ParameterValue, paraDescription.ParameterValue, paraLogType.comboBoxen.SelectedItem.ToString(),
-                TimeSpan.Parse(paraLogTime.ParameterValue), float.Parse(paraDeadband.ParameterValue),
-                PlcName, paraVarType.comboBoxen.SelectedItem.ToString(), int.Parse(paraBlockNr.ParameterValue),
-                paraDataType.comboBoxen.SelectedItem.ToString(), int.Parse(paraStartAddress.ParameterValue),
-                int.Parse(paraNrOfValues.ParameterValue), byte.Parse(paraBitAddress.ParameterValue),
-                paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue, int.Parse(paraScaleMin.ParameterValue),
-                int.Parse(paraScaleMax.ParameterValue), int.Parse(paraScaleOffset.ParameterValue));
-            return tbl;
 
         }
 

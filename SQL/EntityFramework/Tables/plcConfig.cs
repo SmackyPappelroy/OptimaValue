@@ -17,7 +17,7 @@ namespace OptimaValue
         public string name { get; set; }
 
         [Column(TypeName = "nvarchar")]
-        [StringLength(50)]
+        [StringLength(200)]
         public string ipAddress { get; set; }
 
         [Column(TypeName = "nvarchar")]
@@ -45,5 +45,6 @@ namespace OptimaValue
 
         [Column(TypeName = "datetime")]
         public System.DateTime lastSyncTime { get; set; }
+
     }
 }

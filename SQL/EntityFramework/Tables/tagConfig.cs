@@ -86,5 +86,8 @@ namespace OptimaValue
 
         [Column(TypeName = "int")]
         public int scaleOffset { get; set; }
+
+
+
     }
 }

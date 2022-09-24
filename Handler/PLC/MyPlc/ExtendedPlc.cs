@@ -1,16 +1,43 @@
-﻿using S7.Net;
+﻿using OpcUaHm.Common;
+using S7.Net;
 using System;
 using System.Drawing;
 using System.Linq;
 
 namespace OptimaValue
 {
+
     public class ExtendedPlc : Plc
     {
         #region Constructor
-        public ExtendedPlc(CpuType cpu, string ip, short rack, short slot) : base(cpu, ip, rack, slot)
+        /// <summary>
+        /// PLC
+        /// </summary>
+        /// <param name="cpu"></param>
+        /// <param name="ip"></param>
+        /// <param name="rack"></param>
+        /// <param name="slot"></param>
+        public ExtendedPlc(S7.Net.CpuType cpu, string ip, short rack, short slot) : base(cpu, ip, rack, slot)
         {
+            CpuType = (CpuType)cpu;
             SubscribeEvents(true);
+            timerPing.Interval = 30 * 1000;
+            onlineTimer.Tick += OnlineTimer_Tick;
+        }
+
+        /// <summary>
+        /// OPC Client
+        /// </summary>
+        /// <param name="cpu"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="rack"></param>
+        /// <param name="slot"></param>
+        public ExtendedPlc(CpuType cpu, string connectionString, short rack = 0, short slot = 0) : base(S7.Net.CpuType.S71500, "127.0.0.1", rack, slot)
+        {
+            ConnectionString = connectionString;
+            CpuType = cpu;
+            OpcUaClient = new UaClient(new Uri(connectionString));
+            SubscribeEvents(true, isOpc);
             timerPing.Interval = 30 * 1000;
             onlineTimer.Tick += OnlineTimer_Tick;
         }
@@ -43,9 +70,14 @@ namespace OptimaValue
         #endregion
 
         #region Properties
+        public UaClient OpcUaClient { get; set; }
+        public string ConnectionString { get; }
+        private CpuType CpuType;
         private DateTime UpTimeStart = DateTime.MaxValue;
         private readonly System.Timers.Timer timerPing = new System.Timers.Timer();
         private bool isSubscribed = false;
+        public bool isOpc => CpuType == CpuType.OPC;
+        public new bool IsConnected => isOpc ? OpcUaClient.Status == OpcStatus.Connected : base.IsConnected;
 
         #endregion
 
@@ -155,25 +187,48 @@ namespace OptimaValue
                     return tid.ToString("d'd 'h'h 'm'm 's's'");
             }
         }
+
         #endregion
 
         #region Events
-        private void SubscribeEvents(bool subscribeToEvents)
+        private void SubscribeEvents(bool subscribeToEvents, bool isOpc = false)
         {
             if (!isSubscribed && subscribeToEvents)
             {
-                timerPing.Elapsed += TimerPing_Tick;
+                if (!isOpc)
+                    timerPing.Elapsed += TimerPing_Tick;
+                else
+                {
+                    OpcUaClient.ServerConnectionLost += OpcClient_ServerConnectionLost;
+                    OpcUaClient.ServerConnectionRestored += OpcClient_ServerConnectionRestored;
+                }
                 PlcStatusEvent.NewMessage += PlcStatusEvent_NewMessage;
                 OnlineStatusEvent.NewMessage += OnlineStatusEvent_NewMessage;
                 isSubscribed = true;
             }
             else if (isSubscribed && !subscribeToEvents)
             {
-                timerPing.Elapsed -= TimerPing_Tick;
+                if (isOpc)
+                    timerPing.Elapsed -= TimerPing_Tick;
+                else
+                {
+                    OpcUaClient.ServerConnectionLost -= OpcClient_ServerConnectionLost;
+                    OpcUaClient.ServerConnectionRestored -= OpcClient_ServerConnectionRestored;
+                }
                 PlcStatusEvent.NewMessage -= PlcStatusEvent_NewMessage;
                 OnlineStatusEvent.NewMessage -= OnlineStatusEvent_NewMessage;
                 isSubscribed = false;
             }
+        }
+
+        private void OpcClient_ServerConnectionRestored(object sender, EventArgs e)
+        {
+            ConnectionStatus = ConnectionStatus.Connected;
+        }
+
+        private void OpcClient_ServerConnectionLost(object sender, EventArgs e)
+        {
+            ConnectionStatus = ConnectionStatus.Disconnected;
         }
 
         private void OnlineStatusEvent_NewMessage(object sender, OnlineStatusEventArgs e)
@@ -208,10 +263,9 @@ namespace OptimaValue
             {
                 UnableToPing = false;
             }
-
         }
-
-        #endregion
-
     }
+
+    #endregion
+
 }
