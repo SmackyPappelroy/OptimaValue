@@ -185,7 +185,7 @@ namespace OptimaValue
                         case Type t when t == typeof(byte[]):
                             sql.value = value.ToString();
                             sql.numericValue = 0;
-                                    SqlValues.Add(sql);
+                            SqlValues.Add(sql);
                             break;
                         case Type t when t == typeof(BitArray):
                             break;
@@ -396,6 +396,7 @@ namespace OptimaValue
         private static void LogToSql()
         {
             var tbl = SqlValues.ConvertToDataTable<LogValuesSql>();
+            
 
             if (tbl.Rows.Count == 0)
                 return;

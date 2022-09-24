@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Trend", "Projec
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "OptimaValue.Setup", "..\OptimaValue.Setup\OptimaValue.Setup.vdproj", "{96302CCE-FD57-4EF3-98F8-7350F6C02B83}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpcUaHm", "..\..\OpcUaHm\OpcUaHm.csproj", "{98290EF2-0168-4778-B1EB-8556719B9E97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpcUa", "..\..\OpcUaHm\OpcUa.csproj", "{98290EF2-0168-4778-B1EB-8556719B9E97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

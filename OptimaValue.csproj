@@ -57,7 +57,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\OpcUaHm\OpcUaHm.csproj" />
+		<ProjectReference Include="..\..\OpcUaHm\OpcUa.csproj" />
 		<ProjectReference Include="Projects\OptimaValue.Settings\OptimaValue.Config.csproj" />
 	</ItemGroup>
 
