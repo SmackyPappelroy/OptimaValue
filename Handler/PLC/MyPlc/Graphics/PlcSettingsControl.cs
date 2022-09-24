@@ -416,6 +416,7 @@ namespace OptimaValue.Handler.PLC.Graphics
 
         private void PlcSettingsControl_Load(object sender, EventArgs e)
         {
+            
             txtName.Text = PlcName;
             if (MyPlc == null)
                 txtIp.Text = PlcIp;
