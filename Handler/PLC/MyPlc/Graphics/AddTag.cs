@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using OptimaValue.Config;
+using OpcUa.UI;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
@@ -696,7 +697,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void btnOpcTag_Click(object sender, EventArgs e)
         {
-            TreeView
+            var tree = MyPlc.OpcUaClient.GetOpcTree(MyPlc.OpcBaseFolder);
         }
     }
 }

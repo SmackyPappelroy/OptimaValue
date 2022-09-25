@@ -78,6 +78,8 @@ namespace OptimaValue
         private bool isSubscribed = false;
         public bool isOpc => CpuType == CpuType.OPC;
         public new bool IsConnected => isOpc ? OpcUaClient.Status == OpcStatus.Connected : base.IsConnected;
+        public string OpcBaseFolder => IsConnected && isOpc ? OpcUaClient.RootNode.Name : "";
+
 
         #endregion
 
