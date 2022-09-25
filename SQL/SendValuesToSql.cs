@@ -119,13 +119,13 @@ namespace OptimaValue
                             break;
                         case Type t when t == typeof(byte):
                             sql.value = value.ToString();
-                            sql.numericValue = (byte)value;                            
+                            sql.numericValue = (byte)value;
                             SqlValues.Add(sql);
 
                             break;
                         case Type t when t == typeof(short):
                             sql.value = value.ToString();
-                            sql.numericValue = (short)value;                            
+                            sql.numericValue = (short)value;
                             SqlValues.Add(sql);
 
                             break;
@@ -396,7 +396,7 @@ namespace OptimaValue
         private static void LogToSql()
         {
             var tbl = SqlValues.ConvertToDataTable<LogValuesSql>();
-            
+
 
             if (tbl.Rows.Count == 0)
                 return;
