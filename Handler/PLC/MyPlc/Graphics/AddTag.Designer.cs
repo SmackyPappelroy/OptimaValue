@@ -41,6 +41,7 @@
             this.paraLogType = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
             this.paraDescription = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
             this.paraLogTime = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
+            this.paraFreq = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
             this.paraVarType = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
             this.paraDataType = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
             this.paraBlockNr = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
@@ -51,10 +52,10 @@
             this.paraScaleMin = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
             this.paraScaleMax = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
             this.paraNrOfValues = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraFreq = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
             this.paraUnit = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnOpcTag = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -217,6 +218,30 @@
             this.paraLogTime.TabIndex = 53;
             this.paraLogTime.Validating += new System.ComponentModel.CancelEventHandler(this.txtTimeOfDay_Validating);
             // 
+            // paraFreq
+            // 
+            this.paraFreq.BackColor = System.Drawing.Color.Transparent;
+            this.paraFreq.ComboItems = new string[] {
+        "Never",
+        "_50ms",
+        "_100ms",
+        "_250ms",
+        "_500ms",
+        "_1s",
+        "_2s",
+        "_10s",
+        "_30s",
+        "_1m",
+        "_5m"};
+            this.paraFreq.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.paraFreq.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
+            this.paraFreq.HeaderText = "Läs-frekvens";
+            this.paraFreq.Location = new System.Drawing.Point(6, 135);
+            this.paraFreq.Margin = new System.Windows.Forms.Padding(6);
+            this.paraFreq.Name = "paraFreq";
+            this.paraFreq.Size = new System.Drawing.Size(433, 49);
+            this.paraFreq.TabIndex = 64;
+            // 
             // paraVarType
             // 
             this.paraVarType.BackColor = System.Drawing.Color.Transparent;
@@ -374,30 +399,6 @@
             this.paraNrOfValues.TabIndex = 62;
             this.paraNrOfValues.Validating += new System.ComponentModel.CancelEventHandler(this.txtNrOfElements_Validating);
             // 
-            // paraFreq
-            // 
-            this.paraFreq.BackColor = System.Drawing.Color.Transparent;
-            this.paraFreq.ComboItems = new string[] {
-        "Never",
-        "_50ms",
-        "_100ms",
-        "_250ms",
-        "_500ms",
-        "_1s",
-        "_2s",
-        "_10s",
-        "_30s",
-        "_1m",
-        "_5m"};
-            this.paraFreq.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraFreq.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraFreq.HeaderText = "Läs-frekvens";
-            this.paraFreq.Location = new System.Drawing.Point(6, 135);
-            this.paraFreq.Margin = new System.Windows.Forms.Padding(6);
-            this.paraFreq.Name = "paraFreq";
-            this.paraFreq.Size = new System.Drawing.Size(433, 49);
-            this.paraFreq.TabIndex = 64;
-            // 
             // paraUnit
             // 
             this.paraUnit.BackColor = System.Drawing.Color.Transparent;
@@ -431,6 +432,18 @@
             this.flowLayoutPanel3.Size = new System.Drawing.Size(154, 37);
             this.flowLayoutPanel3.TabIndex = 3;
             // 
+            // btnOpcTag
+            // 
+            this.btnOpcTag.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnOpcTag.ForeColor = System.Drawing.Color.Black;
+            this.btnOpcTag.Location = new System.Drawing.Point(172, 8);
+            this.btnOpcTag.Name = "btnOpcTag";
+            this.btnOpcTag.Size = new System.Drawing.Size(91, 31);
+            this.btnOpcTag.TabIndex = 4;
+            this.btnOpcTag.Text = "Välj tag...";
+            this.btnOpcTag.UseVisualStyleBackColor = true;
+            this.btnOpcTag.Click += new System.EventHandler(this.btnOpcTag_Click);
+            // 
             // AddPlcFromFile
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -438,6 +451,7 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
             this.ClientSize = new System.Drawing.Size(892, 686);
+            this.Controls.Add(this.btnOpcTag);
             this.Controls.Add(this.flowLayoutPanel3);
             this.Controls.Add(this.flowLayoutPanel2);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
@@ -486,5 +500,6 @@
         private Parameters.parameterTextControl paraUnit;
         private Parameters.paramaterComboControl paraVarType;
         private Parameters.parameterTextControl paraDescription;
+        private System.Windows.Forms.Button btnOpcTag;
     }
 }

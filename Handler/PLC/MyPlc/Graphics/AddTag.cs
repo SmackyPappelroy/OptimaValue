@@ -69,6 +69,21 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             paraVarType.comboBoxen.SelectedIndexChanged += comboVarType_SelectedIndexChanged;
             comboLogType_SelectedIndexChanged(this, EventArgs.Empty);
             comboVarType_SelectedIndexChanged(this, EventArgs.Empty);
+            SetVisibility();
+        }
+
+        private void SetVisibility()
+        {
+            if (MyPlc.isOpc)
+            {
+                paraBitAddress.Visible = false;
+                paraDataType.Visible = false;
+                paraVarType.Visible = false;
+                paraStartAddress.Visible = false;
+                paraBlockNr.Visible = false;
+            }
+            else
+                btnOpcTag.Visible = false;
         }
 
         private void TimeOut_Tick(object sender, EventArgs e)
@@ -675,6 +690,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         }
 
         private void txtDeadband_TextChanged(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void btnOpcTag_Click(object sender, EventArgs e)
         {
 
         }

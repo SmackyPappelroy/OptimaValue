@@ -1407,7 +1407,7 @@ namespace OptimaValue
                             MyPlc.ConnectionStatus = ConnectionStatus.Disconnected;
                             logTag.LastErrorMessage = ex.Message;
                         }
-                        catch (OptimaValueException ex)
+                        catch (OpcUaException ex)
                         {
                             MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
                             Apps.Logger.Log($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);

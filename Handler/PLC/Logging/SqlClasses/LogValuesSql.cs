@@ -8,5 +8,6 @@ namespace OptimaValue
         public DateTime logTime { get; set; }
         public string value { get; set; }
         public float numericValue { get; set; }
+        public string opcQuality { get; set; }
     }
 }

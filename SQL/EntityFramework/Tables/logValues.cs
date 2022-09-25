@@ -21,5 +21,9 @@ namespace OptimaValue
 
         [Column(TypeName = "float")]
         public float numericValue { get; set; }
+
+        [Column(TypeName = "nvarchar")]
+        [StringLength(10)]
+        public string opcQuality { get; set; }
     }
 }

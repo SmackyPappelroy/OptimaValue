@@ -102,12 +102,13 @@ namespace OptimaValue
                 var sql = new LogValuesSql()
                 {
                     logTime = raw.logValue.LastLogTime,
-                    tag_id = raw.logValue.Id
+                    tag_id = raw.logValue.Id,
                 };
                 if (raw.unknownTag is ReadEvent<object> val)
                 {
                     var value = val.Value;
                     var type = val.Value.GetType();
+                    sql.opcQuality = val.Quality.ToString();
                     switch (type)
                     {
                         case Type t when t == typeof(bool):
@@ -118,13 +119,13 @@ namespace OptimaValue
                             break;
                         case Type t when t == typeof(byte):
                             sql.value = value.ToString();
-                            sql.numericValue = (byte)value;
+                            sql.numericValue = (byte)value;                            
                             SqlValues.Add(sql);
 
                             break;
                         case Type t when t == typeof(short):
                             sql.value = value.ToString();
-                            sql.numericValue = (short)value;
+                            sql.numericValue = (short)value;                            
                             SqlValues.Add(sql);
 
                             break;
@@ -150,7 +151,6 @@ namespace OptimaValue
                             sql.value = value.ToString();
                             sql.numericValue = (long)value;
                             SqlValues.Add(sql);
-
                             break;
                         case Type t when t == typeof(ulong):
                             sql.value = value.ToString();

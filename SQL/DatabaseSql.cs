@@ -445,6 +445,7 @@ public static class DatabaseSql
         objBulk.ColumnMappings.Add("logTime", "logTime");
         objBulk.ColumnMappings.Add("value", "value");
         objBulk.ColumnMappings.Add("numericValue", "numericValue");
+        objBulk.ColumnMappings.Add("opcQuality", "opcQuality");
         objBulk.ColumnMappings.Add("tag_id", "tag_id");
         try
         {

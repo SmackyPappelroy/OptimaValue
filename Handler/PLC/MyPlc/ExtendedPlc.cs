@@ -81,6 +81,11 @@ namespace OptimaValue
 
         #endregion
 
+        #region Methods
+
+
+        #endregion
+
         #region Logging
         private bool loggerIsStarted = false;
         public bool LoggerIsStarted
