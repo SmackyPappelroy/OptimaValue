@@ -55,7 +55,7 @@
             this.paraUnit = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnOpcTag = new System.Windows.Forms.Button();
+            this.comboOpcTags = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -432,17 +432,15 @@
             this.flowLayoutPanel3.Size = new System.Drawing.Size(154, 37);
             this.flowLayoutPanel3.TabIndex = 3;
             // 
-            // btnOpcTag
+            // comboOpcTags
             // 
-            this.btnOpcTag.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnOpcTag.ForeColor = System.Drawing.Color.Black;
-            this.btnOpcTag.Location = new System.Drawing.Point(172, 8);
-            this.btnOpcTag.Name = "btnOpcTag";
-            this.btnOpcTag.Size = new System.Drawing.Size(91, 31);
-            this.btnOpcTag.TabIndex = 4;
-            this.btnOpcTag.Text = "Välj tag...";
-            this.btnOpcTag.UseVisualStyleBackColor = true;
-            this.btnOpcTag.Click += new System.EventHandler(this.btnOpcTag_Click);
+            this.comboOpcTags.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.comboOpcTags.FormattingEnabled = true;
+            this.comboOpcTags.Location = new System.Drawing.Point(173, 10);
+            this.comboOpcTags.Name = "comboOpcTags";
+            this.comboOpcTags.Size = new System.Drawing.Size(652, 29);
+            this.comboOpcTags.TabIndex = 5;
+            this.comboOpcTags.Visible = false;
             // 
             // AddPlcFromFile
             // 
@@ -451,7 +449,7 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
             this.ClientSize = new System.Drawing.Size(892, 686);
-            this.Controls.Add(this.btnOpcTag);
+            this.Controls.Add(this.comboOpcTags);
             this.Controls.Add(this.flowLayoutPanel3);
             this.Controls.Add(this.flowLayoutPanel2);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
@@ -500,6 +498,6 @@
         private Parameters.parameterTextControl paraUnit;
         private Parameters.paramaterComboControl paraVarType;
         private Parameters.parameterTextControl paraDescription;
-        private System.Windows.Forms.Button btnOpcTag;
+        private System.Windows.Forms.ComboBox comboOpcTags;
     }
 }

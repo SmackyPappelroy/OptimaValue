@@ -8,6 +8,9 @@ using System.Linq;
 using System.Windows.Forms;
 using OptimaValue.Config;
 using OpcUa.UI;
+using System.Threading.Tasks;
+using OpcUa;
+using System.Windows.Controls;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
@@ -73,6 +76,57 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             SetVisibility();
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            if (MyPlc.isOpc)
+            {
+                comboOpcTags.Visible = true;
+                comboOpcTags.SelectedIndexChanged += ((sender, e) =>
+                {
+                    paraName.ParameterValue = comboOpcTags.Text;
+                });
+                PopulateOpcTags();
+            }
+        }
+
+        private async void PopulateOpcTags()
+        {
+            try
+            {
+                await Task.Run(() => { MyPlc.OpcUaClient.Connect(); });
+                if (MyPlc.IsConnected)
+                {
+                    //var tags = MyPlc.OpcUaClient.BrowseNodesOfNode(null, string.Empty);
+                    //MyPlc.OpcUaClient.GetOpcTree(tags);
+                    //var rootNodes = MyPlc.OpcUaClient.ExploreOpc("");
+                    var allNodes = MyPlc.OpcUaClient.ExploreOpc(MyPlc.PlcName);
+                    var folders = allNodes.Where(x => x.NodeClass == Opc.Ua.NodeClass.Object).ToList();
+                    var opcNodes = allNodes.Where(x => x.NodeClass == Opc.Ua.NodeClass.Variable).ToList();
+
+                    comboOpcTags.Items.Clear();
+                    foreach (var item in opcNodes)
+                    {
+                        //ComboBoxItem boxItem = new()
+                        //{
+                        //    Content = item.Name,
+                        //};
+                        comboOpcTags.Items.Add(item.Name);
+                    }
+                    comboOpcTags.SelectedIndex = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                MyPlc.OpcUaClient.Dispose();
+            }
+        }
+
         private void SetVisibility()
         {
             if (MyPlc.isOpc)
@@ -83,8 +137,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 paraStartAddress.Visible = false;
                 paraBlockNr.Visible = false;
             }
-            else
-                btnOpcTag.Visible = false;
+
         }
 
         private void TimeOut_Tick(object sender, EventArgs e)
@@ -504,11 +557,17 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             var temp = paraDeadband.ParameterValue.Replace(',', '.');
 
+            int blockNr = MyPlc.isOpc ? 0 : int.Parse(paraBlockNr.ParameterValue);
+            int startAddress = MyPlc.isOpc ? 0 : int.Parse(paraStartAddress.ParameterValue);
+            int nrOfValues = MyPlc.isOpc ? 0 : int.Parse(paraNrOfValues.ParameterValue);
+            byte bitAddress = (byte)(MyPlc.isOpc ? 0 : byte.Parse(paraBitAddress.ParameterValue));
+            string varType = MyPlc.isOpc ? "Opc" : paraVarType.comboBoxen.SelectedItem.ToString();
+
             var query = $"UPDATE {Settings.Databas}.dbo.tagConfig ";
             query += $"SET active='{checkActive.Checked}',name='{paraName.ParameterValue}',description='{paraDescription.ParameterValue}',logType='{paraLogType.comboBoxen.SelectedItem}',timeOfDay='{paraLogTime.ParameterValue}'";
-            query += $",deadband={temp},plcName='{PlcName}',varType='{paraVarType.comboBoxen.SelectedItem}',blockNr={int.Parse(paraBlockNr.ParameterValue)}" +
-                $",dataType='{paraDataType.comboBoxen.SelectedItem}',startByte={int.Parse(paraStartAddress.ParameterValue)},nrOfElements={int.Parse(paraNrOfValues.ParameterValue)}" +
-                $",bitAddress={byte.Parse(paraBitAddress.ParameterValue)},logFreq='{paraFreq.comboBoxen.SelectedItem}',";
+            query += $",deadband={temp},plcName='{PlcName}',varType='{varType}',blockNr={blockNr}" +
+                $",dataType='{paraDataType.comboBoxen.SelectedItem}',startByte={startAddress},nrOfElements={nrOfValues}" +
+                $",bitAddress={bitAddress},logFreq='{paraFreq.comboBoxen.SelectedItem}',";
             query += $"tagUnit='{paraUnit.ParameterValue}',eventId={tag.EventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
                 $",boolTrigger='{tag.BoolTrigger}',analogTrigger='{tag.AnalogTrigger}',analogValue={tag.AnalogValue}, " +
                 $"scaleMin={paraScaleMin.ParameterValue},scaleMax={paraScaleMax.ParameterValue},scaleOffset={paraScaleOffset.ParameterValue}" +
@@ -695,9 +754,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         }
 
-        private void btnOpcTag_Click(object sender, EventArgs e)
+        private async void btnOpcTag_Click(object sender, EventArgs e)
         {
-            var tree = MyPlc.OpcUaClient.GetOpcTree(MyPlc.OpcBaseFolder);
+
         }
     }
 }
