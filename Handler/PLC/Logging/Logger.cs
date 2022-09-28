@@ -133,7 +133,7 @@ namespace OptimaValue
                         if (!plc.isOpc)
                             plc.Open();
                         else
-                            plc.OpcUaClient.Connect();
+                            await plc.OpcUaClient.Connect();
                         if ((plc.isOpc && plc.OpcUaClient.Status == OpcStatus.NotConnected) || (!plc.isOpc && !plc.IsConnected))
                         {
                             Apps.Logger.Log($"Får ej kontakt med {plc.PlcName}", Severity.Error);
@@ -183,7 +183,7 @@ namespace OptimaValue
                                     if (MyPlc.isOpc)
                                     {
                                         MyPlc.OpcUaClient = new UaClient(new Uri(MyPlc.ConnectionString));
-                                        MyPlc.OpcUaClient.Connect();
+                                        await MyPlc.OpcUaClient.Connect();
                                         if (MyPlc.OpcUaClient.Status == OpcStatus.Connected)
                                         {
                                             MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Ok);

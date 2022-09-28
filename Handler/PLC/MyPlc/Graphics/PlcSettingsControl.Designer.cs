@@ -46,12 +46,15 @@
             this.btnDelete = new System.Windows.Forms.Button();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.btnSyncTime = new System.Windows.Forms.Button();
-            this.btnConnect = new System.Windows.Forms.Button();
             this.imageTest = new System.Windows.Forms.PictureBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnConnect = new System.Windows.Forms.Button();
+            this.comboOpcTopic = new System.Windows.Forms.ComboBox();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imageTest)).BeginInit();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblName
@@ -258,8 +261,8 @@
             this.tableLayoutPanel2.Controls.Add(this.lblRack, 1, 5);
             this.tableLayoutPanel2.Controls.Add(this.lblSlot, 2, 5);
             this.tableLayoutPanel2.Controls.Add(this.txtSlot, 2, 6);
-            this.tableLayoutPanel2.Controls.Add(this.btnConnect, 2, 0);
             this.tableLayoutPanel2.Controls.Add(this.imageTest, 3, 0);
+            this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel1, 2, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -296,18 +299,6 @@
             this.btnSyncTime.UseVisualStyleBackColor = true;
             this.btnSyncTime.Click += new System.EventHandler(this.btnSyncTime_Click);
             // 
-            // btnConnect
-            // 
-            this.btnConnect.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnConnect.Location = new System.Drawing.Point(262, 10);
-            this.btnConnect.Margin = new System.Windows.Forms.Padding(3, 10, 3, 3);
-            this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(153, 50);
-            this.btnConnect.TabIndex = 16;
-            this.btnConnect.Text = "Testa anslutning";
-            this.btnConnect.UseVisualStyleBackColor = true;
-            this.btnConnect.Click += new System.EventHandler(this.button1_Click);
-            // 
             // imageTest
             // 
             this.imageTest.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
@@ -317,6 +308,47 @@
             this.imageTest.Size = new System.Drawing.Size(29, 62);
             this.imageTest.TabIndex = 17;
             this.imageTest.TabStop = false;
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.Controls.Add(this.btnConnect, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.comboOpcTopic, 0, 1);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(262, 3);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(218, 62);
+            this.tableLayoutPanel1.TabIndex = 18;
+            // 
+            // btnConnect
+            // 
+            this.btnConnect.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnConnect.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnConnect.Location = new System.Drawing.Point(0, 0);
+            this.btnConnect.Margin = new System.Windows.Forms.Padding(0);
+            this.btnConnect.Name = "btnConnect";
+            this.btnConnect.Size = new System.Drawing.Size(218, 31);
+            this.btnConnect.TabIndex = 16;
+            this.btnConnect.Text = "Testa anslutning";
+            this.btnConnect.UseVisualStyleBackColor = true;
+            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
+            // 
+            // comboOpcTopic
+            // 
+            this.comboOpcTopic.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.comboOpcTopic.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.comboOpcTopic.FormattingEnabled = true;
+            this.comboOpcTopic.Location = new System.Drawing.Point(3, 34);
+            this.comboOpcTopic.Name = "comboOpcTopic";
+            this.comboOpcTopic.Size = new System.Drawing.Size(212, 24);
+            this.comboOpcTopic.TabIndex = 17;
+            this.comboOpcTopic.Visible = false;
+            this.comboOpcTopic.SelectedIndexChanged += new System.EventHandler(this.comboOpcTopic_SelectedIndexChanged);
             // 
             // imageList
             // 
@@ -342,6 +374,7 @@
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imageTest)).EndInit();
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -367,5 +400,7 @@
         private System.Windows.Forms.ImageList imageList;
         private System.Windows.Forms.Button btnConnect;
         private System.Windows.Forms.PictureBox imageTest;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.ComboBox comboOpcTopic;
     }
 }

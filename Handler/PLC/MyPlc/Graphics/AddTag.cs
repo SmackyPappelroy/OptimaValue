@@ -95,7 +95,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             try
             {
-                await Task.Run(() => { MyPlc.OpcUaClient.Connect(); });
+                await MyPlc.OpcUaClient.Connect();
                 if (MyPlc.IsConnected)
                 {
                     //var tags = MyPlc.OpcUaClient.BrowseNodesOfNode(null, string.Empty);

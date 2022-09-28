@@ -1,9 +1,14 @@
-﻿using OptimaValue.Handler.PLC.MyPlc.Graphics;
+﻿using Opc.Ua.Export;
+using OpcUa;
+using OpcUaHm.Common;
+using OptimaValue.Handler.PLC.MyPlc.Graphics;
 using S7.Net;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Media;
 using System.Windows.Forms;
 
 namespace OptimaValue.Handler.PLC.Graphics
@@ -416,7 +421,7 @@ namespace OptimaValue.Handler.PLC.Graphics
 
         private void PlcSettingsControl_Load(object sender, EventArgs e)
         {
-            
+
             txtName.Text = PlcName;
             if (MyPlc == null)
                 txtIp.Text = PlcIp;
@@ -550,7 +555,7 @@ namespace OptimaValue.Handler.PLC.Graphics
 
 
 
-        private async void button1_Click(object sender, EventArgs e)
+        private async void btnConnect_Click(object sender, EventArgs e)
         {
             if (ValidateAll())
             {
@@ -564,22 +569,26 @@ namespace OptimaValue.Handler.PLC.Graphics
                         await MyPlc.OpenAsync();
                     else
                     {
-                        MyPlc.OpcUaClient.Connect();
+                        await MyPlc.OpcUaClient.Connect();
+                        PopulateOpcTopics();
                     }
                     imageTest.Image = imageList.Images[2];
+                    SystemSounds.Beep.Play();
                     connected = true;
+                    $"Ansluten till {MyPlc.PlcName}".SendStatusMessage(Severity.Error);
                 }
                 catch (Exception ex)
                 {
                     imageTest.Image = imageList.Images[1];
                     connected = false;
+                    SystemSounds.Hand.Play();
                     $"Ingen anslutning till {MyPlc.PlcName}".SendStatusMessage(Severity.Information);
                 }
                 finally
                 {
                     if (!MyPlc.isOpc)
                         MyPlc.Close();
-                    else
+                    else if (MyPlc.OpcUaClient.Status == OpcUaHm.Common.OpcStatus.Connected)
                         MyPlc.OpcUaClient.Dispose();
                     btnConnect.Enabled = true;
                     timeoutTimer.Start();
@@ -588,6 +597,18 @@ namespace OptimaValue.Handler.PLC.Graphics
 
                 }
             }
+        }
+
+        private List<UaNode> PopulateOpcTopics()
+        {
+            var nodes = MyPlc.OpcUaClient.ExploreOpc("", true);
+            comboOpcTopic.Items.Clear();
+            foreach (var item in nodes)
+            {
+                comboOpcTopic.Items.Add(item.Tag);
+            }
+            comboOpcTopic.SelectedIndex = 0;
+            return nodes;
         }
 
         private void comboCpu_SelectedValueChanged(object sender, EventArgs e)
@@ -599,26 +620,22 @@ namespace OptimaValue.Handler.PLC.Graphics
                 txtSlot.Visible = false;
                 lblRack.Visible = false;
                 txtRack.Visible = false;
+                comboOpcTopic.Visible = true;
             }
             else
             {
+                comboOpcTopic.Visible = false;
                 lblIpAddress.Text = "IP-adress";
                 lblSlot.Visible = true;
                 txtSlot.Visible = true;
                 lblRack.Visible = true;
                 txtRack.Visible = true;
             }
-            //if (((ComboBox)sender).SelectedItem == "S71500")
-            //{
-            //    txtSlot.Text = "1";
-            //    txtRack.Text = "0";
-            //}
-            //else if (((ComboBox)sender).SelectedItem == "S7300")
-            //{
-            //    txtSlot.Text = "2";
-            //    txtRack.Text = "0";
-            //}
+        }
 
+        private void comboOpcTopic_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            txtName.Text = comboOpcTopic.Text;
         }
     }
 }
