@@ -131,11 +131,14 @@ namespace OptimaValue.Trend
 
         public int SeriesIndex { get; set; }
 
+        //public GridItem(Color backgroundColor)
         public GridItem()
         {
+            //CreateRandomColor(backgroundColor);
             CreateRandomColor();
         }
 
+        //private void CreateRandomColor(Color backgroundColor)
         private void CreateRandomColor()
         {
             Random redColor = new Random();
@@ -147,12 +150,14 @@ namespace OptimaValue.Trend
             Random blueColor = new Random();
             var blue = Convert.ToByte(blueColor.Next(0, 255));
 
+            //(var LineColortemp, var FillColortemp) = ChangeColors(red: red, green: green, blue: blue, backgroundColor: backgroundColor);
             (var LineColortemp, var FillColortemp) = ChangeColors(red: red, green: green, blue: blue);
 
             LineColor = LineColortemp.ToString();
             FillColor = FillColortemp.ToString();
         }
 
+        //private (Color stroke, LinearGradientBrush fill) ChangeColors(byte red, byte green, byte blue, Color backgroundColor)
         private (Color stroke, Color fill) ChangeColors(byte red, byte green, byte blue)
         {
             var brightnessFactor = 0.3f;
@@ -162,6 +167,16 @@ namespace OptimaValue.Trend
 
             Color strokeColor = ChangeColorBrightness(Color.FromArgb(255, red, green, blue), brightnessFactor);
             Color fillColor = ChangeColorBrightness(Color.FromArgb(fillColorAlpha, red, green, blue), brightnessFactor);
+            //LinearGradientBrush fillColorGradient = new LinearGradientBrush
+            //{
+            //    StartPoint = new System.Windows.Point(0, 0),
+            //    EndPoint = new System.Windows.Point(0, 1),
+            //    GradientStops = new GradientStopCollection
+            //    {
+            //        new GradientStop(strokeColor, 0),
+            //        new GradientStop(backgroundColor, 1)
+            //    }
+            //};
             return (strokeColor, fillColor);
         }
 

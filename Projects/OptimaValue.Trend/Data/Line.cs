@@ -103,6 +103,16 @@ public class Line : INotifyPropertyChanged
 
     public void CreateLine(int index)
     {
+        var linearFill = new LinearGradientBrush
+        {
+            StartPoint = new System.Windows.Point(0, 0),
+            EndPoint = new System.Windows.Point(0, 1),
+            GradientStops = new GradientStopCollection
+                {
+                    new GradientStop((Color)ColorConverter.ConvertFromString(Tag.FillColor), 0),
+                    new GradientStop(Color.FromArgb(255,0,0,0), 1)
+                }
+        };
 
         GLineSeries = new()
         {
@@ -114,7 +124,8 @@ public class Line : INotifyPropertyChanged
             ScalesYAt = index,
             Foreground = new SolidColorBrush(Color.FromArgb(107, 48, 48, 48)),
             Stroke = Tag.StringToSolidColorBrush(Tag.LineColor),
-            Fill = Tag.StringToSolidColorBrush(Tag.FillColor),
+            //Fill = Tag.StringToSolidColorBrush(Tag.FillColor),
+            Fill = linearFill,
             Title = Tag.name,
             Tag = Tag.id,
             Values = new GearedValues<DateTimePoint>().WithQuality(Quality)

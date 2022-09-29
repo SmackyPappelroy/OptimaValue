@@ -54,52 +54,61 @@ namespace OptimaValue.Trend
                 UpdateWindowTitle(fileName, viewModel);
                 return;
             }
-            var text = File.ReadAllText(fileName);
-            var trend = JsonSerializer.Deserialize<SaveClass>(text);
-
-            //Series = trend.Series;
-            viewModel.InputStartDate = trend.StartDateFetchedData;
-            viewModel.InputStartTime = new TimeOnly(trend.StartDateFetchedData.TimeOfDay.Ticks);
-            viewModel.InputEndDate = trend.EndDateFetchedData;
-            viewModel.InputEndTime = new TimeOnly(trend.EndDateFetchedData.TimeOfDay.Ticks);
-            viewModel.MinDateSeries = trend.StartDateDisplayedData;
-            viewModel.MaxDateSeries = trend.EndDateDisplayedData;
-
-            viewModel.Lines = new();
-            viewModel.Lines.Clear();
-            viewModel.AxisCollection.Clear();
-            viewModel.Series = new();
-            viewModel.SelectedItems = trend.SelectedItems;
-            int index = 0;
-            foreach (var item in trend.SelectedItems)
+            try
             {
-                var line = new Line(item.id, viewModel, item.LineColor, item.FillColor);
-                await line.SetupLine(viewModel.StartDate, viewModel.EndDate, index);
-                viewModel.Series.Add(line.GLineSeries);
-                viewModel.Lines.Add(line);
-                if (index == 0)
+                var text = File.ReadAllText(fileName);
+
+                var trend = JsonSerializer.Deserialize<SaveClass>(text);
+
+                //Series = trend.Series;
+                viewModel.InputStartDate = trend.StartDateFetchedData;
+                viewModel.InputStartTime = new TimeOnly(trend.StartDateFetchedData.TimeOfDay.Ticks);
+                viewModel.InputEndDate = trend.EndDateFetchedData;
+                viewModel.InputEndTime = new TimeOnly(trend.EndDateFetchedData.TimeOfDay.Ticks);
+                viewModel.MinDateSeries = trend.StartDateDisplayedData;
+                viewModel.MaxDateSeries = trend.EndDateDisplayedData;
+
+                viewModel.Lines = new();
+                viewModel.Lines.Clear();
+                viewModel.AxisCollection.Clear();
+                viewModel.Series = new();
+                viewModel.SelectedItems = trend.SelectedItems;
+                int index = 0;
+                foreach (var item in trend.SelectedItems)
                 {
-                    viewModel.AxisCollection.Clear();
-                    if (StaticClass.Lines != null)
+                    var line = new Line(item.id, viewModel, item.LineColor, item.FillColor);
+                    await line.SetupLine(viewModel.StartDate, viewModel.EndDate, index);
+                    viewModel.Series.Add(line.GLineSeries);
+                    viewModel.Lines.Add(line);
+                    if (index == 0)
                     {
-                        StaticClass.Lines.Clear();
-                        StaticClass.Lines = new();
+                        viewModel.AxisCollection.Clear();
+                        if (StaticClass.Lines != null)
+                        {
+                            StaticClass.Lines.Clear();
+                            StaticClass.Lines = new();
+                        }
+                        else
+                            StaticClass.Lines = new();
                     }
-                    else
-                        StaticClass.Lines = new();
+                    StaticClass.Lines.Add(line);
+                    viewModel.AxisCollection.Add(line.AxisY);
+
+
+
+                    viewModel.FormatSeries();
+
+                    HookIntoEvents(item, viewModel);
+                    index++;
                 }
-                StaticClass.Lines.Add(line);
-                viewModel.AxisCollection.Add(line.AxisY);
-
-
-
-                viewModel.FormatSeries();
-
-                HookIntoEvents(item, viewModel);
-                index++;
+                UpdateWindowTitle(fileName, viewModel);
+                StaticClass.LastSaveFile = fileName;
             }
-            UpdateWindowTitle(fileName, viewModel);
-            StaticClass.LastSaveFile = fileName;
+
+            catch (Exception ex)
+            {
+                viewModel.RaiseMessage(ex.Message);
+            }
         }
 
         private static void HookIntoEvents(GridItem item, MainWindowViewModel vm)

@@ -19,10 +19,10 @@ namespace OptimaValue.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace OptimaValue.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("OptimaValue.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace OptimaValue.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap add_new_64px {
+        public static System.Drawing.Bitmap add_new_64px {
             get {
                 object obj = ResourceManager.GetObject("add_new_64px", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -73,7 +73,7 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap add_new_64px_Gray {
+        public static System.Drawing.Bitmap add_new_64px_Gray {
             get {
                 object obj = ResourceManager.GetObject("add_new_64px_Gray", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -83,7 +83,7 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap available_updates_64px {
+        public static System.Drawing.Bitmap available_updates_64px {
             get {
                 object obj = ResourceManager.GetObject("available_updates_64px", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -93,7 +93,7 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap available_updates_64px_gray {
+        public static System.Drawing.Bitmap available_updates_64px_gray {
             get {
                 object obj = ResourceManager.GetObject("available_updates_64px_gray", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -103,7 +103,7 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon icons8_gas_alarm {
+        public static System.Drawing.Icon icons8_gas_alarm {
             get {
                 object obj = ResourceManager.GetObject("icons8_gas_alarm", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
@@ -113,7 +113,7 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon icons8_gas_idle {
+        public static System.Drawing.Icon icons8_gas_idle {
             get {
                 object obj = ResourceManager.GetObject("icons8_gas_idle", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
@@ -123,7 +123,7 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon icons8_gas_running {
+        public static System.Drawing.Icon icons8_gas_running {
             get {
                 object obj = ResourceManager.GetObject("icons8_gas_running", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
@@ -133,7 +133,17 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap S71500Sync__Custom_ {
+        public static System.Drawing.Bitmap locked_48px {
+            get {
+                object obj = ResourceManager.GetObject("locked_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap S71500Sync__Custom_ {
             get {
                 object obj = ResourceManager.GetObject("S71500Sync__Custom_", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -143,7 +153,7 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap S7300Sync {
+        public static System.Drawing.Bitmap S7300Sync {
             get {
                 object obj = ResourceManager.GetObject("S7300Sync", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -153,7 +163,7 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tag_error {
+        public static System.Drawing.Bitmap tag_error {
             get {
                 object obj = ResourceManager.GetObject("tag_error", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
@@ -163,9 +173,19 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tag_ok {
+        public static System.Drawing.Bitmap tag_ok {
             get {
                 object obj = ResourceManager.GetObject("tag_ok", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap unlocked_48px {
+            get {
+                object obj = ResourceManager.GetObject("unlocked_48px", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

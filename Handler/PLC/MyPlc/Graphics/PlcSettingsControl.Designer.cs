@@ -341,6 +341,7 @@
             // comboOpcTopic
             // 
             this.comboOpcTopic.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.comboOpcTopic.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboOpcTopic.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.comboOpcTopic.FormattingEnabled = true;
             this.comboOpcTopic.Location = new System.Drawing.Point(3, 34);

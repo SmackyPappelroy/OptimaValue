@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Linq;
 using System.Media;
 using System.Windows.Forms;
 
@@ -198,7 +199,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtIp, "Fältet får ej va tomt");
                     ipOk = false;
                 }
-                else if (!InputValidation.CheckIPValid(txtIp.Text) && !txtIp.Text.ToLower().StartsWith("opc.tcp://"))
+                else if (!InputValidation.CheckIPValid(txtIp.Text) || (comboCpu.Text == "OPC" && string.IsNullOrWhiteSpace(txtIp.Text)))
                 {
                     errorProvider.SetError(txtIp, "Ingen giltig IP-adress / OPC UA adress");
                     ipOk = false;
@@ -381,7 +382,7 @@ namespace OptimaValue.Handler.PLC.Graphics
         {
             if (comboCpu.SelectedItem != null)
                 cpuOk = true;
-            if (txtIp.Text.CheckValidIpAddress() || txtIp.Text.ToLower().StartsWith("opc.tcp://"))
+            if (txtIp.Text.CheckValidIpAddress() || (!string.IsNullOrWhiteSpace(comboCpu.Text) && !string.IsNullOrWhiteSpace(txtIp.Text)))
                 ipOk = true;
             if (short.TryParse(txtSlot.Text, out _))
                 slotOk = true;
@@ -434,6 +435,10 @@ namespace OptimaValue.Handler.PLC.Graphics
             checkActive.Checked = Active;
             comboCpu.SelectedItem = CpuType.ToString();
             btnConnect.Enabled = ValidateAll();
+            if (MyPlc == null)
+                btnConnect.Visible = false;
+            else
+                btnConnect.Visible = true;
 
             if (MyPlc != null && MyPlc.isOpc)
             {
@@ -446,10 +451,10 @@ namespace OptimaValue.Handler.PLC.Graphics
             else
             {
                 lblIpAddress.Text = "IP-adress";
-                lblSlot.Visible = false;
-                txtSlot.Visible = false;
-                lblRack.Visible = false;
-                txtRack.Visible = false;
+                lblSlot.Visible = true;
+                txtSlot.Visible = true;
+                lblRack.Visible = true;
+                txtRack.Visible = true;
             }
         }
 
@@ -554,11 +559,12 @@ namespace OptimaValue.Handler.PLC.Graphics
         }
 
 
-
+        bool loading = false;
         private async void btnConnect_Click(object sender, EventArgs e)
         {
             if (ValidateAll())
             {
+                loading = true;
                 tableLayoutPanel2.Enabled = false;
                 try
                 {
@@ -594,7 +600,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                     timeoutTimer.Start();
                     Application.UseWaitCursor = false;
                     tableLayoutPanel2.Enabled = true;
-
+                    loading = false;
                 }
             }
         }
@@ -603,6 +609,7 @@ namespace OptimaValue.Handler.PLC.Graphics
         {
             var nodes = MyPlc.OpcUaClient.ExploreOpc("", true);
             comboOpcTopic.Items.Clear();
+            nodes = nodes.OrderBy(x => x.Tag).ToList();
             foreach (var item in nodes)
             {
                 comboOpcTopic.Items.Add(item.Tag);
@@ -635,7 +642,8 @@ namespace OptimaValue.Handler.PLC.Graphics
 
         private void comboOpcTopic_SelectedIndexChanged(object sender, EventArgs e)
         {
-            txtName.Text = comboOpcTopic.Text;
+            if (!loading)
+                txtName.Text = comboOpcTopic.Text;
         }
     }
 }

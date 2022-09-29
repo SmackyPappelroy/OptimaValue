@@ -85,7 +85,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 comboOpcTags.Visible = true;
                 comboOpcTags.SelectedIndexChanged += ((sender, e) =>
                 {
-                    paraName.ParameterValue = comboOpcTags.Text;
+                    if (!locked)
+                        paraName.ParameterValue = comboOpcTags.Text;
                 });
                 PopulateOpcTags();
             }
@@ -104,6 +105,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     var allNodes = MyPlc.OpcUaClient.ExploreOpc(MyPlc.PlcName);
                     var folders = allNodes.Where(x => x.NodeClass == Opc.Ua.NodeClass.Object).ToList();
                     var opcNodes = allNodes.Where(x => x.NodeClass == Opc.Ua.NodeClass.Variable).ToList();
+                    opcNodes = opcNodes.OrderBy(x => x.Tag).ToList();
 
                     comboOpcTags.Items.Clear();
                     foreach (var item in opcNodes)
@@ -112,8 +114,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                         //{
                         //    Content = item.Name,
                         //};
-                        comboOpcTags.Items.Add(item.Name);
+                        var tagName = item.Tag.Substring(MyPlc.PlcName.Length + 1, item.Tag.Length - MyPlc.PlcName.Length - 1);
+                        comboOpcTags.Items.Add(tagName);
                     }
+
                     comboOpcTags.SelectedIndex = 0;
                 }
             }
@@ -131,6 +135,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             if (MyPlc.isOpc)
             {
+                btnOpcLock.Visible = true;
                 paraBitAddress.Visible = false;
                 paraDataType.Visible = false;
                 paraVarType.Visible = false;
@@ -754,8 +759,16 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         }
 
-        private async void btnOpcTag_Click(object sender, EventArgs e)
+        bool locked = true;
+        private void btnOpcLock_Click(object sender, EventArgs e)
         {
+            locked = !locked;
+            if (locked)
+            {
+                btnOpcLock.BackgroundImage = Properties.Resources.locked_48px;
+            }
+            else
+                btnOpcLock.BackgroundImage = Properties.Resources.unlocked_48px;
 
         }
     }

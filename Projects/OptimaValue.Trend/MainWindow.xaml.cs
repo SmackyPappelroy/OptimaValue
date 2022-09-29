@@ -56,11 +56,15 @@ namespace OptimaValue.Trend
                                 if (item.GLineSeries.ScalesYAt > 0)
                                     item.GLineSeries.ScalesYAt--;
                             }
+                            if (viewModel.Series == null)
+                                return;
+
                             foreach (var item in viewModel.Series)
                             {
                                 if (item.ScalesYAt > 0)
                                     item.ScalesYAt--;
                             }
+
                             if (viewModel.Lines == null || viewModel.Lines.Count == 0)
                                 return;
                             Line line = viewModel.Lines.FirstOrDefault(l => l.Tag.id == grid.id);

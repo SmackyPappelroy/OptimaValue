@@ -180,6 +180,7 @@ namespace OptimaValue.Trend
             {
                 if (availableItems.Count == 0)
                 {
+                    //availableItems = (model ??= new()).GetGridItems(TrendBackGround.GradientStops[0].Color);
                     availableItems = (model ??= new()).GetGridItems();
                 }
                 return availableItems;
@@ -274,6 +275,14 @@ namespace OptimaValue.Trend
                     new System.Windows.Media.GradientStop((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFFFFFFF"),1),
                 }
                 };
+                foreach (var item in Series)
+                {
+                    var line = item as GLineSeries;
+                    var fill = line.Fill as LinearGradientBrush;
+                    fill.GradientStops[1].Color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFFFFFFF");
+                }
+                window.MyChart.AxisX[0].Separator.Stroke = new SolidColorBrush(System.Windows.Media.Color.FromArgb(Color.DarkGray.A, Color.DarkGray.R, Color.DarkGray.G, Color.DarkGray.B));
+
             }
             else if (DarkTheme == 1)
             {
@@ -289,6 +298,15 @@ namespace OptimaValue.Trend
                     new System.Windows.Media.GradientStop((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FF000000"),1),
                 }
                 };
+                foreach (var item in Series)
+                {
+                    var line = item as GLineSeries;
+                    var fill = line.Fill as LinearGradientBrush;
+                    fill.GradientStops[1].Color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FF000000");
+                }
+                window.MyChart.AxisX[0].Separator.Stroke = new SolidColorBrush(System.Windows.Media.Color.FromArgb(Color.LightGray.A, Color.LightGray.R, Color.LightGray.G, Color.LightGray.B));
+
+
             }
         }
 
@@ -600,7 +618,7 @@ namespace OptimaValue.Trend
         /// Raise a message that is displayed on the UI
         /// </summary>
         /// <param name="message"></param>
-        private void RaiseMessage(string message)
+        public void RaiseMessage(string message)
         {
             OnStatusMessage?.Invoke(message);
         }
@@ -674,7 +692,18 @@ namespace OptimaValue.Trend
                 sourceItem.OnFillColorChanged += ((fillColor) =>
                 {
                     var line = Series.Where(x => x.Title == sourceItem.name).FirstOrDefault() as GLineSeries;
-                    line.Fill = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(fillColor));
+                    var linearFill = new LinearGradientBrush
+                    {
+                        StartPoint = new System.Windows.Point(0, 0),
+                        EndPoint = new System.Windows.Point(0, 1),
+                        GradientStops = new GradientStopCollection
+                {
+                    new System.Windows.Media.GradientStop((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(fillColor), 0),
+                    new System.Windows.Media.GradientStop(System.Windows.Media.Color.FromArgb(255,0,0,0), 1)
+                }
+                    };
+                    //line.Fill = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(fillColor));
+                    line.Fill = linearFill;
                 });
                 sourceItem.OnLineColorChanged += ((lineColor) =>
                 {

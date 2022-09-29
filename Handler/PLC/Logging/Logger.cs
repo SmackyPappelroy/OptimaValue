@@ -614,6 +614,15 @@ namespace OptimaValue
                                                 break;
                                             case VarType.DateTime:
                                                 break;
+                                            case VarType.Opc:
+                                                var readEvent = unknownTag as ReadEvent<object>;
+                                                var lastValue = lastKnownLogValue.value;
+                                                var lastKnownReadEvent = lastValue as ReadEvent<object>;
+                                                if (!Equals(readEvent.Value.ToString(), lastKnownReadEvent.Value.ToString()))
+                                                {
+                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                }
+                                                break;
                                             default:
                                                 break;
                                         }

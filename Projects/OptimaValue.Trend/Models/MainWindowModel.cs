@@ -16,6 +16,7 @@ namespace OptimaValue.Trend
         {
 
         }
+        //public List<GridItem> GetGridItems(System.Windows.Media.Color backgroundColor)
         public List<GridItem> GetGridItems()
         {
             var query = $"SELECT id,name,description,scaleMin,scaleMax,scaleOffset FROM {Config.Settings.Databas}.dbo.tagConfig";
@@ -25,7 +26,8 @@ namespace OptimaValue.Trend
             var result = cmd.ExecuteReader();
             return
                 result.Cast<IDataRecord>()
-                    .Select(x => new GridItem
+                    //.Select(x => new GridItem(backgroundColor)
+                    .Select(x => new GridItem()
                     {
                         id = x.GetInt32(0),
                         name = x.GetString(1),
