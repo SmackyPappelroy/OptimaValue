@@ -10,7 +10,7 @@
 		<AssemblyName>OptimaValue</AssemblyName>
 		<StartupObject>OptimaValue.Program</StartupObject>
 		<ApplicationIcon>Mina Resurser\icons8_gas_idle.ico</ApplicationIcon>
-		<PlatformTarget>x64</PlatformTarget>
+		<PlatformTarget>AnyCPU</PlatformTarget>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
 	</PropertyGroup>

@@ -61,7 +61,12 @@ namespace OptimaValue.Handler.PLC.Graphics
             Id = id;
             MyPlc = myPlc;
             if (MyPlc != null)
-                CpuType = MyPlc.isOpc ? CpuType.OPC : cpuType;
+            {
+                if (myPlc.isOpc)
+                {
+                    CpuType = myPlc.OpcType == OpcType.OpcUa ? CpuType.OpcUa : CpuType.OpcDa;
+                }
+            }
             else
                 CpuType = CpuType.S71500;
             btnSyncTime.Visible = false;
@@ -575,7 +580,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                         await MyPlc.OpenAsync();
                     else
                     {
-                        await MyPlc.OpcUaClient.Connect();
+                        await MyPlc.OpcClient.Connect();
                         PopulateOpcTopics();
                     }
                     imageTest.Image = imageList.Images[2];
@@ -594,8 +599,8 @@ namespace OptimaValue.Handler.PLC.Graphics
                 {
                     if (!MyPlc.isOpc)
                         MyPlc.Close();
-                    else if (MyPlc.OpcUaClient.Status == OpcUaHm.Common.OpcStatus.Connected)
-                        MyPlc.OpcUaClient.Dispose();
+                    else if (MyPlc.OpcClient.Status == OpcUaHm.Common.OpcStatus.Connected)
+                        MyPlc.OpcClient.Dispose();
                     btnConnect.Enabled = true;
                     timeoutTimer.Start();
                     Application.UseWaitCursor = false;
@@ -605,9 +610,9 @@ namespace OptimaValue.Handler.PLC.Graphics
             }
         }
 
-        private List<UaNode> PopulateOpcTopics()
+        private List<Node> PopulateOpcTopics()
         {
-            var nodes = MyPlc.OpcUaClient.ExploreOpc("", true);
+            var nodes = MyPlc.OpcClient.ExploreOpc("", true);
             comboOpcTopic.Items.Clear();
             nodes = nodes.OrderBy(x => x.Tag).ToList();
             foreach (var item in nodes)
@@ -615,7 +620,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                 comboOpcTopic.Items.Add(item.Tag);
             }
             comboOpcTopic.SelectedIndex = 0;
-            return nodes;
+            return nodes.ToList();
         }
 
         private void comboCpu_SelectedValueChanged(object sender, EventArgs e)
@@ -643,7 +648,18 @@ namespace OptimaValue.Handler.PLC.Graphics
         private void comboOpcTopic_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (!loading)
+            {
                 txtName.Text = comboOpcTopic.Text;
+                try
+                {
+                    MyPlc.OpcClient.Connect();
+                    var subNodes = MyPlc.OpcClient.ExploreOpc(txtName.Text, false, true);
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
         }
     }
 }

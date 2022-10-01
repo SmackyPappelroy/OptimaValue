@@ -14,9 +14,9 @@ namespace OptimaValue.Trend
     public class GridItem : INotifyPropertyChanged
     {
         public event Action<double> OnSmoothingChanged;
-        public event Action<int> OnScaleMinChanged;
-        public event Action<int> OnScaleMaxChanged;
-        public event Action<int, int> OnScaleOffsetChanged;
+        public event Action<float> OnScaleMinChanged;
+        public event Action<float> OnScaleMaxChanged;
+        public event Action<int, float> OnScaleOffsetChanged;
         public event Action<string> OnLineColorChanged;
         public event Action<string> OnFillColorChanged;
         public event Action<bool> OnActiveChanged;
@@ -41,9 +41,9 @@ namespace OptimaValue.Trend
         [ColumnName("Beskrivning")]
         public string? description { get; set; }
 
-        private int mScaleMin;
+        private float mScaleMin;
         [ColumnName("Minimum")]
-        public int scaleMin
+        public float scaleMin
         {
             get => mScaleMin;
             set
@@ -57,9 +57,9 @@ namespace OptimaValue.Trend
             }
         }
 
-        private int mScaleMax;
+        private float mScaleMax;
         [ColumnName("Maximum")]
-        public int scaleMax
+        public float scaleMax
         {
             get => mScaleMax;
             set
@@ -72,9 +72,9 @@ namespace OptimaValue.Trend
             }
         }
 
-        private int mScaleOffset;
+        private float mScaleOffset;
         [ColumnName("TrendOffset")]
-        public int scaleOffset
+        public float scaleOffset
         {
             get => mScaleOffset;
             set

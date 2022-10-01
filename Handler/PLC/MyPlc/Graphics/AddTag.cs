@@ -11,6 +11,9 @@ using OpcUa.UI;
 using System.Threading.Tasks;
 using OpcUa;
 using System.Windows.Controls;
+using OpcUaHm.Common;
+using System.Collections.Generic;
+using OpcUa.DA;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
@@ -63,6 +66,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 paraDataType.comboBoxen.SelectedItem = "DataBlock";
                 paraLogType.comboBoxen.Text = "Cyclic";
                 paraLogType.comboBoxen.SelectedItem = "Cyclic";
+                paraRawMin.ParameterValue = 0.ToString();
+                paraRawMax.ParameterValue = 0.ToString();
                 paraScaleMin.ParameterValue = 0.ToString();
                 paraScaleMax.ParameterValue = 0.ToString();
                 paraScaleOffset.ParameterValue = 0.ToString();
@@ -86,39 +91,108 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 comboOpcTags.SelectedIndexChanged += ((sender, e) =>
                 {
                     if (!locked)
+                    {
                         paraName.ParameterValue = comboOpcTags.Text;
+
+                        try
+                        {
+                            MyPlc.OpcClient.Connect();
+                            var tag = Tags.Where(x => x.Name == comboOpcTags.Text).FirstOrDefault();
+                            var subNodes = MyPlc.OpcClient.ExploreOpc(tag.FullName, false, true);
+
+                            try
+                            {
+                                var descriptionNode = subNodes.Where(x => x.Name.Contains("escription")).FirstOrDefault();
+                                var description = MyPlc.OpcClient.Read<string>(descriptionNode.Tag);
+                                paraDescription.ParameterValue = description.Value;
+                            }
+                            catch (Exception) { }
+
+
+                            var unitsNode = subNodes.Where(x => x.Name.Contains("Units")).FirstOrDefault();
+                            var rawLowNode = subNodes.Where(x => x.Name.Contains("RawLow")).FirstOrDefault();
+                            var rawHiNode = subNodes.Where(x => x.Name.Contains("RawHigh")).FirstOrDefault();
+                            var scaleLowNode = subNodes.Where(x => x.Name.Contains("ScaledLow")).FirstOrDefault();
+                            var scaleHiNode = subNodes.Where(x => x.Name.Contains("ScaledHigh")).FirstOrDefault();
+
+                            var units = MyPlc.OpcClient.Read<string>(unitsNode.Tag);
+                            var rawLo = MyPlc.OpcClient.Read<object>(rawLowNode.Tag);
+                            var rawHi = MyPlc.OpcClient.Read<object>(rawHiNode.Tag);
+                            var scaledLo = MyPlc.OpcClient.Read<object>(scaleLowNode.Tag);
+                            var scaleHi = MyPlc.OpcClient.Read<object>(scaleHiNode.Tag);
+
+                            paraRawMin.ParameterValue = rawLo.Value.ToString();
+                            paraRawMax.ParameterValue = rawHi.Value.ToString();
+
+                            paraScaleMin.ParameterValue = scaledLo.Value.ToString();
+                            paraScaleMax.ParameterValue = scaleHi.Value.ToString();
+
+                            paraUnit.ParameterValue = units.Value;
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
                 });
                 PopulateOpcTags();
             }
         }
 
+        private class ComboTag
+        {
+            public string Name { get; set; }
+            public string FullName { get; set; }
+        }
+        private List<ComboTag> Tags = new();
+
         private async void PopulateOpcTags()
         {
             try
             {
-                await MyPlc.OpcUaClient.Connect();
+                await MyPlc.OpcClient.Connect();
                 if (MyPlc.IsConnected)
                 {
                     //var tags = MyPlc.OpcUaClient.BrowseNodesOfNode(null, string.Empty);
                     //MyPlc.OpcUaClient.GetOpcTree(tags);
                     //var rootNodes = MyPlc.OpcUaClient.ExploreOpc("");
-                    var allNodes = MyPlc.OpcUaClient.ExploreOpc(MyPlc.PlcName);
-                    var folders = allNodes.Where(x => x.NodeClass == Opc.Ua.NodeClass.Object).ToList();
-                    var opcNodes = allNodes.Where(x => x.NodeClass == Opc.Ua.NodeClass.Variable).ToList();
-                    opcNodes = opcNodes.OrderBy(x => x.Tag).ToList();
-
-                    comboOpcTags.Items.Clear();
-                    foreach (var item in opcNodes)
+                    if (MyPlc.OpcType == OpcType.OpcUa)
                     {
-                        //ComboBoxItem boxItem = new()
-                        //{
-                        //    Content = item.Name,
-                        //};
-                        var tagName = item.Tag.Substring(MyPlc.PlcName.Length + 1, item.Tag.Length - MyPlc.PlcName.Length - 1);
-                        comboOpcTags.Items.Add(tagName);
-                    }
+                        var opcClient = MyPlc.OpcClient as UaClient;
+                        List<UaNode> allNodes = opcClient.ExploreOpc(MyPlc.PlcName).ToList();
+                        var folders = allNodes.Where(x => x.NodeClass == Opc.Ua.NodeClass.Object).ToList();
+                        var opcNodes = allNodes.Where(x => x.NodeClass == Opc.Ua.NodeClass.Variable).ToList();
+                        opcNodes = opcNodes.OrderBy(x => x.Tag).ToList();
 
-                    comboOpcTags.SelectedIndex = 0;
+                        comboOpcTags.Items.Clear();
+                        foreach (var item in opcNodes)
+                        {
+                            var tagName = item.Tag.Substring(MyPlc.PlcName.Length + 1, item.Tag.Length - MyPlc.PlcName.Length - 1);
+                            comboOpcTags.Items.Add(tagName);
+                            Tags.Add(new ComboTag() { Name = tagName, FullName = item.Tag });
+                        }
+
+                        comboOpcTags.SelectedIndex = 0;
+                    }
+                    else if (MyPlc.OpcType == OpcType.OpcDa)
+                    {
+                        var daClient = MyPlc.OpcClient as DaClient;
+                        List<DaNode> allNodes = daClient.ExploreOpc(MyPlc.PlcName).ToList();
+                        allNodes = allNodes.OrderBy(x => x.Tag).ToList();
+
+                        comboOpcTags.Items.Clear();
+                        foreach (var item in allNodes)
+                        {
+                            //ComboBoxItem boxItem = new()
+                            //{
+                            //    Content = item.Name,
+                            //};
+                            var tagName = item.Tag.Substring(MyPlc.PlcName.Length + 1, item.Tag.Length - MyPlc.PlcName.Length - 1);
+                            comboOpcTags.Items.Add(tagName);
+                        }
+
+                        comboOpcTags.SelectedIndex = 0;
+                    }
                 }
             }
             catch (Exception ex)
@@ -127,7 +201,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             finally
             {
-                MyPlc.OpcUaClient.Dispose();
+                MyPlc.OpcClient.Dispose();
             }
         }
 
@@ -178,6 +252,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             paraFreq.comboBoxen.SelectedItem = tag.LogFreq;
 
             paraUnit.ParameterValue = tag.TagUnit;
+
+            paraRawMin.ParameterValue = tag.rawMin.ToString();
+            paraRawMax.ParameterValue = tag.rawMax.ToString();
 
             paraScaleMin.ParameterValue = tag.scaleMin.ToString();
             paraScaleMax.ParameterValue = tag.scaleMax.ToString();
@@ -246,13 +323,38 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             else
                 errorProvider.SetError(paraBlockNr, "");
         }
+
+        private void paraRawMin_Validating(object sender, CancelEventArgs e)
+        {
+            errorProvider.SetIconAlignment(paraRawMin, ErrorIconAlignment.MiddleLeft);
+
+            if (string.IsNullOrEmpty(paraRawMin.ParameterValue))
+                errorProvider.SetError(paraRawMin, "Ange ett numeriskt värde");
+            else if (!float.TryParse(paraRawMin.ParameterValue, out float _))
+                errorProvider.SetError(paraRawMin, "Inte ett numeriskt positivt värde");
+            else
+                errorProvider.SetError(paraRawMin, "");
+        }
+
+        private void paraRawMax_Validating(object sender, CancelEventArgs e)
+        {
+            errorProvider.SetIconAlignment(paraRawMin, ErrorIconAlignment.MiddleLeft);
+
+            if (string.IsNullOrEmpty(paraRawMax.ParameterValue))
+                errorProvider.SetError(paraRawMax, "Ange ett numeriskt värde");
+            else if (!float.TryParse(paraRawMax.ParameterValue, out float _))
+                errorProvider.SetError(paraRawMax, "Inte ett numeriskt positivt värde");
+            else
+                errorProvider.SetError(paraRawMax, "");
+        }
+
         private void txtScaleMin_Validating(object sender, CancelEventArgs e)
         {
             errorProvider.SetIconAlignment(paraScaleMin, ErrorIconAlignment.MiddleLeft);
 
             if (string.IsNullOrEmpty(paraScaleMin.ParameterValue))
                 errorProvider.SetError(paraScaleMin, "Ange ett numeriskt värde");
-            else if (!uint.TryParse(paraScaleMin.ParameterValue, out uint _))
+            else if (!float.TryParse(paraScaleMin.ParameterValue, out float _))
                 errorProvider.SetError(paraScaleMin, "Inte ett numeriskt positivt värde");
             else
                 errorProvider.SetError(paraScaleMin, "");
@@ -263,7 +365,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             if (string.IsNullOrEmpty(paraScaleMax.ParameterValue))
                 errorProvider.SetError(paraScaleMax, "Ange ett numeriskt värde");
-            else if (!uint.TryParse(paraScaleMax.ParameterValue, out uint _))
+            else if (!float.TryParse(paraScaleMax.ParameterValue, out float _))
                 errorProvider.SetError(paraScaleMax, "Inte ett numeriskt positivt värde");
             else
                 errorProvider.SetError(paraScaleMax, "");
@@ -274,7 +376,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             if (string.IsNullOrEmpty(paraScaleOffset.ParameterValue))
                 errorProvider.SetError(paraScaleOffset, "Ange ett numeriskt värde");
-            else if (!uint.TryParse(paraScaleOffset.ParameterValue, out uint _))
+            else if (!float.TryParse(paraScaleOffset.ParameterValue, out float _))
                 errorProvider.SetError(paraScaleOffset, "Inte ett numeriskt positivt värde");
             else
                 errorProvider.SetError(paraScaleOffset, "");
@@ -333,6 +435,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var okLogFreq = false;
             var okUnit = false;
             var tempString = string.Empty;
+
+            var okRawMin = false;
+            var okRawMax = false;
+
             var okScaleMin = false;
             var okScaleMax = false;
             var okScaleOffset = false;
@@ -343,13 +449,19 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (MyPlc.isOpc && okName)
                 return true;
 
-            if (int.TryParse(paraScaleMin.ParameterValue, out int _))
+            if (float.TryParse(paraRawMin.ParameterValue, out float _))
+                okRawMin = true;
+
+            if (float.TryParse(paraRawMax.ParameterValue, out float _))
+                okRawMax = true;
+
+            if (float.TryParse(paraScaleMin.ParameterValue, out float _))
                 okScaleMin = true;
 
-            if (int.TryParse(paraScaleMax.ParameterValue, out int _))
+            if (float.TryParse(paraScaleMax.ParameterValue, out float _))
                 okScaleMax = true;
 
-            if (int.TryParse(paraScaleOffset.ParameterValue, out int _))
+            if (float.TryParse(paraScaleOffset.ParameterValue, out float _))
                 okScaleOffset = true;
 
             if (paraUnit.ParameterValue.Length <= 30)
@@ -398,7 +510,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             if (okName && okTimeOfDay && okDeadBand && okVarType && okBlockNr
                 && okDataType && okStartByte && okNrOfElements && okBitAddress &&
-                okLogFreq && okLogType && okUnit && okScaleMin && okScaleMax && okScaleOffset)
+                okLogFreq && okLogType && okUnit && okScaleMin && okScaleMax && okScaleOffset
+                && okRawMin && okRawMax)
             {
                 return true;
             }
@@ -485,12 +598,12 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             var query = $"INSERT INTO {Settings.Databas}.dbo.tagConfig ";
             query += $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
-            query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
+            query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset,rawMin,rawMax) ";
             query += $"VALUES ('{checkActive.Checked}','{paraName.ParameterValue}','{paraDescription.ParameterValue}','{paraLogType.comboBoxen.SelectedItem}','{paraLogTime.ParameterValue}',";
             query += $"{deadband},'{PlcName}','{varType}',{blockNr}, ";
             query += $"'{paraDataType.comboBoxen.SelectedItem}',{startAddress},{nrOfValues},";
             query += $"{bitAddress},'{paraFreq.comboBoxen.SelectedItem}','{paraUnit.ParameterValue}',{tagEventId},'{isBoolTrigger}','";
-            query += $"{boolTrigger}','{analogTrigger}',{analogValue},{paraScaleMin.ParameterValue},{paraScaleMax.ParameterValue},{paraScaleOffset.ParameterValue})";
+            query += $"{boolTrigger}','{analogTrigger}',{analogValue},{paraScaleMin.ParameterValue},{paraScaleMax.ParameterValue},{paraScaleOffset.ParameterValue},{paraRawMin.ParameterValue},{paraRawMax.ParameterValue})";
 
             DatabaseSql.AddTag(query);
 
@@ -521,10 +634,12 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var _boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), (tbl.AsEnumerable().ElementAt(0).Field<string>("boolTrigger")));
             var _analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), (tbl.AsEnumerable().ElementAt(0).Field<string>("analogTrigger")));
             var _analogValue = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("analogValue"));
-            var _scaleMin = (tbl.AsEnumerable().ElementAt(0).Field<int>("scaleMin"));
-            var _scaleMax = (tbl.AsEnumerable().ElementAt(0).Field<int>("scaleMax"));
-            var _scaleOffset = (tbl.AsEnumerable().ElementAt(0).Field<int>("scaleOffset"));
+            var _scaleMin = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("scaleMin"));
+            var _scaleMax = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("scaleMax"));
+            var _scaleOffset = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("scaleOffset"));
 
+            var _rawMin = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("rawMin"));
+            var _rawMax = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("rawMax"));
 
 
             tag = new TagDefinitions()
@@ -551,6 +666,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 scaleMin = _scaleMin,
                 scaleMax = _scaleMax,
                 scaleOffset = _scaleOffset,
+                rawMin = _rawMin,
+                rawMax = _rawMax
             };
             btnNew.BackColor = greenColor;
             btnNew.Image = Properties.Resources.add_new_64px_Gray;
@@ -575,7 +692,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 $",bitAddress={bitAddress},logFreq='{paraFreq.comboBoxen.SelectedItem}',";
             query += $"tagUnit='{paraUnit.ParameterValue}',eventId={tag.EventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
                 $",boolTrigger='{tag.BoolTrigger}',analogTrigger='{tag.AnalogTrigger}',analogValue={tag.AnalogValue}, " +
-                $"scaleMin={paraScaleMin.ParameterValue},scaleMax={paraScaleMax.ParameterValue},scaleOffset={paraScaleOffset.ParameterValue}" +
+                $"scaleMin={paraScaleMin.ParameterValue},scaleMax={paraScaleMax.ParameterValue},rawMin={paraRawMin.ParameterValue},rawMax={paraRawMax.ParameterValue},scaleOffset={paraScaleOffset.ParameterValue}" +
                 $" WHERE id = {tag.Id}";
 
             bool success = DatabaseSql.UpdateTag(query);
@@ -611,9 +728,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             tbl.Columns.Add("boolTrigger", typeof(string));
             tbl.Columns.Add("analogTrigger", typeof(string));
             tbl.Columns.Add("analogValue", typeof(float));
-            tbl.Columns.Add("scaleMin", typeof(int));
-            tbl.Columns.Add("scaleMax", typeof(int));
-            tbl.Columns.Add("scaleOffset", typeof(int));
+            tbl.Columns.Add("rawMin", typeof(float));
+            tbl.Columns.Add("rawMax", typeof(float));
+            tbl.Columns.Add("scaleMin", typeof(float));
+            tbl.Columns.Add("scaleMax", typeof(float));
+            tbl.Columns.Add("scaleOffset", typeof(float));
 
             if (!MyPlc.isOpc)
             {
@@ -622,8 +741,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                PlcName, paraVarType.comboBoxen.SelectedItem.ToString(), int.Parse(paraBlockNr.ParameterValue),
                paraDataType.comboBoxen.SelectedItem.ToString(), int.Parse(paraStartAddress.ParameterValue),
                int.Parse(paraNrOfValues.ParameterValue), byte.Parse(paraBitAddress.ParameterValue),
-               paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue, int.Parse(paraScaleMin.ParameterValue),
-               int.Parse(paraScaleMax.ParameterValue), int.Parse(paraScaleOffset.ParameterValue));
+               paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue,
+               float.Parse(paraRawMin.ToString()), float.Parse(paraRawMax.ToString()), float.Parse(paraScaleMin.ParameterValue),
+               float.Parse(paraScaleMax.ParameterValue), float.Parse(paraScaleOffset.ParameterValue));
                 return tbl;
             }
             else
@@ -633,8 +753,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                PlcName, "", 0,
                "", 0,
                1, byte.Parse(paraBitAddress.ParameterValue),
-               paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue, int.Parse(paraScaleMin.ParameterValue),
-               int.Parse(paraScaleMax.ParameterValue), int.Parse(paraScaleOffset.ParameterValue));
+               paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue
+               , float.Parse(paraRawMin.ParameterValue), float.Parse(paraRawMax.ParameterValue), float.Parse(paraScaleMin.ParameterValue),
+               float.Parse(paraScaleMax.ParameterValue), float.Parse(paraScaleOffset.ParameterValue));
                 return tbl;
             }
 

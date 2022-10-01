@@ -133,8 +133,8 @@ namespace OptimaValue
                         if (!plc.isOpc)
                             plc.Open();
                         else
-                            await plc.OpcUaClient.Connect();
-                        if ((plc.isOpc && plc.OpcUaClient.Status == OpcStatus.NotConnected) || (!plc.isOpc && !plc.IsConnected))
+                            await plc.OpcClient.Connect();
+                        if ((plc.isOpc && plc.OpcClient.Status == OpcStatus.NotConnected) || (!plc.isOpc && !plc.IsConnected))
                         {
                             Apps.Logger.Log($"Får ej kontakt med {plc.PlcName}", Severity.Error);
                             RequestDisconnect();
@@ -182,9 +182,9 @@ namespace OptimaValue
                                 {
                                     if (MyPlc.isOpc)
                                     {
-                                        MyPlc.OpcUaClient = new UaClient(new Uri(MyPlc.ConnectionString));
-                                        await MyPlc.OpcUaClient.Connect();
-                                        if (MyPlc.OpcUaClient.Status == OpcStatus.Connected)
+                                        MyPlc.OpcClient = new UaClient(new Uri(MyPlc.ConnectionString));
+                                        await MyPlc.OpcClient.Connect();
+                                        if (MyPlc.OpcClient.Status == OpcStatus.Connected)
                                         {
                                             MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Ok);
                                             Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Information);
@@ -238,8 +238,10 @@ namespace OptimaValue
                     if (MyPlc.IsConnected && MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.Active)
                     {
                         foreach (TagDefinitions logValue in TagsToLog.AllLogValues)
+                        {
                             if (logValue.PlcName.Equals(MyPlc.PlcName))
                                 ReadValue(MyPlc, logValue);
+                        }
 
                     }
                     if (startClosing)
@@ -350,7 +352,7 @@ namespace OptimaValue
                     if ((tiden - logTag.LastLogTime) >= TimeSpan.FromMilliseconds((int)logTag.LogFreq - logdiff)) // Minskar med 2 millisekunder vid snabb loggning för att få en mer exakt loggning
                     {
                         object unknownTag = new object();
-                        string opcTagType = "";
+                        //string opcTagType = "";
                         string opcTagName = "";
 
                         try
@@ -358,7 +360,7 @@ namespace OptimaValue
                             if (MyPlc.isOpc)
                             {
                                 opcTagName = logTag.PlcName + "." + logTag.Name;
-                                opcTagType = MyPlc.OpcUaClient.GetDataType(opcTagName).ToString();
+                                //opcTagType = MyPlc.OpcClient.GetDataType(opcTagName).ToString();
                             }
                             if (MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.IsConnected)
                             {
@@ -380,7 +382,7 @@ namespace OptimaValue
                                     }
                                     else
                                     {
-                                        unknownTag = MyPlc.OpcUaClient.Read<string>(opcTagName);
+                                        unknownTag = MyPlc.OpcClient.Read<object>(opcTagName);
                                     }
                                 }
                                 else if (logTag.VarType == VarType.DateTime)
@@ -392,7 +394,7 @@ namespace OptimaValue
                                     }
                                     else
                                     {
-                                        unknownTag = MyPlc.OpcUaClient.Read<DateTime>(opcTagName);
+                                        unknownTag = MyPlc.OpcClient.Read<object>(opcTagName);
                                     }
 
                                 }
@@ -405,7 +407,7 @@ namespace OptimaValue
                                     unknownTag = MyPlc.Read(logTag.DataType, logTag.BlockNr, logTag.StartByte, (S7.Net.VarType)logTag.VarType, logTag.NrOfElements, logTag.BitAddress);
                                 else if (MyPlc.isOpc)
                                 {
-                                    unknownTag = MyPlc.OpcUaClient.Read<object>(opcTagName);
+                                    unknownTag = MyPlc.OpcClient.Read<object>(opcTagName);
                                 }
                                 logTag.LastLogTime = tiden;
                                 logTag.NrSuccededReadAttempts++;
@@ -683,7 +685,7 @@ namespace OptimaValue
                                                             }
                                                             else
                                                             {
-                                                                var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                 AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                             }
                                                         }
@@ -698,7 +700,7 @@ namespace OptimaValue
                                                             }
                                                             else
                                                             {
-                                                                var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                 AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                             }
                                                         }
@@ -713,7 +715,7 @@ namespace OptimaValue
                                                             }
                                                             else
                                                             {
-                                                                var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                 AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                             }
                                                         }
@@ -741,7 +743,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -756,7 +758,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -771,7 +773,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -786,7 +788,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -801,7 +803,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -816,7 +818,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -850,7 +852,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -865,7 +867,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -880,7 +882,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -895,7 +897,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -910,7 +912,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -925,7 +927,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -959,7 +961,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -974,7 +976,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -989,7 +991,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1004,7 +1006,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1019,7 +1021,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1034,7 +1036,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1068,7 +1070,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1083,7 +1085,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1098,7 +1100,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1113,7 +1115,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1128,7 +1130,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1143,7 +1145,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1177,7 +1179,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1192,7 +1194,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1207,7 +1209,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1222,7 +1224,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1237,7 +1239,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1252,7 +1254,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1286,7 +1288,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1301,7 +1303,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1316,7 +1318,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1331,7 +1333,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1346,7 +1348,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }
@@ -1361,7 +1363,7 @@ namespace OptimaValue
                                                                     }
                                                                     else
                                                                     {
-                                                                        var subbedLog = MyPlc.OpcUaClient.Read<object>(subbedTag.OpcTagName);
+                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
                                                                         AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                     }
                                                                 }

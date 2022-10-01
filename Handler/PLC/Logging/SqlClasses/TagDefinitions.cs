@@ -45,13 +45,17 @@ namespace OptimaValue
         public string TagUnit { get; set; } = string.Empty;
 
         #region Skalering
+        [Name("rawMin")]
+        public float rawMin { get; set; }
+        [Name("rawMax")]
+        public float rawMax { get; set; }
 
         [Name("scaleMin")]
-        public int scaleMin { get; set; }
+        public float scaleMin { get; set; }
         [Name("scaleMax")]
-        public int scaleMax { get; set; }
+        public float scaleMax { get; set; }
         [Name("scaleOffset")]
-        public int scaleOffset { get; set; }
+        public float scaleOffset { get; set; }
 
         #endregion
 

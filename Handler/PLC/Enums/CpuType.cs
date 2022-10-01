@@ -37,8 +37,12 @@ namespace OptimaValue
         //     S7 1500 cpu type
         S71500 = 40,
         //
-        // OPC
+        // OPC UA
         //
-        OPC = 50
+        OpcUa = 50,
+        //
+        // OPC DA
+        //
+        OpcDa = 600,
     }
 }

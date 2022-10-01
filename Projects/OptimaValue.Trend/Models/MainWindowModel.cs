@@ -32,9 +32,9 @@ namespace OptimaValue.Trend
                         id = x.GetInt32(0),
                         name = x.GetString(1),
                         description = x.IsDBNull(2) ? string.Empty : x.GetString(2),
-                        scaleMin = x.IsDBNull(3) ? 0 : x.GetInt32(3),
-                        scaleMax = x.IsDBNull(4) ? 0 : x.GetInt32(4),
-                        scaleOffset = x.IsDBNull(5) ? 0 : x.GetInt32(5),
+                        scaleMin = (float)(x.IsDBNull(3) ? 0 : x.GetDouble(3)),
+                        scaleMax = (float)(x.IsDBNull(4) ? 0 : x.GetDouble(4)),
+                        scaleOffset = (float)(x.IsDBNull(5) ? 0 : x.GetDouble(5)),
                     })
                     .ToList();
 

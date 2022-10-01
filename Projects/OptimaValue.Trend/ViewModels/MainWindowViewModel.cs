@@ -535,7 +535,7 @@ namespace OptimaValue.Trend
         public Func<double, string> FormatterY;
 
 
-        public void FormatSeries(int id = int.MinValue, int offset = 0)
+        public void FormatSeries(int id = int.MinValue, float offset = 0)
         {
             if (Lines.Count == 0)
             {
@@ -546,7 +546,7 @@ namespace OptimaValue.Trend
             }
             foreach (var line in Lines)
             {
-                int offSet = 0;
+                float offSet = 0;
                 if (id == line.Tag.id)
                 {
                     offSet = offset;

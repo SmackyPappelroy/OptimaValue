@@ -221,9 +221,13 @@ namespace OptimaValue
                 var _boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("boolTrigger")));
                 var _analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("analogTrigger")));
                 var _analogValue = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("analogValue"));
-                var _scaleMin = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("scaleMin"));
-                var _scaleMax = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("scaleMax"));
-                var _scaleOffset = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("scaleOffset"));
+
+                var _rawMin = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("rawMin"));
+                var _rawMax = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("rawMax"));
+
+                var _scaleMin = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("scaleMin"));
+                var _scaleMax = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("scaleMax"));
+                var _scaleOffset = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("scaleOffset"));
 
                 var myTag = new TagDefinitions()
                 {
@@ -249,6 +253,8 @@ namespace OptimaValue
                     BoolTrigger = _boolTrigger,
                     AnalogTrigger = _analogTrigger,
                     AnalogValue = _analogValue,
+                    rawMin = _rawMin,
+                    rawMax = _rawMax,
                     scaleMin = _scaleMin,
                     scaleMax = _scaleMax,
                     scaleOffset = _scaleOffset,

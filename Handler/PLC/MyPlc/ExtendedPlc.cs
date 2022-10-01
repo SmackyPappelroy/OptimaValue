@@ -1,4 +1,5 @@
-﻿using OpcUaHm.Common;
+﻿using OpcUa.DA;
+using OpcUaHm.Common;
 using S7.Net;
 using System;
 using System.Drawing;
@@ -6,6 +7,12 @@ using System.Linq;
 
 namespace OptimaValue
 {
+    public enum OpcType
+    {
+        None,
+        OpcUa,
+        OpcDa,
+    }
 
     public class ExtendedPlc : Plc
     {
@@ -36,7 +43,11 @@ namespace OptimaValue
         {
             ConnectionString = connectionString;
             CpuType = cpu;
-            OpcUaClient = new UaClient(new Uri(connectionString));
+            if (CpuType == CpuType.OpcUa)
+                OpcClient = new UaClient(new Uri(connectionString));
+            else if (CpuType == CpuType.OpcDa)
+                OpcClient = new DaClient(connectionString);
+
             SubscribeEvents(true, isOpc);
             timerPing.Interval = 30 * 1000;
             onlineTimer.Tick += OnlineTimer_Tick;
@@ -70,15 +81,28 @@ namespace OptimaValue
         #endregion
 
         #region Properties
-        public UaClient OpcUaClient { get; set; }
+        public IClient<Node> OpcClient { get; set; }
         public string ConnectionString { get; }
         private CpuType CpuType;
         private DateTime UpTimeStart = DateTime.MaxValue;
         private readonly System.Timers.Timer timerPing = new System.Timers.Timer();
         private bool isSubscribed = false;
-        public bool isOpc => CpuType == CpuType.OPC;
-        public new bool IsConnected => isOpc ? OpcUaClient.Status == OpcStatus.Connected : base.IsConnected;
-        public string OpcBaseFolder => IsConnected && isOpc ? OpcUaClient.RootNode.Name : "";
+        public bool isOpc => CpuType == CpuType.OpcUa || CpuType == CpuType.OpcDa;
+        public OpcType OpcType
+        {
+            get
+            {
+                if (CpuType == CpuType.OpcUa)
+                    return OpcType.OpcUa;
+                else if (CpuType == CpuType.OpcDa)
+                    return OpcType.OpcDa;
+                else
+                    return OpcType.None;
+            }
+        }
+
+        public new bool IsConnected => isOpc ? OpcClient.Status == OpcStatus.Connected : base.IsConnected;
+        public string OpcBaseFolder => IsConnected && isOpc ? OpcClient.RootNode.Name : "";
 
 
         #endregion
@@ -204,11 +228,16 @@ namespace OptimaValue
             {
                 if (!isOpc)
                     timerPing.Elapsed += TimerPing_Tick;
-                else
+                else if (OpcClient is UaClient uaClient)
                 {
-                    OpcUaClient.ServerConnectionLost += OpcClient_ServerConnectionLost;
-                    OpcUaClient.ServerConnectionRestored += OpcClient_ServerConnectionRestored;
+                    uaClient.ServerConnectionLost += OpcClient_ServerConnectionLost;
+                    uaClient.ServerConnectionRestored += OpcClient_ServerConnectionRestored;
                 }
+                else if (OpcClient is DaClient daClient)
+                {
+                    ConnectionStatus = daClient.Status == OpcStatus.NotConnected ? ConnectionStatus.Disconnected : ConnectionStatus.Connected;
+                }
+
                 PlcStatusEvent.NewMessage += PlcStatusEvent_NewMessage;
                 OnlineStatusEvent.NewMessage += OnlineStatusEvent_NewMessage;
                 isSubscribed = true;
@@ -217,10 +246,14 @@ namespace OptimaValue
             {
                 if (isOpc)
                     timerPing.Elapsed -= TimerPing_Tick;
-                else
+                else if (OpcClient is UaClient uaClient)
                 {
-                    OpcUaClient.ServerConnectionLost -= OpcClient_ServerConnectionLost;
-                    OpcUaClient.ServerConnectionRestored -= OpcClient_ServerConnectionRestored;
+                    uaClient.ServerConnectionLost -= OpcClient_ServerConnectionLost;
+                    uaClient.ServerConnectionRestored -= OpcClient_ServerConnectionRestored;
+                }
+                else if (OpcClient is DaClient daClient)
+                {
+                    ConnectionStatus = daClient.Status == OpcStatus.NotConnected ? ConnectionStatus.Disconnected : ConnectionStatus.Connected;
                 }
                 PlcStatusEvent.NewMessage -= PlcStatusEvent_NewMessage;
                 OnlineStatusEvent.NewMessage -= OnlineStatusEvent_NewMessage;
@@ -272,6 +305,8 @@ namespace OptimaValue
             }
         }
     }
+
+
 
     #endregion
 

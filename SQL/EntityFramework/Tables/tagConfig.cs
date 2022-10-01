@@ -78,14 +78,20 @@ namespace OptimaValue
         [Column(TypeName = "float")]
         public float analogValue { get; set; }
 
-        [Column(TypeName = "int")]
-        public int scaleMin { get; set; }
+        [Column(TypeName = "float")]
+        public float scaleMin { get; set; }
+
+        [Column(TypeName = "float")]
+        public float scaleMax { get; set; }
+
+        [Column(TypeName = "float")]
+        public float rawMin { get; set; }
+
+        [Column(TypeName = "float")]
+        public float rawMax { get; set; }
 
         [Column(TypeName = "int")]
-        public int scaleMax { get; set; }
-
-        [Column(TypeName = "int")]
-        public int scaleOffset { get; set; }
+        public float scaleOffset { get; set; }
 
 
 

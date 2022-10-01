@@ -68,7 +68,7 @@ namespace OptimaValue
                 var _syncBoolAddress = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("syncBoolAddress"));
                 var _lastSyncTime = (tbl.AsEnumerable().ElementAt(rowIndex).Field<DateTime>("lastSyncTime"));
 
-                if (_cpu != CpuType.OPC)
+                if (_cpu != CpuType.OpcUa && _cpu != CpuType.OpcDa)
                 {
                     var myPlc = new ExtendedPlc((S7.Net.CpuType)_cpu, _ip, _rack, _slot)
                     {

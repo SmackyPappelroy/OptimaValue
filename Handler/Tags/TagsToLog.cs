@@ -69,9 +69,11 @@ namespace OptimaValue
                              BoolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), dr["boolTrigger"].ToString()),
                              AnalogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), dr["analogTrigger"].ToString()),
                              AnalogValue = (float)((double)dr["analogValue"]),
-                             scaleMin = (int)dr["scaleMin"],
-                             scaleMax = (int)dr["scaleMax"],
-                             scaleOffset = (int)dr["scaleOffset"],
+                             rawMin = (float)((double)dr["rawMin"]),
+                             rawMax = (float)((double)dr["rawMax"]),
+                             scaleMin = (float)((double)dr["scaleMin"]),
+                             scaleMax = (float)((double)dr["scaleMax"]),
+                             scaleOffset = (float)((double)dr["scaleOffset"]),
                          }).ToList();
 
             // Sorterar listan alfabetiskt
