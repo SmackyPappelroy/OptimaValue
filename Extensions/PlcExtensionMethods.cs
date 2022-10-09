@@ -11,43 +11,7 @@ namespace OptimaValue
     public static class OptimaExtensions
     {
 
-        /// <summary>
-        /// Returns True if pingable<para></para>Timeout of 2 seconds <para></para>
-        /// Throws a <see cref="NullReferenceException"/> if <paramref name="plc"/> is null<para></para>
-        /// Throws a <see cref="PingException"/> if not valid IP address format
-        /// </summary>
-        /// <returns></returns>
-        public static bool Ping(this Plc plc)
-        {
-            if (plc == null)
-                throw new NullReferenceException("Plc kan ej vara null");
-            if (!plc.IP.CheckValidIpAddress())
-                throw new PingException("Inte giltig IP-adress");
-            Ping pinger = null;
-            var Pingable = false;
-            try
-            {
-                pinger = new Ping();
-                PingReply reply = pinger.Send(plc.IP, 2000); // Timeout-tid 2 sekunder
-                Pingable = reply.Status == IPStatus.Success;
 
-                if (!Pingable)
-                {
-                    return false;
-                }
-            }
-            catch (PingException)
-            {
-                if (!Pingable)
-                    return false;
-            }
-            finally
-            {
-                if (pinger != null)
-                    pinger.Dispose();
-            }
-            return Pingable;
-        }
 
         /// <summary>
         /// Returns True if valid <see cref="CpuType"/>

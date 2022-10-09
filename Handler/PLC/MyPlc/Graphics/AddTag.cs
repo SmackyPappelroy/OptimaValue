@@ -19,10 +19,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
     public partial class AddPlcFromFile : Form
     {
+        private ExtendedPlc MyPlc;
         private readonly string PlcName = string.Empty;
         private TagDefinitions tag;
         public event EventHandler TagChanged;
-        private readonly ExtendedPlc MyPlc;
+        private readonly ExtendedPlc opcPlc;
         private EventForm eventForm;
         private bool eventFormOpen = false;
         private bool startup = true;
@@ -94,16 +95,17 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     {
                         paraName.ParameterValue = comboOpcTags.Text;
 
+                        var opcPlc = MyPlc.Plc as OpcPlc;
                         try
                         {
-                            MyPlc.OpcClient.Connect();
+                            MyPlc.Plc.Connect();
                             var tag = Tags.Where(x => x.Name == comboOpcTags.Text).FirstOrDefault();
-                            var subNodes = MyPlc.OpcClient.ExploreOpc(tag.FullName, false, true);
+                            var subNodes = opcPlc.Client.ExploreOpc(tag.FullName, false, true);
 
                             try
                             {
                                 var descriptionNode = subNodes.Where(x => x.Name.Contains("escription")).FirstOrDefault();
-                                var description = MyPlc.OpcClient.Read<string>(descriptionNode.Tag);
+                                ReadEvent<string> description = (ReadEvent<string>)MyPlc.Plc.Read(descriptionNode.Tag);
                                 paraDescription.ParameterValue = description.Value;
                             }
                             catch (Exception) { }
@@ -115,11 +117,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                             var scaleLowNode = subNodes.Where(x => x.Name.Contains("ScaledLow")).FirstOrDefault();
                             var scaleHiNode = subNodes.Where(x => x.Name.Contains("ScaledHigh")).FirstOrDefault();
 
-                            var units = MyPlc.OpcClient.Read<string>(unitsNode.Tag);
-                            var rawLo = MyPlc.OpcClient.Read<object>(rawLowNode.Tag);
-                            var rawHi = MyPlc.OpcClient.Read<object>(rawHiNode.Tag);
-                            var scaledLo = MyPlc.OpcClient.Read<object>(scaleLowNode.Tag);
-                            var scaleHi = MyPlc.OpcClient.Read<object>(scaleHiNode.Tag);
+                            ReadEvent<string> units = (ReadEvent<string>)MyPlc.Plc.Read(unitsNode.Tag);
+                            ReadEvent<object> rawLo = (ReadEvent<object>)MyPlc.Plc.Read(rawLowNode.Tag);
+                            ReadEvent<object> rawHi = (ReadEvent<object>)MyPlc.Plc.Read(rawHiNode.Tag);
+                            ReadEvent<object> scaledLo = (ReadEvent<object>)MyPlc.Plc.Read(scaleLowNode.Tag);
+                            ReadEvent<object> scaleHi = (ReadEvent<object>)MyPlc.Plc.Read(scaleHiNode.Tag);
 
                             paraRawMin.ParameterValue = rawLo.Value.ToString();
                             paraRawMax.ParameterValue = rawHi.Value.ToString();
@@ -150,16 +152,17 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             try
             {
-                await MyPlc.OpcClient.Connect();
+                await MyPlc.Plc.ConnectAsync();
                 if (MyPlc.IsConnected)
                 {
                     //var tags = MyPlc.OpcUaClient.BrowseNodesOfNode(null, string.Empty);
                     //MyPlc.OpcUaClient.GetOpcTree(tags);
                     //var rootNodes = MyPlc.OpcUaClient.ExploreOpc("");
-                    if (MyPlc.OpcType == OpcType.OpcUa)
+                    if (MyPlc.CpuType == CpuType.OpcUa)
                     {
-                        var opcClient = MyPlc.OpcClient as UaClient;
-                        List<UaNode> allNodes = opcClient.ExploreOpc(MyPlc.PlcName).ToList();
+                        var opcPlc = MyPlc.Plc as OpcPlc;
+                        var client = opcPlc.Client as UaClient;
+                        List<UaNode> allNodes = client.ExploreOpc(MyPlc.PlcName).ToList();
                         var folders = allNodes.Where(x => x.NodeClass == Opc.Ua.NodeClass.Object).ToList();
                         var opcNodes = allNodes.Where(x => x.NodeClass == Opc.Ua.NodeClass.Variable).ToList();
                         opcNodes = opcNodes.OrderBy(x => x.Tag).ToList();
@@ -174,9 +177,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
                         comboOpcTags.SelectedIndex = 0;
                     }
-                    else if (MyPlc.OpcType == OpcType.OpcDa)
+                    else if (MyPlc.CpuType == CpuType.OpcDa)
                     {
-                        var daClient = MyPlc.OpcClient as DaClient;
+                        var opcPlc = MyPlc.Plc as OpcPlc;
+                        var daClient = opcPlc.Client as DaClient;
                         List<DaNode> allNodes = daClient.ExploreOpc(MyPlc.PlcName).ToList();
                         allNodes = allNodes.OrderBy(x => x.Tag).ToList();
 
@@ -201,7 +205,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             finally
             {
-                MyPlc.OpcClient.Dispose();
+                MyPlc.Plc.Dispose();
             }
         }
 

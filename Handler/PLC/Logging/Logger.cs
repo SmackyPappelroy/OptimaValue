@@ -130,11 +130,8 @@ namespace OptimaValue
                 {
                     if (plc.Active)
                     {
-                        if (!plc.isOpc)
-                            plc.Open();
-                        else
-                            await plc.OpcClient.Connect();
-                        if ((plc.isOpc && plc.OpcClient.Status == OpcStatus.NotConnected) || (!plc.isOpc && !plc.IsConnected))
+                        await plc.Plc.ConnectAsync();
+                        if (!plc.Plc.IsConnected)
                         {
                             Apps.Logger.Log($"Får ej kontakt med {plc.PlcName}", Severity.Error);
                             RequestDisconnect();
@@ -182,48 +179,47 @@ namespace OptimaValue
                                 {
                                     if (MyPlc.isOpc)
                                     {
-                                        MyPlc.OpcClient = new UaClient(new Uri(MyPlc.ConnectionString));
-                                        await MyPlc.OpcClient.Connect();
-                                        if (MyPlc.OpcClient.Status == OpcStatus.Connected)
-                                        {
-                                            MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Ok);
-                                            Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Information);
-                                            MyPlc.ConnectionStatus = ConnectionStatus.Connected;
-                                        }
-                                        else
-                                        {
-                                            MyPlc.SendPlcStatusMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Error);
-                                            Apps.Logger.Log($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Error);
-                                        }
-                                    }
-                                    else if (MyPlc.Ping())
-                                    {
-                                        MyPlc.Close();
-                                        MyPlc.Open();
+                                        await MyPlc.Plc.ConnectAsync();
                                         if (MyPlc.IsConnected)
                                         {
-                                            MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Ok);
-                                            Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Information);
+                                            MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Status.Ok);
+                                            Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Severity.Information);
                                             MyPlc.ConnectionStatus = ConnectionStatus.Connected;
                                         }
                                         else
                                         {
-                                            MyPlc.SendPlcStatusMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Error);
-                                            Apps.Logger.Log($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Error);
+                                            MyPlc.SendPlcStatusMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Status.Error);
+                                            Apps.Logger.Log($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Severity.Error);
+                                        }
+                                    }
+                                    else if (MyPlc.Plc.Ping())
+                                    {
+                                        MyPlc.Plc.Disconnect();
+                                        MyPlc.Plc.Connect();
+                                        if (MyPlc.IsConnected)
+                                        {
+                                            MyPlc.SendPlcStatusMessage($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Status.Ok);
+                                            Apps.Logger.Log($"Lyckades återansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Severity.Information);
+                                            MyPlc.ConnectionStatus = ConnectionStatus.Connected;
+                                        }
+                                        else
+                                        {
+                                            MyPlc.SendPlcStatusMessage($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Status.Error);
+                                            Apps.Logger.Log($"Misslyckades att återansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Severity.Error);
                                         }
                                     }
                                     else
                                     {
-                                        MyPlc.SendPlcStatusMessage($"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Error);
-                                        Apps.Logger.Log($"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Error);
+                                        MyPlc.SendPlcStatusMessage($"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Status.Error);
+                                        Apps.Logger.Log($"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Severity.Error);
                                     }
 
                                     MyPlc.LastReconnect = tiden;
                                 }
                                 catch (Exception ex)
                                 {
-                                    MyPlc.SendPlcStatusMessage($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Status.Error);
-                                    Apps.Logger.Log($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.IP}", Severity.Error, ex);
+                                    MyPlc.SendPlcStatusMessage($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Status.Error);
+                                    Apps.Logger.Log($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Severity.Error, ex);
                                     MyPlc.LastReconnect = tiden;
                                 }
                             }
@@ -265,9 +261,11 @@ namespace OptimaValue
         private static void SyncPlc(ExtendedPlc MyPlc, DateTime tid)
         {
             var tid1 = TimeZoneInfo.ConvertTimeFromUtc(tid, TimeZoneInfo.Local);
+            var plcTag = new PlcTag(DataType.DataBlock, MyPlc.SyncTimeDbNr, MyPlc.SyncTimeOffset);
+
             try
             {
-                switch ((CpuType)MyPlc.CPU)
+                switch ((CpuType)MyPlc.CpuType)
                 {
                     case CpuType.S7200:
                         break;
@@ -276,20 +274,20 @@ namespace OptimaValue
                     case CpuType.S7300:
                         // Write Time
                         var tidBytes = S7.Net.Types.DateTime.ToByteArray(tid1);
-                        MyPlc.WriteBytes(DataType.DataBlock, MyPlc.SyncTimeDbNr, MyPlc.SyncTimeOffset, tidBytes);
-                        MyPlc.Write(MyPlc.SyncBoolAddress, 1);
+                        MyPlc.Plc.WriteBytes(plcTag, tidBytes);
+                        MyPlc.Plc.Write(MyPlc.SyncBoolAddress, 1);
                         break;
                     case CpuType.S7400:
                         var tidByte = S7.Net.Types.DateTime.ToByteArray(tid1);
-                        MyPlc.WriteBytes(DataType.DataBlock, MyPlc.SyncTimeDbNr, MyPlc.SyncTimeOffset, tidByte);
-                        MyPlc.Write(MyPlc.SyncBoolAddress, 1);
+                        MyPlc.Plc.WriteBytes(plcTag, tidByte);
+                        MyPlc.Plc.Write(MyPlc.SyncBoolAddress, 1);
                         break;
                     case CpuType.S71200:
                         break;
                     case CpuType.S71500:
                         var tidByt = S7.Net.Types.DateTimeLong.ToByteArray(tid1);
-                        MyPlc.WriteBytes(DataType.DataBlock, MyPlc.SyncTimeDbNr, MyPlc.SyncTimeOffset, tidByt);
-                        MyPlc.Write(MyPlc.SyncBoolAddress, 1);
+                        MyPlc.Plc.WriteBytes(plcTag, tidByt);
+                        MyPlc.Plc.Write(MyPlc.SyncBoolAddress, 1);
                         break;
                     default:
                         break;
@@ -313,7 +311,7 @@ namespace OptimaValue
             {
                 if (MyPlc.LoggerIsStarted)
                 {
-                    MyPlc.Close();
+                    MyPlc.Plc.Disconnect();
 
                     if (message == string.Empty)
                         MyPlc.SendPlcStatusMessage($"Kommunikationen till {MyPlc.PlcName} avbruten", Status.Warning);
@@ -349,17 +347,20 @@ namespace OptimaValue
                     else
                         logdiff = 0;
 
+                    var tag = (ITagDefinition)logTag;
+                    var plcTag = new PlcTag(tag);
+
+                    //var plcTag = (PlcTag)((ITagDefinition)logTag);
+
                     if ((tiden - logTag.LastLogTime) >= TimeSpan.FromMilliseconds((int)logTag.LogFreq - logdiff)) // Minskar med 2 millisekunder vid snabb loggning för att få en mer exakt loggning
                     {
                         object unknownTag = new object();
                         //string opcTagType = "";
-                        string opcTagName = "";
 
                         try
                         {
                             if (MyPlc.isOpc)
                             {
-                                opcTagName = logTag.PlcName + "." + logTag.Name;
                                 //opcTagType = MyPlc.OpcClient.GetDataType(opcTagName).ToString();
                             }
                             if (MyPlc.ConnectionStatus == ConnectionStatus.Connected && MyPlc.IsConnected)
@@ -370,44 +371,47 @@ namespace OptimaValue
 
                                 if (logTag.VarType == VarType.S7String && !MyPlc.isOpc)
                                 {
-                                    var temp = MyPlc.ReadBytes(logTag.DataType, logTag.BlockNr, logTag.StartByte, logTag.NrOfElements + 2);
+                                    var temp = MyPlc.Plc.ReadBytes(plcTag, 2);
                                     unknownTag = temp.S7StringSwedish();
                                 }
                                 else if (logTag.VarType == VarType.String)
                                 {
                                     if (!MyPlc.isOpc)
                                     {
-                                        var temp = MyPlc.ReadBytes(logTag.DataType, logTag.BlockNr, logTag.StartByte, logTag.NrOfElements);
+                                        var temp = MyPlc.Plc.ReadBytes(plcTag, 2);
                                         unknownTag = temp.StringSwedish();
                                     }
                                     else
                                     {
-                                        unknownTag = MyPlc.OpcClient.Read<object>(opcTagName);
+                                        unknownTag = MyPlc.Plc.Read(plcTag);
                                     }
                                 }
                                 else if (logTag.VarType == VarType.DateTime)
                                 {
                                     if (!MyPlc.isOpc)
                                     {
-                                        var temp = MyPlc.ReadBytes(logTag.DataType, logTag.BlockNr, logTag.StartByte, 8);
+                                        var temp = MyPlc.Plc.ReadBytes(plcTag, 8);
                                         unknownTag = S7.Net.Types.DateTime.FromByteArray(temp);
                                     }
                                     else
                                     {
-                                        unknownTag = MyPlc.OpcClient.Read<object>(opcTagName);
+                                        unknownTag = MyPlc.Plc.Read(plcTag);
                                     }
 
                                 }
                                 else if (logTag.VarType == VarType.DateTimeLong && !MyPlc.isOpc)
                                 {
-                                    var temp = MyPlc.ReadBytes(logTag.DataType, logTag.BlockNr, logTag.StartByte, 12);
+                                    var temp = MyPlc.Plc.ReadBytes(plcTag, 12);
                                     unknownTag = S7.Net.Types.DateTimeLong.FromByteArray(temp);
                                 }
                                 else if (!MyPlc.isOpc)
-                                    unknownTag = MyPlc.Read(logTag.DataType, logTag.BlockNr, logTag.StartByte, (S7.Net.VarType)logTag.VarType, logTag.NrOfElements, logTag.BitAddress);
+                                {
+                                    unknownTag = MyPlc.Plc.Read(plcTag);
+
+                                }
                                 else if (MyPlc.isOpc)
                                 {
-                                    unknownTag = MyPlc.OpcClient.Read<object>(opcTagName);
+                                    unknownTag = MyPlc.Plc.Read(plcTag);
                                 }
                                 logTag.LastLogTime = tiden;
                                 logTag.NrSuccededReadAttempts++;
@@ -667,10 +671,15 @@ namespace OptimaValue
                                     foreach (int id in logTag.SubscribedTags)
                                     {
                                         var subbedTag = TagHelpers.GetTagFromId(id);
+                                        var tagg = (ITagDefinition)subbedTag;
+
+                                        plcTag = new PlcTag(tagg);
+
                                         if (subbedTag.Active)
                                         {
                                             subbedTag.LastLogTime = tiden;
                                             var lastValue = lastLogValue.Find(l => l.tag_id == logTag.Id);
+
                                             if (subbedTag.IsBooleanTrigger && logTag.VarType == VarType.Bit)
                                             {
                                                 switch (subbedTag.BoolTrigger)
@@ -678,46 +687,22 @@ namespace OptimaValue
                                                     case BooleanTrigger.OnTrue:
                                                         if (!(bool)lastValue.value && (bool)unknownTag)
                                                         {
-                                                            if (!MyPlc.isOpc)
-                                                            {
-                                                                var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                            }
-                                                            else
-                                                            {
-                                                                var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                            }
+                                                            var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                            AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                         }
                                                         break;
                                                     case BooleanTrigger.WhileTrue:
                                                         if ((bool)unknownTag)
                                                         {
-                                                            if (!MyPlc.isOpc)
-                                                            {
-                                                                var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                            }
-                                                            else
-                                                            {
-                                                                var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                            }
+                                                            var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                            AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                         }
                                                         break;
                                                     case BooleanTrigger.OnFalse:
                                                         if ((bool)lastValue.value && !(bool)unknownTag)
                                                         {
-                                                            if (!MyPlc.isOpc)
-                                                            {
-                                                                var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                            }
-                                                            else
-                                                            {
-                                                                var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                            }
+                                                            var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                            AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                         }
                                                         break;
                                                     default:
@@ -736,91 +721,43 @@ namespace OptimaValue
                                                             case VarType.Byte:
                                                                 if ((byte)unknownTag < subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
                                                                 if ((UInt16)unknownTag < subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
                                                                 if ((UInt32)unknownTag < subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
                                                                 if ((short)unknownTag < subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
                                                                 if ((Int32)unknownTag < subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
                                                                 if ((float)unknownTag < subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.String:
@@ -845,91 +782,43 @@ namespace OptimaValue
                                                             case VarType.Byte:
                                                                 if ((byte)unknownTag > subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
                                                                 if ((UInt16)unknownTag > subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
                                                                 if ((UInt32)unknownTag > subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
                                                                 if ((short)unknownTag > subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
                                                                 if ((Int32)unknownTag > subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
                                                                 if ((float)unknownTag > subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.String:
@@ -954,91 +843,43 @@ namespace OptimaValue
                                                             case VarType.Byte:
                                                                 if ((byte)unknownTag == subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
                                                                 if ((UInt16)unknownTag == subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
                                                                 if ((UInt32)unknownTag == subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
                                                                 if ((short)unknownTag == subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
                                                                 if ((Int32)unknownTag == subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
                                                                 if ((float)unknownTag == subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.String:
@@ -1063,91 +904,43 @@ namespace OptimaValue
                                                             case VarType.Byte:
                                                                 if ((byte)unknownTag <= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
                                                                 if ((UInt16)unknownTag <= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
                                                                 if ((UInt32)unknownTag <= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
                                                                 if ((short)unknownTag <= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
                                                                 if ((Int32)unknownTag <= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
                                                                 if ((float)unknownTag <= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.String:
@@ -1172,91 +965,43 @@ namespace OptimaValue
                                                             case VarType.Byte:
                                                                 if ((byte)unknownTag >= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
                                                                 if ((UInt16)unknownTag >= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
                                                                 if ((UInt32)unknownTag >= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
                                                                 if ((short)unknownTag >= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
                                                                 if ((Int32)unknownTag >= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
                                                                 if ((float)unknownTag >= subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.String:
@@ -1281,91 +1026,43 @@ namespace OptimaValue
                                                             case VarType.Byte:
                                                                 if ((byte)unknownTag != subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
                                                                 if ((UInt16)unknownTag != subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
                                                                 if ((UInt32)unknownTag != subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
                                                                 if ((short)unknownTag != subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
                                                                 if ((Int32)unknownTag != subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
                                                                 if ((float)unknownTag != subbedTag.AnalogValue)
                                                                 {
-                                                                    if (!MyPlc.isOpc)
-                                                                    {
-                                                                        var subbedLog = MyPlc.Read(subbedTag.DataType, subbedTag.BlockNr, subbedTag.StartByte, (S7.Net.VarType)subbedTag.VarType, subbedTag.NrOfElements, subbedTag.BitAddress);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        var subbedLog = MyPlc.OpcClient.Read<object>(subbedTag.OpcTagName);
-                                                                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
-                                                                    }
+                                                                    var subbedLog = MyPlc.Plc.Read(plcTag);
+                                                                    AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.String:
@@ -1395,7 +1092,7 @@ namespace OptimaValue
                             {
                                 if (MyPlc.UnableToPing)
                                 {
-                                    var errorString = $"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.IP}";
+                                    var errorString = $"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}";
                                     logTag.LastErrorMessage = errorString;
                                     MyPlc.SendPlcStatusMessage(errorString, Status.Error);
                                 }

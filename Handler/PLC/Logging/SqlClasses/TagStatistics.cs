@@ -9,10 +9,6 @@ namespace OptimaValue
     public class TagStatistics
     {
 
-        //private DateTime lastTimeLogged = DateTime.MinValue;
-        //private TimeSpan totalScanTime = TimeSpan.FromSeconds(0);
-        //private TimeSpan lastScanTime = TimeSpan.MinValue;
-
         #region Events
         public event EventHandler<ReadErrorEventArgs> ReadErrorEvent;
 
@@ -34,45 +30,9 @@ namespace OptimaValue
 
         public void ClearScanTime()
         {
-            //lastTimeLogged = DateTime.MinValue;
-            //totalScanTime = TimeSpan.FromSeconds(0);
             NrFailedReadAttempts = 0;
             NrSuccededReadAttempts = 0;
         }
-
-        //private void CalculateScanTime()
-        //{
-        //    var tiden = DateTime.Now;
-        //    if (lastTimeLogged == tiden)
-        //    {
-        //        ScanTime = "-";
-        //        lastTimeLogged = tiden;
-        //    }
-        //    else
-        //    {
-        //        lastScanTime = tiden - lastTimeLogged;
-        //        totalScanTime += lastScanTime;
-        //        lastTimeLogged = tiden;
-        //        ScanTime = lastScanTime.ToString(@"mm\:ss\.ffff");
-        //    }
-        //}
-        //private void CalculateAverageScanTime()
-        //{
-        //    if (totalScanTime == TimeSpan.FromSeconds(0))
-        //        AverageScanTime = "-";
-        //    else
-        //    {
-        //        var divisor = (NrFailedReadAttempts + nrSuccededReadAttempts - 1);
-        //        if (divisor > 0)
-        //        {
-        //            var ticks = totalScanTime.Ticks / divisor;
-        //            var newTime = new TimeSpan(ticks);
-        //            AverageScanTime = newTime.ToString(@"mm\:ss\.ffff");
-        //        }
-
-        //    }
-        //}
-
 
         private int nrSuccededReadAttempts = 0;
         public int NrSuccededReadAttempts
@@ -81,8 +41,6 @@ namespace OptimaValue
             set
             {
                 nrSuccededReadAttempts = value;
-                //CalculateScanTime();
-                //CalculateAverageScanTime();
             }
         }
         private int nrFailedReadAttempts = 0;
@@ -97,8 +55,6 @@ namespace OptimaValue
                     RaiseReadError(false);
 
                 nrFailedReadAttempts = value;
-                //CalculateScanTime();
-                //CalculateAverageScanTime();
             }
         }
         public string PercentOk

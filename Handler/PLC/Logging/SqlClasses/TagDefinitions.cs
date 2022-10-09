@@ -7,7 +7,7 @@ using CsvHelper.Configuration;
 
 namespace OptimaValue
 {
-    public class TagDefinitions : TagStatistics
+    public class TagDefinitions : TagStatistics, ITagDefinition
     {
         [Name("Id")]
         public int Id { get; set; }

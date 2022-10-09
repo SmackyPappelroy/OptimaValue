@@ -109,7 +109,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             txtSynkByte.Text = myPlc.SyncTimeOffset.ToString();
             checkActive.Checked = myPlc.SyncActive;
             txtSyncBool.Text = myPlc.SyncBoolAddress.ToString();
-            if (MyPlc.CPU == S7.Net.CpuType.S7300 || MyPlc.CPU == S7.Net.CpuType.S7400)
+            if ((S7.Net.CpuType)MyPlc.CpuType == S7.Net.CpuType.S7300 || (S7.Net.CpuType)MyPlc.CpuType == S7.Net.CpuType.S7400)
                 pictureBox1.Image = Properties.Resources.S7300Sync;
             else
                 pictureBox1.Image = Properties.Resources.S71500Sync__Custom_;

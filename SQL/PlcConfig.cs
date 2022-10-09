@@ -67,46 +67,18 @@ namespace OptimaValue
                 var _syncActive = (tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("syncActive"));
                 var _syncBoolAddress = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("syncBoolAddress"));
                 var _lastSyncTime = (tbl.AsEnumerable().ElementAt(rowIndex).Field<DateTime>("lastSyncTime"));
+                var _activePlcId = (int)tbl.AsEnumerable().ElementAt(rowIndex).Field<Int32>("id");
+                var _active = tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("Active");
 
-                if (_cpu != CpuType.OpcUa && _cpu != CpuType.OpcDa)
-                {
-                    var myPlc = new ExtendedPlc((S7.Net.CpuType)_cpu, _ip, _rack, _slot)
-                    {
-                        Id = _id,
-                        PlcName = _name,
-                        ActivePlcId = (int)tbl.AsEnumerable().ElementAt(rowIndex).Field<Int32>("id"),
-                        Active = tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("Active"),
+                var plcConfig = new PlcConfiguration(_name, _cpu, _ip,
+                    _rack, _slot, _activePlcId,
+                    _active, _syncTimeDbNr, _syncTimeDbOffset,
+                    _syncBoolAddress, _syncActive, _lastSyncTime);
 
-                        SyncTimeDbNr = _syncTimeDbNr,
-                        SyncTimeOffset = _syncTimeDbOffset,
-                        SyncBoolAddress = _syncBoolAddress,
-                        SyncActive = _syncActive,
-                        lastSyncTime = _lastSyncTime,
-                    };
-                    PlcList.Add(myPlc);
-                }
-                else
-                {
-                    var myPlc = new ExtendedPlc(_cpu, _ip, _rack, _slot)
-                    {
-                        Id = _id,
-                        PlcName = _name,
-                        ActivePlcId = (int)tbl.AsEnumerable().ElementAt(rowIndex).Field<Int32>("id"),
-                        Active = tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("Active"),
-
-                        SyncTimeDbNr = _syncTimeDbNr,
-                        SyncTimeOffset = _syncTimeDbOffset,
-                        SyncBoolAddress = _syncBoolAddress,
-                        SyncActive = _syncActive,
-                        lastSyncTime = _lastSyncTime,
-                    };
-                    PlcList.Add(myPlc);
-                }
-
-
-
-
+                var myPlc = new ExtendedPlc(plcConfig);
+                PlcList.Add(myPlc);
             }
+
             if (PlcList.Count > 0)
                 return true;
             else

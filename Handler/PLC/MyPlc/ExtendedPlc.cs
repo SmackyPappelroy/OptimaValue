@@ -1,6 +1,6 @@
-﻿using OpcUa.DA;
+﻿using DocumentFormat.OpenXml.Drawing.Charts;
+using OpcUa.DA;
 using OpcUaHm.Common;
-using S7.Net;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -14,44 +14,56 @@ namespace OptimaValue
         OpcDa,
     }
 
-    public class ExtendedPlc : Plc
+    public class ExtendedPlc
     {
+        public IPlc Plc;
+        public PlcConfiguration PlcConfiguration { get; }
+
+
         #region Constructor
         /// <summary>
-        /// PLC
+        /// Create new controller
         /// </summary>
         /// <param name="cpu"></param>
         /// <param name="ip"></param>
         /// <param name="rack"></param>
         /// <param name="slot"></param>
-        public ExtendedPlc(S7.Net.CpuType cpu, string ip, short rack, short slot) : base(cpu, ip, rack, slot)
+        public ExtendedPlc(PlcConfiguration config)
         {
-            CpuType = (CpuType)cpu;
-            SubscribeEvents(true);
+            this.PlcConfiguration = config;
+            if ((int)config.CpuType < 1000)
+            {
+                Plc = new SiemensPlc((S7.Net.CpuType)config.CpuType,
+                    config.Ip, config.Rack, config.Slot);
+            }
+            else if (config.CpuType == CpuType.OpcUa)
+            {
+                Plc = new OpcPlc(config.Ip, OpcType.OpcUa, Id);
+            }
+            else if (config.CpuType == CpuType.OpcDa)
+            {
+                Plc = new OpcPlc(config.Ip, OpcType.OpcDa, Id);
+            }
+
+
+            Plc.PlcName = config.PlcName;
+            Plc.ConnectionString = config.Ip;
+            PlcName = config.PlcName;
+            ActivePlcId = config.ActivePlcId;
+            Active = config.Active;
+            SyncTimeDbNr = config.SyncTimeDbNr;
+            SyncBoolAddress = config.SyncBoolAddress;
+            SyncActive = config.SyncActive;
+            lastSyncTime = config.lastSyncTime;
+
+            if (!isOpc)
+                SubscribeEvents(true);
+            else
+                SubscribeEvents(true, true);
             timerPing.Interval = 30 * 1000;
             onlineTimer.Tick += OnlineTimer_Tick;
         }
 
-        /// <summary>
-        /// OPC Client
-        /// </summary>
-        /// <param name="cpu"></param>
-        /// <param name="connectionString"></param>
-        /// <param name="rack"></param>
-        /// <param name="slot"></param>
-        public ExtendedPlc(CpuType cpu, string connectionString, short rack = 0, short slot = 0) : base(S7.Net.CpuType.S71500, "127.0.0.1", rack, slot)
-        {
-            ConnectionString = connectionString;
-            CpuType = cpu;
-            if (CpuType == CpuType.OpcUa)
-                OpcClient = new UaClient(new Uri(connectionString));
-            else if (CpuType == CpuType.OpcDa)
-                OpcClient = new DaClient(connectionString);
-
-            SubscribeEvents(true, isOpc);
-            timerPing.Interval = 30 * 1000;
-            onlineTimer.Tick += OnlineTimer_Tick;
-        }
         #endregion
 
         private void OnlineTimer_Tick(object sender, EventArgs e)
@@ -81,28 +93,14 @@ namespace OptimaValue
         #endregion
 
         #region Properties
-        public IClient<Node> OpcClient { get; set; }
-        public string ConnectionString { get; }
-        private CpuType CpuType;
+        public CpuType CpuType => Plc.CpuType;
         private DateTime UpTimeStart = DateTime.MaxValue;
         private readonly System.Timers.Timer timerPing = new System.Timers.Timer();
         private bool isSubscribed = false;
-        public bool isOpc => CpuType == CpuType.OpcUa || CpuType == CpuType.OpcDa;
-        public OpcType OpcType
-        {
-            get
-            {
-                if (CpuType == CpuType.OpcUa)
-                    return OpcType.OpcUa;
-                else if (CpuType == CpuType.OpcDa)
-                    return OpcType.OpcDa;
-                else
-                    return OpcType.None;
-            }
-        }
+        public bool isOpc => Plc.isNotPlc;
 
-        public new bool IsConnected => isOpc ? OpcClient.Status == OpcStatus.Connected : base.IsConnected;
-        public string OpcBaseFolder => IsConnected && isOpc ? OpcClient.RootNode.Name : "";
+        public new bool IsConnected => Plc.IsConnected; // isOpc ? OpcClient.Status == OpcStatus.Connected : base.IsConnected;
+        public string OpcBaseFolder => IsConnected && isOpc ? ((OpcPlc)Plc).RootNodeName : "";
 
 
         #endregion
@@ -168,7 +166,6 @@ namespace OptimaValue
                     watchDog = 0;
                 return watchDog;
             }
-
         }
         public bool Alarm { get; set; } = false;
         private ConnectionStatus connectionStatus = ConnectionStatus.Disconnected;
@@ -228,12 +225,12 @@ namespace OptimaValue
             {
                 if (!isOpc)
                     timerPing.Elapsed += TimerPing_Tick;
-                else if (OpcClient is UaClient uaClient)
+                else if (((OpcPlc)Plc).Client is UaClient uaClient)
                 {
                     uaClient.ServerConnectionLost += OpcClient_ServerConnectionLost;
                     uaClient.ServerConnectionRestored += OpcClient_ServerConnectionRestored;
                 }
-                else if (OpcClient is DaClient daClient)
+                else if (((OpcPlc)Plc).Client is DaClient daClient)
                 {
                     ConnectionStatus = daClient.Status == OpcStatus.NotConnected ? ConnectionStatus.Disconnected : ConnectionStatus.Connected;
                 }
@@ -246,12 +243,12 @@ namespace OptimaValue
             {
                 if (isOpc)
                     timerPing.Elapsed -= TimerPing_Tick;
-                else if (OpcClient is UaClient uaClient)
+                else if (((OpcPlc)Plc).Client is UaClient uaClient)
                 {
                     uaClient.ServerConnectionLost -= OpcClient_ServerConnectionLost;
                     uaClient.ServerConnectionRestored -= OpcClient_ServerConnectionRestored;
                 }
-                else if (OpcClient is DaClient daClient)
+                else if (((OpcPlc)Plc).Client is DaClient daClient)
                 {
                     ConnectionStatus = daClient.Status == OpcStatus.NotConnected ? ConnectionStatus.Disconnected : ConnectionStatus.Connected;
                 }
@@ -293,7 +290,8 @@ namespace OptimaValue
 
         private void TimerPing_Tick(object sender, EventArgs e)
         {
-            if (!IP.Ping())
+            var plc = (SiemensPlc)Plc;
+            if (!plc.Ping())
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 UnableToPing = true;

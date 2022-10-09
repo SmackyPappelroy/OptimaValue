@@ -64,7 +64,7 @@ namespace OptimaValue.Handler.PLC.Graphics
             {
                 if (myPlc.isOpc)
                 {
-                    CpuType = myPlc.OpcType == OpcType.OpcUa ? CpuType.OpcUa : CpuType.OpcDa;
+                    CpuType = myPlc.CpuType;
                 }
             }
             else
@@ -434,7 +434,7 @@ namespace OptimaValue.Handler.PLC.Graphics
             else if (!MyPlc.isOpc)
                 txtIp.Text = PlcIp;
             else
-                txtIp.Text = MyPlc.ConnectionString;
+                txtIp.Text = MyPlc.Plc.ConnectionString;
             txtSlot.Text = Slot;
             txtRack.Text = Rack;
             checkActive.Checked = Active;
@@ -559,7 +559,7 @@ namespace OptimaValue.Handler.PLC.Graphics
         {
             if (tryConnect)
             {
-                MyPlc.Close();
+                MyPlc.Plc.Disconnect();
             }
         }
 
@@ -577,30 +577,30 @@ namespace OptimaValue.Handler.PLC.Graphics
                     btnConnect.Enabled = false;
                     Application.UseWaitCursor = true;
                     if (!MyPlc.isOpc)
-                        await MyPlc.OpenAsync();
+                        await MyPlc.Plc.ConnectAsync();
                     else
                     {
-                        await MyPlc.OpcClient.Connect();
+                        await MyPlc.Plc.ConnectAsync();
                         PopulateOpcTopics();
                     }
                     imageTest.Image = imageList.Images[2];
                     SystemSounds.Beep.Play();
                     connected = true;
-                    $"Ansluten till {MyPlc.PlcName}".SendStatusMessage(Severity.Error);
+                    $"Ansluten till {MyPlc.PlcName}".SendStatusMessage(Severity.Success);
                 }
                 catch (Exception ex)
                 {
                     imageTest.Image = imageList.Images[1];
                     connected = false;
                     SystemSounds.Hand.Play();
-                    $"Ingen anslutning till {MyPlc.PlcName}".SendStatusMessage(Severity.Information);
+                    $"Ingen anslutning till {MyPlc.PlcName}".SendStatusMessage(Severity.Error);
                 }
                 finally
                 {
                     if (!MyPlc.isOpc)
-                        MyPlc.Close();
-                    else if (MyPlc.OpcClient.Status == OpcUaHm.Common.OpcStatus.Connected)
-                        MyPlc.OpcClient.Dispose();
+                        MyPlc.Plc.Disconnect();
+                    else if (MyPlc.IsConnected)
+                        MyPlc.Plc.Dispose();
                     btnConnect.Enabled = true;
                     timeoutTimer.Start();
                     Application.UseWaitCursor = false;
@@ -612,7 +612,8 @@ namespace OptimaValue.Handler.PLC.Graphics
 
         private List<Node> PopulateOpcTopics()
         {
-            var nodes = MyPlc.OpcClient.ExploreOpc("", true);
+            var opcClient = MyPlc.Plc as OpcPlc;
+            var nodes = opcClient.Client.ExploreOpc("", true);
             comboOpcTopic.Items.Clear();
             nodes = nodes.OrderBy(x => x.Tag).ToList();
             foreach (var item in nodes)
@@ -652,12 +653,18 @@ namespace OptimaValue.Handler.PLC.Graphics
                 txtName.Text = comboOpcTopic.Text;
                 try
                 {
-                    MyPlc.OpcClient.Connect();
-                    var subNodes = MyPlc.OpcClient.ExploreOpc(txtName.Text, false, true);
+                    var opcPlc = MyPlc.Plc as OpcPlc;
+                    opcPlc.Connect();
+                    var subNodes = opcPlc.Client.ExploreOpc(txtName.Text, false, true);
                 }
                 catch (Exception ex)
                 {
 
+                }
+                finally
+                {
+                    var opcPlc = MyPlc.Plc as OpcPlc;
+                    opcPlc.Disconnect();
                 }
             }
         }

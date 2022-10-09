@@ -426,8 +426,8 @@ namespace OptimaValue
                 else
                 {
                     settingsControl = new PlcSettingsControl(activePlc.ConnectionStatus, activePlc.PlcName
-                  , activePlc.IP, activePlc.Slot.ToString(), activePlc.Rack.ToString()
-                  , activePlc.Active, (CpuType)activePlc.CPU, activePlc.ActivePlcId, activePlc)
+                  , activePlc.PlcConfiguration.Ip, activePlc.PlcConfiguration.Slot.ToString(), activePlc.PlcConfiguration.Rack.ToString()
+                  , activePlc.Active, (CpuType)activePlc.PlcConfiguration.CpuType, activePlc.ActivePlcId, activePlc)
                     {
                         Parent = contentPanel
                     };

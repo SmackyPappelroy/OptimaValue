@@ -39,10 +39,14 @@ namespace OptimaValue
         //
         // OPC UA
         //
-        OpcUa = 50,
+        OpcUa = 1000,
         //
         // OPC DA
         //
-        OpcDa = 600,
+        OpcDa = 1100,
+        //
+        // Unknown
+        //
+        Unknown = 9999
     }
 }
