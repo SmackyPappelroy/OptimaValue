@@ -135,11 +135,12 @@
             // 
             // txtIp
             // 
+            this.tableLayoutPanel2.SetColumnSpan(this.txtIp, 2);
             this.txtIp.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.txtIp.Location = new System.Drawing.Point(40, 216);
             this.txtIp.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.txtIp.Name = "txtIp";
-            this.txtIp.Size = new System.Drawing.Size(211, 27);
+            this.txtIp.Size = new System.Drawing.Size(365, 27);
             this.txtIp.TabIndex = 6;
             this.txtIp.Validating += new System.ComponentModel.CancelEventHandler(this.txtIp_Validating);
             // 

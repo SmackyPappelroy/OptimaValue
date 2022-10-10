@@ -16,8 +16,10 @@ namespace OptimaValue
     {
         private S7.Net.Plc myPlc;
         private CpuType cpuType;
-        private readonly System.Timers.Timer timerPing = new System.Timers.Timer();
-        private bool isSubscribed = false;
+        private readonly System.Timers.Timer timerPing = new System.Timers.Timer()
+        {
+            Interval = 30 * 1000
+        };
         private System.Windows.Forms.Timer onlineTimer = new System.Windows.Forms.Timer()
         {
             Interval = 500,
@@ -48,15 +50,29 @@ namespace OptimaValue
             }
         }
 
+        private void TimerPing_Tick(object sender, EventArgs e)
+        {
+            if (!Ping())
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                UnableToPing = true;
+
+            }
+            else
+            {
+                UnableToPing = false;
+            }
+        }
+
         public SiemensPlc()
         {
-
         }
 
         public SiemensPlc(S7.Net.CpuType cpuType, string ip, short rack, short slot)
         {
             this.cpuType = (CpuType)cpuType;
             myPlc = new Plc(cpuType, ip, rack, slot);
+            timerPing.Elapsed += TimerPing_Tick;
         }
 
         public string PlcName { get; set; }
@@ -151,45 +167,123 @@ namespace OptimaValue
             ConnectionStatus = myPlc.IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
         }
 
+        public async Task<bool> TestConnectionAsync()
+        {
+            try
+            {
+                await myPlc.OpenAsync();
+                return IsConnected;
+            }
+            catch (Exception) { }
+            finally
+            {
+                myPlc.Close();
+            }
+            return false;
+        }
+
         public object Read(PlcTag tag)
         {
-            return myPlc.Read(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.BitAddress);
-            return null;
+            try
+            {
+                return myPlc.Read(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.BitAddress);
+            }
+            catch (PlcException)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public object Read(string address)
         {
-            return myPlc.Read(address);
+            try
+            {
+                return myPlc.Read(address);
+            }
+            catch (PlcException)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public Task<object> ReadAsync(PlcTag tag)
         {
-            return myPlc.ReadAsync(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.BitAddress);
+            try
+            {
+                return myPlc.ReadAsync(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.BitAddress);
+            }
+            catch (PlcException)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task<object> ReadAsync(string address)
         {
-            return await myPlc.ReadAsync(address);
+            try
+            {
+                return await myPlc.ReadAsync(address);
+            }
+            catch (PlcException)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public byte[] ReadBytes(PlcTag tag)
         {
-            return myPlc.ReadBytes(tag.DataType, tag.BlockNr, tag.StartByte, tag.NrOfElements);
+            try
+            {
+                return myPlc.ReadBytes(tag.DataType, tag.BlockNr, tag.StartByte, tag.NrOfElements);
+            }
+            catch (PlcException)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task<byte[]> ReadBytesAsync(PlcTag tag)
         {
-            return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, tag.NrOfElements);
+            try
+            {
+                return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, tag.NrOfElements);
+            }
+            catch (PlcException)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public byte[] ReadBytes(PlcTag tag, int nrOfElements)
         {
-            return myPlc.ReadBytes(tag.DataType, tag.BlockNr, tag.StartByte, nrOfElements);
+            try
+            {
+                return myPlc.ReadBytes(tag.DataType, tag.BlockNr, tag.StartByte, nrOfElements);
+            }
+            catch (PlcException)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task<byte[]> ReadBytesAsync(PlcTag tag, int nrOfElements)
         {
-            return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, nrOfElements);
+            try
+            {
+                return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, nrOfElements);
+            }
+            catch (PlcException)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public void Write(PlcTag tag, object value)
@@ -224,61 +318,9 @@ namespace OptimaValue
 
         public void Dispose()
         {
+            timerPing.Elapsed += TimerPing_Tick;
             myPlc.Close();
             GC.SuppressFinalize(this);
-        }
-
-        public void SubscribeEvents(bool subscribeToEvents, bool isOpc = false)
-        {
-            if (!isSubscribed && subscribeToEvents)
-            {
-                if (!isOpc)
-                    timerPing.Elapsed += TimerPing_Tick;
-
-                PlcStatusEvent.NewMessage += PlcStatusEvent_NewMessage;
-                OnlineStatusEvent.NewMessage += OnlineStatusEvent_NewMessage;
-                isSubscribed = true;
-            }
-            else if (isSubscribed && !subscribeToEvents)
-            {
-                PlcStatusEvent.NewMessage -= PlcStatusEvent_NewMessage;
-                OnlineStatusEvent.NewMessage -= OnlineStatusEvent_NewMessage;
-                isSubscribed = false;
-            }
-        }
-
-        private void OnlineStatusEvent_NewMessage(object sender, OnlineStatusEventArgs e)
-        {
-            if (e.PlcName == PlcName)
-            {
-                ExternalElapsedTime = e.ElapsedTime;
-                ExternalOnlineColor = e.Color;
-                ExternalOnlineMessage = e.Message;
-                ExternalCommunicationStatus = e.connectionStatus;
-            }
-        }
-
-        private void PlcStatusEvent_NewMessage(object sender, PlcStatusEventArgs e)
-        {
-            if (e.PlcName == e.PlcName)
-            {
-                ExternalStatus = e.Status;
-                ExternalStatusMessage = e.Message;
-            }
-        }
-
-        private void TimerPing_Tick(object sender, EventArgs e)
-        {
-            if (!myPlc.IP.Ping())
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                UnableToPing = true;
-
-            }
-            else
-            {
-                UnableToPing = false;
-            }
         }
 
         /// <summary>
@@ -318,5 +360,7 @@ namespace OptimaValue
             }
             return Pingable;
         }
+
+
     }
 }

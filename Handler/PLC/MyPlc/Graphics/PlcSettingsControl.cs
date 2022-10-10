@@ -184,7 +184,8 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtIp, "Fältet får ej va tomt");
                     ipOk = false;
                 }
-                else if (!InputValidation.CheckIPValid(txtIp.Text) && !txtIp.Text.ToLower().StartsWith("opc.tcp://"))
+                else if (!InputValidation.CheckIPValid(txtIp.Text) &&
+                    (!txtIp.Text.ToLower().StartsWith("opc.tcp://") || (!!txtIp.Text.ToLower().StartsWith("opc.http://"))))
                 {
                     errorProvider.SetError(txtIp, "Ingen giltig IP-adress / OPC UA adress");
                     ipOk = false;
@@ -584,7 +585,8 @@ namespace OptimaValue.Handler.PLC.Graphics
                         PopulateOpcTopics();
                     }
                     imageTest.Image = imageList.Images[2];
-                    SystemSounds.Beep.Play();
+                    if (OperatingSystem.IsWindows())
+                        SystemSounds.Beep.Play();
                     connected = true;
                     $"Ansluten till {MyPlc.PlcName}".SendStatusMessage(Severity.Success);
                 }
@@ -592,7 +594,8 @@ namespace OptimaValue.Handler.PLC.Graphics
                 {
                     imageTest.Image = imageList.Images[1];
                     connected = false;
-                    SystemSounds.Hand.Play();
+                    if (OperatingSystem.IsWindows())
+                        SystemSounds.Hand.Play();
                     $"Ingen anslutning till {MyPlc.PlcName}".SendStatusMessage(Severity.Error);
                 }
                 finally

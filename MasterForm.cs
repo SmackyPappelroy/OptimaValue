@@ -600,8 +600,7 @@ namespace OptimaValue
             }
             foreach (ExtendedPlc myPlc in PlcConfig.PlcList)
             {
-                if (myPlc.ConnectionStatus == ConnectionStatus.Connected
-                    || myPlc.LoggerIsStarted)
+                if (myPlc.LoggerIsStarted)
                     anyActivePlcs = true;
             }
             if (anyActivePlcs)

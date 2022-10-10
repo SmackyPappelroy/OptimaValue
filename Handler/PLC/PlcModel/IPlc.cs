@@ -15,6 +15,7 @@ namespace OptimaValue
         bool IsConnected { get; }
         CpuType CpuType { get; }
         bool isNotPlc { get; }
+        bool UnableToPing { get; }
         string ConnectionString { get; set; }
 
         DateTime UpTimeStart { get; set; }
@@ -28,6 +29,7 @@ namespace OptimaValue
         bool Ping();
         void Connect();
         Task ConnectAsync();
+        Task<bool> TestConnectionAsync();
         void Disconnect();
         object Read(PlcTag tag);
         object Read(string address);

@@ -60,7 +60,6 @@ namespace OptimaValue
                 SubscribeEvents(true);
             else
                 SubscribeEvents(true, true);
-            timerPing.Interval = 30 * 1000;
             onlineTimer.Tick += OnlineTimer_Tick;
         }
 
@@ -95,11 +94,10 @@ namespace OptimaValue
         #region Properties
         public CpuType CpuType => Plc.CpuType;
         private DateTime UpTimeStart = DateTime.MaxValue;
-        private readonly System.Timers.Timer timerPing = new System.Timers.Timer();
         private bool isSubscribed = false;
         public bool isOpc => Plc.isNotPlc;
 
-        public new bool IsConnected => Plc.IsConnected; // isOpc ? OpcClient.Status == OpcStatus.Connected : base.IsConnected;
+        public bool IsConnected => Plc.IsConnected; // isOpc ? OpcClient.Status == OpcStatus.Connected : base.IsConnected;
         public string OpcBaseFolder => IsConnected && isOpc ? ((OpcPlc)Plc).RootNodeName : "";
 
 
@@ -153,68 +151,25 @@ namespace OptimaValue
         public int Id = 0;
 
         public DateTime LastReconnect = DateTime.MinValue;
-        public bool UnableToPing { get; private set; }
-        public string PlcName { get; set; }
-        public Int32 ActivePlcId { get; set; }
-        private short watchDog = 0;
-        public short WatchDog
-        {
-            get
-            {
-                watchDog++;
-                if (watchDog > 5000)
-                    watchDog = 0;
-                return watchDog;
-            }
-        }
-        public bool Alarm { get; set; } = false;
-        private ConnectionStatus connectionStatus = ConnectionStatus.Disconnected;
+        public bool UnableToPing => Plc.UnableToPing;
 
-        public ConnectionStatus ConnectionStatus
+        private string plcName;
+        public string PlcName
         {
-            get => connectionStatus;
+            get => plcName;
             set
             {
-                if (connectionStatus == ConnectionStatus.Disconnected || connectionStatus == ConnectionStatus.Connecting)
-                {
-                    if (value == ConnectionStatus.Connected)
-                    {
-                        UpTimeStart = DateTime.UtcNow;
-                        timerPing.Start();
-                    }
-                }
-                if (value != ConnectionStatus.Connected)
-                    timerPing.Stop();
-                connectionStatus = value;
+                Plc.PlcName = value;
+                plcName = value;
             }
         }
-        public TimeSpan UpTime
-        {
-            get
-            {
-                if (UpTimeStart == DateTime.MaxValue)
-                    return TimeSpan.FromSeconds(0);
-                else
-                    return DateTime.UtcNow - UpTimeStart;
-            }
-        }
-        public string UpTimeString
-        {
-            get
-            {
-                if (UpTimeStart == DateTime.MaxValue)
-                    return "0s";
-                var tid = DateTime.UtcNow - UpTimeStart;
-                if (tid < TimeSpan.FromMinutes(1))
-                    return tid.ToString("s's'");
-                else if (tid < TimeSpan.FromHours(1))
-                    return tid.ToString("m'm 's's'");
-                else if (tid > TimeSpan.FromHours(1) && (tid < TimeSpan.FromDays(1)))
-                    return tid.ToString("h'h 'm'm 's's'");
-                else
-                    return tid.ToString("d'd 'h'h 'm'm 's's'");
-            }
-        }
+        public Int32 ActivePlcId { get; set; }
+        public short WatchDog => Plc.WatchDog;
+        public bool Alarm { get; set; } = false;
+
+        public ConnectionStatus ConnectionStatus => Plc.ConnectionStatus;
+        public TimeSpan UpTime => Plc.UpTime;
+        public string UpTimeString => Plc.UpTimeString;
 
         #endregion
 
@@ -223,49 +178,16 @@ namespace OptimaValue
         {
             if (!isSubscribed && subscribeToEvents)
             {
-                if (!isOpc)
-                    timerPing.Elapsed += TimerPing_Tick;
-                else if (((OpcPlc)Plc).Client is UaClient uaClient)
-                {
-                    uaClient.ServerConnectionLost += OpcClient_ServerConnectionLost;
-                    uaClient.ServerConnectionRestored += OpcClient_ServerConnectionRestored;
-                }
-                else if (((OpcPlc)Plc).Client is DaClient daClient)
-                {
-                    ConnectionStatus = daClient.Status == OpcStatus.NotConnected ? ConnectionStatus.Disconnected : ConnectionStatus.Connected;
-                }
-
                 PlcStatusEvent.NewMessage += PlcStatusEvent_NewMessage;
                 OnlineStatusEvent.NewMessage += OnlineStatusEvent_NewMessage;
                 isSubscribed = true;
             }
             else if (isSubscribed && !subscribeToEvents)
             {
-                if (isOpc)
-                    timerPing.Elapsed -= TimerPing_Tick;
-                else if (((OpcPlc)Plc).Client is UaClient uaClient)
-                {
-                    uaClient.ServerConnectionLost -= OpcClient_ServerConnectionLost;
-                    uaClient.ServerConnectionRestored -= OpcClient_ServerConnectionRestored;
-                }
-                else if (((OpcPlc)Plc).Client is DaClient daClient)
-                {
-                    ConnectionStatus = daClient.Status == OpcStatus.NotConnected ? ConnectionStatus.Disconnected : ConnectionStatus.Connected;
-                }
                 PlcStatusEvent.NewMessage -= PlcStatusEvent_NewMessage;
                 OnlineStatusEvent.NewMessage -= OnlineStatusEvent_NewMessage;
                 isSubscribed = false;
             }
-        }
-
-        private void OpcClient_ServerConnectionRestored(object sender, EventArgs e)
-        {
-            ConnectionStatus = ConnectionStatus.Connected;
-        }
-
-        private void OpcClient_ServerConnectionLost(object sender, EventArgs e)
-        {
-            ConnectionStatus = ConnectionStatus.Disconnected;
         }
 
         private void OnlineStatusEvent_NewMessage(object sender, OnlineStatusEventArgs e)
@@ -288,20 +210,7 @@ namespace OptimaValue
             }
         }
 
-        private void TimerPing_Tick(object sender, EventArgs e)
-        {
-            var plc = (SiemensPlc)Plc;
-            if (!plc.Ping())
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                UnableToPing = true;
 
-            }
-            else
-            {
-                UnableToPing = false;
-            }
-        }
     }
 
 

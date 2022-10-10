@@ -98,14 +98,14 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                         var opcPlc = MyPlc.Plc as OpcPlc;
                         try
                         {
-                            MyPlc.Plc.Connect();
+                            opcPlc.Connect();
                             var tag = Tags.Where(x => x.Name == comboOpcTags.Text).FirstOrDefault();
-                            var subNodes = opcPlc.Client.ExploreOpc(tag.FullName, false, true);
+                            var subNodes = opcPlc.ExploreOpc(tag.FullName, false, true);
 
                             try
                             {
                                 var descriptionNode = subNodes.Where(x => x.Name.Contains("escription")).FirstOrDefault();
-                                ReadEvent<string> description = (ReadEvent<string>)MyPlc.Plc.Read(descriptionNode.Tag);
+                                ReadEvent<string> description = opcPlc.Read<string>(descriptionNode.Tag);
                                 paraDescription.ParameterValue = description.Value;
                             }
                             catch (Exception) { }
@@ -117,11 +117,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                             var scaleLowNode = subNodes.Where(x => x.Name.Contains("ScaledLow")).FirstOrDefault();
                             var scaleHiNode = subNodes.Where(x => x.Name.Contains("ScaledHigh")).FirstOrDefault();
 
-                            ReadEvent<string> units = (ReadEvent<string>)MyPlc.Plc.Read(unitsNode.Tag);
-                            ReadEvent<object> rawLo = (ReadEvent<object>)MyPlc.Plc.Read(rawLowNode.Tag);
-                            ReadEvent<object> rawHi = (ReadEvent<object>)MyPlc.Plc.Read(rawHiNode.Tag);
-                            ReadEvent<object> scaledLo = (ReadEvent<object>)MyPlc.Plc.Read(scaleLowNode.Tag);
-                            ReadEvent<object> scaleHi = (ReadEvent<object>)MyPlc.Plc.Read(scaleHiNode.Tag);
+                            ReadEvent<string> units = opcPlc.Read<string>(unitsNode.Tag);
+                            ReadEvent<object> rawLo = opcPlc.Read<object>(rawLowNode.Tag);
+                            ReadEvent<object> rawHi = opcPlc.Read<object>(rawHiNode.Tag);
+                            ReadEvent<object> scaledLo = opcPlc.Read<object>(scaleLowNode.Tag);
+                            ReadEvent<object> scaleHi = opcPlc.Read<object>(scaleHiNode.Tag);
 
                             paraRawMin.ParameterValue = rawLo.Value.ToString();
                             paraRawMax.ParameterValue = rawHi.Value.ToString();
