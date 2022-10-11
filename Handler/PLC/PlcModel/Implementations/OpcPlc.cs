@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Navigation;
@@ -245,7 +246,7 @@ namespace OptimaValue
             }
         }
 
-        public async Task<object> ReadAsync(PlcTag tag)
+        public async Task<object> ReadAsync(PlcTag tag, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -271,7 +272,7 @@ namespace OptimaValue
             }
         }
 
-        public async Task<object> ReadAsync(string address)
+        public async Task<object> ReadAsync(string address, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -307,12 +308,12 @@ namespace OptimaValue
             Client.Write(address, value);
         }
 
-        public async Task WriteAsync(string address, object value)
+        public async Task WriteAsync(string address, object value, CancellationToken cancellationToken = default)
         {
             await Client.WriteAsync(address, value);
         }
 
-        public async Task WriteAsync(PlcTag tag, object value)
+        public async Task WriteAsync(PlcTag tag, object value, CancellationToken cancellationToken = default)
         {
             await Client.WriteAsync(tag.PlcName + "." + tag.Name, value);
         }
@@ -338,7 +339,7 @@ namespace OptimaValue
             throw new NotImplementedException();
         }
 
-        public Task WriteBytesAsync(PlcTag tag, byte[] value)
+        public Task WriteBytesAsync(PlcTag tag, byte[] value, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -353,7 +354,7 @@ namespace OptimaValue
             throw new NotImplementedException();
         }
 
-        public Task<byte[]> ReadBytesAsync(PlcTag tag)
+        public Task<byte[]> ReadBytesAsync(PlcTag tag, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }
@@ -363,7 +364,7 @@ namespace OptimaValue
             throw new NotImplementedException();
         }
 
-        public Task<byte[]> ReadBytesAsync(PlcTag tag, int nrOfElements)
+        public Task<byte[]> ReadBytesAsync(PlcTag tag, int nrOfElements, CancellationToken cancellationToken = default)
         {
             throw new NotImplementedException();
         }

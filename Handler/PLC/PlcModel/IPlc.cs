@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OptimaValue
@@ -35,15 +36,15 @@ namespace OptimaValue
         object Read(string address);
         byte[] ReadBytes(PlcTag tag);
         byte[] ReadBytes(PlcTag tag, int nrOfElements);
-        Task<byte[]> ReadBytesAsync(PlcTag tag);
-        Task<byte[]> ReadBytesAsync(PlcTag tag, int nrOfElements);
-        Task<object> ReadAsync(PlcTag tag);
-        Task<object> ReadAsync(string address);
+        Task<byte[]> ReadBytesAsync(PlcTag tag, CancellationToken cancellationToken = default);
+        Task<byte[]> ReadBytesAsync(PlcTag tag, int nrOfElements, CancellationToken cancellationToken = default);
+        Task<object> ReadAsync(PlcTag tag, CancellationToken cancellationToken = default);
+        Task<object> ReadAsync(string address, CancellationToken cancellationToken = default);
         void Write(PlcTag tag, object value);
         void Write(string address, object value);
         void WriteBytes(PlcTag tag, byte[] value);
-        Task WriteAsync(string address, object value);
-        Task WriteBytesAsync(PlcTag tag, byte[] value);
-        Task WriteAsync(PlcTag tag, object value);
+        Task WriteAsync(string address, object value, CancellationToken cancellationToken = default);
+        Task WriteBytesAsync(PlcTag tag, byte[] value, CancellationToken cancellationToken = default);
+        Task WriteAsync(PlcTag tag, object value, CancellationToken cancellationToken = default);
     }
 }
