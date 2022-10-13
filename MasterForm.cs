@@ -30,6 +30,7 @@ namespace OptimaValue
                 {
                     var activePlcs = PlcConfig.PlcList.Where(p => p.ConnectionStatus == ConnectionStatus.Connected);
                     var tags = TagsToLog.AllLogValues.Where(x => x.PlcName == activePlcs.First().PlcName).ToList();
+                    tags = tags.Where(x => x.Active).ToList();
                     tags = tags.OrderBy(x => x.PlcName).ThenBy(x => x.Name).ToList();
                     return tags;
                 }
@@ -716,11 +717,8 @@ namespace OptimaValue
                         treeNode.ImageIndex = 2;
                         treeNode.SelectedImageIndex = 2;
                     }
-                    if (!isConnected)
-                    {
                         comboTrend.Visible = true;
                         AddTrendTags();
-                    }
                     isConnected = true;
                     break;
                 case ConnectionStatus.Disconnecting:
@@ -827,7 +825,8 @@ namespace OptimaValue
         private void btnStartTrend_Click(object sender, EventArgs e)
         {
             //var tagId = AvailableTagsTrend.Where(x => x.Name == comboTrend.Text).Select(x => x.Id).First();
-            var tagId = TagIds.Where(x => x.Id == (int)comboTrend.ComboBox.SelectedValue).First();
+            var tagId = TagIds.Where(x => x.Id == (int)comboTrend.ComboBox.SelectedValue
+                ).First();
             var trendForm = new TrendTag(tagId.Id);
             trendForm.Show();
         }

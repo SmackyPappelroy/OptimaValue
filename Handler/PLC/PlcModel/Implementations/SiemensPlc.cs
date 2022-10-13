@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -208,11 +209,11 @@ namespace OptimaValue
             }
         }
 
-        public Task<object> ReadAsync(PlcTag tag)
+        public Task<object> ReadAsync(PlcTag tag, CancellationToken cancellationToken = default)
         {
             try
             {
-                return myPlc.ReadAsync(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType,1, tag.BitAddress);
+                return myPlc.ReadAsync(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType,1, tag.BitAddress,cancellationToken);
             }
             catch (PlcException)
             {
@@ -221,11 +222,11 @@ namespace OptimaValue
             }
         }
 
-        public async Task<object> ReadAsync(string address)
+        public async Task<object> ReadAsync(string address, CancellationToken cancellationToken = default)
         {
             try
             {
-                return await myPlc.ReadAsync(address);
+                return await myPlc.ReadAsync(address, cancellationToken);
             }
             catch (PlcException)
             {
@@ -247,11 +248,11 @@ namespace OptimaValue
             }
         }
 
-        public async Task<byte[]> ReadBytesAsync(PlcTag tag)
+        public async Task<byte[]> ReadBytesAsync(PlcTag tag, CancellationToken cancellationToken = default)
         {
             try
             {
-                return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, tag.NrOfElements);
+                return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, tag.NrOfElements, cancellationToken);
             }
             catch (PlcException)
             {
@@ -273,11 +274,11 @@ namespace OptimaValue
             }
         }
 
-        public async Task<byte[]> ReadBytesAsync(PlcTag tag, int nrOfElements)
+        public async Task<byte[]> ReadBytesAsync(PlcTag tag, int nrOfElements, CancellationToken cancellationToken = default)
         {
             try
             {
-                return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, nrOfElements);
+                return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, nrOfElements, cancellationToken);
             }
             catch (PlcException)
             {
@@ -296,14 +297,14 @@ namespace OptimaValue
             myPlc.Write(address, value);
         }
 
-        public async Task WriteAsync(string address, object value)
+        public async Task WriteAsync(string address, object value, CancellationToken cancellationToken = default)
         {
-            await myPlc.WriteAsync(address, value);
+            await myPlc.WriteAsync(address, value, cancellationToken);
         }
 
-        public async Task WriteAsync(PlcTag tag, object value)
+        public async Task WriteAsync(PlcTag tag, object value, CancellationToken cancellationToken = default)
         {
-            await myPlc.WriteAsync(tag.Address, value);
+            await myPlc.WriteAsync(tag.Address, value, cancellationToken);
         }
 
         public void WriteBytes(PlcTag tag, byte[] value)
@@ -311,7 +312,7 @@ namespace OptimaValue
             myPlc.WriteBytes(tag.DataType, tag.BlockNr, tag.StartByte, value);
         }
 
-        public async Task WriteBytesAsync(PlcTag tag, byte[] value)
+        public async Task WriteBytesAsync(PlcTag tag, byte[] value, CancellationToken cancellationToken = default)
         {
             await myPlc.WriteBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, value);
         }
