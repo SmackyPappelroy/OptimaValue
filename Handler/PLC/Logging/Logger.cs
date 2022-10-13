@@ -1100,10 +1100,14 @@ namespace OptimaValue
                             logTag.NrFailedReadAttempts++;
                             logTag.LastErrorMessage = ex.Message;
                         }
+                        catch (OpcUnableToReadTagException ex)
+                        {
+                              MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\nIngen licens?", Status.Error);
+
+                        }
                         catch (OpcException ex)
                         {
                             if(ex is OpcUnableToReadTagException)
-                              MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\nIngen licens?", Status.Error);
                             else
                               MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
                                 
