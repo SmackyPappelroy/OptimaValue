@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpcUa", "..\..\Opc\OpcUa\Op
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpcUa.UI", "..\..\Opc\OpcUa.UI\OpcUa.UI.csproj", "{BDF8BA42-D4CC-41CE-956E-324DD20C3C87}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "..\Installer\Installer.vdproj", "{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -149,6 +151,18 @@ Global
 		{BDF8BA42-D4CC-41CE-956E-324DD20C3C87}.Release|x64.Build.0 = Release|Any CPU
 		{BDF8BA42-D4CC-41CE-956E-324DD20C3C87}.Release|x86.ActiveCfg = Release|Any CPU
 		{BDF8BA42-D4CC-41CE-956E-324DD20C3C87}.Release|x86.Build.0 = Release|Any CPU
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Debug|Any CPU.ActiveCfg = Debug
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Debug|arm64.ActiveCfg = Debug
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Debug|x64.ActiveCfg = Debug
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Debug|x86.ActiveCfg = Debug
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.DefaultBuild|Any CPU.ActiveCfg = Debug
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.DefaultBuild|arm64.ActiveCfg = Debug
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.DefaultBuild|x64.ActiveCfg = Debug
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.DefaultBuild|x86.ActiveCfg = Debug
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Release|Any CPU.ActiveCfg = Release
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Release|arm64.ActiveCfg = Release
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Release|x64.ActiveCfg = Release
+		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

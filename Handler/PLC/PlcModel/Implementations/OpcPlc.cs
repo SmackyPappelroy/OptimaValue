@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Office.PowerPoint.Y2021.M06.Main;
 using OpcUa.DA;
+using OpcUa.UI.Controls;
 using OpcUaHm.Common;
 using S7.Net;
 using System;
@@ -198,7 +199,7 @@ namespace OptimaValue
         {
             try
             {
-                return Client.Read<object>(tag.PlcName + "." + tag.Name);
+                return Client.Read<object>(tag.Name);
             }
             catch (OpcException)
             {
@@ -211,7 +212,7 @@ namespace OptimaValue
         {
             try
             {
-                return Client.Read<T>(tag.PlcName + "." + tag.Name);
+                return Client.Read<T>(tag.Name);
             }
             catch (OpcException)
             {
@@ -250,7 +251,7 @@ namespace OptimaValue
         {
             try
             {
-                return await Client.ReadAsync<object>(tag.PlcName + "." + tag.Name);
+                return await Client.ReadAsync<object>(tag.Name);
             }
             catch (OpcException)
             {
@@ -263,7 +264,7 @@ namespace OptimaValue
         {
             try
             {
-                return await Client.ReadAsync<T>(tag.PlcName + "." + tag.Name);
+                return await Client.ReadAsync<T>(tag.Name);
             }
             catch (OpcException)
             {
@@ -315,7 +316,7 @@ namespace OptimaValue
 
         public async Task WriteAsync(PlcTag tag, object value, CancellationToken cancellationToken = default)
         {
-            await Client.WriteAsync(tag.PlcName + "." + tag.Name, value);
+            await Client.WriteAsync(tag.Name, value);
         }
 
         public IEnumerable<Node> ExploreOpc(string filter = "", bool onlyFolders = false, bool includeSubVariables = false)
@@ -332,6 +333,15 @@ namespace OptimaValue
             }
             Client.Dispose();
             GC.SuppressFinalize(this);
+        }
+
+        public BrowseOpcTreeControl CreateOpcTree()
+        {
+            if (Client is UaClient uaClient)
+            {
+                return new BrowseOpcTreeControl(uaClient.MySession, uaClient);
+            }
+            return null;
         }
 
         public void WriteBytes(PlcTag tag, byte[] value)

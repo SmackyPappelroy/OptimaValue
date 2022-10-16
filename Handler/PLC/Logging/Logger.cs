@@ -341,7 +341,7 @@ namespace OptimaValue
                     else
                         logdiff = 0;
 
-                    var tag = (ITagDefinition)logTag;
+             var tag = (ITagDefinition)logTag;
                     var plcTag = new PlcTag(tag);
 
                     //var plcTag = (PlcTag)((ITagDefinition)logTag);
@@ -1095,6 +1095,7 @@ namespace OptimaValue
                         }
                         catch (PlcException ex)
                         {
+                            logTag.LastLogTime = tiden;
                             MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
                             Apps.Logger.Log($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);
                             logTag.NrFailedReadAttempts++;
@@ -1102,21 +1103,23 @@ namespace OptimaValue
                         }
                         catch (OpcUnableToReadTagException ex)
                         {
-                              MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\nIngen licens?", Status.Error);
-
+                            logTag.LastLogTime = tiden;
+                            MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\nIngen licens?", Status.Error);
+                            Apps.Logger.Log($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);
+                            logTag.NrFailedReadAttempts++;
+                            logTag.LastErrorMessage = ex.Message;
                         }
                         catch (OpcException ex)
                         {
-                            if(ex is OpcUnableToReadTagException)
-                            else
-                              MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
-                                
+                            logTag.LastLogTime = tiden;
+                            MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
                             Apps.Logger.Log($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);
                             logTag.NrFailedReadAttempts++;
                             logTag.LastErrorMessage = ex.Message;
                         }
                         catch (OpcUaException ex)
                         {
+                            logTag.LastLogTime = tiden;
                             MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
                             Apps.Logger.Log($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);
                         }

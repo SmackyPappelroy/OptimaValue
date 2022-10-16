@@ -275,6 +275,8 @@ namespace OptimaValue.Trend
                     new System.Windows.Media.GradientStop((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFFFFFFF"),1),
                 }
                 };
+                if (Series == null)
+                    return;
                 foreach (var item in Series)
                 {
                     var line = item as GLineSeries;
@@ -298,6 +300,8 @@ namespace OptimaValue.Trend
                     new System.Windows.Media.GradientStop((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FF000000"),1),
                 }
                 };
+                if (Series == null)
+                    return;
                 foreach (var item in Series)
                 {
                     var line = item as GLineSeries;

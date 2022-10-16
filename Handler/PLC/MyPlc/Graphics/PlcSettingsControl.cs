@@ -1,5 +1,7 @@
 ﻿using Opc.Ua.Export;
 using OpcUa;
+using OpcUa.UI;
+using OpcUa.UI.Controls;
 using OpcUaHm.Common;
 using OptimaValue.Handler.PLC.MyPlc.Graphics;
 using S7.Net;
@@ -184,8 +186,8 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtIp, "Fältet får ej va tomt");
                     ipOk = false;
                 }
-                else if (!InputValidation.CheckIPValid(txtIp.Text) &&
-                    (!txtIp.Text.ToLower().StartsWith("opc.tcp://") || (!!txtIp.Text.ToLower().StartsWith("opc.http://"))))
+                else if (!txtIp.Text.IsValidIpAddress() &&
+                    (!txtIp.Text.IsValidOpcConnectionString()))
                 {
                     errorProvider.SetError(txtIp, "Ingen giltig IP-adress / OPC UA adress");
                     ipOk = false;
@@ -205,7 +207,7 @@ namespace OptimaValue.Handler.PLC.Graphics
                     errorProvider.SetError(txtIp, "Fältet får ej va tomt");
                     ipOk = false;
                 }
-                else if (!InputValidation.CheckIPValid(txtIp.Text) || (comboCpu.Text == "OPC" && string.IsNullOrWhiteSpace(txtIp.Text)))
+                else if (!txtIp.Text.IsValidIpAddress() || (comboCpu.Text == "OPC" && string.IsNullOrWhiteSpace(txtIp.Text)))
                 {
                     errorProvider.SetError(txtIp, "Ingen giltig IP-adress / OPC UA adress");
                     ipOk = false;
@@ -582,6 +584,9 @@ namespace OptimaValue.Handler.PLC.Graphics
                     else
                     {
                         await MyPlc.Plc.ConnectAsync();
+
+
+
                         PopulateOpcTopics();
                     }
                     imageTest.Image = imageList.Images[2];

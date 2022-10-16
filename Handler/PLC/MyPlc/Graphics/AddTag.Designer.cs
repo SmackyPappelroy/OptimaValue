@@ -57,8 +57,6 @@
             this.paraUnit = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
-            this.comboOpcTags = new System.Windows.Forms.ComboBox();
-            this.btnOpcLock = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -465,30 +463,6 @@
             this.flowLayoutPanel3.Size = new System.Drawing.Size(154, 37);
             this.flowLayoutPanel3.TabIndex = 3;
             // 
-            // comboOpcTags
-            // 
-            this.comboOpcTags.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.comboOpcTags.FormattingEnabled = true;
-            this.comboOpcTags.Location = new System.Drawing.Point(173, 10);
-            this.comboOpcTags.Name = "comboOpcTags";
-            this.comboOpcTags.Size = new System.Drawing.Size(652, 29);
-            this.comboOpcTags.TabIndex = 5;
-            this.comboOpcTags.Visible = false;
-            // 
-            // btnOpcLock
-            // 
-            this.btnOpcLock.BackgroundImage = global::OptimaValue.Properties.Resources.locked_48px;
-            this.btnOpcLock.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnOpcLock.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOpcLock.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
-            this.btnOpcLock.Location = new System.Drawing.Point(840, 9);
-            this.btnOpcLock.Name = "btnOpcLock";
-            this.btnOpcLock.Size = new System.Drawing.Size(30, 30);
-            this.btnOpcLock.TabIndex = 6;
-            this.btnOpcLock.UseVisualStyleBackColor = true;
-            this.btnOpcLock.Visible = false;
-            this.btnOpcLock.Click += new System.EventHandler(this.btnOpcLock_Click);
-            // 
             // AddPlcFromFile
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -496,8 +470,6 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
             this.ClientSize = new System.Drawing.Size(920, 806);
-            this.Controls.Add(this.btnOpcLock);
-            this.Controls.Add(this.comboOpcTags);
             this.Controls.Add(this.flowLayoutPanel3);
             this.Controls.Add(this.flowLayoutPanel2);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
@@ -546,8 +518,6 @@
         private Parameters.parameterTextControl paraUnit;
         private Parameters.paramaterComboControl paraVarType;
         private Parameters.parameterTextControl paraDescription;
-        private System.Windows.Forms.ComboBox comboOpcTags;
-        private System.Windows.Forms.Button btnOpcLock;
         private Parameters.parameterTextControl paraRawMax;
         private Parameters.parameterTextControl paraRawMin;
     }
