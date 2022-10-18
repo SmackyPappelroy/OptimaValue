@@ -157,4 +157,10 @@
   <data name="locked_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Mina Resurser\locked_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="opcualogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Mina Resurser\Logos\opcualogo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="siemens-logo-512x512" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Mina Resurser\Logos\siemens-logo-512x512.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

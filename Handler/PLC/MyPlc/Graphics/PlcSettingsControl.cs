@@ -39,7 +39,18 @@ namespace OptimaValue.Handler.PLC.Graphics
 
         private bool PlcExists => DatabaseSql.DoesPlcExist(PlcName);
 
-
+        /// <summary>
+        /// Tar bort flickering när man laddar bakgrundsbilden.
+        /// </summary>
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams handleparm = base.CreateParams;
+                handleparm.ExStyle |= 0x02000000;
+                return handleparm;
+            }
+        }
 
         public PlcSettingsControl(ConnectionStatus conStatus, string plcName, string plcIp,
             string slot, string rack, bool active, CpuType cpuType, int id, ExtendedPlc myPlc)
@@ -62,17 +73,24 @@ namespace OptimaValue.Handler.PLC.Graphics
             Active = active;
             Id = id;
             MyPlc = myPlc;
+
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            this.SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+            this.SetStyle(ControlStyles.UserPaint, true);
+
             if (MyPlc != null)
             {
                 if (myPlc.isOpc)
                 {
                     CpuType = myPlc.CpuType;
                     btnBrowseOpc.Visible = true;
+                    this.BackgroundImage = new Bitmap(Properties.Resources.opcualogo);
                 }
                 else
                 {
                     CpuType = MyPlc.CpuType;
                     btnBrowseOpc.Visible = false;
+                    this.BackgroundImage = new Bitmap(Properties.Resources.siemens_logo_512x512);
                 }
             }
             else
@@ -90,7 +108,8 @@ namespace OptimaValue.Handler.PLC.Graphics
                     btnDelete.Enabled = true;
                     btnSave.Enabled = true;
                 }
-                btnSyncTime.Visible = true;
+                if (!MyPlc.isOpc)
+                    btnSyncTime.Visible = true;
             }
 
             this.HandleDestroyed += PlcSettingsControl_HandleDestroyed;

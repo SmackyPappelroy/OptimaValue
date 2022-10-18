@@ -29,6 +29,10 @@
 
 	<ItemGroup>
 	  <None Remove="Mina Resurser\cancel_16px.png" />
+	  <None Remove="Mina Resurser\Logos\opc.svg" />
+	  <None Remove="Mina Resurser\Logos\opcualogo.png" />
+	  <None Remove="Mina Resurser\Logos\siemens-logo-512x512.png" />
+	  <None Remove="Mina Resurser\Logos\siemens.svg" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -45,6 +49,15 @@
 
 	<ItemGroup>
 		<Content Include="Mina Resurser\icons8_gas_idle.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Mina Resurser\Logos\opcualogo.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </EmbeddedResource>
+	  <EmbeddedResource Include="Mina Resurser\Logos\siemens-logo-512x512.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>

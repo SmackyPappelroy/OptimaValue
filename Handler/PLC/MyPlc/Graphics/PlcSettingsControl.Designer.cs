@@ -48,9 +48,9 @@
             this.btnSyncTime = new System.Windows.Forms.Button();
             this.imageTest = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.btnBrowseOpc = new System.Windows.Forms.Button();
             this.btnConnect = new System.Windows.Forms.Button();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.btnBrowseOpc = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imageTest)).BeginInit();
@@ -327,10 +327,23 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(218, 62);
             this.tableLayoutPanel1.TabIndex = 18;
             // 
+            // btnBrowseOpc
+            // 
+            this.btnBrowseOpc.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnBrowseOpc.Font = new System.Drawing.Font("Century Gothic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnBrowseOpc.Location = new System.Drawing.Point(0, 31);
+            this.btnBrowseOpc.Margin = new System.Windows.Forms.Padding(0);
+            this.btnBrowseOpc.Name = "btnBrowseOpc";
+            this.btnBrowseOpc.Size = new System.Drawing.Size(218, 31);
+            this.btnBrowseOpc.TabIndex = 17;
+            this.btnBrowseOpc.Text = "Utforska OPC...";
+            this.btnBrowseOpc.UseVisualStyleBackColor = true;
+            this.btnBrowseOpc.Click += new System.EventHandler(this.btnBrowseOpc_Click);
+            // 
             // btnConnect
             // 
             this.btnConnect.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnConnect.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.btnConnect.Font = new System.Drawing.Font("Century Gothic", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.btnConnect.Location = new System.Drawing.Point(0, 0);
             this.btnConnect.Margin = new System.Windows.Forms.Padding(0);
             this.btnConnect.Name = "btnConnect";
@@ -349,25 +362,14 @@
             this.imageList.Images.SetKeyName(1, "disconnected_90px_red.png");
             this.imageList.Images.SetKeyName(2, "connected_90px.png");
             // 
-            // btnBrowseOpc
-            // 
-            this.btnBrowseOpc.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnBrowseOpc.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnBrowseOpc.Location = new System.Drawing.Point(0, 31);
-            this.btnBrowseOpc.Margin = new System.Windows.Forms.Padding(0);
-            this.btnBrowseOpc.Name = "btnBrowseOpc";
-            this.btnBrowseOpc.Size = new System.Drawing.Size(218, 31);
-            this.btnBrowseOpc.TabIndex = 17;
-            this.btnBrowseOpc.Text = "Browse...";
-            this.btnBrowseOpc.UseVisualStyleBackColor = true;
-            this.btnBrowseOpc.Click += new System.EventHandler(this.btnBrowseOpc_Click);
-            // 
             // PlcSettingsControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
+            this.BackColor = System.Drawing.Color.Transparent;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.Controls.Add(this.tableLayoutPanel2);
+            this.DoubleBuffered = true;
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "PlcSettingsControl";
             this.Size = new System.Drawing.Size(518, 532);

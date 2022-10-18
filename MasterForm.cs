@@ -717,8 +717,8 @@ namespace OptimaValue
                         treeNode.ImageIndex = 2;
                         treeNode.SelectedImageIndex = 2;
                     }
-                        comboTrend.Visible = true;
-                        AddTrendTags();
+                    comboTrend.Visible = true;
+                    AddTrendTags();
                     isConnected = true;
                     break;
                 case ConnectionStatus.Disconnecting:

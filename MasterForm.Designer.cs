@@ -357,7 +357,7 @@
             // comboTrend
             // 
             this.comboTrend.Name = "comboTrend";
-            this.comboTrend.Size = new System.Drawing.Size(121, 28);
+            this.comboTrend.Size = new System.Drawing.Size(300, 28);
             this.comboTrend.TextChanged += new System.EventHandler(this.comboTrend_TextChanged);
             // 
             // btnStartTrend

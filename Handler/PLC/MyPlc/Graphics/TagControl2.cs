@@ -87,16 +87,52 @@ namespace OptimaValue
             this.flowLayoutPanel.BackColor = Color.FromArgb(67, 62, 71);
 
             fileName = FileList[0];
+            var fileEnding = fileName.Substring(fileName.Length - 4, 4).ToLower();
 
-            if (fileName.Substring(fileName.Length - 3) != "csv".ToLower())
+            if (fileEnding != ".csv".ToLower() && fileEnding != "json".ToLower())
             {
                 Apps.Logger.Log("Fel fil-format", Severity.Error);
                 return;
             }
-
-            ImportFile(fileName);
+            if (fileEnding == "json")
+            {
+                ReadJsonFile(fileName);
+            }
+            else
+                ImportFile(fileName);
         }
 
+        private void ReadJsonFile(string fileName)
+        {
+            //try
+            //{
+            //    var json = File.ReadAllText(fileName);
+            //    var tiaPortalTags = System.Text.Json.JsonSerializer.Deserialize<List<TiaPortalTag>>(json);
+            //    if (tiaPortalTags != null)
+            //    {
+            //        var tagDefs = new List<TagDefinitions>();
+            //        foreach (var tag in tiaPortalTags)
+            //        {
+            //            var tagdef = new TagDefinitions()
+            //            {
+            //                Active = true,
+            //                Name = tag.TagName,
+            //                DataType = Enum.Parse<DataType>(tag.DataType, true),
+            //                BlockNr = int.Parse(tag.DbNr),
+            //                StartByte = int.Parse(tag.Offset),
+            //                LogType= LogType.Cyclic,
+            //                LogFreq = LogFrequency._1s,
+            //            };
+            //            tagDefs.Add(tagdef);
+            //        }
+            //        AddTag(tagDefs);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message);
+            //}
+        }
 
         private async void TagControl2_Load(object sender, EventArgs e)
         {

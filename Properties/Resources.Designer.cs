@@ -143,6 +143,16 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap opcualogo {
+            get {
+                object obj = ResourceManager.GetObject("opcualogo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap S71500Sync__Custom_ {
             get {
                 object obj = ResourceManager.GetObject("S71500Sync__Custom_", resourceCulture);
@@ -156,6 +166,16 @@ namespace OptimaValue.Properties {
         public static System.Drawing.Bitmap S7300Sync {
             get {
                 object obj = ResourceManager.GetObject("S7300Sync", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap siemens_logo_512x512 {
+            get {
+                object obj = ResourceManager.GetObject("siemens-logo-512x512", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
