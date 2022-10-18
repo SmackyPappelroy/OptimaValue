@@ -90,7 +90,7 @@ namespace OptimaValue
         [Column(TypeName = "float")]
         public float rawMax { get; set; }
 
-        [Column(TypeName = "int")]
+        [Column(TypeName = "float")]
         public float scaleOffset { get; set; }
 
 

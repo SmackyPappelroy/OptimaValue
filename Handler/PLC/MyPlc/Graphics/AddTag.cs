@@ -83,15 +83,28 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             SetVisibility();
         }
 
+
+        bool opcFormOpen = false;
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
             if (MyPlc.isOpc)
             {
-                PopulateOpcTags();
+                btnOpc.Visible = true;
+                btnOpc.Click += ((sender, args) =>
+                {
+                    if (!opcFormOpen)
+                    {
+                        PopulateOpcTags();
+                        opcFormOpen = true;
+                    }
+                });
+
             }
         }
+
+
 
         private class ComboTag
         {
@@ -100,6 +113,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         }
         private List<ComboTag> Tags = new();
 
+        FormBrowseOpc opcForm;
         private async void PopulateOpcTags()
         {
             try
@@ -117,14 +131,18 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                             if (opc.Client is UaClient uaClient)
                             {
                                 var opcControl = new BrowseOpcTreeControl(uaClient.MySession, uaClient);
-                                var form = new FormOpcExplorer(opcControl);
-                                form.Show();
-                                form.FormClosing += (s, e) =>
+                                opcForm = new FormBrowseOpc(opcControl);
+                                opcForm.FormClosing += ((sender, args) =>
+                                {
+                                    opcFormOpen = false;
+                                });
+                                opcForm.Show();
+                                opcForm.FormClosing += (s, e) =>
                                 {
                                     MyPlc.Plc.Dispose();
                                 };
-                                form.OnAddOpcTag += Form_OnAddOpcTag;
-                                form.OnDeleteOpcTag += Form_OnDeleteOpcTag;
+                                opcForm.OnAddOpcTag += Form_OnAddOpcTag;
+                                opcForm.OnDeleteOpcTag += Form_OnDeleteOpcTag;
                             }
 
                         }
@@ -737,7 +755,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                paraDataType.comboBoxen.SelectedItem.ToString(), int.Parse(paraStartAddress.ParameterValue),
                int.Parse(paraNrOfValues.ParameterValue), byte.Parse(paraBitAddress.ParameterValue),
                paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue,
-               float.Parse(paraRawMin.ToString()), float.Parse(paraRawMax.ToString()), float.Parse(paraScaleMin.ParameterValue),
+               float.Parse(paraRawMin.ParameterValue), float.Parse(paraRawMax.ParameterValue), float.Parse(paraScaleMin.ParameterValue),
                float.Parse(paraScaleMax.ParameterValue), float.Parse(paraScaleOffset.ParameterValue));
                 return tbl;
             }
@@ -745,9 +763,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             {
                 tbl.Rows.Add(checkActive.Checked, paraName.ParameterValue, paraDescription.ParameterValue, paraLogType.comboBoxen.SelectedItem.ToString(),
                TimeSpan.Parse(paraLogTime.ParameterValue), float.Parse(paraDeadband.ParameterValue),
-               PlcName, "", 0,
-               "", 0,
-               1, byte.Parse(paraBitAddress.ParameterValue),
+               PlcName, "", 0,"", 0,1, byte.Parse(paraBitAddress.ParameterValue),
                paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue
                , float.Parse(paraRawMin.ParameterValue), float.Parse(paraRawMax.ParameterValue), float.Parse(paraScaleMin.ParameterValue),
                float.Parse(paraScaleMax.ParameterValue), float.Parse(paraScaleOffset.ParameterValue));
@@ -868,6 +884,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private void AddTag_FormClosing(object sender, FormClosingEventArgs e)
         {
             TagsToLog.GetAllTagsFromSql();
+            if (opcForm != null)
+                opcForm.Close();
         }
 
         private void txtDeadband_TextChanged(object sender, CancelEventArgs e)

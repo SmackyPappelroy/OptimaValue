@@ -57,6 +57,7 @@
             this.paraUnit = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
+            this.btnOpc = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -463,6 +464,18 @@
             this.flowLayoutPanel3.Size = new System.Drawing.Size(154, 37);
             this.flowLayoutPanel3.TabIndex = 3;
             // 
+            // btnOpc
+            // 
+            this.btnOpc.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.btnOpc.ForeColor = System.Drawing.Color.Black;
+            this.btnOpc.Location = new System.Drawing.Point(302, 8);
+            this.btnOpc.Name = "btnOpc";
+            this.btnOpc.Size = new System.Drawing.Size(273, 31);
+            this.btnOpc.TabIndex = 4;
+            this.btnOpc.Text = "Utforska OPC-server...";
+            this.btnOpc.UseVisualStyleBackColor = true;
+            this.btnOpc.Visible = false;
+            // 
             // AddPlcFromFile
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -470,6 +483,7 @@
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
             this.ClientSize = new System.Drawing.Size(920, 806);
+            this.Controls.Add(this.btnOpc);
             this.Controls.Add(this.flowLayoutPanel3);
             this.Controls.Add(this.flowLayoutPanel2);
             this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
@@ -520,5 +534,6 @@
         private Parameters.parameterTextControl paraDescription;
         private Parameters.parameterTextControl paraRawMax;
         private Parameters.parameterTextControl paraRawMin;
+        private System.Windows.Forms.Button btnOpc;
     }
 }

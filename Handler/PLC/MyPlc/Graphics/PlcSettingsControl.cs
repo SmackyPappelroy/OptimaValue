@@ -67,6 +67,12 @@ namespace OptimaValue.Handler.PLC.Graphics
                 if (myPlc.isOpc)
                 {
                     CpuType = myPlc.CpuType;
+                    btnBrowseOpc.Visible = true;
+                }
+                else
+                {
+                    CpuType = MyPlc.CpuType;
+                    btnBrowseOpc.Visible = false;
                 }
             }
             else
@@ -622,13 +628,7 @@ namespace OptimaValue.Handler.PLC.Graphics
         {
             var opcClient = MyPlc.Plc as OpcPlc;
             var nodes = opcClient.Client.ExploreOpc("", true);
-            comboOpcTopic.Items.Clear();
             nodes = nodes.OrderBy(x => x.Tag).ToList();
-            foreach (var item in nodes)
-            {
-                comboOpcTopic.Items.Add(item.Tag);
-            }
-            comboOpcTopic.SelectedIndex = 0;
             return nodes.ToList();
         }
 
@@ -641,11 +641,9 @@ namespace OptimaValue.Handler.PLC.Graphics
                 txtSlot.Visible = false;
                 lblRack.Visible = false;
                 txtRack.Visible = false;
-                comboOpcTopic.Visible = true;
             }
             else
             {
-                comboOpcTopic.Visible = false;
                 lblIpAddress.Text = "IP-adress";
                 lblSlot.Visible = true;
                 txtSlot.Visible = true;
@@ -654,27 +652,23 @@ namespace OptimaValue.Handler.PLC.Graphics
             }
         }
 
-        private void comboOpcTopic_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (!loading)
-            {
-                txtName.Text = comboOpcTopic.Text;
-                try
-                {
-                    var opcPlc = MyPlc.Plc as OpcPlc;
-                    opcPlc.Connect();
-                    var subNodes = opcPlc.Client.ExploreOpc(txtName.Text, false, true);
-                }
-                catch (Exception ex)
-                {
 
-                }
-                finally
-                {
-                    var opcPlc = MyPlc.Plc as OpcPlc;
-                    opcPlc.Disconnect();
-                }
+        private async void btnBrowseOpc_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                await MyPlc.Plc.ConnectAsync();
+                var plc = MyPlc.Plc as OpcPlc;
+                var uaClient = plc.Client as UaClient;
+
+                var browseControl = new BrowseOpcTreeControl(uaClient.MySession, uaClient);
+                var form = new FormBrowseOpc(browseControl);
+
+                form.Show();
             }
+            catch { }
+
         }
+
     }
 }
