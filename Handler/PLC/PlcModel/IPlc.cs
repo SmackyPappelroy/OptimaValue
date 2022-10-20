@@ -32,14 +32,14 @@ namespace OptimaValue
         Task ConnectAsync();
         Task<bool> TestConnectionAsync();
         void Disconnect();
-        object Read(PlcTag tag);
-        object Read(string address);
+        ReadValue Read(PlcTag tag);
+        ReadValue Read(string address);
         byte[] ReadBytes(PlcTag tag);
         byte[] ReadBytes(PlcTag tag, int nrOfElements);
         Task<byte[]> ReadBytesAsync(PlcTag tag, CancellationToken cancellationToken = default);
         Task<byte[]> ReadBytesAsync(PlcTag tag, int nrOfElements, CancellationToken cancellationToken = default);
-        Task<object> ReadAsync(PlcTag tag, CancellationToken cancellationToken = default);
-        Task<object> ReadAsync(string address, CancellationToken cancellationToken = default);
+        Task<ReadValue> ReadAsync(PlcTag tag, CancellationToken cancellationToken = default);
+        Task<ReadValue> ReadAsync(string address, CancellationToken cancellationToken = default);
         void Write(PlcTag tag, object value);
         void Write(string address, object value);
         void WriteBytes(PlcTag tag, byte[] value);

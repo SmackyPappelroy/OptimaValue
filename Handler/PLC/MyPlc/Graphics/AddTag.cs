@@ -187,8 +187,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 try
                 {
                     var descriptionNode = subNodes.Where(x => x.Name.Contains("escription")).FirstOrDefault();
-                    ReadEvent<string> description = opcPlc.Read<string>(descriptionNode.Tag);
-                    paraDescription.ParameterValue = description.Value;
+                    var description = opcPlc.Read(descriptionNode.Tag);
+                    paraDescription.ParameterValue = description.Value.ToString();
                 }
                 catch (Exception) { }
 
@@ -199,11 +199,11 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 var scaleLowNode = subNodes.Where(x => x.Name.Contains("ScaledLow")).FirstOrDefault();
                 var scaleHiNode = subNodes.Where(x => x.Name.Contains("ScaledHigh")).FirstOrDefault();
 
-                ReadEvent<string> units = opcPlc.Read<string>(unitsNode.Tag);
-                ReadEvent<object> rawLo = opcPlc.Read<object>(rawLowNode.Tag);
-                ReadEvent<object> rawHi = opcPlc.Read<object>(rawHiNode.Tag);
-                ReadEvent<object> scaledLo = opcPlc.Read<object>(scaleLowNode.Tag);
-                ReadEvent<object> scaleHi = opcPlc.Read<object>(scaleHiNode.Tag);
+                var units = opcPlc.Read(unitsNode.Tag).Value.ToString();
+                var rawLo = opcPlc.Read(rawLowNode.Tag);
+                var rawHi = opcPlc.Read(rawHiNode.Tag);
+                var scaledLo = opcPlc.Read(scaleLowNode.Tag);
+                var scaleHi = opcPlc.Read(scaleHiNode.Tag);
 
                 paraRawMin.ParameterValue = rawLo.Value.ToString();
                 paraRawMax.ParameterValue = rawHi.Value.ToString();
@@ -211,7 +211,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 paraScaleMin.ParameterValue = scaledLo.Value.ToString();
                 paraScaleMax.ParameterValue = scaleHi.Value.ToString();
 
-                paraUnit.ParameterValue = units.Value;
+                paraUnit.ParameterValue = units;
             }
             catch (Exception ex)
             {

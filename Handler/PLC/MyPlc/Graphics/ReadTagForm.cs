@@ -36,5 +36,11 @@ namespace OptimaValue
             this.Controls.Add(control);
             control.Dock = DockStyle.Fill;
         }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            control.Dispose();
+            base.OnClosing(e);
+        }
     }
 }

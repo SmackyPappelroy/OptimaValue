@@ -16,7 +16,7 @@ namespace OptimaValue
 
     public class ExtendedPlc
     {
-        public IPlc Plc;
+        public IPlc Plc { get; set; }
         public PlcConfiguration PlcConfiguration { get; }
 
 

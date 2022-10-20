@@ -27,7 +27,14 @@ namespace OptimaValue
         public event Action<ConnectionStatus> OnConnectionChanged;
         public string ConnectionString { get; set; }
         public string PlcName { get; set; }
-        public bool IsConnected => Client.Status == OpcStatus.Connected;
+        public bool IsConnected
+        {
+            get
+            {
+                ConnectionStatus = ConnectionStatus.Connected;
+                return Client.Status == OpcStatus.Connected;
+            }
+        }
         public string RootNodeName => Client.RootNode.Name;
         public bool UnableToPing { get; private set; }
         public OpcType OpcType
@@ -155,7 +162,7 @@ namespace OptimaValue
         private void Initialize()
         {
             if (opcType == OpcType.OpcUa)
-                Client = new UaClient(new Uri(ConnectionString));
+                Client = new UaClient(new Uri(ConnectionString), Application.ProductName);
             else
                 Client = new DaClient(ConnectionString);
         }
@@ -195,11 +202,12 @@ namespace OptimaValue
             return false;
         }
 
-        public object Read(PlcTag tag)
+        public ReadValue Read(PlcTag tag)
         {
             try
             {
-                return Client.Read<object>(tag.Name);
+                var temp = Client.Read<object>(tag.Name);
+                return new ReadValue(this, temp);
             }
             catch (OpcException)
             {
@@ -208,11 +216,12 @@ namespace OptimaValue
             }
         }
 
-        public ReadEvent<T> Read<T>(PlcTag tag)
+        public ReadValue Read(string address)
         {
             try
             {
-                return Client.Read<T>(tag.Name);
+                var temp = Client.Read<object>(address);
+                return new ReadValue(this, temp);
             }
             catch (OpcException)
             {
@@ -221,11 +230,13 @@ namespace OptimaValue
             }
         }
 
-        public object Read(string address)
+
+        public async Task<ReadValue> ReadAsync(PlcTag tag, CancellationToken cancellationToken = default)
         {
             try
             {
-                return Client.Read<object>(address);
+                var value = await Client.ReadAsync<object>(tag.Name);
+                return new ReadValue(this, value);
             }
             catch (OpcException)
             {
@@ -234,63 +245,14 @@ namespace OptimaValue
             }
         }
 
-        public ReadEvent<T> Read<T>(string address)
-        {
-            try
-            {
-                return Client.Read<T>(address);
-            }
-            catch (OpcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-        }
 
-        public async Task<object> ReadAsync(PlcTag tag, CancellationToken cancellationToken = default)
+        public async Task<ReadValue> ReadAsync(string address, CancellationToken cancellationToken = default)
         {
             try
             {
-                return await Client.ReadAsync<object>(tag.Name);
-            }
-            catch (OpcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-        }
-
-        public async Task<ReadEvent<T>> ReadAsync<T>(PlcTag tag)
-        {
-            try
-            {
-                return await Client.ReadAsync<T>(tag.Name);
-            }
-            catch (OpcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-        }
-
-        public async Task<object> ReadAsync(string address, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                return await Client.ReadAsync<object>(address);
-            }
-            catch (OpcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-        }
-
-        public async Task<ReadEvent<T>> ReadAsync<T>(string address)
-        {
-            try
-            {
-                return await Client.ReadAsync<T>(address);
+                var readEvent = await Client.ReadAsync<object>(address);
+                var readValue = new ReadValue(this, readEvent.Value);
+                return readValue;
             }
             catch (OpcException)
             {

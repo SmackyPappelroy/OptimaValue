@@ -104,11 +104,11 @@ namespace OptimaValue
                     logTime = raw.logValue.LastLogTime,
                     tag_id = raw.logValue.Id,
                 };
-                if (raw.unknownTag is ReadEvent<object> val)
+                if (raw.unknownTag is ReadValue readVal)
                 {
-                    var value = val.Value;
-                    var type = val.Value.GetType();
-                    sql.opcQuality = val.Quality.ToString();
+                    var value = readVal.Value;
+                    var type = readVal.Type; ;
+                    sql.opcQuality = readVal.Quality;
                     switch (type)
                     {
                         case Type t when t == typeof(bool):

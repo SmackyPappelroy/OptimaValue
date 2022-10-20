@@ -67,20 +67,22 @@ namespace OptimaValue
                     var client = plc as OpcPlc;
                     try
                     {
-                        var readEvent = await client.ReadAsync<object>(tag);
+                        var readValue = await client.ReadAsync(tag);
                         this.Invoke(new Action(() =>
                         {
-                            if (readEvent.Type.IsArray)
+                            if (readValue.Type.IsArray)
                             {
-                                txtValue.Text = string.Join(", ", (readEvent.Value as Array).Cast<object>());
+                                txtValue.Text = string.Join(", ", (readValue.Value as Array).Cast<object>());
                             }
                             else
-                                txtValue.Text = readEvent.Value.ToString();
+                            {
+                                txtValue.Text = readValue.Value == null ? "null" : readValue.Value.ToString();
+                            }
 
                             lblTagName.Text = tag.Name;
-                            lblQuality.Text = readEvent.Quality == "Good" ? "Bra" : readEvent.Quality;
-                            lblTime.Text = readEvent.SourceTimestamp.ToLocalTime().ToString();
-                            lblDataType.Text = readEvent.Type.ToString();
+                            lblQuality.Text = readValue.Quality == "Good" ? "Bra" : readValue.Quality;
+                            lblTime.Text = readValue.SourceTimestamp.ToString();
+                            lblDataType.Text = readValue.Type == null ? "null" : readValue.Type.ToString();
                         }));
                     }
                     catch (Exception ex)
@@ -93,16 +95,16 @@ namespace OptimaValue
                     try
                     {
                         var siemensPlc = plc as SiemensPlc;
-                        var readEvent = await siemensPlc.ReadAsync(tag);
+                        var returnValue = await siemensPlc.ReadAsync(tag);
                         this.Invoke(new Action(() =>
                         {
 
-                            txtValue.Text = readEvent.ToString();
+                            txtValue.Text = returnValue.ToString();
 
                             lblTagName.Text = tag.Name;
                             lblQuality.Text = "Bra";
                             lblTime.Text = DateTime.Now.ToString();
-                            lblDataType.Text = readEvent.GetType().ToString();
+                            lblDataType.Text = returnValue.GetType() == null ? "null" : returnValue.GetType().ToString();
                         }));
                     }
                     catch { plc.SendPlcStatusMessage($"Lyckades ej ansluta till {plc.PlcName}", Status.Warning); }

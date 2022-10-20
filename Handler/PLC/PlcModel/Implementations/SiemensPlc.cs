@@ -78,7 +78,14 @@ namespace OptimaValue
 
         public string PlcName { get; set; }
 
-        public bool IsConnected => myPlc.IsConnected;
+        public bool IsConnected
+        {
+            get
+            {
+                ConnectionStatus = ConnectionStatus.Connected;
+                return myPlc.IsConnected;
+            }
+        }
 
         public CpuType CpuType => cpuType;
 
@@ -183,12 +190,12 @@ namespace OptimaValue
             return false;
         }
 
-        public object Read(PlcTag tag)
+        public ReadValue Read(PlcTag tag)
         {
             try
             {
                 var temp = myPlc.Read(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.NrOfElements, tag.BitAddress);
-                return temp;
+                return new ReadValue(this, temp);
             }
             catch (PlcException)
             {
@@ -197,11 +204,12 @@ namespace OptimaValue
             }
         }
 
-        public object Read(string address)
+        public ReadValue Read(string address)
         {
             try
             {
-                return myPlc.Read(address);
+                var temp = myPlc.Read(address);
+                return new ReadValue(this, temp);
             }
             catch (PlcException)
             {
@@ -210,11 +218,13 @@ namespace OptimaValue
             }
         }
 
-        public Task<object> ReadAsync(PlcTag tag, CancellationToken cancellationToken = default)
+        public async Task<ReadValue> ReadAsync(PlcTag tag, CancellationToken cancellationToken = default)
         {
             try
             {
-                return myPlc.ReadAsync(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.NrOfElements, tag.BitAddress, cancellationToken);
+                var temp = await myPlc.ReadAsync(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.NrOfElements, tag.BitAddress, cancellationToken);
+                return new ReadValue(this, temp);
+
             }
             catch (PlcException)
             {
@@ -223,11 +233,12 @@ namespace OptimaValue
             }
         }
 
-        public async Task<object> ReadAsync(string address, CancellationToken cancellationToken = default)
+        public async Task<ReadValue> ReadAsync(string address, CancellationToken cancellationToken = default)
         {
             try
             {
-                return await myPlc.ReadAsync(address, cancellationToken);
+                var temp = await myPlc.ReadAsync(address, cancellationToken);
+                return new ReadValue(this, temp);
             }
             catch (PlcException)
             {

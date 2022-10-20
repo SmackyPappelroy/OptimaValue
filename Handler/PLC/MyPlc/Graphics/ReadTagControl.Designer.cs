@@ -69,7 +69,7 @@ namespace OptimaValue
             // 
             this.lblDataType.AutoSize = true;
             this.lblDataType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblDataType.Location = new System.Drawing.Point(97, 102);
+            this.lblDataType.Location = new System.Drawing.Point(97, 208);
             this.lblDataType.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblDataType.Name = "lblDataType";
             this.lblDataType.Size = new System.Drawing.Size(40, 19);
@@ -80,7 +80,7 @@ namespace OptimaValue
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label3.Location = new System.Drawing.Point(9, 100);
+            this.label3.Location = new System.Drawing.Point(9, 206);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(81, 21);
@@ -91,7 +91,7 @@ namespace OptimaValue
             // 
             this.lblQuality.AutoSize = true;
             this.lblQuality.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblQuality.Location = new System.Drawing.Point(97, 142);
+            this.lblQuality.Location = new System.Drawing.Point(97, 248);
             this.lblQuality.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblQuality.Name = "lblQuality";
             this.lblQuality.Size = new System.Drawing.Size(40, 19);
@@ -102,7 +102,7 @@ namespace OptimaValue
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label4.Location = new System.Drawing.Point(23, 140);
+            this.label4.Location = new System.Drawing.Point(23, 246);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(67, 21);
@@ -113,7 +113,7 @@ namespace OptimaValue
             // 
             this.lblTime.AutoSize = true;
             this.lblTime.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.lblTime.Location = new System.Drawing.Point(97, 183);
+            this.lblTime.Location = new System.Drawing.Point(97, 289);
             this.lblTime.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblTime.Name = "lblTime";
             this.lblTime.Size = new System.Drawing.Size(40, 19);
@@ -124,7 +124,7 @@ namespace OptimaValue
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label5.Location = new System.Drawing.Point(54, 181);
+            this.label5.Location = new System.Drawing.Point(54, 287);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(36, 21);
@@ -136,6 +136,7 @@ namespace OptimaValue
             this.txtValue.AutoSize = true;
             this.txtValue.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.txtValue.Location = new System.Drawing.Point(97, 62);
+            this.txtValue.MaximumSize = new System.Drawing.Size(400, 0);
             this.txtValue.Name = "txtValue";
             this.txtValue.Size = new System.Drawing.Size(40, 19);
             this.txtValue.TabIndex = 10;
@@ -145,7 +146,7 @@ namespace OptimaValue
             // 
             this.txtConnection.AutoSize = true;
             this.txtConnection.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.txtConnection.Location = new System.Drawing.Point(97, 218);
+            this.txtConnection.Location = new System.Drawing.Point(97, 324);
             this.txtConnection.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.txtConnection.Name = "txtConnection";
             this.txtConnection.Size = new System.Drawing.Size(40, 19);
@@ -156,7 +157,7 @@ namespace OptimaValue
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label6.Location = new System.Drawing.Point(28, 217);
+            this.label6.Location = new System.Drawing.Point(28, 323);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(63, 21);
@@ -181,7 +182,7 @@ namespace OptimaValue
             this.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "ReadTagControl";
-            this.Size = new System.Drawing.Size(462, 254);
+            this.Size = new System.Drawing.Size(462, 357);
             this.ResumeLayout(false);
             this.PerformLayout();
 
