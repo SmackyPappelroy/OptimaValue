@@ -87,6 +87,12 @@ namespace OptimaValue
         {
             PlcStatusEvent.RaiseMessage(message, plc.PlcName, status);
         }
+
+        public static void SendPlcStatusMessage(this IPlc plc, string message, Status status)
+        {
+            PlcStatusEvent.RaiseMessage(message, plc.PlcName, status);
+        }
+
         public static void SendPlcOnlineMessage(this ExtendedPlc plc, ConnectionStatus connectionStatus, string elapsedTime = "")
         {
             OnlineStatusEvent.RaiseMessage(connectionStatus, plc.PlcName, elapsedTime);

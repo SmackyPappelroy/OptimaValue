@@ -187,7 +187,8 @@ namespace OptimaValue
         {
             try
             {
-                return myPlc.Read(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.BitAddress);
+                var temp = myPlc.Read(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.NrOfElements, tag.BitAddress);
+                return temp;
             }
             catch (PlcException)
             {
@@ -213,7 +214,7 @@ namespace OptimaValue
         {
             try
             {
-                return myPlc.ReadAsync(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType,1, tag.BitAddress,cancellationToken);
+                return myPlc.ReadAsync(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.NrOfElements, tag.BitAddress, cancellationToken);
             }
             catch (PlcException)
             {

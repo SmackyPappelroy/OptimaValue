@@ -50,11 +50,11 @@
             this.flowLayoutPanel.ContextMenuStrip = this.contextMenuStrip;
             this.flowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel.Location = new System.Drawing.Point(3, 5);
-            this.flowLayoutPanel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.flowLayoutPanel.Location = new System.Drawing.Point(3, 4);
+            this.flowLayoutPanel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.flowLayoutPanel.Name = "flowLayoutPanel";
-            this.flowLayoutPanel.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
-            this.flowLayoutPanel.Size = new System.Drawing.Size(560, 699);
+            this.flowLayoutPanel.Padding = new System.Windows.Forms.Padding(0, 2, 0, 0);
+            this.flowLayoutPanel.Size = new System.Drawing.Size(486, 524);
             this.flowLayoutPanel.TabIndex = 0;
             this.flowLayoutPanel.WrapContents = false;
             // 
@@ -66,26 +66,26 @@
             this.importeraToolStripMenuItem,
             this.exporteraToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(145, 76);
+            this.contextMenuStrip.Size = new System.Drawing.Size(127, 70);
             // 
             // addMenu
             // 
             this.addMenu.Name = "addMenu";
-            this.addMenu.Size = new System.Drawing.Size(144, 24);
+            this.addMenu.Size = new System.Drawing.Size(126, 22);
             this.addMenu.Text = "Lägg Till";
             this.addMenu.Click += new System.EventHandler(this.addMenu_Click_1);
             // 
             // importeraToolStripMenuItem
             // 
             this.importeraToolStripMenuItem.Name = "importeraToolStripMenuItem";
-            this.importeraToolStripMenuItem.Size = new System.Drawing.Size(144, 24);
+            this.importeraToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
             this.importeraToolStripMenuItem.Text = "Importera";
             this.importeraToolStripMenuItem.Click += new System.EventHandler(this.click_Import);
             // 
             // exporteraToolStripMenuItem
             // 
             this.exporteraToolStripMenuItem.Name = "exporteraToolStripMenuItem";
-            this.exporteraToolStripMenuItem.Size = new System.Drawing.Size(144, 24);
+            this.exporteraToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
             this.exporteraToolStripMenuItem.Text = "Exportera";
             this.exporteraToolStripMenuItem.Click += new System.EventHandler(this.click_Export);
             // 
@@ -99,21 +99,21 @@
             this.tablePanel.Controls.Add(this.pictureBox1, 1, 0);
             this.tablePanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tablePanel.Location = new System.Drawing.Point(0, 0);
-            this.tablePanel.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.tablePanel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tablePanel.Name = "tablePanel";
             this.tablePanel.RowCount = 1;
             this.tablePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tablePanel.Size = new System.Drawing.Size(592, 709);
+            this.tablePanel.Size = new System.Drawing.Size(518, 532);
             this.tablePanel.TabIndex = 1;
             // 
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(569, 5);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.pictureBox1.Location = new System.Drawing.Point(495, 4);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Padding = new System.Windows.Forms.Padding(2, 3, 2, 0);
-            this.pictureBox1.Size = new System.Drawing.Size(20, 19);
+            this.pictureBox1.Padding = new System.Windows.Forms.Padding(2, 2, 2, 0);
+            this.pictureBox1.Size = new System.Drawing.Size(20, 18);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
@@ -122,12 +122,12 @@
             // TagControl2
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tablePanel);
-            this.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "TagControl2";
-            this.Size = new System.Drawing.Size(592, 709);
+            this.Size = new System.Drawing.Size(518, 532);
             this.Load += new System.EventHandler(this.TagControl2_Load);
             this.contextMenuStrip.ResumeLayout(false);
             this.tablePanel.ResumeLayout(false);

@@ -130,7 +130,8 @@ namespace OptimaValue
                 {
                     if (plc.Active)
                     {
-                        await plc.Plc.ConnectAsync();
+                        if (!plc.IsConnected)
+                            await plc.Plc.ConnectAsync();
                         if (!plc.Plc.IsConnected)
                         {
                             Apps.Logger.Log($"Får ej kontakt med {plc.PlcName}", Severity.Error);
@@ -341,7 +342,7 @@ namespace OptimaValue
                     else
                         logdiff = 0;
 
-             var tag = (ITagDefinition)logTag;
+                    var tag = (ITagDefinition)logTag;
                     var plcTag = new PlcTag(tag);
 
                     //var plcTag = (PlcTag)((ITagDefinition)logTag);
@@ -1123,7 +1124,7 @@ namespace OptimaValue
                             MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
                             Apps.Logger.Log($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);
                         }
-                        
+
                     }
                 }
             }

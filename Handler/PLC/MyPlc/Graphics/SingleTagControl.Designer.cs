@@ -34,6 +34,7 @@
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.changeTagMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.removeTagMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this.readTagMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.txtName = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.statusPicture = new System.Windows.Forms.PictureBox();
@@ -68,23 +69,31 @@
             // 
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.changeTagMenu,
-            this.removeTagMenu});
+            this.removeTagMenu,
+            this.readTagMenu});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(111, 48);
+            this.contextMenuStrip.Size = new System.Drawing.Size(128, 70);
             // 
             // changeTagMenu
             // 
             this.changeTagMenu.Name = "changeTagMenu";
-            this.changeTagMenu.Size = new System.Drawing.Size(110, 22);
+            this.changeTagMenu.Size = new System.Drawing.Size(127, 22);
             this.changeTagMenu.Text = "Ändra";
             this.changeTagMenu.Click += new System.EventHandler(this.changeTagMenu_Click);
             // 
             // removeTagMenu
             // 
             this.removeTagMenu.Name = "removeTagMenu";
-            this.removeTagMenu.Size = new System.Drawing.Size(110, 22);
+            this.removeTagMenu.Size = new System.Drawing.Size(127, 22);
             this.removeTagMenu.Text = "Ta Bort";
             this.removeTagMenu.Click += new System.EventHandler(this.removeTagMenu_Click);
+            // 
+            // readTagMenu
+            // 
+            this.readTagMenu.Name = "readTagMenu";
+            this.readTagMenu.Size = new System.Drawing.Size(127, 22);
+            this.readTagMenu.Text = "Läs tagg...";
+            this.readTagMenu.Click += new System.EventHandler(this.readTagMenu_Click);
             // 
             // txtName
             // 
@@ -226,5 +235,6 @@
         private System.Windows.Forms.ToolStripMenuItem rensaFelToolStripMenuItem;
         private System.Windows.Forms.PictureBox pictureBox2;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.ToolStripMenuItem readTagMenu;
     }
 }

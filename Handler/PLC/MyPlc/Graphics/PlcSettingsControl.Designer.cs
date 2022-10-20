@@ -50,11 +50,14 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.btnBrowseOpc = new System.Windows.Forms.Button();
             this.btnConnect = new System.Windows.Forms.Button();
+            this.picLogo = new System.Windows.Forms.PictureBox();
             this.imageList = new System.Windows.Forms.ImageList(this.components);
+            this.imageListLogo = new System.Windows.Forms.ImageList(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imageTest)).BeginInit();
             this.tableLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
             this.SuspendLayout();
             // 
             // lblName
@@ -265,6 +268,7 @@
             this.tableLayoutPanel2.Controls.Add(this.txtSlot, 2, 6);
             this.tableLayoutPanel2.Controls.Add(this.imageTest, 3, 0);
             this.tableLayoutPanel2.Controls.Add(this.tableLayoutPanel1, 2, 0);
+            this.tableLayoutPanel2.Controls.Add(this.picLogo, 0, 7);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -353,6 +357,18 @@
             this.btnConnect.UseVisualStyleBackColor = true;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
+            // picLogo
+            // 
+            this.picLogo.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.tableLayoutPanel2.SetColumnSpan(this.picLogo, 2);
+            this.picLogo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picLogo.Location = new System.Drawing.Point(3, 359);
+            this.picLogo.Name = "picLogo";
+            this.picLogo.Size = new System.Drawing.Size(253, 42);
+            this.picLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picLogo.TabIndex = 19;
+            this.picLogo.TabStop = false;
+            // 
             // imageList
             // 
             this.imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
@@ -361,6 +377,14 @@
             this.imageList.Images.SetKeyName(0, "disconnected_90px.png");
             this.imageList.Images.SetKeyName(1, "disconnected_90px_red.png");
             this.imageList.Images.SetKeyName(2, "connected_90px.png");
+            // 
+            // imageListLogo
+            // 
+            this.imageListLogo.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imageListLogo.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageListLogo.ImageStream")));
+            this.imageListLogo.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageListLogo.Images.SetKeyName(0, "siemens-logo-512x512.png");
+            this.imageListLogo.Images.SetKeyName(1, "opcualogo.png");
             // 
             // PlcSettingsControl
             // 
@@ -380,6 +404,7 @@
             this.tableLayoutPanel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.imageTest)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -407,5 +432,7 @@
         private System.Windows.Forms.PictureBox imageTest;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Button btnBrowseOpc;
+        private System.Windows.Forms.PictureBox picLogo;
+        private System.Windows.Forms.ImageList imageListLogo;
     }
 }

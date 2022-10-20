@@ -158,6 +158,7 @@ namespace OptimaValue
                                     {
                                         flowLayoutPanel.Controls.Add(newTag);
                                     });
+                                    this.Disposed += (s, e) => newTag.Dispose();
                                 }
                             }
                             return;

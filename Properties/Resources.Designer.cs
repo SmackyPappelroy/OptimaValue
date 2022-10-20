@@ -173,9 +173,9 @@ namespace OptimaValue.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        public static System.Drawing.Bitmap siemens_logo_512x512 {
+        public static System.Drawing.Bitmap siemens {
             get {
-                object obj = ResourceManager.GetObject("siemens-logo-512x512", resourceCulture);
+                object obj = ResourceManager.GetObject("siemens", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

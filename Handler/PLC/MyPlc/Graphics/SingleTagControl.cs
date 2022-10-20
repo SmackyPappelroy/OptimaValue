@@ -1,5 +1,6 @@
 ﻿using OptimaValue.Properties;
 using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Windows.Forms;
@@ -196,6 +197,23 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private void txtName_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             changeTagMenu_Click(this, EventArgs.Empty);
+        }
+
+
+        private void readTagMenu_Click(object sender, EventArgs e)
+        {
+            var tag = new PlcTag(SingleTag);
+            var control = new ReadTagControl(MyPlc.Plc, tag);
+
+            var form = new ReadTagForm(control, MyPlc.Plc, tag);
+            form.Show();
+
+            this.Disposed += ((s, e) =>
+            {
+                form.Close();
+                control.Dispose();
+                form.Dispose();
+            });
         }
     }
 }

@@ -84,13 +84,13 @@ namespace OptimaValue.Handler.PLC.Graphics
                 {
                     CpuType = myPlc.CpuType;
                     btnBrowseOpc.Visible = true;
-                    this.BackgroundImage = new Bitmap(Properties.Resources.opcualogo);
+                    picLogo.BackgroundImage = new Bitmap(Properties.Resources.opcualogo);
                 }
                 else
                 {
                     CpuType = MyPlc.CpuType;
                     btnBrowseOpc.Visible = false;
-                    this.BackgroundImage = new Bitmap(Properties.Resources.siemens_logo_512x512);
+                    picLogo.BackgroundImage = new Bitmap(Properties.Resources.siemens);
                 }
             }
             else

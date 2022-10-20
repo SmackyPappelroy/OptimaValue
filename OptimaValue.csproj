@@ -55,9 +55,6 @@
 	  <EmbeddedResource Include="Mina Resurser\Logos\opcualogo.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </EmbeddedResource>
-	  <EmbeddedResource Include="Mina Resurser\Logos\siemens-logo-512x512.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -82,6 +79,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Update="Handler\PLC\MyPlc\Graphics\ReadTagControl.cs">
+		  <SubType>UserControl</SubType>
+		</Compile>
 		<Compile Update="Properties\Resources.Designer.cs">
 		  <DesignTime>True</DesignTime>
 		  <AutoGen>True</AutoGen>

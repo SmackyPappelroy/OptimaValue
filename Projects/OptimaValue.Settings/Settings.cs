@@ -197,6 +197,7 @@ namespace OptimaValue.Config
                         IsTrendRunning = false,
                         IsOptimaValueRunning = false
                     };
+                    Directory.CreateDirectory(filePath);
                     File.WriteAllText(fullPathName, JsonSerializer.Serialize(settings));
                 }
             }
