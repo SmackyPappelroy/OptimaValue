@@ -8,10 +8,12 @@ namespace OptimaValue
 {
     public class ReadValue
     {
+        private DateTime createdDate;
         public ReadValue(IPlc plc, object value)
         {
             this.plc = plc;
             internalValue = value;
+            createdDate = DateTime.Now;
         }
 
         private enum plcType
@@ -96,7 +98,7 @@ namespace OptimaValue
             {
                 if (PlcType == plcType.SiemensPlc)
                 {
-                    return DateTime.Now;
+                    return createdDate;
                 }
                 else if (PlcType == plcType.OpcPlc)
                 {
@@ -105,7 +107,7 @@ namespace OptimaValue
                 }
                 else
                 {
-                    return DateTime.Now;
+                    return createdDate;
                 }
             }
         }
@@ -116,7 +118,7 @@ namespace OptimaValue
             {
                 if (PlcType == plcType.SiemensPlc)
                 {
-                    return DateTime.Now;
+                    return createdDate;
                 }
                 else if (PlcType == plcType.OpcPlc)
                 {
@@ -125,7 +127,7 @@ namespace OptimaValue
                 }
                 else
                 {
-                    return DateTime.Now;
+                    return createdDate;
                 }
             }
         }
@@ -136,7 +138,7 @@ namespace OptimaValue
             {
                 if (PlcType == plcType.SiemensPlc)
                 {
-                    return DateTime.Now;
+                    return createdDate;
                 }
                 else if (PlcType == plcType.OpcPlc)
                 {
@@ -145,7 +147,7 @@ namespace OptimaValue
                 }
                 else
                 {
-                    return DateTime.Now;
+                    return createdDate;
                 }
             }
         }
