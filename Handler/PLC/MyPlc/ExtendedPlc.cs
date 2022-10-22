@@ -93,7 +93,6 @@ namespace OptimaValue
 
         #region Properties
         public CpuType CpuType => Plc.CpuType;
-        private DateTime UpTimeStart = DateTime.MaxValue;
         private bool isSubscribed = false;
         public bool isOpc => Plc.isNotPlc;
 

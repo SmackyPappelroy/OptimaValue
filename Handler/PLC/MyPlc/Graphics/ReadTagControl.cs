@@ -46,6 +46,7 @@ namespace OptimaValue
             timer.Dispose();
             plc.Disconnect();
             plc.Dispose();
+            this.Dispose();
         }
 
         private SemaphoreSlim lockObject = new(1);

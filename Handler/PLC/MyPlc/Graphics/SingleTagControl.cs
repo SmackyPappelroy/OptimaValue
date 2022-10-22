@@ -214,6 +214,13 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 control.Dispose();
                 form.Dispose();
             });
+
+            this.LostFocus += ((s, e) =>
+            {
+                form.Close();
+                control.Dispose();
+                form.Dispose();
+            });
         }
     }
 }

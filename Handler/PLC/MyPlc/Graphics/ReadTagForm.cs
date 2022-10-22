@@ -31,7 +31,6 @@ namespace OptimaValue
 
         private void ReadTagForm_Load(object sender, EventArgs e)
         {
-            control = new ReadTagControl(plc, tag);
             this.Text = tag.Name;
             this.Controls.Add(control);
             control.Dock = DockStyle.Fill;

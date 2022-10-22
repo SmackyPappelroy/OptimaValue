@@ -163,10 +163,19 @@ namespace OptimaValue
             ConnectionStatus = myPlc.IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
         }
 
-        public async Task ConnectAsync()
+        public async Task ConnectAsync(int timeOut = 1000)
         {
-            await myPlc.OpenAsync();
-            ConnectionStatus = myPlc.IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
+            try
+            {
+                using CancellationTokenSource cts = new CancellationTokenSource(timeOut);
+
+                await myPlc.OpenAsync(cts.Token);
+                ConnectionStatus = myPlc.IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
+            }
+            catch (OperationCanceledException ex)
+            {
+                throw new TimeoutException("Timeout when connecting to PLC", ex);
+            }
         }
 
         public void Disconnect()

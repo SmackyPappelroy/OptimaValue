@@ -16,6 +16,13 @@ namespace OptimaValue
             createdDate = DateTime.Now;
         }
 
+        public ReadValue(ExtendedPlc plc, object value)
+        {
+            this.plc = plc.Plc;
+            internalValue = value;
+            createdDate = DateTime.Now;
+        }
+
         private enum plcType
         {
             SiemensPlc,
@@ -151,6 +158,108 @@ namespace OptimaValue
                 }
             }
         }
+
+        public float ValueAsFloat
+        {
+            get
+            {
+                if (Value == null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    if (Type.IsArray)
+                    {
+                        return 0;
+                    }
+                    else if (Value is float)
+                    {
+                        return (float)Value;
+                    }
+                    else if (Value is double)
+                    {
+                        return (float)Convert.ToDouble(Value);
+                    }
+                    else if (Value is int)
+                    {
+                        return (float)(int)Value;
+                    }
+                    else if (Value is uint)
+                    {
+                        return (float)(uint)Value;
+                    }
+                    else if (Value is short)
+                    {
+                        return (float)(short)Value;
+                    }
+                    else if (Value is ushort)
+                    {
+                        return (float)(ushort)Value;
+                    }
+                    else if (Value is long)
+                    {
+                        return (float)(long)Value;
+                    }
+                    else if (Value is ulong)
+                    {
+                        return (float)(ulong)Value;
+                    }
+                    else if (Value is byte)
+                    {
+                        return (float)(byte)Value;
+                    }
+                    else if (Value is sbyte)
+                    {
+                        return (float)(sbyte)Value;
+                    }
+                    else if (Value is bool)
+                    {
+                        return (bool)Value ? 1 : 0;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        public string ValueAsString
+        {
+            get
+            {
+                if (Value == null)
+                {
+                    return "null";
+                }
+                else
+                {
+                    if (Type.IsArray)
+                    {
+                        var array = Value as Array;
+                        var sb = new StringBuilder();
+                        sb.Append("[");
+                        for (int i = 0; i < array.Length; i++)
+                        {
+                            sb.Append(array.GetValue(i).ToString());
+                            if (i < array.Length - 1)
+                            {
+                                sb.Append(", ");
+                            }
+                        }
+                        sb.Append("]");
+                        return sb.ToString();
+                    }
+                    else
+                    {
+                        return Value.ToString();
+                    }
+                }
+            }
+        }
+
+        public override string ToString() => Value.ToString();
     }
 
 

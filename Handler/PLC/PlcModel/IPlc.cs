@@ -29,7 +29,7 @@ namespace OptimaValue
 
         bool Ping();
         void Connect();
-        Task ConnectAsync();
+        Task ConnectAsync(int timeOut = 1000);
         Task<bool> TestConnectionAsync();
         void Disconnect();
         ReadValue Read(PlcTag tag);

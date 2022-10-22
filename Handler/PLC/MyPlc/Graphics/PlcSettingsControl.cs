@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Media;
@@ -599,26 +600,24 @@ namespace OptimaValue.Handler.PLC.Graphics
             {
                 loading = true;
                 tableLayoutPanel2.Enabled = false;
+                var sw = new Stopwatch();
                 try
                 {
                     tryConnect = true;
                     btnConnect.Enabled = false;
                     Application.UseWaitCursor = true;
-                    if (!MyPlc.isOpc)
-                        await MyPlc.Plc.ConnectAsync();
-                    else
+                    sw.Start();
+                    await MyPlc.Plc.ConnectAsync();
+                    if (MyPlc.isOpc)
                     {
-                        await MyPlc.Plc.ConnectAsync();
-
-
-
                         PopulateOpcTopics();
                     }
                     imageTest.Image = imageList.Images[2];
                     if (OperatingSystem.IsWindows())
                         SystemSounds.Beep.Play();
                     connected = true;
-                    $"Ansluten till {MyPlc.PlcName}".SendStatusMessage(Severity.Success);
+                    $"Ansluten till {MyPlc.PlcName}"
+                        .SendStatusMessage(Severity.Success);
                 }
                 catch (Exception ex)
                 {
@@ -626,10 +625,13 @@ namespace OptimaValue.Handler.PLC.Graphics
                     connected = false;
                     if (OperatingSystem.IsWindows())
                         SystemSounds.Hand.Play();
-                    $"Ingen anslutning till {MyPlc.PlcName}".SendStatusMessage(Severity.Error);
+                    $"Ingen anslutning till {MyPlc.PlcName}"
+                        .SendStatusMessage(Severity.Error);
                 }
                 finally
                 {
+                    sw.Stop();
+                    Debug.WriteLine($"Connection time: {sw.ElapsedMilliseconds} ms");
                     if (!MyPlc.isOpc)
                         MyPlc.Plc.Disconnect();
                     else if (MyPlc.IsConnected)

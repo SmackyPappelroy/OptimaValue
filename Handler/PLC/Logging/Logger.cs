@@ -1,4 +1,5 @@
-﻿using OpcUaHm;
+﻿using Opc.Ua;
+using OpcUaHm;
 using OpcUaHm.Common;
 using S7.Net;
 using System;
@@ -144,12 +145,21 @@ namespace OptimaValue
                     }
 
                 }
-
+                catch (TimeoutException ex)
+                {
+                    Apps.Logger.Log($"Lyckas ej ansluta till {plc.PlcName}", Severity.Error, ex);
+                    RequestDisconnect();
+                }
                 catch (PlcException ex)
                 {
                     Apps.Logger.Log($"Lyckas ej ansluta till {plc.PlcName}", Severity.Error, ex);
                     RequestDisconnect();
 
+                }
+                catch (ServiceResultException ex)
+                {
+                    Apps.Logger.Log($"Lyckas ej ansluta till {plc.PlcName}", Severity.Error, ex);
+                    RequestDisconnect();
                 }
             }
 
@@ -350,7 +360,7 @@ namespace OptimaValue
 
                     if ((tiden - logTag.LastLogTime) >= TimeSpan.FromMilliseconds((int)logTag.LogFreq - logdiff)) // Minskar med 2 millisekunder vid snabb loggning för att få en mer exakt loggning
                     {
-                        object unknownTag = new object();
+                        ReadValue readValue = null;
                         //string opcTagType = "";
 
                         try
@@ -365,18 +375,20 @@ namespace OptimaValue
                                 if (logTag.VarType == VarType.S7String && !MyPlc.isOpc)
                                 {
                                     var temp = await MyPlc.Plc.ReadBytesAsync(plcTag, 2);
-                                    unknownTag = temp.S7StringSwedish();
+                                    var rdVal = new ReadValue(MyPlc.Plc, temp);
+                                    var rs = (byte[])rdVal.Value;
+                                    readValue = new ReadValue(MyPlc.Plc, rs.S7StringSwedish());
                                 }
                                 else if (logTag.VarType == VarType.String)
                                 {
                                     if (!MyPlc.isOpc)
                                     {
                                         var temp = MyPlc.Plc.ReadBytes(plcTag, 2);
-                                        unknownTag = temp.StringSwedish();
+                                        readValue = new ReadValue(MyPlc, temp.S7StringSwedish());
                                     }
                                     else
                                     {
-                                        unknownTag = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                        readValue = await MyPlc.Plc.ReadAsync(plcTag);
                                     }
                                 }
                                 else if (logTag.VarType == VarType.DateTime)
@@ -384,27 +396,27 @@ namespace OptimaValue
                                     if (!MyPlc.isOpc)
                                     {
                                         var temp = await MyPlc.Plc.ReadBytesAsync(plcTag, 8);
-                                        unknownTag = S7.Net.Types.DateTime.FromByteArray(temp);
+                                        readValue = new ReadValue(MyPlc, S7.Net.Types.DateTime.FromByteArray(temp));
                                     }
                                     else
                                     {
-                                        unknownTag = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                        readValue = await MyPlc.Plc.ReadAsync(plcTag);
                                     }
 
                                 }
                                 else if (logTag.VarType == VarType.DateTimeLong && !MyPlc.isOpc)
                                 {
                                     var temp = await MyPlc.Plc.ReadBytesAsync(plcTag, 12);
-                                    unknownTag = S7.Net.Types.DateTimeLong.FromByteArray(temp);
+                                    readValue = new ReadValue(MyPlc, S7.Net.Types.DateTimeLong.FromByteArray(temp));
                                 }
                                 else if (!MyPlc.isOpc)
                                 {
-                                    unknownTag = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                    readValue = await MyPlc.Plc.ReadAsync(plcTag);
 
                                 }
                                 else if (MyPlc.isOpc)
                                 {
-                                    unknownTag = await MyPlc.Plc.ReadAsync(plcTag);
+                                    readValue = await MyPlc.Plc.ReadAsync(plcTag);
                                 }
                                 logTag.LastLogTime = tiden;
                                 logTag.NrSuccededReadAttempts++;
@@ -412,10 +424,10 @@ namespace OptimaValue
 
                                 if (logTag.LogType == LogType.Delta && MyPlc.IsConnected)
                                 {
-                                    var lastKnownLogValue = lastLogValue.FindLast(l => l.tag_id == logTag.Id);
+                                    LastValue lastKnownLogValue = lastLogValue.FindLast(l => l.tag_id == logTag.Id);
                                     if (lastKnownLogValue == null)
                                     {
-                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                         return;
                                     }
 
@@ -425,70 +437,70 @@ namespace OptimaValue
                                         switch (logTag.VarType)
                                         {
                                             case VarType.Bit:
-                                                if ((bool)unknownTag != (bool)lastKnownLogValue.value)
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                if ((bool)readValue.Value != (bool)lastKnownLogValue.value)
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 break;
                                             case VarType.Byte:
-                                                if (unknownTag is byte unknownConverted)
+                                                if (readValue.Value is byte unknownConverted)
                                                 {
-                                                    if (Math.Abs(unknownConverted - ((byte)lastKnownLogValue.value)) > (float)((byte)logTag.Deadband))
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    if (Math.Abs(unknownConverted - ((byte)lastKnownLogValue.value)) > ((byte)logTag.Deadband))
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 else
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 break;
                                             case VarType.Word:
-                                                if (unknownTag is ushort unknownUShort)
+                                                if (readValue.Value is ushort unknownUShort)
                                                 {
-                                                    if (Math.Abs(unknownUShort - ((ushort)lastKnownLogValue.value)) > (float)((ushort)logTag.Deadband))
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    if (Math.Abs(unknownUShort - ((ushort)lastKnownLogValue.value)) > ((ushort)logTag.Deadband))
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 else
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 break;
                                             case VarType.DWord:
-                                                if (unknownTag is uint uknonwnUint)
+                                                if (readValue.Value is uint uknonwnUint)
                                                 {
-                                                    if (Math.Abs(uknonwnUint - ((uint)lastKnownLogValue.value)) > (float)((uint)logTag.Deadband))
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    if (Math.Abs(uknonwnUint - ((uint)lastKnownLogValue.value)) > ((uint)logTag.Deadband))
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 else
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 break;
                                             case VarType.Int:
-                                                if (unknownTag is short unknownShort)
+                                                if (readValue.Value is short unknownShort)
                                                 {
-                                                    if (Math.Abs(unknownShort - ((short)lastKnownLogValue.value)) > (float)((short)logTag.Deadband))
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    if (Math.Abs(unknownShort - ((short)lastKnownLogValue.value)) > ((short)logTag.Deadband))
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 else
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 break;
                                             case VarType.DInt:
-                                                if (unknownTag is int unknownInt)
+                                                if (readValue.Value is int unknownInt)
                                                 {
-                                                    if (Math.Abs(unknownInt - ((int)lastKnownLogValue.value)) > (float)((int)logTag.Deadband))
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    if (Math.Abs(unknownInt - ((int)lastKnownLogValue.value)) > ((int)logTag.Deadband))
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 else
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 break;
                                             case VarType.Real:
-                                                if (unknownTag is float unknownFloat)
+                                                if (readValue.Value is float unknownFloat)
                                                 {
                                                     if (Math.Abs(unknownFloat - (float)lastKnownLogValue.value) > (float)logTag.Deadband)
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 else
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 break;
                                             case VarType.String:
-                                                if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                if (!Equals(readValue.ToString(), lastKnownLogValue.value.ToString()))
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 break;
                                             case VarType.S7String:
-                                                if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                if (!Equals(readValue.ToString(), lastKnownLogValue.value.ToString()))
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 break;
                                             case VarType.Timer:
                                                 break;
@@ -508,103 +520,103 @@ namespace OptimaValue
                                         switch (logTag.VarType)
                                         {
                                             case VarType.Bit:
-                                                if ((bool)unknownTag != (bool)lastKnownLogValue.value)
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                if ((bool)readValue.Value != (bool)lastKnownLogValue.value)
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 break;
                                             case VarType.Byte:
-                                                if (unknownTag is byte unknownByte)
+                                                if (readValue.Value is byte unknownByte)
                                                 {
                                                     if (unknownByte > (byte)lastKnownLogValue.value ||
                                                         unknownByte < (byte)lastKnownLogValue.value)
                                                     {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 break;
                                             case VarType.Word:
-                                                if (unknownTag is ushort unknownUShort)
+                                                if (readValue.Value is ushort unknownUShort)
                                                 {
                                                     if (unknownUShort > (ushort)lastKnownLogValue.value ||
                                                         unknownUShort < (ushort)lastKnownLogValue.value)
                                                     {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 break;
                                             case VarType.DWord:
-                                                if (unknownTag is uint unknownUInt)
+                                                if (readValue.Value is uint unknownUInt)
                                                 {
                                                     if (unknownUInt > (uint)lastKnownLogValue.value ||
                                                         unknownUInt < (uint)lastKnownLogValue.value)
                                                     {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 break;
                                             case VarType.Int:
-                                                if (unknownTag is short unknownShort)
+                                                if (readValue.Value is short unknownShort)
                                                 {
                                                     if (unknownShort > (short)lastKnownLogValue.value ||
                                                         unknownShort < (short)lastKnownLogValue.value)
                                                     {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 break;
                                             case VarType.DInt:
-                                                if (unknownTag is int unknownInt)
+                                                if (readValue.Value is int unknownInt)
                                                 {
                                                     if (unknownInt > (int)lastKnownLogValue.value ||
                                                         unknownInt < (int)lastKnownLogValue.value)
                                                     {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 break;
                                             case VarType.Real:
-                                                if (unknownTag is float unknownFloat)
+                                                if (readValue.Value is float unknownFloat)
                                                 {
                                                     if (unknownFloat > (float)lastKnownLogValue.value ||
                                                         unknownFloat < (float)lastKnownLogValue.value)
                                                     {
-                                                        AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 break;
                                             case VarType.String:
-                                                if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
+                                                if (!Equals(readValue.ToString(), lastKnownLogValue.value.ToString()))
                                                 {
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 break;
                                             case VarType.S7String:
-                                                if (!Equals(unknownTag.ToString(), lastKnownLogValue.value.ToString()))
+                                                if (!Equals(readValue.ToString(), lastKnownLogValue.value.ToString()))
                                                 {
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 break;
                                             case VarType.Timer:
@@ -614,12 +626,9 @@ namespace OptimaValue
                                             case VarType.DateTime:
                                                 break;
                                             case VarType.Opc:
-                                                var readEvent = unknownTag as ReadEvent<object>;
-                                                var lastValue = lastKnownLogValue.value;
-                                                var lastKnownReadEvent = lastValue as ReadEvent<object>;
-                                                if (!Equals(readEvent.Value.ToString(), lastKnownReadEvent.Value.ToString()))
+                                                if (!Equals(readValue.Value.ToString(), lastKnownLogValue.value.ToString()))
                                                 {
-                                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                                 }
                                                 break;
                                             default:
@@ -629,7 +638,7 @@ namespace OptimaValue
                                 }
                                 else if (logTag.LogType == LogType.Cyclic && MyPlc.IsConnected)
                                 {
-                                    AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                 }
                                 else if (logTag.LogType == LogType.TimeOfDay && MyPlc.IsConnected)
                                 {
@@ -640,20 +649,20 @@ namespace OptimaValue
                                             tid1.Minute == logTag.TimeOfDay.Minutes &&
                                             tid1.Second == logTag.TimeOfDay.Seconds)
                                         {
-                                            var allOccurencesOfTagInList = lastLogValue.Find(n => n.tag_id == logTag.Id && n.logDate.Day == tiden.Day);
+                                            var allOccurencesOfTagInList = lastLogValue.Find(n => n.tag_id == logTag.Id && n.ReadValue.LogTime.Day == tiden.Day);
                                             if (allOccurencesOfTagInList == null)
                                             {
-                                                AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                                AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                             }
                                         }
                                     }
                                     else if (tid1.Hour == logTag.TimeOfDay.Hours &&
                                             tid1.Minute == logTag.TimeOfDay.Minutes)
                                     {
-                                        var allOccurencesOfTagInList = lastLogValue.Find(n => n.tag_id == logTag.Id && n.logDate.Day == tiden.Day);
+                                        var allOccurencesOfTagInList = lastLogValue.Find(n => n.tag_id == logTag.Id && n.ReadValue.LogTime.Day == tiden.Day);
                                         if (allOccurencesOfTagInList == null)
                                         {
-                                            AddValueToSql(logTag, unknownTag, MyPlc.PlcName);
+                                            AddValueToSql(logTag, readValue, MyPlc.PlcName);
                                         }
                                     }
                                 }
@@ -678,23 +687,23 @@ namespace OptimaValue
                                                 switch (subbedTag.BoolTrigger)
                                                 {
                                                     case BooleanTrigger.OnTrue:
-                                                        if (!(bool)lastValue.value && (bool)unknownTag)
+                                                        if (!(bool)lastValue.value && (bool)readValue.Value)
                                                         {
-                                                            var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                            var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                             AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                         }
                                                         break;
                                                     case BooleanTrigger.WhileTrue:
-                                                        if ((bool)unknownTag)
+                                                        if ((bool)readValue.Value)
                                                         {
-                                                            var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                            var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                             AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                         }
                                                         break;
                                                     case BooleanTrigger.OnFalse:
-                                                        if ((bool)lastValue.value && !(bool)unknownTag)
+                                                        if ((bool)lastValue.value && !(bool)readValue.Value)
                                                         {
-                                                            var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                            var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                             AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                         }
                                                         break;
@@ -712,44 +721,44 @@ namespace OptimaValue
                                                             case VarType.Bit:
                                                                 break;
                                                             case VarType.Byte:
-                                                                if ((byte)unknownTag < subbedTag.AnalogValue)
+                                                                if ((byte)readValue.Value < subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
-                                                                if ((UInt16)unknownTag < subbedTag.AnalogValue)
+                                                                if ((UInt16)readValue.Value < subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
-                                                                if ((UInt32)unknownTag < subbedTag.AnalogValue)
+                                                                if ((UInt32)readValue.Value < subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
-                                                                if ((short)unknownTag < subbedTag.AnalogValue)
+                                                                if ((short)readValue.Value < subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
-                                                                if ((Int32)unknownTag < subbedTag.AnalogValue)
+                                                                if ((Int32)readValue.Value < subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
-                                                                if ((float)unknownTag < subbedTag.AnalogValue)
+                                                                if ((float)readValue.Value < subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
@@ -773,44 +782,44 @@ namespace OptimaValue
                                                             case VarType.Bit:
                                                                 break;
                                                             case VarType.Byte:
-                                                                if ((byte)unknownTag > subbedTag.AnalogValue)
+                                                                if ((byte)readValue.Value > subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
-                                                                if ((UInt16)unknownTag > subbedTag.AnalogValue)
+                                                                if ((UInt16)readValue.Value > subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
-                                                                if ((UInt32)unknownTag > subbedTag.AnalogValue)
+                                                                if ((UInt32)readValue.Value > subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
-                                                                if ((short)unknownTag > subbedTag.AnalogValue)
+                                                                if ((short)readValue.Value > subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
-                                                                if ((Int32)unknownTag > subbedTag.AnalogValue)
+                                                                if ((Int32)readValue.Value > subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
-                                                                if ((float)unknownTag > subbedTag.AnalogValue)
+                                                                if ((float)readValue.Value > subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
@@ -834,44 +843,44 @@ namespace OptimaValue
                                                             case VarType.Bit:
                                                                 break;
                                                             case VarType.Byte:
-                                                                if ((byte)unknownTag == subbedTag.AnalogValue)
+                                                                if ((byte)readValue.Value == subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
-                                                                if ((UInt16)unknownTag == subbedTag.AnalogValue)
+                                                                if ((UInt16)readValue.Value == subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
-                                                                if ((UInt32)unknownTag == subbedTag.AnalogValue)
+                                                                if ((UInt32)readValue.Value == subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
-                                                                if ((short)unknownTag == subbedTag.AnalogValue)
+                                                                if ((short)readValue.Value == subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
-                                                                if ((Int32)unknownTag == subbedTag.AnalogValue)
+                                                                if ((Int32)readValue.Value == subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
-                                                                if ((float)unknownTag == subbedTag.AnalogValue)
+                                                                if ((float)readValue.Value == subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
@@ -895,44 +904,44 @@ namespace OptimaValue
                                                             case VarType.Bit:
                                                                 break;
                                                             case VarType.Byte:
-                                                                if ((byte)unknownTag <= subbedTag.AnalogValue)
+                                                                if ((byte)readValue.Value <= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
-                                                                if ((UInt16)unknownTag <= subbedTag.AnalogValue)
+                                                                if ((UInt16)readValue.Value <= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
-                                                                if ((UInt32)unknownTag <= subbedTag.AnalogValue)
+                                                                if ((UInt32)readValue.Value <= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
-                                                                if ((short)unknownTag <= subbedTag.AnalogValue)
+                                                                if ((short)readValue.Value <= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
-                                                                if ((Int32)unknownTag <= subbedTag.AnalogValue)
+                                                                if ((Int32)readValue.Value <= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
-                                                                if ((float)unknownTag <= subbedTag.AnalogValue)
+                                                                if ((float)readValue.Value <= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
@@ -956,44 +965,44 @@ namespace OptimaValue
                                                             case VarType.Bit:
                                                                 break;
                                                             case VarType.Byte:
-                                                                if ((byte)unknownTag >= subbedTag.AnalogValue)
+                                                                if ((byte)readValue.Value >= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
-                                                                if ((UInt16)unknownTag >= subbedTag.AnalogValue)
+                                                                if ((UInt16)readValue.Value >= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
-                                                                if ((UInt32)unknownTag >= subbedTag.AnalogValue)
+                                                                if ((UInt32)readValue.Value >= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
-                                                                if ((short)unknownTag >= subbedTag.AnalogValue)
+                                                                if ((short)readValue.Value >= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
-                                                                if ((Int32)unknownTag >= subbedTag.AnalogValue)
+                                                                if ((Int32)readValue.Value >= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
-                                                                if ((float)unknownTag >= subbedTag.AnalogValue)
+                                                                if ((float)readValue.Value >= subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
@@ -1017,44 +1026,44 @@ namespace OptimaValue
                                                             case VarType.Bit:
                                                                 break;
                                                             case VarType.Byte:
-                                                                if ((byte)unknownTag != subbedTag.AnalogValue)
+                                                                if ((byte)readValue.Value != subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Word:
-                                                                if ((UInt16)unknownTag != subbedTag.AnalogValue)
+                                                                if ((UInt16)readValue.Value != subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DWord:
-                                                                if ((UInt32)unknownTag != subbedTag.AnalogValue)
+                                                                if ((UInt32)readValue.Value != subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Int:
-                                                                if ((short)unknownTag != subbedTag.AnalogValue)
+                                                                if ((short)readValue.Value != subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.DInt:
-                                                                if ((Int32)unknownTag != subbedTag.AnalogValue)
+                                                                if ((Int32)readValue.Value != subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
                                                             case VarType.Real:
-                                                                if ((float)unknownTag != subbedTag.AnalogValue)
+                                                                if ((float)readValue.Value != subbedTag.AnalogValue)
                                                                 {
-                                                                    var subbedLog = (await MyPlc.Plc.ReadAsync(plcTag)).Value;
+                                                                    var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
                                                                     AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
                                                                 }
                                                                 break;
@@ -1122,37 +1131,41 @@ namespace OptimaValue
                             MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
                             Apps.Logger.Log($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);
                         }
-
+                        catch (ServiceResultException ex)
+                        {
+                            logTag.LastLogTime = tiden;
+                            MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
+                            Apps.Logger.Log($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);
+                        }
                     }
                 }
             }
         }
 
 
-        private static void AddValueToSql(TagDefinitions logTag, object unknownTag, string plcName)
+        private static void AddValueToSql(TagDefinitions logTag, ReadValue readValue, string plcName)
         {
             lock (sqlLock)
             {
-                if (unknownTag == null)
+                if (readValue.Value == null)
                     return;
 
                 logTag.TimesLogged++;
                 lastLogValue.Add(new LastValue()
                 {
                     tag_id = logTag.Id,
-                    value = unknownTag,
-                    logDate = logTag.LastLogTime,
+                    ReadValue = readValue,
                 });
 
-                var allOccurencesOfTagInList = lastLogValue.FindAll(n => n.tag_id == logTag.Id).OrderBy(dat => dat.logDate).ToList();
+                var allOccurencesOfTagInList = lastLogValue.FindAll(n => n.tag_id == logTag.Id).OrderBy(dat => dat.ReadValue.LogTime).ToList();
                 var nrOfItemsInLastLog = lastLogValue.FindAll(n => n.tag_id == logTag.Id);
 
 
                 // Garantera att det bara finns ett värde bakåt
                 if (nrOfItemsInLastLog.Count > 2)
                 {
-                    var removeDate = allOccurencesOfTagInList[nrOfItemsInLastLog.Count - 3].logDate;
-                    lastLogValue.RemoveAll(i => i.tag_id == logTag.Id && i.logDate <= removeDate);
+                    var removeDate = allOccurencesOfTagInList[nrOfItemsInLastLog.Count - 3].ReadValue.LogTime;
+                    lastLogValue.RemoveAll(i => i.tag_id == logTag.Id && i.ReadValue.LogTime <= removeDate);
                 }
 
                 var logValue = new TagDefinitions()
@@ -1171,7 +1184,7 @@ namespace OptimaValue
                     VarType = logTag.VarType
                 };
 
-                SendValuesToSql.AddRawValue(unknownTag, logValue);
+                SendValuesToSql.AddRawValue(readValue, logValue);
             }
 
         }
