@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -52,6 +53,7 @@ namespace OptimaValue.Trend
             }
             catch (Exception ex)
             {
+                Debug.WriteLine(ex);
                 Log.Error(ex, "Applikationen kraschade");
                 Log.CloseAndFlush();
                 Application.Current.Shutdown();

@@ -185,7 +185,8 @@
         "Cyclic",
         "Delta",
         "TimeOfDay",
-        "Event"};
+        "Event",
+        "WriteWatchDogInt16"};
             this.paraLogType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.paraLogType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
             this.paraLogType.HeaderText = "Log-typ";

@@ -20,6 +20,7 @@ namespace OptimaValue
         private static Stopwatch cycleTime = new Stopwatch();
         public static int FastestLogTime = int.MaxValue;
 
+
         /// <summary>
         /// Lokal tid offset
         /// </summary>
@@ -411,12 +412,13 @@ namespace OptimaValue
                                 }
                                 else if (!MyPlc.isOpc)
                                 {
-                                    readValue = await MyPlc.Plc.ReadAsync(plcTag);
-
+                                    if (logTag.LogType != LogType.WriteWatchDogInt16)
+                                        readValue = await MyPlc.Plc.ReadAsync(plcTag);
                                 }
                                 else if (MyPlc.isOpc)
                                 {
-                                    readValue = await MyPlc.Plc.ReadAsync(plcTag);
+                                    if (logTag.LogType != LogType.WriteWatchDogInt16)
+                                        readValue = await MyPlc.Plc.ReadAsync(plcTag);
                                 }
                                 logTag.LastLogTime = tiden;
                                 logTag.NrSuccededReadAttempts++;
@@ -639,6 +641,12 @@ namespace OptimaValue
                                 else if (logTag.LogType == LogType.Cyclic && MyPlc.IsConnected)
                                 {
                                     AddValueToSql(logTag, readValue, MyPlc.PlcName);
+                                }
+                                else if (logTag.LogType == LogType.WriteWatchDogInt16 && MyPlc.IsConnected && !MyPlc.isOpc)
+                                {
+                                    var oldWd = await MyPlc.Plc.ReadAsync(plcTag);
+                                    var intValue = Convert.ToInt16(oldWd.Value) + 1;
+                                    await MyPlc.Plc.WriteAsync(plcTag, intValue);
                                 }
                                 else if (logTag.LogType == LogType.TimeOfDay && MyPlc.IsConnected)
                                 {

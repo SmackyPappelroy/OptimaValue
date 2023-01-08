@@ -58,11 +58,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CsvHelper" Version="28.0.1" />
+		<PackageReference Include="CsvHelper" Version="30.0.1" />
 		<PackageReference Include="EntityFramework" Version="6.4.4" />
 		<PackageReference Include="LiveCharts.WinForms.NetCore3" Version="0.9.7" />
-		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.47027.0" />
-		<PackageReference Include="S7netplus" Version="0.14.0" />
+		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.11.0" />
+		<PackageReference Include="S7netplus" Version="0.16.0" />
 		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
 	</ItemGroup>
 

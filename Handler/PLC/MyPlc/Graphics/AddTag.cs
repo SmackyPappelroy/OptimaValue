@@ -121,9 +121,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 await MyPlc.Plc.ConnectAsync();
                 if (MyPlc.IsConnected)
                 {
-                    //var tags = MyPlc.OpcUaClient.BrowseNodesOfNode(null, string.Empty);
-                    //MyPlc.OpcUaClient.GetOpcTree(tags);
-                    //var rootNodes = MyPlc.OpcUaClient.ExploreOpc("");
                     if (MyPlc.CpuType == CpuType.OpcUa)
                     {
                         if (MyPlc.Plc is OpcPlc opc)
@@ -435,6 +432,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private bool ValidateAll()
         {
+            var logType = paraLogType.comboBoxen.SelectedItem.ToString();
             var okName = false;
             var okLogType = false;
             var okTimeOfDay = false;
@@ -462,19 +460,19 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (MyPlc.isOpc && okName)
                 return true;
 
-            if (float.TryParse(paraRawMin.ParameterValue, out float _))
+            if (float.TryParse(paraRawMin.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
                 okRawMin = true;
 
-            if (float.TryParse(paraRawMax.ParameterValue, out float _))
+            if (float.TryParse(paraRawMax.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
                 okRawMax = true;
 
-            if (float.TryParse(paraScaleMin.ParameterValue, out float _))
+            if (float.TryParse(paraScaleMin.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
                 okScaleMin = true;
 
-            if (float.TryParse(paraScaleMax.ParameterValue, out float _))
+            if (float.TryParse(paraScaleMax.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
                 okScaleMax = true;
 
-            if (float.TryParse(paraScaleOffset.ParameterValue, out float _))
+            if (float.TryParse(paraScaleOffset.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
                 okScaleOffset = true;
 
             if (paraUnit.ParameterValue.Length <= 30)
@@ -484,16 +482,21 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (!string.IsNullOrEmpty(paraLogType.comboBoxen.SelectedItem.ToString()))
                 okLogType = true;
 
-            if (TimeSpan.TryParse(paraLogTime.ParameterValue, out TimeSpan _))
+            if (TimeSpan.TryParse(paraLogTime.ParameterValue, out TimeSpan _) || logType == "WriteWatchDogInt16")
                 okTimeOfDay = true;
 
-            if (float.TryParse(paraDeadband.ParameterValue, out float _))
+            if (float.TryParse(paraDeadband.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
                 okDeadBand = true;
 
             if (paraVarType.comboBoxen.SelectedItem != null)
             {
                 if (!string.IsNullOrEmpty(paraVarType.comboBoxen.SelectedItem.ToString()))
                     okVarType = true;
+            }
+            else if (logType == "WriteWatchDogInt16")
+            {
+                paraVarType.comboBoxen.SelectedItem = "Int";
+                okVarType = true;
             }
 
             if (ushort.TryParse(paraBlockNr.ParameterValue, out ushort _))
@@ -508,13 +511,13 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (ushort.TryParse(paraStartAddress.ParameterValue, out ushort _))
                 okStartByte = true;
 
-            if (ushort.TryParse(paraNrOfValues.ParameterValue, out ushort _))
+            if (ushort.TryParse(paraNrOfValues.ParameterValue, out ushort _) || logType == "WriteWatchDogInt16")
                 okNrOfElements = true;
 
             if (ushort.TryParse(paraBlockNr.ParameterValue, out ushort _))
                 okBlockNr = true;
 
-            if (byte.TryParse(paraBitAddress.ParameterValue, out byte _))
+            if (byte.TryParse(paraBitAddress.ParameterValue, out byte _) || logType == "WriteWatchDogInt16")
                 okBitAddress = true;
 
             if (!string.IsNullOrEmpty(paraFreq.comboBoxen.SelectedItem.ToString()))
@@ -763,7 +766,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             {
                 tbl.Rows.Add(checkActive.Checked, paraName.ParameterValue, paraDescription.ParameterValue, paraLogType.comboBoxen.SelectedItem.ToString(),
                TimeSpan.Parse(paraLogTime.ParameterValue), float.Parse(paraDeadband.ParameterValue),
-               PlcName, "", 0,"", 0,1, byte.Parse(paraBitAddress.ParameterValue),
+               PlcName, "", 0, "", 0, 1, byte.Parse(paraBitAddress.ParameterValue),
                paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue
                , float.Parse(paraRawMin.ParameterValue), float.Parse(paraRawMax.ParameterValue), float.Parse(paraScaleMin.ParameterValue),
                float.Parse(paraScaleMax.ParameterValue), float.Parse(paraScaleOffset.ParameterValue));
@@ -779,18 +782,58 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             {
                 case "Cyclic":
                     paraLogTime.Visible = false;
-
                     paraDeadband.Visible = false;
+
+                    paraScaleMax.Visible = true;
+                    paraScaleMin.Visible = true;
+                    paraScaleOffset.Visible = true;
+                    paraUnit.Visible = true;
+                    paraRawMin.Visible = true;
+                    paraRawMax.Visible = true;
+                    paraLogType.Visible = true;
+                    paraBitAddress.Visible = true;
+                    paraVarType.Visible = true;
+
                     break;
                 case "Delta":
                     paraLogTime.Visible = false;
-
                     paraDeadband.Visible = true;
+
+                    paraScaleMax.Visible = true;
+                    paraScaleMin.Visible = true;
+                    paraScaleOffset.Visible = true;
+                    paraUnit.Visible = true;
+                    paraRawMin.Visible = true;
+                    paraRawMax.Visible = true;
+                    paraLogType.Visible = true;
+                    paraBitAddress.Visible = true;
+                    paraVarType.Visible = true;
+
                     break;
                 case "TimeOfDay":
                     paraLogTime.Visible = true;
-
                     paraDeadband.Visible = false;
+
+                    paraScaleMax.Visible = true;
+                    paraScaleMin.Visible = true;
+                    paraScaleOffset.Visible = true;
+                    paraUnit.Visible = true;
+                    paraRawMin.Visible = true;
+                    paraRawMax.Visible = true;
+                    paraLogType.Visible = true;
+                    paraBitAddress.Visible = true;
+                    paraVarType.Visible = true;
+
+                    break;
+                case "WriteWatchDogInt16":
+                    paraRawMin.Visible = false;
+                    paraRawMax.Visible = false;
+                    paraScaleMax.Visible = false;
+                    paraScaleMin.Visible = false;
+                    paraScaleOffset.Visible = false;
+                    paraUnit.Visible = false;
+                    paraBitAddress.Visible = false;
+                    paraVarType.Visible = false;
                     break;
                 default:
                     break;
