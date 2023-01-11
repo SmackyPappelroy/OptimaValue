@@ -325,7 +325,7 @@ namespace OptimaValue
 
         public async Task WriteAsync(PlcTag tag, object value, CancellationToken cancellationToken = default)
         {
-            await myPlc.WriteAsync(tag.Address, value, cancellationToken);
+            await myPlc.WriteAsync(tag.DataType, tag.BlockNr, tag.StartByte, value);
         }
 
         public void WriteBytes(PlcTag tag, byte[] value)

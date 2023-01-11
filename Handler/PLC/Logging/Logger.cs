@@ -646,7 +646,7 @@ namespace OptimaValue
                                 {
                                     var oldWd = await MyPlc.Plc.ReadAsync(plcTag);
                                     var intValue = Convert.ToInt16(oldWd.Value) + 1;
-                                    await MyPlc.Plc.WriteAsync(plcTag, intValue);
+                                    await MyPlc.Plc.WriteAsync(plcTag, (short)intValue);
                                 }
                                 else if (logTag.LogType == LogType.TimeOfDay && MyPlc.IsConnected)
                                 {
