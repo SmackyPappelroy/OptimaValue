@@ -101,7 +101,11 @@ namespace OptimaValue
         public static void RequestDisconnect()
         {
             if (logTask != null && !cancelTokenSource.IsCancellationRequested)
+            {
                 cancelTokenSource.Cancel();
+                Master.Stopping = true;
+                Master.IsStarted = false;
+            }
         }
 
         private static void RestartTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)

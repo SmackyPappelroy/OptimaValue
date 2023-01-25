@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Serilog.Core;
+using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -19,6 +21,7 @@ namespace OptimaValue
         /// Enables logging to file
         /// </summary>
         public bool EnableFileLog;
+        private readonly ILogger serviceLogger;
         #endregion
 
 
@@ -27,7 +30,7 @@ namespace OptimaValue
         /// </summary>
         /// <param name="filePath">Format: C:\Katalog\</param>
         /// <param name="enableFileLog">Log to file?</param>
-        public FileLogger(string filePath, bool enableFileLog)
+        public FileLogger(string filePath, bool enableFileLog, ILogger serviceLogger = null)
         {
             //Normalize filepath
             FilePath = filePath?.Replace('/', '\\').Trim();
@@ -37,6 +40,7 @@ namespace OptimaValue
                 FilePath += '\\';
 
             EnableFileLog = enableFileLog;
+            this.serviceLogger = serviceLogger;
         }
 
         /// <summary>
@@ -104,6 +108,27 @@ namespace OptimaValue
 
                 // Raise an event
                 NewLog.Invoke((logString, hmiString, severity, tiden, true, ex));
+                // ServiceLogger
+                if (serviceLogger is not null)
+                {
+                    switch (severity)
+                    {
+                        case Severity.Success:
+                            serviceLogger.LogInformation(logString);
+                            break;
+                        case Severity.Information:
+                            serviceLogger.LogInformation(logString);
+                            break;
+                        case Severity.Warning:
+                            serviceLogger.LogWarning(logString);
+                            break;
+                        case Severity.Error:
+                            serviceLogger.LogError(logString);
+                            break;
+                        default:
+                            break;
+                    }
+                }
 
                 if (EnableFileLog)
                     LogToFile("\r\n\r\n" + logString + "\r\n\r\n");

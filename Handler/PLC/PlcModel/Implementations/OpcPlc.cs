@@ -13,8 +13,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Navigation;
-using Windows.Media.Core;
-using Windows.Media.Protection.PlayReady;
 
 namespace OptimaValue
 {

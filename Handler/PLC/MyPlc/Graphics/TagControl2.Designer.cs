@@ -129,6 +129,8 @@
             this.Name = "TagControl2";
             this.Size = new System.Drawing.Size(518, 532);
             this.Load += new System.EventHandler(this.TagControl2_Load);
+            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.TagControl2_DragDrop_1);
+            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.TagControl2_DragEnter_1);
             this.contextMenuStrip.ResumeLayout(false);
             this.tablePanel.ResumeLayout(false);
             this.tablePanel.PerformLayout();

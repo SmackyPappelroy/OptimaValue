@@ -1,10 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace OptimaValue
 {
     public static class Master
     {
         public static bool AbortSqlLog = false;
+        public static bool IsStarted;
+        public static bool Stopping;
 
         public static async Task<bool> StartLog()
         {
@@ -30,7 +33,7 @@ namespace OptimaValue
 
             if (ActivePlcs)
                 SendValuesToSql.StartSql();
-
+            IsStarted = true;
             return true;
         }
 
@@ -38,6 +41,7 @@ namespace OptimaValue
         {
             Logger.Stop(applicationShutdown);
             AbortSqlLog = true;
+            IsStarted = false;
         }
     }
 }

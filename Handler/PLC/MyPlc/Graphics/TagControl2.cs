@@ -12,6 +12,12 @@ using System.Linq;
 using System.Windows.Forms;
 using OptimaValue.Config;
 using System.Threading.Tasks;
+using System.Text.Json;
+using ClosedXML.Excel;
+using System.Runtime.CompilerServices;
+using S7.Net.Types;
+using System.Reflection;
+using System.Data.SqlTypes;
 
 namespace OptimaValue
 {
@@ -275,7 +281,7 @@ namespace OptimaValue
                     Deadband = _deadband,
                     Id = _id,
                     LogFreq = _logFreq,
-                    LastLogTime = DateTime.MinValue,
+                    LastLogTime = System.DateTime.MinValue,
                     LogType = _logType,
                     Name = _name,
                     Description = _description,
@@ -329,31 +335,143 @@ namespace OptimaValue
         private void click_Export(object sender, EventArgs e)
         {
             SaveFileDialog save = new();
-            save.Filter = "CSV File|*.csv";
-            save.Title = "Spara .CSV fil";
+            save.Filter = "CSV File|*.CSV|Excel File|*.XLSX";
+            save.Title = "Spara taggar till fil";
             DialogResult result = save.ShowDialog();
 
+
+
+            if (save.FileName != "" && result == DialogResult.OK)
+            {
+                if (save.FileName.EndsWith(".CSV"))
+                {
+                    saveToCsvFile(save.FileName);
+                }
+                else if (save.FileName.EndsWith(".XLSX"))
+                {
+                    //saveToCsvFile(save.FileName);
+                    saveToExcel(save.FileName);
+                }
+            }
+        }
+
+        private void saveToCsvFile(string fileName)
+        {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 Delimiter = ";"
             };
-
-            if (save.FileName != "" && result == DialogResult.OK)
+            try
             {
-                try
+                using (var sw = new StreamWriter(fileName))
                 {
-                    using (var sw = new StreamWriter(save.FileName))
-                    {
-                        var wr = new CsvWriter(sw, config);
 
-                        wr.WriteRecords(tags);
-                        Apps.Logger.Log($"Sparade {myPlc.PlcName}s taggar till {save.FileName}", Severity.Success);
-                    }
+                    var wr = new CsvWriter(sw, config);
+
+                    wr.WriteRecords(tags);
+                    Apps.Logger.Log($"Sparade {myPlc.PlcName}s taggar till {fileName}", Severity.Success);
                 }
-                catch (IOException)
+            }
+            catch (IOException)
+            {
+                Apps.Logger.Log($"Lyckades ej spara {myPlc.PlcName}s taggar till {fileName}", Severity.Error);
+            }
+        }
+
+        private void saveToExcel(string fileName)
+        {
+            //populate myList with data
+
+            DataTable dt = new DataTable();
+
+            // get the properties of the class
+            PropertyInfo[] props = typeof(TagDefinitions).GetProperties();
+
+            // add the columns to the DataTable
+            foreach (PropertyInfo prop in props)
+            {
+                dt.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
+            }
+
+            try
+            {
+                // add the data to the DataTable
+                foreach (TagDefinitions obj in tags)
                 {
-                    Apps.Logger.Log($"Lyckades ej spara {myPlc.PlcName}s taggar till {save.FileName}", Severity.Error);
+                    var row = dt.NewRow();
+                    foreach (PropertyInfo prop in props)
+                    {
+                        // if the property is datetime
+                        if (prop.GetValue(obj, null) == null)
+                        {
+                            row[prop.Name] = DBNull.Value;
+                        }
+                        else if (prop.PropertyType == typeof(System.DateTime))
+                        {
+                            // If value is DateTime.MinValue set it to Sql datetime.minvalue
+                            if ((System.DateTime)prop.GetValue(obj, null) == System.DateTime.MinValue)
+                            {
+                                row[prop.Name] = SqlDateTime.MinValue.Value;
+                            }
+                            else
+                            {
+                                row[prop.Name] = prop.GetValue(obj, null);
+                            }
+                        }
+                        else
+                        {
+                            row[prop.Name] = prop.GetValue(obj, null);
+                        }
+                    }
+                    dt.Rows.Add(row);
                 }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Sheet1");
+
+                worksheet.Cell(1, 1).InsertTable(dt);
+
+                workbook.SaveAs(fileName);
+
+            }
+        }
+
+        private void saveToExcelFileFromCsvFile(string fileName)
+        {
+            // Open the CSV file and read its contents into a DataTable
+            DataTable dt = new DataTable();
+            using (StreamReader sr = new StreamReader(fileName))
+            {
+                string[] headers = sr.ReadLine().Split(';');
+                foreach (string header in headers)
+                {
+                    dt.Columns.Add(header);
+                }
+                while (!sr.EndOfStream)
+                {
+                    string[] rows = sr.ReadLine().Split(';');
+                    DataRow dr = dt.NewRow();
+                    for (int i = 0; i < headers.Length; i++)
+                    {
+                        dr[i] = rows[i];
+                    }
+                    dt.Rows.Add(dr);
+                }
+            }
+
+            // Create a new XLWorkbook and add the DataTable as a worksheet
+            string xlsxFile = @"c:\temp\test.xlsx";
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                wb.AddWorksheet(dt, "Sheet1");
+                wb.SaveAs(xlsxFile);
             }
         }
 
@@ -704,6 +822,33 @@ namespace OptimaValue
         {
             statFormOpen = false;
             statForm.FormClosing -= StatForm_FormClosing;
+        }
+
+        private void TagControl2_DragEnter_1(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop) && e.Data.GetDataPresent(DataFormats.Text))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+        }
+
+        private void TagControl2_DragDrop_1(object sender, DragEventArgs e)
+        {
+            // Import JSON file
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                foreach (string file in files)
+                {
+                    if (file.EndsWith(".json"))
+                    {
+                        var json = File.ReadAllText(file);
+                        var tagList = JsonSerializer.Deserialize<List<TagDefinitions>>(json);
+                        AddTag(tagList);
+                        Redraw();
+                    }
+                }
+            }
         }
     }
 }

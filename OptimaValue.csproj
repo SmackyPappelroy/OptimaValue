@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
+		<TargetFramework>net6.0-windows</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
@@ -12,7 +12,6 @@
 		<ApplicationIcon>Mina Resurser\icons8_gas_idle.ico</ApplicationIcon>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<AnalysisLevel>latest</AnalysisLevel>
-		<SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -28,11 +27,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="Mina Resurser\cancel_16px.png" />
-	  <None Remove="Mina Resurser\Logos\opc.svg" />
-	  <None Remove="Mina Resurser\Logos\opcualogo.png" />
-	  <None Remove="Mina Resurser\Logos\siemens-logo-512x512.png" />
-	  <None Remove="Mina Resurser\Logos\siemens.svg" />
+		<None Remove="Mina Resurser\cancel_16px.png" />
+		<None Remove="Mina Resurser\Logos\opc.svg" />
+		<None Remove="Mina Resurser\Logos\opcualogo.png" />
+		<None Remove="Mina Resurser\Logos\siemens-logo-512x512.png" />
+		<None Remove="Mina Resurser\Logos\siemens.svg" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -52,15 +51,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="Mina Resurser\Logos\opcualogo.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </EmbeddedResource>
+		<EmbeddedResource Include="Mina Resurser\Logos\opcualogo.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="CsvHelper" Version="30.0.1" />
 		<PackageReference Include="EntityFramework" Version="6.4.4" />
 		<PackageReference Include="LiveCharts.WinForms.NetCore3" Version="0.9.7" />
+		<PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
 		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.11.0" />
 		<PackageReference Include="S7netplus" Version="0.16.0" />
 		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
@@ -73,19 +73,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Resource Include="Mina Resurser\cancel_16px.png">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Resource>
+		<Resource Include="Mina Resurser\cancel_16px.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Resource>
 	</ItemGroup>
 
 	<ItemGroup>
 		<Compile Update="Handler\PLC\MyPlc\Graphics\ReadTagControl.cs">
-		  <SubType>UserControl</SubType>
+			<SubType>UserControl</SubType>
 		</Compile>
 		<Compile Update="Properties\Resources.Designer.cs">
-		  <DesignTime>True</DesignTime>
-		  <AutoGen>True</AutoGen>
-		  <DependentUpon>Resources.resx</DependentUpon>
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
 		</Compile>
 		<Compile Update="Properties\Settings.Designer.cs">
 			<DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -95,10 +95,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Update="Properties\Resources.resx">
-	    <Generator>PublicResXFileCodeGenerator</Generator>
-	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-	  </EmbeddedResource>
+		<EmbeddedResource Update="Properties\Resources.resx">
+			<Generator>PublicResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>

@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpcUa.UI", "..\..\Opc\OpcUa
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "..\Installer\Installer.vdproj", "{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimaValue.Service", "..\OptimaValue.Service\OptimaValue.Service.csproj", "{C9041FA6-064A-4729-991E-575952AFAE2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -163,6 +165,30 @@ Global
 		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Release|arm64.ActiveCfg = Release
 		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Release|x64.ActiveCfg = Release
 		{17A5F954-4B46-4B07-BE5A-D349E5B7B71D}.Release|x86.ActiveCfg = Release
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Debug|arm64.Build.0 = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Debug|x64.Build.0 = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Debug|x86.Build.0 = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.DefaultBuild|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.DefaultBuild|Any CPU.Build.0 = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.DefaultBuild|arm64.ActiveCfg = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.DefaultBuild|arm64.Build.0 = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.DefaultBuild|x64.ActiveCfg = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.DefaultBuild|x64.Build.0 = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.DefaultBuild|x86.ActiveCfg = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.DefaultBuild|x86.Build.0 = Debug|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Release|arm64.ActiveCfg = Release|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Release|arm64.Build.0 = Release|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Release|x64.ActiveCfg = Release|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Release|x64.Build.0 = Release|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Release|x86.ActiveCfg = Release|Any CPU
+		{C9041FA6-064A-4729-991E-575952AFAE2A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
