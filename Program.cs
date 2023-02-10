@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 using OptimaValue.Config;
@@ -14,6 +15,12 @@ static class Program
     static void Main()
     {
         bool createdNew = true;
+        // Check if OptimaValue.Service is running
+        if (Process.GetProcessesByName("OptimaValue.Service").Length > 0)
+        {
+            MessageBox.Show("OptimaValue.Service is already running");
+            return;
+        }
 
         using Mutex mutex = new(true, "OptimaValue", out createdNew);
         if (createdNew)

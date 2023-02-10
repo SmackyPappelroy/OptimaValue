@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace OptimaValue
@@ -15,7 +16,7 @@ namespace OptimaValue
 
             if (!await DatabaseSql.TestConnectionAsync())
             {
-                "Ingen kontakt med databas".SendStatusMessage(Severity.Warning);
+                $"Ingen kontakt med databas {Config.Settings.ConnectionString}".SendStatusMessage(Severity.Warning);
                 return false;
             }
 
