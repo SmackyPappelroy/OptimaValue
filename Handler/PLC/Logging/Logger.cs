@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -94,6 +95,7 @@ namespace OptimaValue
                     t.Exception?.Handle(e => true);
                     AbortLogThread(string.Empty);
                     Console.WriteLine("You have canceled the task");
+                    Apps.Logger.Log("Loggningscykel avslutad",Severity.Error);
                     cancelTokenSource = new CancellationTokenSource();
                 }, TaskContinuationOptions.OnlyOnCanceled);
         }
@@ -1117,6 +1119,14 @@ namespace OptimaValue
                         {
                             logTag.LastLogTime = tiden;
                             MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Status.Error);
+                            Apps.Logger.Log($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);
+                            logTag.NrFailedReadAttempts++;
+                            logTag.LastErrorMessage = ex.Message;
+                        }
+                        catch (IOException ex)
+                        {
+                            logTag.LastLogTime = tiden;
+                            MyPlc.SendPlcStatusMessage($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\nIngen licens?", Status.Error);
                             Apps.Logger.Log($"Misslyckades att läsa {logTag.Name} från {MyPlc.PlcName}\r\n{ex.Message}", Severity.Error, ex);
                             logTag.NrFailedReadAttempts++;
                             logTag.LastErrorMessage = ex.Message;

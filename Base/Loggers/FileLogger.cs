@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace OptimaValue
 {
-    public class FileLogger
+    public class FileLogger 
     {
         #region Properties
         protected string FilePath;

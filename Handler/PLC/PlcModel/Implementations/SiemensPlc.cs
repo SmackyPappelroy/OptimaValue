@@ -4,6 +4,7 @@ using S7.Net;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
@@ -82,8 +83,7 @@ namespace OptimaValue
         {
             get
             {
-                ConnectionStatus = ConnectionStatus.Connected;
-                return myPlc.IsConnected;
+                return myPlc.IsConnected && ConnectionStatus == ConnectionStatus.Connected;
             }
         }
 
@@ -211,6 +211,11 @@ namespace OptimaValue
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
+            catch(IOException ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public ReadValue Read(string address)
@@ -221,6 +226,11 @@ namespace OptimaValue
                 return new ReadValue(this, temp);
             }
             catch (PlcException)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
+            catch (IOException ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
@@ -240,6 +250,11 @@ namespace OptimaValue
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
+            catch (IOException ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task<ReadValue> ReadAsync(string address, CancellationToken cancellationToken = default)
@@ -250,6 +265,11 @@ namespace OptimaValue
                 return new ReadValue(this, temp);
             }
             catch (PlcException)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
+            catch (IOException ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
@@ -267,6 +287,11 @@ namespace OptimaValue
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
+            catch (IOException ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task<byte[]> ReadBytesAsync(PlcTag tag, CancellationToken cancellationToken = default)
@@ -280,6 +305,7 @@ namespace OptimaValue
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
+            catch (IOException ex) { ConnectionStatus = ConnectionStatus.Disconnected; throw; }
         }
 
         public byte[] ReadBytes(PlcTag tag, int nrOfElements)
@@ -293,6 +319,7 @@ namespace OptimaValue
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
+            catch (IOException ex) { ConnectionStatus = ConnectionStatus.Disconnected; throw; }
         }
 
         public async Task<byte[]> ReadBytesAsync(PlcTag tag, int nrOfElements, CancellationToken cancellationToken = default)
@@ -306,6 +333,7 @@ namespace OptimaValue
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
+            catch (IOException ex) { ConnectionStatus = ConnectionStatus.Disconnected; throw; }
         }
 
         public void Write(PlcTag tag, object value)
