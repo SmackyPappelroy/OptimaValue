@@ -28,482 +28,446 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AddPlcFromFile));
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnSave = new System.Windows.Forms.Button();
-            this.btnNew = new System.Windows.Forms.Button();
-            this.errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
-            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.checkActive = new System.Windows.Forms.CheckBox();
-            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.paraName = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraLogType = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
-            this.paraDescription = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraLogTime = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraFreq = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
-            this.paraVarType = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
-            this.paraDataType = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.paramaterComboControl();
-            this.paraBlockNr = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraStartAddress = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraBitAddress = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraDeadband = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraScaleOffset = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraScaleMin = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraScaleMax = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraRawMin = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraRawMax = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraNrOfValues = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.paraUnit = new OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters.parameterTextControl();
-            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnOpc = new System.Windows.Forms.Button();
-            this.tableLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
-            this.flowLayoutPanel1.SuspendLayout();
-            this.flowLayoutPanel2.SuspendLayout();
-            this.flowLayoutPanel3.SuspendLayout();
-            this.SuspendLayout();
+            tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            btnSave = new System.Windows.Forms.Button();
+            btnNew = new System.Windows.Forms.Button();
+            errorProvider = new System.Windows.Forms.ErrorProvider(components);
+            toolTip = new System.Windows.Forms.ToolTip(components);
+            checkActive = new System.Windows.Forms.CheckBox();
+            flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            paraName = new Parameters.parameterTextControl();
+            paraLogType = new Parameters.paramaterComboControl();
+            paraDescription = new Parameters.parameterTextControl();
+            paraLogTime = new Parameters.parameterTextControl();
+            paraFreq = new Parameters.paramaterComboControl();
+            paraVarType = new Parameters.paramaterComboControl();
+            paraDataType = new Parameters.paramaterComboControl();
+            paraBlockNr = new Parameters.parameterTextControl();
+            paraStartAddress = new Parameters.parameterTextControl();
+            paraBitAddress = new Parameters.parameterTextControl();
+            paraDeadband = new Parameters.parameterTextControl();
+            paraScaleOffset = new Parameters.parameterTextControl();
+            paraScaleMin = new Parameters.parameterTextControl();
+            paraScaleMax = new Parameters.parameterTextControl();
+            paraRawMin = new Parameters.parameterTextControl();
+            paraRawMax = new Parameters.parameterTextControl();
+            paraNrOfValues = new Parameters.parameterTextControl();
+            paraUnit = new Parameters.parameterTextControl();
+            flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+            flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
+            btnOpc = new System.Windows.Forms.Button();
+            tableLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)errorProvider).BeginInit();
+            flowLayoutPanel1.SuspendLayout();
+            flowLayoutPanel2.SuspendLayout();
+            flowLayoutPanel3.SuspendLayout();
+            SuspendLayout();
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Controls.Add(this.btnSave, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.btnNew, 0, 0);
-            this.tableLayoutPanel1.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.AddColumns;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(4, 625);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 1;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 108F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(895, 108);
-            this.tableLayoutPanel1.TabIndex = 0;
-            this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
+            tableLayoutPanel1.ColumnCount = 2;
+            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tableLayoutPanel1.Controls.Add(btnSave, 1, 0);
+            tableLayoutPanel1.Controls.Add(btnNew, 0, 0);
+            tableLayoutPanel1.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.AddColumns;
+            tableLayoutPanel1.Location = new System.Drawing.Point(4, 625);
+            tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 1;
+            tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 108F));
+            tableLayoutPanel1.Size = new System.Drawing.Size(895, 108);
+            tableLayoutPanel1.TabIndex = 0;
+            tableLayoutPanel1.Paint += tableLayoutPanel1_Paint;
             // 
             // btnSave
             // 
-            this.btnSave.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnSave.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
-            this.btnSave.FlatAppearance.BorderSize = 0;
-            this.btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSave.Font = new System.Drawing.Font("Century Gothic", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnSave.ForeColor = System.Drawing.Color.Black;
-            this.btnSave.Image = ((System.Drawing.Image)(resources.GetObject("btnSave.Image")));
-            this.btnSave.Location = new System.Drawing.Point(451, 4);
-            this.btnSave.Margin = new System.Windows.Forms.Padding(4);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(440, 100);
-            this.btnSave.TabIndex = 18;
-            this.toolTip.SetToolTip(this.btnSave, "Ändra befintlig tag");
-            this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnUpdate_Click);
+            btnSave.Dock = System.Windows.Forms.DockStyle.Fill;
+            btnSave.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(67, 62, 71);
+            btnSave.FlatAppearance.BorderSize = 0;
+            btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnSave.Font = new System.Drawing.Font("Century Gothic", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnSave.ForeColor = System.Drawing.Color.Black;
+            btnSave.Image = (System.Drawing.Image)resources.GetObject("btnSave.Image");
+            btnSave.Location = new System.Drawing.Point(451, 4);
+            btnSave.Margin = new System.Windows.Forms.Padding(4);
+            btnSave.Name = "btnSave";
+            btnSave.Size = new System.Drawing.Size(440, 100);
+            btnSave.TabIndex = 18;
+            toolTip.SetToolTip(btnSave, "Ändra befintlig tag");
+            btnSave.UseVisualStyleBackColor = true;
+            btnSave.Click += btnUpdate_Click;
             // 
             // btnNew
             // 
-            this.btnNew.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnNew.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
-            this.btnNew.FlatAppearance.BorderSize = 0;
-            this.btnNew.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnNew.Font = new System.Drawing.Font("Century Gothic", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnNew.ForeColor = System.Drawing.Color.Black;
-            this.btnNew.Image = ((System.Drawing.Image)(resources.GetObject("btnNew.Image")));
-            this.btnNew.Location = new System.Drawing.Point(4, 4);
-            this.btnNew.Margin = new System.Windows.Forms.Padding(4);
-            this.btnNew.Name = "btnNew";
-            this.btnNew.Size = new System.Drawing.Size(439, 100);
-            this.btnNew.TabIndex = 17;
-            this.toolTip.SetToolTip(this.btnNew, "Skapa ny tag");
-            this.btnNew.UseVisualStyleBackColor = true;
-            this.btnNew.Click += new System.EventHandler(this.btnAdd_Click);
+            btnNew.Dock = System.Windows.Forms.DockStyle.Fill;
+            btnNew.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(67, 62, 71);
+            btnNew.FlatAppearance.BorderSize = 0;
+            btnNew.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnNew.Font = new System.Drawing.Font("Century Gothic", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnNew.ForeColor = System.Drawing.Color.Black;
+            btnNew.Image = (System.Drawing.Image)resources.GetObject("btnNew.Image");
+            btnNew.Location = new System.Drawing.Point(4, 4);
+            btnNew.Margin = new System.Windows.Forms.Padding(4);
+            btnNew.Name = "btnNew";
+            btnNew.Size = new System.Drawing.Size(439, 100);
+            btnNew.TabIndex = 17;
+            toolTip.SetToolTip(btnNew, "Skapa ny tag");
+            btnNew.UseVisualStyleBackColor = true;
+            btnNew.Click += btnAdd_Click;
             // 
             // errorProvider
             // 
-            this.errorProvider.ContainerControl = this;
+            errorProvider.ContainerControl = this;
             // 
             // checkActive
             // 
-            this.checkActive.AutoSize = true;
-            this.checkActive.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.checkActive.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.checkActive.Location = new System.Drawing.Point(4, 4);
-            this.checkActive.Margin = new System.Windows.Forms.Padding(4);
-            this.checkActive.Name = "checkActive";
-            this.checkActive.Padding = new System.Windows.Forms.Padding(11, 0, 0, 0);
-            this.checkActive.Size = new System.Drawing.Size(81, 25);
-            this.checkActive.TabIndex = 1;
-            this.checkActive.Text = "Aktiv";
-            this.toolTip.SetToolTip(this.checkActive, "Ska taggen loggas?");
-            this.checkActive.UseVisualStyleBackColor = true;
+            checkActive.AutoSize = true;
+            checkActive.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            checkActive.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
+            checkActive.Location = new System.Drawing.Point(4, 4);
+            checkActive.Margin = new System.Windows.Forms.Padding(4);
+            checkActive.Name = "checkActive";
+            checkActive.Padding = new System.Windows.Forms.Padding(11, 0, 0, 0);
+            checkActive.Size = new System.Drawing.Size(81, 25);
+            checkActive.TabIndex = 1;
+            checkActive.Text = "Aktiv";
+            toolTip.SetToolTip(checkActive, "Ska taggen loggas?");
+            checkActive.UseVisualStyleBackColor = true;
             // 
             // flowLayoutPanel1
             // 
-            this.flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.flowLayoutPanel1.Controls.Add(this.paraName);
-            this.flowLayoutPanel1.Controls.Add(this.paraLogType);
-            this.flowLayoutPanel1.Controls.Add(this.paraDescription);
-            this.flowLayoutPanel1.Controls.Add(this.paraLogTime);
-            this.flowLayoutPanel1.Controls.Add(this.paraFreq);
-            this.flowLayoutPanel1.Controls.Add(this.paraVarType);
-            this.flowLayoutPanel1.Controls.Add(this.paraDataType);
-            this.flowLayoutPanel1.Controls.Add(this.paraBlockNr);
-            this.flowLayoutPanel1.Controls.Add(this.paraStartAddress);
-            this.flowLayoutPanel1.Controls.Add(this.paraBitAddress);
-            this.flowLayoutPanel1.Controls.Add(this.paraDeadband);
-            this.flowLayoutPanel1.Controls.Add(this.paraScaleOffset);
-            this.flowLayoutPanel1.Controls.Add(this.paraScaleMin);
-            this.flowLayoutPanel1.Controls.Add(this.paraScaleMax);
-            this.flowLayoutPanel1.Controls.Add(this.paraRawMin);
-            this.flowLayoutPanel1.Controls.Add(this.paraRawMax);
-            this.flowLayoutPanel1.Controls.Add(this.paraNrOfValues);
-            this.flowLayoutPanel1.Controls.Add(this.paraUnit);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(4, 2);
-            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 2, 4, 4);
-            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(895, 615);
-            this.flowLayoutPanel1.TabIndex = 1;
+            flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            flowLayoutPanel1.Controls.Add(paraName);
+            flowLayoutPanel1.Controls.Add(paraLogType);
+            flowLayoutPanel1.Controls.Add(paraDescription);
+            flowLayoutPanel1.Controls.Add(paraLogTime);
+            flowLayoutPanel1.Controls.Add(paraFreq);
+            flowLayoutPanel1.Controls.Add(paraVarType);
+            flowLayoutPanel1.Controls.Add(paraDataType);
+            flowLayoutPanel1.Controls.Add(paraBlockNr);
+            flowLayoutPanel1.Controls.Add(paraStartAddress);
+            flowLayoutPanel1.Controls.Add(paraBitAddress);
+            flowLayoutPanel1.Controls.Add(paraDeadband);
+            flowLayoutPanel1.Controls.Add(paraScaleOffset);
+            flowLayoutPanel1.Controls.Add(paraScaleMin);
+            flowLayoutPanel1.Controls.Add(paraScaleMax);
+            flowLayoutPanel1.Controls.Add(paraRawMin);
+            flowLayoutPanel1.Controls.Add(paraRawMax);
+            flowLayoutPanel1.Controls.Add(paraNrOfValues);
+            flowLayoutPanel1.Controls.Add(paraUnit);
+            flowLayoutPanel1.Location = new System.Drawing.Point(4, 2);
+            flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 2, 4, 4);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new System.Drawing.Size(895, 615);
+            flowLayoutPanel1.TabIndex = 1;
             // 
             // paraName
             // 
-            this.paraName.BackColor = System.Drawing.Color.Transparent;
-            this.paraName.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraName.Header = "Namn";
-            this.paraName.Location = new System.Drawing.Point(6, 6);
-            this.paraName.Margin = new System.Windows.Forms.Padding(6);
-            this.paraName.Name = "paraName";
-            this.paraName.ParameterValue = "";
-            this.paraName.Size = new System.Drawing.Size(433, 56);
-            this.paraName.TabIndex = 51;
-            this.paraName.Validating += new System.ComponentModel.CancelEventHandler(this.txtName_Validating);
+            paraName.BackColor = System.Drawing.Color.Transparent;
+            paraName.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraName.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraName.Header = "Namn";
+            paraName.Location = new System.Drawing.Point(6, 6);
+            paraName.Margin = new System.Windows.Forms.Padding(6);
+            paraName.Name = "paraName";
+            paraName.ParameterValue = "";
+            paraName.Size = new System.Drawing.Size(433, 56);
+            paraName.TabIndex = 51;
+            paraName.Validating += txtName_Validating;
             // 
             // paraLogType
             // 
-            this.paraLogType.BackColor = System.Drawing.Color.Transparent;
-            this.paraLogType.ComboItems = new string[] {
-        "Cyclic",
-        "Delta",
-        "TimeOfDay",
-        "Event",
-        "WriteWatchDogInt16"};
-            this.paraLogType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraLogType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraLogType.HeaderText = "Log-typ";
-            this.paraLogType.Location = new System.Drawing.Point(451, 6);
-            this.paraLogType.Margin = new System.Windows.Forms.Padding(6);
-            this.paraLogType.Name = "paraLogType";
-            this.paraLogType.Size = new System.Drawing.Size(433, 56);
-            this.paraLogType.TabIndex = 52;
+            paraLogType.BackColor = System.Drawing.Color.Transparent;
+            paraLogType.ComboItems = (new string[] { "Cyclic", "Delta", "TimeOfDay", "Event", "WriteWatchDogInt16" });
+            paraLogType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraLogType.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraLogType.HeaderText = "Log-typ";
+            paraLogType.Location = new System.Drawing.Point(451, 6);
+            paraLogType.Margin = new System.Windows.Forms.Padding(6);
+            paraLogType.Name = "paraLogType";
+            paraLogType.Size = new System.Drawing.Size(433, 56);
+            paraLogType.TabIndex = 52;
             // 
             // paraDescription
             // 
-            this.paraDescription.BackColor = System.Drawing.Color.Transparent;
-            this.paraDescription.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraDescription.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraDescription.Header = "Beskrivning";
-            this.paraDescription.Location = new System.Drawing.Point(6, 74);
-            this.paraDescription.Margin = new System.Windows.Forms.Padding(6);
-            this.paraDescription.Name = "paraDescription";
-            this.paraDescription.ParameterValue = "";
-            this.paraDescription.Size = new System.Drawing.Size(433, 56);
-            this.paraDescription.TabIndex = 67;
+            paraDescription.BackColor = System.Drawing.Color.Transparent;
+            paraDescription.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraDescription.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraDescription.Header = "Beskrivning";
+            paraDescription.Location = new System.Drawing.Point(6, 74);
+            paraDescription.Margin = new System.Windows.Forms.Padding(6);
+            paraDescription.Name = "paraDescription";
+            paraDescription.ParameterValue = "";
+            paraDescription.Size = new System.Drawing.Size(433, 56);
+            paraDescription.TabIndex = 67;
             // 
             // paraLogTime
             // 
-            this.paraLogTime.BackColor = System.Drawing.Color.Transparent;
-            this.paraLogTime.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraLogTime.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraLogTime.Header = "Tid";
-            this.paraLogTime.Location = new System.Drawing.Point(451, 74);
-            this.paraLogTime.Margin = new System.Windows.Forms.Padding(6);
-            this.paraLogTime.Name = "paraLogTime";
-            this.paraLogTime.ParameterValue = "";
-            this.paraLogTime.Size = new System.Drawing.Size(433, 56);
-            this.paraLogTime.TabIndex = 53;
-            this.paraLogTime.Validating += new System.ComponentModel.CancelEventHandler(this.txtTimeOfDay_Validating);
+            paraLogTime.BackColor = System.Drawing.Color.Transparent;
+            paraLogTime.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraLogTime.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraLogTime.Header = "Tid";
+            paraLogTime.Location = new System.Drawing.Point(451, 74);
+            paraLogTime.Margin = new System.Windows.Forms.Padding(6);
+            paraLogTime.Name = "paraLogTime";
+            paraLogTime.ParameterValue = "";
+            paraLogTime.Size = new System.Drawing.Size(433, 56);
+            paraLogTime.TabIndex = 53;
+            paraLogTime.Validating += txtTimeOfDay_Validating;
             // 
             // paraFreq
             // 
-            this.paraFreq.BackColor = System.Drawing.Color.Transparent;
-            this.paraFreq.ComboItems = new string[] {
-        "Never",
-        "_50ms",
-        "_100ms",
-        "_250ms",
-        "_500ms",
-        "_1s",
-        "_2s",
-        "_10s",
-        "_30s",
-        "_1m",
-        "_5m"};
-            this.paraFreq.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraFreq.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraFreq.HeaderText = "Läs-frekvens";
-            this.paraFreq.Location = new System.Drawing.Point(6, 142);
-            this.paraFreq.Margin = new System.Windows.Forms.Padding(6);
-            this.paraFreq.Name = "paraFreq";
-            this.paraFreq.Size = new System.Drawing.Size(433, 56);
-            this.paraFreq.TabIndex = 64;
+            paraFreq.BackColor = System.Drawing.Color.Transparent;
+            paraFreq.ComboItems = (new string[] { "Never", "_50ms", "_100ms", "_250ms", "_500ms", "_1s", "_2s", "_10s", "_30s", "_1m", "_5m", "_20m", "_1h" });
+            paraFreq.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraFreq.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraFreq.HeaderText = "Läs-frekvens";
+            paraFreq.Location = new System.Drawing.Point(6, 142);
+            paraFreq.Margin = new System.Windows.Forms.Padding(6);
+            paraFreq.Name = "paraFreq";
+            paraFreq.Size = new System.Drawing.Size(433, 56);
+            paraFreq.TabIndex = 64;
             // 
             // paraVarType
             // 
-            this.paraVarType.BackColor = System.Drawing.Color.Transparent;
-            this.paraVarType.ComboItems = new string[] {
-        "Bit",
-        "Byte",
-        "Word",
-        "DWord",
-        "Int",
-        "DInt",
-        "Real",
-        "String",
-        "S7String",
-        "Timer",
-        "Counter",
-        "DateTime",
-        "DateTimeLong"};
-            this.paraVarType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraVarType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraVarType.HeaderText = "Variabel-typ";
-            this.paraVarType.Location = new System.Drawing.Point(451, 142);
-            this.paraVarType.Margin = new System.Windows.Forms.Padding(6);
-            this.paraVarType.Name = "paraVarType";
-            this.paraVarType.Size = new System.Drawing.Size(433, 50);
-            this.paraVarType.TabIndex = 66;
+            paraVarType.BackColor = System.Drawing.Color.Transparent;
+            paraVarType.ComboItems = (new string[] { "Bit", "Byte", "Word", "DWord", "Int", "DInt", "Real", "String", "S7String", "Timer", "Counter", "DateTime", "DateTimeLong" });
+            paraVarType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraVarType.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraVarType.HeaderText = "Variabel-typ";
+            paraVarType.Location = new System.Drawing.Point(451, 142);
+            paraVarType.Margin = new System.Windows.Forms.Padding(6);
+            paraVarType.Name = "paraVarType";
+            paraVarType.Size = new System.Drawing.Size(433, 50);
+            paraVarType.TabIndex = 66;
             // 
             // paraDataType
             // 
-            this.paraDataType.BackColor = System.Drawing.Color.Transparent;
-            this.paraDataType.ComboItems = new string[] {
-        "Counter",
-        "Timer",
-        "Input",
-        "Output",
-        "Memory",
-        "DataBlock"};
-            this.paraDataType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraDataType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraDataType.HeaderText = "Datatyp";
-            this.paraDataType.Location = new System.Drawing.Point(6, 210);
-            this.paraDataType.Margin = new System.Windows.Forms.Padding(6);
-            this.paraDataType.Name = "paraDataType";
-            this.paraDataType.Size = new System.Drawing.Size(433, 56);
-            this.paraDataType.TabIndex = 60;
+            paraDataType.BackColor = System.Drawing.Color.Transparent;
+            paraDataType.ComboItems = (new string[] { "Counter", "Timer", "Input", "Output", "Memory", "DataBlock" });
+            paraDataType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraDataType.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraDataType.HeaderText = "Datatyp";
+            paraDataType.Location = new System.Drawing.Point(6, 210);
+            paraDataType.Margin = new System.Windows.Forms.Padding(6);
+            paraDataType.Name = "paraDataType";
+            paraDataType.Size = new System.Drawing.Size(433, 56);
+            paraDataType.TabIndex = 60;
             // 
             // paraBlockNr
             // 
-            this.paraBlockNr.BackColor = System.Drawing.Color.Transparent;
-            this.paraBlockNr.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraBlockNr.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraBlockNr.Header = "Block-nummer";
-            this.paraBlockNr.Location = new System.Drawing.Point(451, 210);
-            this.paraBlockNr.Margin = new System.Windows.Forms.Padding(6);
-            this.paraBlockNr.Name = "paraBlockNr";
-            this.paraBlockNr.ParameterValue = "";
-            this.paraBlockNr.Size = new System.Drawing.Size(433, 50);
-            this.paraBlockNr.TabIndex = 56;
-            this.paraBlockNr.Validating += new System.ComponentModel.CancelEventHandler(this.txtBlockNr_Validating);
+            paraBlockNr.BackColor = System.Drawing.Color.Transparent;
+            paraBlockNr.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraBlockNr.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraBlockNr.Header = "Block-nummer";
+            paraBlockNr.Location = new System.Drawing.Point(451, 210);
+            paraBlockNr.Margin = new System.Windows.Forms.Padding(6);
+            paraBlockNr.Name = "paraBlockNr";
+            paraBlockNr.ParameterValue = "";
+            paraBlockNr.Size = new System.Drawing.Size(433, 50);
+            paraBlockNr.TabIndex = 56;
+            paraBlockNr.Validating += txtBlockNr_Validating;
             // 
             // paraStartAddress
             // 
-            this.paraStartAddress.BackColor = System.Drawing.Color.Transparent;
-            this.paraStartAddress.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraStartAddress.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraStartAddress.Header = "Start-adress";
-            this.paraStartAddress.Location = new System.Drawing.Point(6, 278);
-            this.paraStartAddress.Margin = new System.Windows.Forms.Padding(6);
-            this.paraStartAddress.Name = "paraStartAddress";
-            this.paraStartAddress.ParameterValue = "";
-            this.paraStartAddress.Size = new System.Drawing.Size(433, 56);
-            this.paraStartAddress.TabIndex = 61;
-            this.paraStartAddress.Validating += new System.ComponentModel.CancelEventHandler(this.txtStartByte_Validating);
+            paraStartAddress.BackColor = System.Drawing.Color.Transparent;
+            paraStartAddress.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraStartAddress.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraStartAddress.Header = "Start-adress";
+            paraStartAddress.Location = new System.Drawing.Point(6, 278);
+            paraStartAddress.Margin = new System.Windows.Forms.Padding(6);
+            paraStartAddress.Name = "paraStartAddress";
+            paraStartAddress.ParameterValue = "";
+            paraStartAddress.Size = new System.Drawing.Size(433, 56);
+            paraStartAddress.TabIndex = 61;
+            paraStartAddress.Validating += txtStartByte_Validating;
             // 
             // paraBitAddress
             // 
-            this.paraBitAddress.BackColor = System.Drawing.Color.Transparent;
-            this.paraBitAddress.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraBitAddress.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraBitAddress.Header = "Bit-adress";
-            this.paraBitAddress.Location = new System.Drawing.Point(451, 278);
-            this.paraBitAddress.Margin = new System.Windows.Forms.Padding(6);
-            this.paraBitAddress.Name = "paraBitAddress";
-            this.paraBitAddress.ParameterValue = "";
-            this.paraBitAddress.Size = new System.Drawing.Size(433, 56);
-            this.paraBitAddress.TabIndex = 63;
-            this.paraBitAddress.Validating += new System.ComponentModel.CancelEventHandler(this.txtBitAddress_Validating);
+            paraBitAddress.BackColor = System.Drawing.Color.Transparent;
+            paraBitAddress.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraBitAddress.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraBitAddress.Header = "Bit-adress";
+            paraBitAddress.Location = new System.Drawing.Point(451, 278);
+            paraBitAddress.Margin = new System.Windows.Forms.Padding(6);
+            paraBitAddress.Name = "paraBitAddress";
+            paraBitAddress.ParameterValue = "";
+            paraBitAddress.Size = new System.Drawing.Size(433, 56);
+            paraBitAddress.TabIndex = 63;
+            paraBitAddress.Validating += txtBitAddress_Validating;
             // 
             // paraDeadband
             // 
-            this.paraDeadband.BackColor = System.Drawing.Color.Transparent;
-            this.paraDeadband.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraDeadband.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraDeadband.Header = "Dödband";
-            this.paraDeadband.Location = new System.Drawing.Point(6, 346);
-            this.paraDeadband.Margin = new System.Windows.Forms.Padding(6);
-            this.paraDeadband.Name = "paraDeadband";
-            this.paraDeadband.ParameterValue = "";
-            this.paraDeadband.Size = new System.Drawing.Size(433, 56);
-            this.paraDeadband.TabIndex = 54;
-            this.paraDeadband.Validating += new System.ComponentModel.CancelEventHandler(this.txtDeadband_TextChanged);
+            paraDeadband.BackColor = System.Drawing.Color.Transparent;
+            paraDeadband.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraDeadband.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraDeadband.Header = "Dödband";
+            paraDeadband.Location = new System.Drawing.Point(6, 346);
+            paraDeadband.Margin = new System.Windows.Forms.Padding(6);
+            paraDeadband.Name = "paraDeadband";
+            paraDeadband.ParameterValue = "";
+            paraDeadband.Size = new System.Drawing.Size(433, 56);
+            paraDeadband.TabIndex = 54;
+            paraDeadband.Validating += txtDeadband_TextChanged;
             // 
             // paraScaleOffset
             // 
-            this.paraScaleOffset.BackColor = System.Drawing.Color.Transparent;
-            this.paraScaleOffset.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraScaleOffset.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraScaleOffset.Header = "Skalering offset";
-            this.paraScaleOffset.Location = new System.Drawing.Point(451, 346);
-            this.paraScaleOffset.Margin = new System.Windows.Forms.Padding(6);
-            this.paraScaleOffset.Name = "paraScaleOffset";
-            this.paraScaleOffset.ParameterValue = "";
-            this.paraScaleOffset.Size = new System.Drawing.Size(433, 56);
-            this.paraScaleOffset.TabIndex = 57;
-            this.paraScaleOffset.Validating += new System.ComponentModel.CancelEventHandler(this.txtScaleOffset_Validating);
+            paraScaleOffset.BackColor = System.Drawing.Color.Transparent;
+            paraScaleOffset.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraScaleOffset.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraScaleOffset.Header = "Skalering offset";
+            paraScaleOffset.Location = new System.Drawing.Point(451, 346);
+            paraScaleOffset.Margin = new System.Windows.Forms.Padding(6);
+            paraScaleOffset.Name = "paraScaleOffset";
+            paraScaleOffset.ParameterValue = "";
+            paraScaleOffset.Size = new System.Drawing.Size(433, 56);
+            paraScaleOffset.TabIndex = 57;
+            paraScaleOffset.Validating += txtScaleOffset_Validating;
             // 
             // paraScaleMin
             // 
-            this.paraScaleMin.BackColor = System.Drawing.Color.Transparent;
-            this.paraScaleMin.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraScaleMin.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraScaleMin.Header = "Skalering Min";
-            this.paraScaleMin.Location = new System.Drawing.Point(6, 414);
-            this.paraScaleMin.Margin = new System.Windows.Forms.Padding(6);
-            this.paraScaleMin.Name = "paraScaleMin";
-            this.paraScaleMin.ParameterValue = "";
-            this.paraScaleMin.Size = new System.Drawing.Size(433, 56);
-            this.paraScaleMin.TabIndex = 58;
-            this.paraScaleMin.Validating += new System.ComponentModel.CancelEventHandler(this.txtScaleMin_Validating);
+            paraScaleMin.BackColor = System.Drawing.Color.Transparent;
+            paraScaleMin.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraScaleMin.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraScaleMin.Header = "Skalering Min";
+            paraScaleMin.Location = new System.Drawing.Point(6, 414);
+            paraScaleMin.Margin = new System.Windows.Forms.Padding(6);
+            paraScaleMin.Name = "paraScaleMin";
+            paraScaleMin.ParameterValue = "";
+            paraScaleMin.Size = new System.Drawing.Size(433, 56);
+            paraScaleMin.TabIndex = 58;
+            paraScaleMin.Validating += txtScaleMin_Validating;
             // 
             // paraScaleMax
             // 
-            this.paraScaleMax.BackColor = System.Drawing.Color.Transparent;
-            this.paraScaleMax.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraScaleMax.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraScaleMax.Header = "Skalering Max";
-            this.paraScaleMax.Location = new System.Drawing.Point(451, 414);
-            this.paraScaleMax.Margin = new System.Windows.Forms.Padding(6);
-            this.paraScaleMax.Name = "paraScaleMax";
-            this.paraScaleMax.ParameterValue = "";
-            this.paraScaleMax.Size = new System.Drawing.Size(433, 56);
-            this.paraScaleMax.TabIndex = 59;
-            this.paraScaleMax.Validating += new System.ComponentModel.CancelEventHandler(this.txtScaleMax_Validating);
+            paraScaleMax.BackColor = System.Drawing.Color.Transparent;
+            paraScaleMax.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraScaleMax.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraScaleMax.Header = "Skalering Max";
+            paraScaleMax.Location = new System.Drawing.Point(451, 414);
+            paraScaleMax.Margin = new System.Windows.Forms.Padding(6);
+            paraScaleMax.Name = "paraScaleMax";
+            paraScaleMax.ParameterValue = "";
+            paraScaleMax.Size = new System.Drawing.Size(433, 56);
+            paraScaleMax.TabIndex = 59;
+            paraScaleMax.Validating += txtScaleMax_Validating;
             // 
             // paraRawMin
             // 
-            this.paraRawMin.BackColor = System.Drawing.Color.Transparent;
-            this.paraRawMin.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraRawMin.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraRawMin.Header = "Rå skal min";
-            this.paraRawMin.Location = new System.Drawing.Point(6, 482);
-            this.paraRawMin.Margin = new System.Windows.Forms.Padding(6);
-            this.paraRawMin.Name = "paraRawMin";
-            this.paraRawMin.ParameterValue = "";
-            this.paraRawMin.Size = new System.Drawing.Size(433, 56);
-            this.paraRawMin.TabIndex = 69;
-            this.paraRawMin.Validating += new System.ComponentModel.CancelEventHandler(this.paraRawMin_Validating);
+            paraRawMin.BackColor = System.Drawing.Color.Transparent;
+            paraRawMin.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraRawMin.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraRawMin.Header = "Rå skal min";
+            paraRawMin.Location = new System.Drawing.Point(6, 482);
+            paraRawMin.Margin = new System.Windows.Forms.Padding(6);
+            paraRawMin.Name = "paraRawMin";
+            paraRawMin.ParameterValue = "";
+            paraRawMin.Size = new System.Drawing.Size(433, 56);
+            paraRawMin.TabIndex = 69;
+            paraRawMin.Validating += paraRawMin_Validating;
             // 
             // paraRawMax
             // 
-            this.paraRawMax.BackColor = System.Drawing.Color.Transparent;
-            this.paraRawMax.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraRawMax.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraRawMax.Header = "Rå skal max";
-            this.paraRawMax.Location = new System.Drawing.Point(450, 481);
-            this.paraRawMax.Margin = new System.Windows.Forms.Padding(5, 5, 10, 5);
-            this.paraRawMax.Name = "paraRawMax";
-            this.paraRawMax.ParameterValue = "";
-            this.paraRawMax.Size = new System.Drawing.Size(433, 56);
-            this.paraRawMax.TabIndex = 68;
-            this.paraRawMax.Validating += new System.ComponentModel.CancelEventHandler(this.paraRawMax_Validating);
+            paraRawMax.BackColor = System.Drawing.Color.Transparent;
+            paraRawMax.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraRawMax.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraRawMax.Header = "Rå skal max";
+            paraRawMax.Location = new System.Drawing.Point(450, 481);
+            paraRawMax.Margin = new System.Windows.Forms.Padding(5, 5, 10, 5);
+            paraRawMax.Name = "paraRawMax";
+            paraRawMax.ParameterValue = "";
+            paraRawMax.Size = new System.Drawing.Size(433, 56);
+            paraRawMax.TabIndex = 68;
+            paraRawMax.Validating += paraRawMax_Validating;
             // 
             // paraNrOfValues
             // 
-            this.paraNrOfValues.BackColor = System.Drawing.Color.Transparent;
-            this.paraNrOfValues.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraNrOfValues.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraNrOfValues.Header = "Antal värden";
-            this.paraNrOfValues.Location = new System.Drawing.Point(6, 550);
-            this.paraNrOfValues.Margin = new System.Windows.Forms.Padding(6);
-            this.paraNrOfValues.Name = "paraNrOfValues";
-            this.paraNrOfValues.ParameterValue = "";
-            this.paraNrOfValues.Size = new System.Drawing.Size(433, 56);
-            this.paraNrOfValues.TabIndex = 62;
-            this.paraNrOfValues.Validating += new System.ComponentModel.CancelEventHandler(this.txtNrOfElements_Validating);
+            paraNrOfValues.BackColor = System.Drawing.Color.Transparent;
+            paraNrOfValues.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraNrOfValues.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraNrOfValues.Header = "Antal värden";
+            paraNrOfValues.Location = new System.Drawing.Point(6, 550);
+            paraNrOfValues.Margin = new System.Windows.Forms.Padding(6);
+            paraNrOfValues.Name = "paraNrOfValues";
+            paraNrOfValues.ParameterValue = "";
+            paraNrOfValues.Size = new System.Drawing.Size(433, 56);
+            paraNrOfValues.TabIndex = 62;
+            paraNrOfValues.Validating += txtNrOfElements_Validating;
             // 
             // paraUnit
             // 
-            this.paraUnit.BackColor = System.Drawing.Color.Transparent;
-            this.paraUnit.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.paraUnit.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.paraUnit.Header = "Värde-enhet";
-            this.paraUnit.Location = new System.Drawing.Point(451, 550);
-            this.paraUnit.Margin = new System.Windows.Forms.Padding(6);
-            this.paraUnit.Name = "paraUnit";
-            this.paraUnit.ParameterValue = "";
-            this.paraUnit.Size = new System.Drawing.Size(433, 56);
-            this.paraUnit.TabIndex = 65;
-            this.paraUnit.Validating += new System.ComponentModel.CancelEventHandler(this.txtUnit_Validating);
+            paraUnit.BackColor = System.Drawing.Color.Transparent;
+            paraUnit.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraUnit.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraUnit.Header = "Värde-enhet";
+            paraUnit.Location = new System.Drawing.Point(451, 550);
+            paraUnit.Margin = new System.Windows.Forms.Padding(6);
+            paraUnit.Name = "paraUnit";
+            paraUnit.ParameterValue = "";
+            paraUnit.Size = new System.Drawing.Size(433, 56);
+            paraUnit.TabIndex = 65;
+            paraUnit.Validating += txtUnit_Validating;
             // 
             // flowLayoutPanel2
             // 
-            this.flowLayoutPanel2.Controls.Add(this.flowLayoutPanel1);
-            this.flowLayoutPanel2.Controls.Add(this.tableLayoutPanel1);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(1, 46);
-            this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(4);
-            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(895, 743);
-            this.flowLayoutPanel2.TabIndex = 2;
+            flowLayoutPanel2.Controls.Add(flowLayoutPanel1);
+            flowLayoutPanel2.Controls.Add(tableLayoutPanel1);
+            flowLayoutPanel2.Location = new System.Drawing.Point(1, 46);
+            flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(4);
+            flowLayoutPanel2.Name = "flowLayoutPanel2";
+            flowLayoutPanel2.Size = new System.Drawing.Size(895, 743);
+            flowLayoutPanel2.TabIndex = 2;
             // 
             // flowLayoutPanel3
             // 
-            this.flowLayoutPanel3.Controls.Add(this.checkActive);
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(1, 2);
-            this.flowLayoutPanel3.Margin = new System.Windows.Forms.Padding(4);
-            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(154, 37);
-            this.flowLayoutPanel3.TabIndex = 3;
+            flowLayoutPanel3.Controls.Add(checkActive);
+            flowLayoutPanel3.Location = new System.Drawing.Point(1, 2);
+            flowLayoutPanel3.Margin = new System.Windows.Forms.Padding(4);
+            flowLayoutPanel3.Name = "flowLayoutPanel3";
+            flowLayoutPanel3.Size = new System.Drawing.Size(154, 37);
+            flowLayoutPanel3.TabIndex = 3;
             // 
             // btnOpc
             // 
-            this.btnOpc.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.btnOpc.ForeColor = System.Drawing.Color.Black;
-            this.btnOpc.Location = new System.Drawing.Point(302, 8);
-            this.btnOpc.Name = "btnOpc";
-            this.btnOpc.Size = new System.Drawing.Size(273, 31);
-            this.btnOpc.TabIndex = 4;
-            this.btnOpc.Text = "Utforska OPC-server...";
-            this.btnOpc.UseVisualStyleBackColor = true;
-            this.btnOpc.Visible = false;
+            btnOpc.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnOpc.ForeColor = System.Drawing.Color.Black;
+            btnOpc.Location = new System.Drawing.Point(302, 8);
+            btnOpc.Name = "btnOpc";
+            btnOpc.Size = new System.Drawing.Size(273, 31);
+            btnOpc.TabIndex = 4;
+            btnOpc.Text = "Utforska OPC-server...";
+            btnOpc.UseVisualStyleBackColor = true;
+            btnOpc.Visible = false;
             // 
             // AddPlcFromFile
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(67)))), ((int)(((byte)(62)))), ((int)(((byte)(71)))));
-            this.ClientSize = new System.Drawing.Size(920, 806);
-            this.Controls.Add(this.btnOpc);
-            this.Controls.Add(this.flowLayoutPanel3);
-            this.Controls.Add(this.flowLayoutPanel2);
-            this.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4);
-            this.Name = "AddPlcFromFile";
-            this.Opacity = 0.95D;
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Lägg till / Ändra tag...";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AddTag_FormClosing);
-            this.tableLayoutPanel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
-            this.flowLayoutPanel1.ResumeLayout(false);
-            this.flowLayoutPanel2.ResumeLayout(false);
-            this.flowLayoutPanel3.ResumeLayout(false);
-            this.flowLayoutPanel3.PerformLayout();
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            BackColor = System.Drawing.Color.FromArgb(67, 62, 71);
+            ClientSize = new System.Drawing.Size(920, 806);
+            Controls.Add(btnOpc);
+            Controls.Add(flowLayoutPanel3);
+            Controls.Add(flowLayoutPanel2);
+            ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            Margin = new System.Windows.Forms.Padding(4);
+            Name = "AddPlcFromFile";
+            Opacity = 0.95D;
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            Text = "Lägg till / Ändra tag...";
+            FormClosing += AddTag_FormClosing;
+            tableLayoutPanel1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)errorProvider).EndInit();
+            flowLayoutPanel1.ResumeLayout(false);
+            flowLayoutPanel2.ResumeLayout(false);
+            flowLayoutPanel3.ResumeLayout(false);
+            flowLayoutPanel3.PerformLayout();
+            ResumeLayout(false);
         }
 
         #endregion
