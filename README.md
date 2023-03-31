@@ -1,5 +1,5 @@
 # OptimaValue
-##Run in powershell
+## Run in powershell
 Create service:
  ```
 $params = @{
@@ -12,7 +12,7 @@ $params = @{
 New-Service @params
  ```
 
-##Visa logvärde i samma graf: 
+## Visa logvärde i samma graf: 
  ```
     SELECT 
     lv.tag_id,
