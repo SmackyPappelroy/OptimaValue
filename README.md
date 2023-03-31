@@ -1,5 +1,10 @@
 # OptimaValue
-## Create service
+
+## Innehåll
+* [Skapa service](#Skapa service)
+* [Visa logvärde i samma graf](#Visa logvärde i samma graf)
+
+## Skapa service
 Run in powershell:
  ```
 $params = @{
