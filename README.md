@@ -9,3 +9,28 @@ $params = @{
   Description = "Optima databatchloggning för Anläggningsdata"
 }
 New-Service @params
+
+Visa logvärde i samma graf: 
+ ```SELECT 
+    lv.tag_id,
+    CASE 
+        WHEN lv.tag_id = 35 THEN 'Allowed' 
+        WHEN lv.tag_id = 36 THEN 'Utpumpat' 
+    END AS TagName, 
+    COALESCE(lv.numericValue, 
+             (SELECT TOP 1 lv2.numericValue 
+              FROM McValueLog.dbo.logValues lv2 
+              WHERE lv2.tag_id = lv.tag_id AND lv2.logTime < lv.logTime 
+              ORDER BY lv2.logTime desc), 0) AS Value,
+    lv.logTime,
+    (SELECT TOP 1 COALESCE(lv2.numericValue, 0) 
+     FROM McValueLog.dbo.logValues lv2 
+     WHERE lv2.tag_id = 35 AND lv2.logTime <= lv.logTime 
+     ORDER BY lv2.logTime desc) AS Allowed,
+    (SELECT TOP 1 COALESCE(lv2.numericValue, 0) 
+     FROM McValueLog.dbo.logValues lv2 
+     WHERE lv2.tag_id = 36 AND lv2.logTime <= lv.logTime 
+     ORDER BY lv2.logTime desc) AS Utpumpat
+FROM McValueLog.dbo.logValues lv
+WHERE lv.tag_id IN (35, 36) AND lv.logTime BETWEEN '2022-01-01' AND '2024-01-31'
+ORDER BY lv.logTime asc;  ```
