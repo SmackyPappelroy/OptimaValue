@@ -11,7 +11,8 @@ $params = @{
 New-Service @params
 
 Visa logvärde i samma graf: 
- ```SELECT 
+ ```
+    SELECT 
     lv.tag_id,
     CASE 
         WHEN lv.tag_id = 35 THEN 'Allowed' 
@@ -33,4 +34,5 @@ Visa logvärde i samma graf:
      ORDER BY lv2.logTime desc) AS Utpumpat
 FROM McValueLog.dbo.logValues lv
 WHERE lv.tag_id IN (35, 36) AND lv.logTime BETWEEN '2022-01-01' AND '2024-01-31'
-ORDER BY lv.logTime asc;  ```
+ORDER BY lv.logTime asc;  
+```
