@@ -1,6 +1,6 @@
 # OptimaValue
-## Run in powershell
-Create service:
+## Create service
+Run in powershell:
  ```
 $params = @{
   Name = "Optima"
