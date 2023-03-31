@@ -1,6 +1,7 @@
 # OptimaValue
-Run in powershell
+##Run in powershell
 Create service:
+ ```
 $params = @{
   Name = "Optima"
   BinaryPathName = '"C:\Program Files\Optima\Optima\OptimaValue.Service.exe"'
@@ -9,8 +10,9 @@ $params = @{
   Description = "Optima databatchloggning för Anläggningsdata"
 }
 New-Service @params
+ ```
 
-Visa logvärde i samma graf: 
+##Visa logvärde i samma graf: 
  ```
     SELECT 
     lv.tag_id,
