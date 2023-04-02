@@ -6,7 +6,7 @@
 * [Kolla om kurva är stigande eller fallande](#kolla-om-en-kurva-är-stigande-eller-fallande)
 
 ## Skapa service
-* Deploya OptimaValue till en executable.
+* Publish OptimaValue till en executable.
 * Run in powershell:
  ```
 $params = @{
