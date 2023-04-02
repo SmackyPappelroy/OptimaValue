@@ -3,6 +3,7 @@
 ## Innehåll
 * [Skapa service](#"skapa-service")
 * [Visa logvärde i samma graf](#visa-logvärde-i-samma-graf)
+* [Kolla om kurva är stigande eller fallande](#kolla-om-en-kurva-är-stigande-eller-fallande)
 
 ## Skapa service
 Run in powershell:
