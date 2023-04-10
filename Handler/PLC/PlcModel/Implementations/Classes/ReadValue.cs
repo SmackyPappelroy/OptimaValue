@@ -9,6 +9,8 @@ namespace OptimaValue
     public class ReadValue
     {
         private DateTime createdDate;
+        public TimeSpan ReadTime { get; set; }
+
         public ReadValue(IPlc plc, object value)
         {
             this.plc = plc;
