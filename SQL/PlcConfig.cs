@@ -42,46 +42,33 @@ namespace OptimaValue
         /// <returns><code>True</code>If successfull</returns>
         private static bool PopulatePlcList()
         {
-            if (tblPlcConfig == null)
-                return false;
-
-            if (tblPlcConfig.Rows.Count == 0)
+            if (tblPlcConfig == null || tblPlcConfig.Rows.Count == 0)
             {
-                PlcList.Clear();
+                PlcList?.Clear();
                 return false;
             }
 
-            if (PlcList == null)
-                PlcList = new List<ExtendedPlc>();
-
-            PlcList.Clear();
-
-            foreach (DataRow row in tblPlcConfig.Rows)
-            {
-                var id = row.Field<int>("id");
-                var ip = row.Field<string>("ipAddress");
-                var cpu = (CpuType)Enum.Parse(typeof(CpuType), row.Field<string>("cpuType"));
-                var rack = row.Field<short>("rack");
-                var slot = row.Field<short>("slot");
-                var name = row.Field<string>("name");
-
-                var syncTimeDbNr = row.Field<int>("syncTimeDbNr");
-                var syncTimeDbOffset = row.Field<int>("syncTimeOffset");
-                var syncActive = row.Field<bool>("syncActive");
-                var syncBoolAddress = row.Field<string>("syncBoolAddress");
-                var lastSyncTime = row.Field<DateTime>("lastSyncTime");
-                var activePlcId = row.Field<int>("id");
-                var active = row.Field<bool>("Active");
-
-                var plcConfig = new PlcConfiguration(name, cpu, ip, rack, slot, activePlcId, active,
-                    syncTimeDbNr, syncTimeDbOffset, syncBoolAddress, syncActive, lastSyncTime);
-
-                var myPlc = new ExtendedPlc(plcConfig);
-                PlcList.Add(myPlc);
-            }
+            PlcList = tblPlcConfig.AsEnumerable()
+                .Select(row => new PlcConfiguration(
+                    plcName: row.Field<string>("name"),
+                    cpuType: Enum.Parse<CpuType>(row.Field<string>("cpuType")),
+                    ip: row.Field<string>("ipAddress"),
+                    rack: row.Field<short>("rack"),
+                    slot: row.Field<short>("slot"),
+                    activePlcId: row.Field<int>("id"),
+                    active: row.Field<bool>("Active"),
+                    syncTimeDbNr: row.Field<int>("syncTimeDbNr"),
+                    syncTimeOffset: row.Field<int>("syncTimeOffset"),
+                    syncBoolAddress: row.Field<string>("syncBoolAddress"),
+                    syncActive: row.Field<bool>("syncActive"),
+                    lastSyncTime: row.Field<DateTime>("lastSyncTime")
+                ))
+                .Select(plcConfig => new ExtendedPlc(plcConfig))
+                .ToList();
 
             return PlcList.Count > 0;
         }
+
 
 
         public static ExtendedPlc FindPlc(int plcId) => PlcList.Find(p => p.Id == plcId);
