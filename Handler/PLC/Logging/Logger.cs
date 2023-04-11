@@ -226,7 +226,7 @@ namespace OptimaValue
                 executionTime = sw.ElapsedMilliseconds;
                 if (executionTime > 0)
                     Debug.WriteLine($"Read time: {executionTime} ms");
-                var delay = executionTime > minReadTime ? (int)minReadTime : minReadTime - executionTime;
+                var delay = executionTime > minReadTime ? 10 : minReadTime - executionTime;
                 await Task.Delay((int)delay);
                 ct.ThrowIfCancellationRequested();
 
