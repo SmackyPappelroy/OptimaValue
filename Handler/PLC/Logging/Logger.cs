@@ -33,6 +33,7 @@ namespace OptimaValue
             Interval = 5000,
         };
 
+
         private static List<LastValue> lastLogValue;
 
         private static Task logTask;
