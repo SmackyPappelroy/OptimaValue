@@ -28,15 +28,7 @@ public static class DatabaseSql
     /// <returns><code>True</code>If Successfull</returns>
     public static async Task<bool> TestConnectionAsync(int timeOut = 1000, string serverString = "")
     {
-        string conString;
-        if (serverString == "")
-        {
-            conString = ConnectionString;
-        }
-        else
-        {
-            conString = serverString;
-        }
+        string conString = string.IsNullOrEmpty(serverString) ? ConnectionString : serverString;
         using SqlConnection con = new(conString);
 
         try
@@ -48,20 +40,18 @@ public static class DatabaseSql
 
             DatabaseStatus.isConnected = true;
             isConnected = true;
-            return true;
         }
         catch (TaskCanceledException ex1)
         {
             DatabaseStatus.isConnected = false;
             isConnected = false;
-            return false;
         }
         catch (SqlException ex)
         {
             DatabaseStatus.isConnected = false;
             isConnected = false;
-            return false;
         }
+        return isConnected;
     }
 
 
@@ -72,9 +62,9 @@ public static class DatabaseSql
     /// <returns></returns>
     public static bool TagExist(int tagId)
     {
-        object result = new object();
-        var query = $"SELECT TOP 1 name FROM {Settings.Databas}.dbo.tagConfig ";
-        query += $"WHERE id = {tagId}";
+        object result;
+        var query = $"SELECT TOP 1 name FROM {Settings.Databas}.dbo.tagConfig WHERE id = {tagId}";
+
         try
         {
             using SqlConnection con = new(ConnectionString);
@@ -85,10 +75,9 @@ public static class DatabaseSql
         catch (SqlException ex)
         {
             Apps.Logger.Log(string.Empty, Severity.Error, ex);
+            return false;
         }
-        if (result != null)
-            return true;
-        return false;
+        return result != null;
     }
 
     /// <summary>
@@ -98,37 +87,20 @@ public static class DatabaseSql
     /// <returns></returns>
     public static DataTable GetTags(string plcName)
     {
-        var tbl = new DataTable();
-        var query = $"SELECT * FROM {Settings.Databas}.dbo.tagConfig";
+        DataTable tbl = new DataTable();
+        var query = string.IsNullOrEmpty(plcName)
+            ? $"SELECT * FROM {Settings.Databas}.dbo.tagConfig"
+            : $"SELECT * FROM {Settings.Databas}.dbo.tagConfig WHERE plcName = '{plcName}'";
+
         try
         {
             using SqlConnection con = new(ConnectionString);
-            if (plcName == "")
-            {
-                using SqlCommand cmd = new(query, con);
-
-                con.Open();
-
-                using (SqlDataAdapter da = new(cmd))
-                {
-                    if (tbl != null)
-                        tbl.Clear();
-                    da.Fill(tbl);
-                }
-                return tbl;
-            }
-            else
-            {
-                query = $"SELECT * FROM {Settings.Databas}.dbo.tagConfig WHERE plcName = '{plcName}'";
-                using SqlCommand cmd = new(query, con);
-
-                con.Open();
-                using (SqlDataAdapter da = new(cmd))
-                {
-                    da.Fill(tbl);
-                }
-                return tbl;
-            }
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            using SqlDataAdapter da = new(cmd);
+            if (tbl != null)
+                tbl.Clear();
+            da.Fill(tbl);
         }
         catch (SqlException ex)
         {
@@ -140,20 +112,19 @@ public static class DatabaseSql
             Apps.Logger.Log(string.Empty, Severity.Error, ex);
             return null;
         }
+
+        return tbl;
     }
 
     public static bool UpdateTag(string query)
     {
         try
         {
-            using (SqlConnection con = new(ConnectionString))
-            {
-                using SqlCommand cmd = new(query, con);
-                con.Open();
-                cmd.ExecuteNonQuery();
-            }
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            cmd.ExecuteNonQuery();
             return true;
-
         }
         catch (SqlException ex)
         {
@@ -168,57 +139,44 @@ public static class DatabaseSql
     /// <param name="tagId"></param>
     public static void DeleteTag(int tagId)
     {
-        var query = $"DELETE FROM {Settings.Databas}.dbo.logValues ";
-        query += $"WHERE tag_id = {tagId}";
-        try
+        string[] queries = new[]
         {
-            using SqlConnection con = new SqlConnection(ConnectionString);
-            using SqlCommand cmd = new SqlCommand(query, con);
+        $"DELETE FROM {Settings.Databas}.dbo.logValues WHERE tag_id = {tagId}",
+        $"DELETE FROM {Settings.Databas}.dbo.tagConfig WHERE id = {tagId}"
+    };
 
-            con.Open();
-            cmd.ExecuteNonQuery();
-        }
-        catch (SqlException ex)
+        foreach (string query in queries)
         {
-            "Lyckas ej ta bort tag".SendStatusMessage(Severity.Error, ex);
-        }
-
-
-        query = $"DELETE FROM {Settings.Databas}.dbo.tagConfig ";
-        query += $"WHERE id = {tagId}";
-        try
-        {
-            using SqlConnection con = new SqlConnection(ConnectionString);
-            using SqlCommand cmd = new SqlCommand(query, con);
-
-            con.Open();
-            cmd.ExecuteNonQuery();
-        }
-        catch (SqlException ex2)
-        {
-            "Lyckas ej ta bort tag".SendStatusMessage(Severity.Error, ex2);
+            try
+            {
+                using SqlConnection con = new(ConnectionString);
+                using SqlCommand cmd = new(query, con);
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+            catch (SqlException ex)
+            {
+                "Lyckas ej ta bort tag".SendStatusMessage(Severity.Error, ex);
+            }
         }
     }
 
     public static bool CheckForDuplicateTagNames(string tagName, string plcName)
     {
-        object result = new object();
-        var query = $"SELECT TOP 1 name FROM {Settings.Databas}.dbo.tagConfig ";
-        query += $"WHERE name = '{tagName}' AND plcName = '{plcName}'";
+        string query = $"SELECT TOP 1 name FROM {Settings.Databas}.dbo.tagConfig WHERE name = '{tagName}' AND plcName = '{plcName}'";
         try
         {
             using SqlConnection con = new(ConnectionString);
             using SqlCommand cmd = new(query, con);
             con.Open();
-            result = cmd.ExecuteScalar();
+            object result = cmd.ExecuteScalar();
+            return result != null;
         }
         catch (SqlException ex)
         {
             "Lyckas ej kolla om det finns dubletter av taggar".SendStatusMessage(Severity.Error, ex);
+            return false;
         }
-        if (result != null)
-            return true;
-        return false;
     }
 
     /// <summary>
@@ -233,7 +191,6 @@ public static class DatabaseSql
             using SqlCommand cmd = new(query, con);
             con.Open();
             cmd.ExecuteNonQuery();
-
         }
         catch (SqlException ex)
         {
@@ -253,7 +210,7 @@ public static class DatabaseSql
         {
             using SqlConnection con = new(ConnectionString);
             using SqlCommand cmd = new(query, con);
-            using SqlDataAdapter adp = new SqlDataAdapter(cmd);
+            using SqlDataAdapter adp = new(cmd);
             con.Open();
             adp.Fill(tbl);
         }
@@ -270,24 +227,23 @@ public static class DatabaseSql
     /// <returns><see cref="DataTable"/></returns>
     public static DataTable GetPlcDataTable()
     {
-        var tbl = new DataTable();
-        string query = "SELECT * FROM " + Settings.Databas + ".dbo.plcConfig";
-        using SqlConnection con = new SqlConnection(ConnectionString);
-        using SqlCommand cmd = new SqlCommand(query, con);
+        DataTable tbl = new DataTable();
+        string query = $"SELECT * FROM {Settings.Databas}.dbo.plcConfig";
         try
         {
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
             con.Open();
-            using SqlDataAdapter da = new SqlDataAdapter(cmd);
-
+            using SqlDataAdapter da = new(cmd);
             tbl.Clear();
             da.Fill(tbl);
-            return tbl;
         }
         catch (SqlException ex)
         {
             "Lyckas ej hämta PLC tabell".SendStatusMessage(Severity.Error, ex);
             return null;
         }
+        return tbl;
     }
 
     /// <summary>
@@ -296,20 +252,8 @@ public static class DatabaseSql
     /// <param name="id"></param>
     public static void DeletePlc(int id)
     {
-        var query = $"DELETE FROM {Settings.Databas}.dbo.plcConfig ";
-        query += $"WHERE id ='{id}'";
-        try
-        {
-            using SqlConnection con = new SqlConnection(ConnectionString);
-            using SqlCommand cmd = new SqlCommand(query, con);
-
-            con.Open();
-            cmd.ExecuteNonQuery();
-        }
-        catch (SqlException ex)
-        {
-            $"Misslyckades ta bort PLC från SQL\r\n{ex.Message}".SendStatusMessage(Severity.Error);
-        }
+        string query = $"DELETE FROM {Settings.Databas}.dbo.plcConfig WHERE id ='{id}'";
+        ExecuteNonQuery(query, "Misslyckades ta bort PLC från SQL");
     }
 
     /// <summary>
@@ -322,15 +266,8 @@ public static class DatabaseSql
     /// <param name="plcId"></param>
     public static void SavePlcSyncParameters(string syncDb, string syncByte, string syncBool, string activeString, int plcId)
     {
-        string query;
-        query = $"UPDATE {Settings.Databas}.dbo.plcConfig SET ";
-        query += $"syncTimeDbNr={syncDb},syncTimeOffset={syncByte},syncBoolAddress='{syncBool}',syncActive='{activeString}'";
-        query += $" WHERE id = {plcId}";
-
-        using SqlConnection con = new SqlConnection(ConnectionString);
-        using SqlCommand cmd = new SqlCommand(query, con);
-        con.Open();
-        cmd.ExecuteNonQuery();
+        string query = $"UPDATE {Settings.Databas}.dbo.plcConfig SET syncTimeDbNr={syncDb},syncTimeOffset={syncByte},syncBoolAddress='{syncBool}',syncActive='{activeString}' WHERE id = {plcId}";
+        ExecuteNonQuery(query);
     }
 
     /// <summary>
@@ -340,25 +277,9 @@ public static class DatabaseSql
     /// <returns></returns>
     public static bool DoesPlcExist(string plcName)
     {
-        object result = new object();
-        var query = $"Select top 1 name FROM {Settings.Databas}.dbo.plcConfig WHERE name ='{plcName}'";
-        try
-        {
-            using SqlConnection con = new SqlConnection(ConnectionString);
-            using SqlCommand cmd = new SqlCommand(query, con);
-            con.Open();
-            result = cmd.ExecuteScalar();
-
-        }
-        catch (SqlException ex)
-        {
-            $"Misslyckades att läsa från SQL\r\n{ex.Message}".SendStatusMessage(Severity.Error);
-        }
-
-        if (result != null)
-            return true;
-        else
-            return false;
+        string query = $"Select top 1 name FROM {Settings.Databas}.dbo.plcConfig WHERE name ='{plcName}'";
+        object result = ExecuteScalar(query, "Misslyckades att läsa från SQL");
+        return result != null;
     }
 
     /// <summary>
@@ -376,37 +297,16 @@ public static class DatabaseSql
     {
         if (DoesPlcExist(name))
         {
-            string query;
-            query = $"UPDATE {Settings.Databas}.dbo.plcConfig SET active='{activeString}',name='{name}'";
-            query += $",ipAddress='{ip}',cpuType='{cpu}',rack={rack},slot={slot}";
-            query += $" WHERE id = {id}";
+            string query = $"UPDATE {Settings.Databas}.dbo.plcConfig SET active='{activeString}',name='{name}',ipAddress='{ip}',cpuType='{cpu}',rack={rack},slot={slot} WHERE id = {id}";
+            ExecuteNonQuery(query);
 
-            using (SqlConnection con = new(ConnectionString))
-            {
-                using SqlCommand cmd = new(query, con);
-                con.Open();
-                cmd.ExecuteNonQuery();
-            }
-            query = $"UPDATE {Settings.Databas}.dbo.tagConfig SET plcName='{name}' ";
-            query += $"WHERE plcName = '{plcName}'";
-            using (SqlConnection con = new(ConnectionString))
-            {
-                using SqlCommand cmd = new(query, con);
-                con.Open();
-                cmd.ExecuteNonQuery();
-            }
+            query = $"UPDATE {Settings.Databas}.dbo.tagConfig SET plcName='{name}' WHERE plcName = '{plcName}'";
+            ExecuteNonQuery(query);
         }
         else
         {
-            string query;
-            query = $"INSERT INTO {Settings.Databas}.dbo.plcConfig (active,name,ipAddress,cpuType,rack,slot,";
-            query += $"syncTimeDbNr,syncTimeOffset,syncActive,syncBoolAddress,lastSyncTime)";
-            query += $"VALUES ('{activeString}','{name}','{ip}','{cpu}',{rack},{slot},";
-            query += $"0,0,'False','DBX0.0','{DateTime.UtcNow - TimeSpan.FromDays(1)}')";
-            using SqlConnection con = new(ConnectionString);
-            using SqlCommand cmd = new(query, con);
-            con.Open();
-            cmd.ExecuteNonQuery();
+            string query = $"INSERT INTO {Settings.Databas}.dbo.plcConfig (active,name,ipAddress,cpuType,rack,slot,syncTimeDbNr,syncTimeOffset,syncActive,syncBoolAddress,lastSyncTime) VALUES ('{activeString}','{name}','{ip}','{cpu}',{rack},{slot},0,0,'False','DBX0.0','{DateTime.UtcNow - TimeSpan.FromDays(1)}')";
+            ExecuteNonQuery(query);
         }
     }
 
@@ -417,18 +317,8 @@ public static class DatabaseSql
     /// <param name="plcName"></param>
     public static void SaveSyncTime(DateTime tid, string plcName)
     {
-        var query = $"UPDATE {Settings.Databas}.dbo.plcConfig SET lastSyncTime = '{tid}' WHERE name = '{plcName}'";
-        try
-        {
-            using SqlConnection con = new(ConnectionString);
-            using SqlCommand cmd = new(query, con);
-            con.Open();
-            cmd.ExecuteNonQuery();
-        }
-        catch (SqlException ex)
-        {
-            $"Lyckades ej skriva till databas vid tids-synkning: {plcName}".SendStatusMessage(Severity.Error, ex);
-        }
+        string query = $"UPDATE {Settings.Databas}.dbo.plcConfig SET lastSyncTime = '{tid}' WHERE name = '{plcName}'";
+        ExecuteNonQuery(query, $"Lyckades ej skriva till databas vid tids-synkning: {plcName}");
     }
 
     /// <summary>
@@ -437,16 +327,18 @@ public static class DatabaseSql
     /// <param name="tbl"></param>
     public static void SendLogValuesToSql(DataTable tbl)
     {
+        using SqlConnection con = new(ConnectionString);
+        using SqlBulkCopy objBulk = new(ConnectionString)
+        {
+            DestinationTableName = "logValues"
+        };
 
-        using SqlConnection con = new SqlConnection(ConnectionString);
-        using SqlBulkCopy objBulk = new SqlBulkCopy(ConnectionString);
-
-        objBulk.DestinationTableName = "logValues";
         objBulk.ColumnMappings.Add("logTime", "logTime");
         objBulk.ColumnMappings.Add("value", "value");
         objBulk.ColumnMappings.Add("numericValue", "numericValue");
         objBulk.ColumnMappings.Add("opcQuality", "opcQuality");
         objBulk.ColumnMappings.Add("tag_id", "tag_id");
+
         try
         {
             con.Open();
@@ -456,5 +348,44 @@ public static class DatabaseSql
         {
             $"Problem vid lagring till Sql \n\r{ex.Message}".SendStatusMessage(Severity.Error);
         }
+    }
+
+    private static void ExecuteNonQuery(string query, string errorMessage = null)
+    {
+        try
+        {
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            cmd.ExecuteNonQuery();
+        }
+        catch (SqlException ex)
+        {
+            if (errorMessage != null)
+            {
+                $"{errorMessage}\r\n{ex.Message}".SendStatusMessage(Severity.Error);
+            }
+        }
+    }
+
+    private static object ExecuteScalar(string query, string errorMessage = null)
+    {
+        object result = new object();
+        try
+        {
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            result = cmd.ExecuteScalar();
+        }
+        catch (SqlException ex)
+        {
+            if (errorMessage != null)
+            {
+                $"{errorMessage}\r\n{ex.Message}".SendStatusMessage(Severity.Error);
+            }
+        }
+
+        return result;
     }
 }

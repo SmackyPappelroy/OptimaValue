@@ -44,46 +44,45 @@ namespace OptimaValue
         {
             if (tblPlcConfig == null)
                 return false;
-            var tbl = tblPlcConfig;
-            if (tbl.Rows.Count == 0)
+
+            if (tblPlcConfig.Rows.Count == 0)
             {
                 PlcList.Clear();
                 return false;
             }
+
             if (PlcList == null)
                 PlcList = new List<ExtendedPlc>();
+
             PlcList.Clear();
-            for (int rowIndex = 0; rowIndex < tbl.Rows.Count; rowIndex++)
+
+            foreach (DataRow row in tblPlcConfig.Rows)
             {
-                var _id = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("id"));
-                var _ip = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("ipAddress"));
-                var _cpu = (CpuType)Enum.Parse(typeof(CpuType), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("cpuType")));
-                var _rack = (tbl.AsEnumerable().ElementAt(rowIndex).Field<short>("rack"));
-                var _slot = (tbl.AsEnumerable().ElementAt(rowIndex).Field<short>("slot"));
-                var _name = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("name"));
+                var id = row.Field<int>("id");
+                var ip = row.Field<string>("ipAddress");
+                var cpu = (CpuType)Enum.Parse(typeof(CpuType), row.Field<string>("cpuType"));
+                var rack = row.Field<short>("rack");
+                var slot = row.Field<short>("slot");
+                var name = row.Field<string>("name");
 
-                var _syncTimeDbNr = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("syncTimeDbNr"));
-                var _syncTimeDbOffset = (tbl.AsEnumerable().ElementAt(rowIndex).Field<int>("syncTimeOffset"));
-                var _syncActive = (tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("syncActive"));
-                var _syncBoolAddress = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("syncBoolAddress"));
-                var _lastSyncTime = (tbl.AsEnumerable().ElementAt(rowIndex).Field<DateTime>("lastSyncTime"));
-                var _activePlcId = (int)tbl.AsEnumerable().ElementAt(rowIndex).Field<Int32>("id");
-                var _active = tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("Active");
+                var syncTimeDbNr = row.Field<int>("syncTimeDbNr");
+                var syncTimeDbOffset = row.Field<int>("syncTimeOffset");
+                var syncActive = row.Field<bool>("syncActive");
+                var syncBoolAddress = row.Field<string>("syncBoolAddress");
+                var lastSyncTime = row.Field<DateTime>("lastSyncTime");
+                var activePlcId = row.Field<int>("id");
+                var active = row.Field<bool>("Active");
 
-                var plcConfig = new PlcConfiguration(_name, _cpu, _ip,
-                    _rack, _slot, _activePlcId,
-                    _active, _syncTimeDbNr, _syncTimeDbOffset,
-                    _syncBoolAddress, _syncActive, _lastSyncTime);
+                var plcConfig = new PlcConfiguration(name, cpu, ip, rack, slot, activePlcId, active,
+                    syncTimeDbNr, syncTimeDbOffset, syncBoolAddress, syncActive, lastSyncTime);
 
                 var myPlc = new ExtendedPlc(plcConfig);
                 PlcList.Add(myPlc);
             }
 
-            if (PlcList.Count > 0)
-                return true;
-            else
-                return false;
+            return PlcList.Count > 0;
         }
+
 
         public static ExtendedPlc FindPlc(int plcId) => PlcList.Find(p => p.Id == plcId);
 

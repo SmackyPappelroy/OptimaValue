@@ -240,44 +240,26 @@ namespace OptimaValue
         private async Task StartLogging()
         {
             btnStart.Visible = false;
-            // Close all but Masterform
-            for (int i = Application.OpenForms.Count - 1; i >= 0; i--)
+
+            // Close all forms except for MasterForm
+            foreach (var form in Application.OpenForms.Cast<Form>().Where(f => f.Name != "MasterForm").ToArray())
             {
-                if (Application.OpenForms[i].Name != "MasterForm")
-                    Application.OpenForms[i].Close();
+                form.Close();
             }
 
             if (!await Master.StartLog())
+            {
                 btnStart.Visible = true;
-
-            if (settingsControl != null)
-            {
-                if (settingsControl.Visible == true)
-                {
-                    settingsControl.Hide();
-                    settingsControl = null;
-                }
+                return;
             }
 
-            if (statusControl != null)
-            {
-                if (statusControl.Visible == true)
-                {
-                    statusControl.Hide();
-                    statusControl = null;
-                }
-            }
-            if (tagControl != null)
-            {
-                if (tagControl.Visible == true)
-                {
-                    tagControl.Hide();
-                    tagControl = null;
-                }
-            }
+            settingsControl?.Hide();
+            statusControl?.Hide();
+            tagControl?.Hide();
 
             addPlc.Enabled = false;
         }
+
 
         private void btnStop_Click(object sender, EventArgs e)
         {
@@ -402,114 +384,87 @@ namespace OptimaValue
 
         private void treeView_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            if (treeView.SelectedNode.Name == "Konfiguration")
+            switch (treeView.SelectedNode.Name)
             {
-                activePlc = PlcConfig.PlcList.Find(x => x.PlcName == treeView.SelectedNode.Parent.Text);
+                case "Konfiguration":
+                    var plcName = treeView.SelectedNode.Parent?.Text;
+                    activePlc = PlcConfig.PlcList.Find(x => x.PlcName == plcName);
 
-                if (settingsControl != null)
-                {
-                    settingsControl.Hide();
-                }
-                settingsControl = null;
+                    settingsControl?.Hide();
+                    settingsControl = null;
 
-                // Plcn finns ej i databas
-                if (activePlc == null)
-                {
-                    settingsControl = new PlcSettingsControl(ConnectionStatus.Disconnected, string.Empty
-                                      , string.Empty, 1.ToString(), 0.ToString()
-                                      , false, CpuType.S71500, 0, activePlc)
+                    if (activePlc == null)
                     {
-                        Parent = contentPanel
-                    };
-                    settingsControl.Dock = DockStyle.Fill;
-                }
-                // Plcn finns i databas
-                else
-                {
-                    settingsControl = new PlcSettingsControl(activePlc.ConnectionStatus, activePlc.PlcName
-                  , activePlc.PlcConfiguration.Ip, activePlc.PlcConfiguration.Slot.ToString(), activePlc.PlcConfiguration.Rack.ToString()
-                  , activePlc.Active, (CpuType)activePlc.PlcConfiguration.CpuType, activePlc.ActivePlcId, activePlc)
+                        settingsControl = new PlcSettingsControl(ConnectionStatus.Disconnected, string.Empty, string.Empty, "1", "0", false, CpuType.S71500, 0, activePlc)
+                        {
+                            Parent = contentPanel,
+                            Dock = DockStyle.Fill
+                        };
+                    }
+                    else
                     {
-                        Parent = contentPanel
+                        settingsControl = new PlcSettingsControl(activePlc.ConnectionStatus, activePlc.PlcName, activePlc.PlcConfiguration.Ip, activePlc.PlcConfiguration.Slot.ToString(), activePlc.PlcConfiguration.Rack.ToString(), activePlc.Active, (CpuType)activePlc.PlcConfiguration.CpuType, activePlc.ActivePlcId, activePlc)
+                        {
+                            Parent = contentPanel,
+                            Dock = DockStyle.Fill
+                        };
+                    }
+                    settingsControl?.Show();
+                    break;
+
+                case "Status":
+                    var plcNameStatus = treeView.SelectedNode.Parent?.Text;
+                    activePlc = PlcConfig.PlcList.Find(x => x.PlcName == plcNameStatus);
+
+                    if (activePlc == null)
+                    {
+                        return;
+                    }
+
+                    statusControl?.Hide();
+                    statusControl = new StatusControl(activePlc.PlcName)
+                    {
+                        Parent = contentPanel,
+                        Dock = DockStyle.Fill
                     };
-                    settingsControl.Dock = DockStyle.Fill;
-                }
-                if (activePlc != null)
-                {
-                    settingsControl.Show();
-                }
-                else if (activePlc == null)
-                    settingsControl.Show();
+                    statusControl?.Show();
+                    break;
 
+                case "Taggar":
+                    var plcNameTags = treeView.SelectedNode.Parent?.Text;
+                    activePlc = PlcConfig.PlcList.Find(x => x.PlcName == plcNameTags);
+
+                    if (activePlc == null)
+                    {
+                        return;
+                    }
+
+                    tagControl?.Hide();
+                    tagControl = new TagControl2(activePlc, treeView)
+                    {
+                        Parent = contentPanel,
+                        Dock = DockStyle.Fill
+                    };
+                    tagControl?.Show();
+                    break;
+
+                default:
+                    settingsControl?.Hide();
+                    settingsControl = null;
+                    statusControl?.Hide();
+                    statusControl = null;
+                    tagControl?.Hide();
+                    tagControl = null;
+                    break;
             }
-
-            if (treeView.SelectedNode.Name != "Konfiguration")
-            {
-                if (settingsControl != null)
-                    settingsControl.Hide();
-                settingsControl = null;
-            }
-
-            if (treeView.SelectedNode.Name == "Status")
-            {
-                activePlc = PlcConfig.PlcList.Find(x => x.PlcName == treeView.SelectedNode.Parent.Text);
-
-                if (activePlc == null)
-                    return;
-
-                if (statusControl != null)
-                    statusControl.Hide();
-                statusControl = null;
-
-                statusControl = new StatusControl(activePlc.PlcName)
-                {
-                    Parent = contentPanel,
-                    Dock = DockStyle.Fill
-                };
-                statusControl.Show();
-            }
-
-            if (treeView.SelectedNode.Name != "Status")
-            {
-                if (statusControl != null)
-                    statusControl.Hide();
-                statusControl = null;
-            }
-
-            if (treeView.SelectedNode.Name == "Taggar")
-            {
-                activePlc = PlcConfig.PlcList.Find(x => x.PlcName == treeView.SelectedNode.Parent.Text);
-
-                if (activePlc == null)
-                    return;
-
-                if (tagControl != null)
-                    tagControl.Hide();
-                tagControl = null;
-
-                tagControl = new TagControl2(activePlc, treeView)
-                {
-                    Parent = contentPanel,
-                    Dock = DockStyle.Fill
-                };
-                tagControl.Show();
-
-
-            }
-            if (treeView.SelectedNode.Name != "Taggar")
-            {
-                if (tagControl != null)
-                    tagControl.Hide();
-                tagControl = null;
-            }
-
         }
+
         #endregion
 
         #region Events
         public void Subscribe(bool subscribe)
         {
-            if (!isSubscribed && subscribe)
+            if (subscribe)
             {
                 RedrawTreeEvent.NewMessage += RedrawTreeEvent_NewMessage;
                 OnlineStatusEvent.NewMessage += OnlineStatusEvent_NewMessage;
@@ -520,9 +475,8 @@ namespace OptimaValue
                 databaseTimer.Tick += DatabaseTimer_Tick;
                 Logger.RestartEvent += Logger_RestartEvent;
                 this.Resize += MasterForm_Resize;
-                isSubscribed = true;
             }
-            else if (isSubscribed && !subscribe)
+            else
             {
                 RedrawTreeEvent.NewMessage -= RedrawTreeEvent_NewMessage;
                 OnlineStatusEvent.NewMessage -= OnlineStatusEvent_NewMessage;
@@ -531,11 +485,12 @@ namespace OptimaValue
                 startStopButtonVisibilityTimer.Tick -= StartStopButtonVisibilityTimer_Tick;
                 DatabaseCreationEvent.CreatedEvent -= DatabaseCreationEvent_CreatedEvent;
                 Logger.RestartEvent -= Logger_RestartEvent;
-
-
-                isSubscribed = false;
+                this.Resize -= MasterForm_Resize;
             }
+
+            isSubscribed = subscribe;
         }
+
 
         private void DatabaseTimer_Tick(object sender, EventArgs e)
         {
@@ -592,55 +547,66 @@ namespace OptimaValue
 
         private void StartStopButtonVisibilityTimer_Tick(object sender, EventArgs e)
         {
-            var anyActivePlcs = false;
-            if (PlcConfig.PlcList == null || PlcConfig.PlcList.Count == 0)
-            {
-                btnStart.Visible = false;
-                btnStop.Visible = false;
-                return;
-            }
-            foreach (ExtendedPlc myPlc in PlcConfig.PlcList)
-            {
-                if (myPlc.LoggerIsStarted)
-                    anyActivePlcs = true;
-            }
+            bool anyActivePlcs = PlcConfig.PlcList?.Any(x => x.LoggerIsStarted) ?? false;
+
             if (anyActivePlcs)
             {
-                if (btnStart.Visible != false)
+                if (btnStart.Visible)
+                {
                     btnStart.Visible = false;
-                if (menuSettings.Enabled != false)
+                }
+                if (menuSettings.Enabled)
+                {
                     menuSettings.Enabled = false;
-                if (btnStop.Visible != true)
+                }
+                if (!btnStop.Visible)
+                {
                     btnStop.Visible = true;
+                }
                 if (treeView.TopNode.ImageIndex != 7)
                 {
                     treeView.TopNode.ImageIndex = 7;
                     treeView.TopNode.SelectedImageIndex = 7;
                 }
                 if (notifyIcon.Icon != Resources.icons8_gas_running)
+                {
                     notifyIcon.Icon = Resources.icons8_gas_running;
+                }
                 if (notifyIcon.Text != "Ansluten")
+                {
                     notifyIcon.Text = "Ansluten";
+                }
             }
             else
             {
-                if (btnStop.Visible != false)
-                    btnStop.Visible = false;
-                if (menuSettings.Enabled != true)
-                    menuSettings.Enabled = true;
-                if (btnStart.Visible != true)
+                if (!btnStart.Visible)
+                {
                     btnStart.Visible = true;
+                }
+                if (!menuSettings.Enabled)
+                {
+                    menuSettings.Enabled = true;
+                }
+                if (btnStop.Visible)
+                {
+                    btnStop.Visible = false;
+                }
                 if (treeView.TopNode.ImageIndex != 0)
                 {
                     treeView.TopNode.ImageIndex = 0;
                     treeView.TopNode.SelectedImageIndex = 0;
                 }
                 if (notifyIcon.Icon != Resources.icons8_gas_idle)
+                {
                     notifyIcon.Icon = Resources.icons8_gas_idle;
+                }
                 if (notifyIcon.Text != "Ej ansluten")
+                {
                     notifyIcon.Text = "Ej ansluten";
+                }
             }
         }
+
 
         private void StatusTimer_Tick(object sender, EventArgs e)
         {
@@ -657,34 +623,24 @@ namespace OptimaValue
                 Invoke((MethodInvoker)delegate { Logger_NewLog(obj); });
                 return;
             }
-            if (obj.exception != null)
-            {
-                statusPanel.AutoScroll = true;
-                txtStatus.Text = obj.exception.ToString();
-            }
-            else
-            {
-                txtStatus.Text = obj.hmiString;
-            }
 
+            statusPanel.AutoScroll = obj.exception != null;
+            txtStatus.Text = obj.exception != null ? obj.exception.ToString() : obj.hmiString;
             txtStatus.Visible = true;
             statusTimer.Start();
 
-            if (obj.LogSeverity == Severity.Error)
+            if (obj.LogSeverity == Severity.Error || obj.LogSeverity == Severity.Warning)
             {
                 var tiden = DateTime.UtcNow + Logger.UtcOffset;
+                var icon = obj.LogSeverity == Severity.Error ? ToolTipIcon.Error : ToolTipIcon.Warning;
                 if (Properties.Settings.Default.notify)
-                    notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Error);
-                errorImage.Visible = true;
-            }
-            else if (obj.LogSeverity == Severity.Warning)
-            {
-                var tiden = DateTime.UtcNow + Logger.UtcOffset;
-                if (Properties.Settings.Default.notify)
-                    notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, ToolTipIcon.Warning);
+                {
+                    notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, icon);
+                }
                 errorImage.Visible = true;
             }
         }
+
 
         private bool isConnected = false;
         private void OnlineStatusEvent_NewMessage(object sender, OnlineStatusEventArgs e)
