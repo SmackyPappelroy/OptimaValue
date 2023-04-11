@@ -17,10 +17,7 @@ namespace OptimaValue
 
     public static class Logger
     {
-        // Försök att få ner CPU-belastning
-        private static Stopwatch cycleTime = new Stopwatch();
         public static int FastestLogTime = int.MaxValue;
-
 
         /// <summary>
         /// Lokal tid offset
@@ -40,8 +37,6 @@ namespace OptimaValue
 
         private static Task logTask;
         private static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-
-
         private static System.Timers.Timer onlineTimer;
 
         public static bool startClosing = false;
@@ -113,7 +108,6 @@ namespace OptimaValue
             }, TaskContinuationOptions.OnlyOnCanceled);
         }
 
-
         public static void RequestDisconnect()
         {
             if (logTask != null && !cancelTokenSource.IsCancellationRequested)
@@ -142,12 +136,11 @@ namespace OptimaValue
             InitializeOnlineTimer();
             //    InitializeSendValuesToSql();
             InitializeLastLogValue();
+            await CheckConnectionsAsync();
 
             while (PlcConfig.PlcList.Any(p => p.LoggerIsStarted))
             {
                 var sw = Stopwatch.StartNew();
-
-                await CheckConnectionsAndReconnectAsync();
 
                 long minReadTime = TagsToLog.AllLogValues.Min(x => (long)x.LogFreq);
                 await ProcessAllPlcTagsAndHandleClosing();
@@ -172,8 +165,6 @@ namespace OptimaValue
             }
         }
 
-
-
         private static void InitializeLastLogValue()
         {
             if (lastLogValue == null)
@@ -182,7 +173,7 @@ namespace OptimaValue
             }
         }
 
-        private static async Task CheckConnectionsAndReconnectAsync()
+        private static async Task CheckConnectionsAsync()
         {
             foreach (ExtendedPlc plc in PlcConfig.PlcList)
             {
@@ -220,6 +211,35 @@ namespace OptimaValue
                 }
             }
         }
+        private static async Task CheckReconnectAsync(ExtendedPlc MyPlc)
+        {
+            if (MyPlc.ConnectionStatus != ConnectionStatus.Connected)
+            {
+                var tiden = DateTime.UtcNow;
+
+                if (tiden - MyPlc.LastReconnect > TimeSpan.FromSeconds(3))
+                {
+                    try
+                    {
+                        if (MyPlc.isOpc)
+                        {
+                            await ReconnectOpc(MyPlc);
+                        }
+                        else
+                        {
+                            ReconnectPlc(MyPlc);
+                        }
+
+                        MyPlc.LastReconnect = tiden;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogReconnectError(MyPlc, ex);
+                        MyPlc.LastReconnect = tiden;
+                    }
+                }
+            }
+        }
 
         private static void LogConnectionError(ExtendedPlc plc, Exception ex = null)
         {
@@ -230,6 +250,9 @@ namespace OptimaValue
         {
             foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
             {
+                if (!MyPlc.Active)
+                    continue;
+                await CheckReconnectAsync(MyPlc);
                 await ProcessPlcTags(MyPlc);
 
                 if (startClosing)
@@ -238,7 +261,6 @@ namespace OptimaValue
                 }
             }
         }
-
 
         private static async Task ProcessPlcTags(ExtendedPlc plc)
         {
@@ -290,35 +312,6 @@ namespace OptimaValue
         }
 
 
-        private static async Task CheckReconnectAsync(ExtendedPlc MyPlc)
-        {
-            if (MyPlc.ConnectionStatus != ConnectionStatus.Connected)
-            {
-                var tiden = DateTime.UtcNow;
-
-                if (tiden - MyPlc.LastReconnect > TimeSpan.FromSeconds(3))
-                {
-                    try
-                    {
-                        if (MyPlc.isOpc)
-                        {
-                            await ReconnectOpc(MyPlc);
-                        }
-                        else
-                        {
-                            ReconnectPlc(MyPlc);
-                        }
-
-                        MyPlc.LastReconnect = tiden;
-                    }
-                    catch (Exception ex)
-                    {
-                        LogReconnectError(MyPlc, ex);
-                        MyPlc.LastReconnect = tiden;
-                    }
-                }
-            }
-        }
 
         private static async Task ReconnectOpc(ExtendedPlc MyPlc)
         {
@@ -354,7 +347,6 @@ namespace OptimaValue
             MyPlc.SendPlcStatusMessage($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Status.Error);
             Apps.Logger.Log($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Severity.Error, ex);
         }
-
 
         private static async Task ReadValue(ExtendedPlc MyPlc, TagDefinitions logTag)
         {
@@ -653,13 +645,11 @@ namespace OptimaValue
                         break;
                 }
             }
-
             if (shouldAdd)
             {
                 AddValueToSql(logTag, readValue, plcName);
             }
         }
-
 
         /// <summary>
         /// Synkronisera PLC-klockan en gång om dagen
@@ -776,18 +766,15 @@ namespace OptimaValue
 
         private static void RemoveOldLogValues(int tagId)
         {
-            var allOccurencesOfTagInList = lastLogValue.FindAll(n => n.tag_id == tagId).OrderBy(dat => dat.ReadValue.LogTime).ToList();
+            var allOccurrencesOfTagInList = lastLogValue.FindAll(n => n.tag_id == tagId).OrderBy(dat => dat.ReadValue.LogTime).ToList();
             var nrOfItemsInLastLog = lastLogValue.FindAll(n => n.tag_id == tagId);
 
             // Garantera att det bara finns ett värde bakåt
             if (nrOfItemsInLastLog.Count > 2)
             {
-                var removeDate = allOccurencesOfTagInList[nrOfItemsInLastLog.Count - 3].ReadValue.LogTime;
+                var removeDate = allOccurrencesOfTagInList[nrOfItemsInLastLog.Count - 3].ReadValue.LogTime;
                 lastLogValue.RemoveAll(i => i.tag_id == tagId && i.ReadValue.LogTime <= removeDate);
             }
         }
-
-
-
     }
 }
