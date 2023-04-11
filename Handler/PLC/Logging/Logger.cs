@@ -24,11 +24,11 @@ namespace OptimaValue
         /// </summary>
         public static TimeSpan UtcOffset => TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow);
 
-        private static object sqlLock = new object();
+        private static object sqlLock = new();
 
         public static event EventHandler StartedEvent;
         public static event EventHandler RestartEvent;
-        public static System.Timers.Timer RestartTimer = new System.Timers.Timer()
+        public static System.Timers.Timer RestartTimer = new()
         {
             Interval = 5000,
         };
@@ -36,7 +36,7 @@ namespace OptimaValue
         private static List<LastValue> lastLogValue;
 
         private static Task logTask;
-        private static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
+        private static CancellationTokenSource cancelTokenSource = new();
         private static System.Timers.Timer onlineTimer;
 
         public static bool startClosing = false;
@@ -148,7 +148,7 @@ namespace OptimaValue
                 sw.Stop();
                 long executionTime = sw.ElapsedMilliseconds;
                 var delay = executionTime > minReadTime ? 10 : minReadTime - executionTime;
-                await Task.Delay((int)delay);
+                await Task.Delay((int)delay, ct);
 
                 ct.ThrowIfCancellationRequested();
             }
@@ -156,21 +156,15 @@ namespace OptimaValue
 
         private static void InitializeOnlineTimer()
         {
-            if (onlineTimer == null)
-            {
-                onlineTimer = new System.Timers.Timer()
+            onlineTimer ??= new System.Timers.Timer()
                 {
                     Interval = 500
                 };
-            }
         }
 
         private static void InitializeLastLogValue()
         {
-            if (lastLogValue == null)
-            {
-                lastLogValue = new List<LastValue>();
-            }
+            lastLogValue ??= new List<LastValue>();
         }
 
         private static async Task CheckConnectionsAsync()
@@ -389,15 +383,15 @@ namespace OptimaValue
                     LastValue lastKnownLogValue = lastLogValue.FindLast(l => l.tag_id == logTag.Id);
                     if (lastKnownLogValue == null)
                     {
-                        AddValueToSql(logTag, readValue, MyPlc.PlcName);
+                        AddValueToSql(logTag, readValue);
                         return;
                     }
 
-                    CheckDeadbandAndAddToSql(logTag, readValue, lastKnownLogValue, MyPlc.PlcName);
+                    CheckDeadbandAndAddToSql(logTag, readValue, lastKnownLogValue);
                 }
                 else if (logTag.LogType == LogType.Cyclic)
                 {
-                    AddValueToSql(logTag, readValue, MyPlc.PlcName);
+                    AddValueToSql(logTag, readValue);
                 }
                 else if (logTag.LogType == LogType.WriteWatchDogInt16 && !MyPlc.isOpc)
                 {
@@ -419,7 +413,7 @@ namespace OptimaValue
 
                         if (allOccurrencesOfTagInList == null)
                         {
-                            AddValueToSql(logTag, readValue, MyPlc.PlcName);
+                            AddValueToSql(logTag, readValue);
                         }
                     }
                 }
@@ -445,7 +439,7 @@ namespace OptimaValue
                     async Task LogSubscribedTagAsync()
                     {
                         var subbedLog = await MyPlc.Plc.ReadAsync(plcTag);
-                        AddValueToSql(subbedTag, subbedLog, MyPlc.PlcName);
+                        AddValueToSql(subbedTag, subbedLog);
                     }
 
                     if (subbedTag.IsBooleanTrigger && logTag.VarType == VarType.Bit)
@@ -523,7 +517,7 @@ namespace OptimaValue
             void HandleException(Exception ex, string errorMessage, string customMessage = null, bool logError = true)
             {
                 logTag.LastLogTime = tiden;
-                string fullMessage = $"{errorMessage} {logTag.Name} från {MyPlc.PlcName}\r\n{(customMessage != null ? customMessage : ex.Message)}";
+                string fullMessage = $"{errorMessage} {logTag.Name} från {MyPlc.PlcName}\r\n{(customMessage ?? ex.Message)}";
                 MyPlc.SendPlcStatusMessage(fullMessage, Status.Error);
 
                 if (logError)
@@ -600,7 +594,7 @@ namespace OptimaValue
             return new ReadValue(MyPlc, S7.Net.Types.DateTimeLong.FromByteArray(temp));
         }
 
-        private static void CheckDeadbandAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue, string plcName)
+        private static void CheckDeadbandAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
         {
             bool shouldAdd = false;
 
@@ -647,7 +641,7 @@ namespace OptimaValue
             }
             if (shouldAdd)
             {
-                AddValueToSql(logTag, readValue, plcName);
+                AddValueToSql(logTag, readValue);
             }
         }
 
@@ -723,12 +717,11 @@ namespace OptimaValue
 
 
             startClosing = false;
-            if (lastLogValue != null)
-                lastLogValue.Clear();
+            lastLogValue?.Clear();
 
         }
 
-        private static void AddValueToSql(TagDefinitions logTag, ReadValue readValue, string plcName)
+        private static void AddValueToSql(TagDefinitions logTag, ReadValue readValue)
         {
             lock (sqlLock)
             {
