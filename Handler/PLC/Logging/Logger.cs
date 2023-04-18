@@ -394,6 +394,40 @@ namespace OptimaValue
 
                     CheckDeadbandAndAddToSql(logTag, readValue, lastKnownLogValue);
                 }
+                else if (logTag.LogType == LogType.RateOfChange)
+                {
+                    LastValue lastKnownLogValue = lastLogValue.FindLast(l => l.tag_id == logTag.Id);
+                    if (lastKnownLogValue == null)
+                    {
+                        AddValueToSql(logTag, readValue);
+                        return;
+                    }
+
+                    CheckRateOfChangeAndAddToSql(logTag, readValue, lastKnownLogValue);
+
+                    void CheckRateOfChangeAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
+                    {
+                        double rateOfChangeThreshold = 0.1; // Define your rate of change threshold here
+                        DateTime currentTime = DateTime.UtcNow;
+
+                        double valueDifference = Math.Abs(readValue.ValueAsFloat - Convert.ToSingle(lastKnownLogValue.value));
+                        double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.last_updated).TotalSeconds;
+
+                        if (timeDifferenceInSeconds == 0) // Prevent division by zero
+                        {
+                            return;
+                        }
+
+                        double rateOfChange = valueDifference / timeDifferenceInSeconds;
+
+                        if (rateOfChange >= rateOfChangeThreshold)
+                        {
+                            AddValueToSql(logTag, readValue);
+                        }
+                    }
+
+                }
+
                 else if (logTag.LogType == LogType.Cyclic)
                 {
                     AddValueToSql(logTag, readValue);
@@ -967,6 +1001,7 @@ namespace OptimaValue
                 {
                     tag_id = logTag.Id,
                     ReadValue = readValue,
+                    last_updated = DateTime.UtcNow
                 });
 
                 RemoveOldLogValues(logTag.Id);
