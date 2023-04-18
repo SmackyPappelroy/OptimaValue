@@ -58,6 +58,7 @@
             flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             btnOpc = new System.Windows.Forms.Button();
+            btnEkvation = new System.Windows.Forms.Button();
             tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)errorProvider).BeginInit();
             flowLayoutPanel1.SuspendLayout();
@@ -181,7 +182,7 @@
             // paraLogType
             // 
             paraLogType.BackColor = System.Drawing.Color.Transparent;
-            paraLogType.ComboItems = (new string[] { "Cyclic", "Delta", "TimeOfDay", "Event", "WriteWatchDogInt16" });
+            paraLogType.ComboItems = new string[] { "Cyclic", "Delta", "TimeOfDay", "Event", "WriteWatchDogInt16", "Calculated" };
             paraLogType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraLogType.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
             paraLogType.HeaderText = "Log-typ";
@@ -221,7 +222,7 @@
             // paraFreq
             // 
             paraFreq.BackColor = System.Drawing.Color.Transparent;
-            paraFreq.ComboItems = (new string[] { "Never", "_50ms", "_100ms", "_250ms", "_500ms", "_1s", "_2s", "_10s", "_30s", "_1m", "_5m", "_20m", "_1h" });
+            paraFreq.ComboItems = new string[] { "Never", "_50ms", "_100ms", "_250ms", "_500ms", "_1s", "_2s", "_10s", "_30s", "_1m", "_5m", "_20m", "_1h" };
             paraFreq.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraFreq.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
             paraFreq.HeaderText = "Läs-frekvens";
@@ -234,7 +235,7 @@
             // paraVarType
             // 
             paraVarType.BackColor = System.Drawing.Color.Transparent;
-            paraVarType.ComboItems = (new string[] { "Bit", "Byte", "Word", "DWord", "Int", "DInt", "Real", "String", "S7String", "Timer", "Counter", "DateTime", "DateTimeLong" });
+            paraVarType.ComboItems = new string[] { "Bit", "Byte", "Word", "DWord", "Int", "DInt", "Real", "String", "S7String", "Timer", "Counter", "DateTime", "DateTimeLong" };
             paraVarType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraVarType.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
             paraVarType.HeaderText = "Variabel-typ";
@@ -247,7 +248,7 @@
             // paraDataType
             // 
             paraDataType.BackColor = System.Drawing.Color.Transparent;
-            paraDataType.ComboItems = (new string[] { "Counter", "Timer", "Input", "Output", "Memory", "DataBlock" });
+            paraDataType.ComboItems = new string[] { "Counter", "Timer", "Input", "Output", "Memory", "DataBlock" };
             paraDataType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraDataType.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
             paraDataType.HeaderText = "Datatyp";
@@ -442,6 +443,18 @@
             btnOpc.UseVisualStyleBackColor = true;
             btnOpc.Visible = false;
             // 
+            // btnEkvation
+            // 
+            btnEkvation.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnEkvation.ForeColor = System.Drawing.Color.Black;
+            btnEkvation.Location = new System.Drawing.Point(620, 8);
+            btnEkvation.Name = "btnEkvation";
+            btnEkvation.Size = new System.Drawing.Size(200, 31);
+            btnEkvation.TabIndex = 5;
+            btnEkvation.Text = "Kalkylerade värde...";
+            btnEkvation.UseVisualStyleBackColor = true;
+            btnEkvation.Click += clickEkvation;
+            // 
             // AddPlcFromFile
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -449,6 +462,7 @@
             AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             BackColor = System.Drawing.Color.FromArgb(67, 62, 71);
             ClientSize = new System.Drawing.Size(920, 806);
+            Controls.Add(btnEkvation);
             Controls.Add(btnOpc);
             Controls.Add(flowLayoutPanel3);
             Controls.Add(flowLayoutPanel2);
@@ -500,5 +514,6 @@
         private Parameters.parameterTextControl paraRawMax;
         private Parameters.parameterTextControl paraRawMin;
         private System.Windows.Forms.Button btnOpc;
+        private System.Windows.Forms.Button btnEkvation;
     }
 }

@@ -44,6 +44,8 @@ namespace OptimaValue
         [Name("TagUnit")]
         public string TagUnit { get; set; } = string.Empty;
 
+        [Name("Calculation")]
+        public string Calculation { get; set; } = string.Empty;
         #region Skalering
         [Name("rawMin")]
         public float rawMin { get; set; }
@@ -97,6 +99,7 @@ namespace OptimaValue
                 return subscribedTags;
             }
         }
+
 
         public override bool Equals(object obj)
         {

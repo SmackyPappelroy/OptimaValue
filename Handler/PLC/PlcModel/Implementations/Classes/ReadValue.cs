@@ -4,7 +4,6 @@ namespace OptimaValue
 {
     public class ReadValue
     {
-        public TimeSpan ReadTime { get; set; }
         public object Value { get; set; }
         public Type Type => Value?.GetType();
 
@@ -79,7 +78,7 @@ namespace OptimaValue
 
         private readonly IPlc plc;
 
-       
+
 
         public override string ToString() => ValueAsString;
     }

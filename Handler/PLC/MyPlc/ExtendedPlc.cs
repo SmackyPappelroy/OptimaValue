@@ -30,37 +30,41 @@ namespace OptimaValue
         /// <param name="slot"></param>
         public ExtendedPlc(PlcConfiguration config)
         {
-            this.PlcConfiguration = config;
-            if ((int)config.CpuType < 1000)
-            {
-                Plc = new SiemensPlc((S7.Net.CpuType)config.CpuType,
-                    config.Ip, config.Rack, config.Slot);
-            }
-            else if (config.CpuType == CpuType.OpcUa)
-            {
-                Plc = new OpcPlc(config.Ip, OpcType.OpcUa, Id);
-            }
-            else if (config.CpuType == CpuType.OpcDa)
-            {
-                Plc = new OpcPlc(config.Ip, OpcType.OpcDa, Id);
-            }
-
-
-            Plc.PlcName = config.PlcName;
-            Plc.ConnectionString = config.Ip;
-            PlcName = config.PlcName;
-            ActivePlcId = config.ActivePlcId;
-            Active = config.Active;
-            SyncTimeDbNr = config.SyncTimeDbNr;
-            SyncBoolAddress = config.SyncBoolAddress;
-            SyncActive = config.SyncActive;
-            lastSyncTime = config.lastSyncTime;
-
-            if (!isOpc)
-                SubscribeEvents(true);
-            else
-                SubscribeEvents(true, true);
+            PlcConfiguration = config;
+            InitializePlc();
+            InitializeProperties();
+            SubscribeEvents(true);
             onlineTimer.Tick += OnlineTimer_Tick;
+        }
+
+        private void InitializePlc()
+        {
+            if ((int)PlcConfiguration.CpuType < 1000)
+            {
+                Plc = new SiemensPlc((S7.Net.CpuType)PlcConfiguration.CpuType,
+                    PlcConfiguration.Ip, PlcConfiguration.Rack, PlcConfiguration.Slot);
+            }
+            else if (PlcConfiguration.CpuType == CpuType.OpcUa)
+            {
+                Plc = new OpcPlc(PlcConfiguration.Ip, OpcType.OpcUa, Id);
+            }
+            else if (PlcConfiguration.CpuType == CpuType.OpcDa)
+            {
+                Plc = new OpcPlc(PlcConfiguration.Ip, OpcType.OpcDa, Id);
+            }
+        }
+
+        private void InitializeProperties()
+        {
+            Plc.PlcName = PlcConfiguration.PlcName;
+            Plc.ConnectionString = PlcConfiguration.Ip;
+            PlcName = PlcConfiguration.PlcName;
+            ActivePlcId = PlcConfiguration.ActivePlcId;
+            Active = PlcConfiguration.Active;
+            SyncTimeDbNr = PlcConfiguration.SyncTimeDbNr;
+            SyncBoolAddress = PlcConfiguration.SyncBoolAddress;
+            SyncActive = PlcConfiguration.SyncActive;
+            lastSyncTime = PlcConfiguration.lastSyncTime;
         }
 
         #endregion
@@ -72,6 +76,7 @@ namespace OptimaValue
             else
                 this.SendPlcOnlineMessage(ConnectionStatus.Disconnected, string.Empty);
         }
+
 
         #region Messages
         public string ExternalStatusMessage = string.Empty;
@@ -211,9 +216,6 @@ namespace OptimaValue
 
 
     }
-
-
-
     #endregion
 
 }

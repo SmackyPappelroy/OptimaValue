@@ -7,5 +7,6 @@
         TimeOfDay = 2,
         Event = 3,
         WriteWatchDogInt16 = 4,
+        Calculated = 5,
     }
 }

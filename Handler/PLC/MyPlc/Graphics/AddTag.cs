@@ -226,7 +226,26 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 paraStartAddress.Visible = false;
                 paraBlockNr.Visible = false;
             }
-
+            if (tag is not null && tag.LogType == LogType.Calculated)
+            {
+                paraUnit.Visible = true;
+                paraFreq.Visible = true;
+                paraLogType.Visible = true;
+                paraLogTime.Visible = false;
+                paraVarType.Visible = false;
+                paraRawMin.Visible = false;
+                paraRawMax.Visible = false;
+                paraScaleMax.Visible = false;
+                paraScaleMin.Visible = false;
+                paraScaleOffset.Visible = false;
+                paraBitAddress.Visible = false;
+                paraDeadband.Visible = false;
+                paraBlockNr.Visible = false;
+                paraStartAddress.Visible = false;
+                paraNrOfValues.Visible = false;
+                paraDataType.Visible = false;
+                btnEkvation.Visible = true;
+            }
         }
 
         private void TimeOut_Tick(object sender, EventArgs e)
@@ -583,10 +602,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 UpdateTag();
         }
 
-
-
-
-
         private void AddNewTag()
         {
             int tagEventId = 0;
@@ -600,6 +615,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             int nrOfValues = MyPlc.isOpc ? 0 : int.Parse(paraNrOfValues.ParameterValue);
             byte bitAddress = (byte)(MyPlc.isOpc ? 0 : byte.Parse(paraBitAddress.ParameterValue));
             string varType = MyPlc.isOpc ? "Opc" : paraVarType.comboBoxen.SelectedItem.ToString();
+            var deadband = paraDeadband.ParameterValue.Replace(",", ".");
+            var calculation = string.Empty;
+
             if (!(tag == null))
             {
                 tagEventId = tag.EventId;
@@ -607,27 +625,25 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 analogTrigger = tag.AnalogTrigger.ToString();
                 boolTrigger = tag.BoolTrigger.ToString();
                 analogValue = tag.AnalogValue;
+                calculation = tag.Calculation;
             }
 
 
-            var deadband = paraDeadband.ParameterValue.Replace(",", ".");
 
             var query = $"INSERT INTO {Settings.Databas}.dbo.tagConfig ";
             query += $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
-            query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset,rawMin,rawMax) ";
+            query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset,rawMin,rawMax,calculation) ";
             query += $"VALUES ('{checkActive.Checked}','{paraName.ParameterValue}','{paraDescription.ParameterValue}','{paraLogType.comboBoxen.SelectedItem}','{paraLogTime.ParameterValue}',";
             query += $"{deadband},'{PlcName}','{varType}',{blockNr}, ";
             query += $"'{paraDataType.comboBoxen.SelectedItem}',{startAddress},{nrOfValues},";
             query += $"{bitAddress},'{paraFreq.comboBoxen.SelectedItem}','{paraUnit.ParameterValue}',{tagEventId},'{isBoolTrigger}','";
-            query += $"{boolTrigger}','{analogTrigger}',{analogValue},{paraScaleMin.ParameterValue},{paraScaleMax.ParameterValue},{paraScaleOffset.ParameterValue},{paraRawMin.ParameterValue},{paraRawMax.ParameterValue})";
+            query += $"{boolTrigger}','{analogTrigger}',{analogValue},{paraScaleMin.ParameterValue},{paraScaleMax.ParameterValue},{paraScaleOffset.ParameterValue},{paraRawMin.ParameterValue},{paraRawMax.ParameterValue},'{calculation}')";
 
             DatabaseSql.AddTag(query);
 
 
             var tbl = new DataTable();
             tbl = DatabaseSql.GetLastTag();
-
-
 
             var _active = (tbl.AsEnumerable().ElementAt(0).Field<bool>("active"));
             var _bitAddress = (tbl.AsEnumerable().ElementAt(0).Field<byte>("bitAddress"));
@@ -656,7 +672,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             var _rawMin = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("rawMin"));
             var _rawMax = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("rawMax"));
-
+            calculation = (tbl.AsEnumerable().ElementAt(0).Field<string>("calculation"));
 
             tag = new TagDefinitions()
             {
@@ -683,7 +699,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 scaleMax = _scaleMax,
                 scaleOffset = _scaleOffset,
                 rawMin = _rawMin,
-                rawMax = _rawMax
+                rawMax = _rawMax,
+                Calculation = calculation
             };
             btnNew.BackColor = greenColor;
             btnNew.Image = Properties.Resources.add_new_64px_Gray;
@@ -708,7 +725,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 $",bitAddress={bitAddress},logFreq='{paraFreq.comboBoxen.SelectedItem}',";
             query += $"tagUnit='{paraUnit.ParameterValue}',eventId={tag.EventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
                 $",boolTrigger='{tag.BoolTrigger}',analogTrigger='{tag.AnalogTrigger}',analogValue={tag.AnalogValue}, " +
-                $"scaleMin={paraScaleMin.ParameterValue},scaleMax={paraScaleMax.ParameterValue},rawMin={paraRawMin.ParameterValue},rawMax={paraRawMax.ParameterValue},scaleOffset={paraScaleOffset.ParameterValue}" +
+                $"scaleMin={paraScaleMin.ParameterValue},scaleMax={paraScaleMax.ParameterValue},rawMin={paraRawMin.ParameterValue},rawMax={paraRawMax.ParameterValue},scaleOffset={paraScaleOffset.ParameterValue},calculation='{tag.Calculation}'" +
                 $" WHERE id = {tag.Id}";
 
             bool success = DatabaseSql.UpdateTag(query);
@@ -749,31 +766,51 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             tbl.Columns.Add("scaleMin", typeof(float));
             tbl.Columns.Add("scaleMax", typeof(float));
             tbl.Columns.Add("scaleOffset", typeof(float));
+            tbl.Columns.Add("calculation", typeof(string));
 
             if (!MyPlc.isOpc)
             {
-                tbl.Rows.Add(checkActive.Checked, paraName.ParameterValue, paraDescription.ParameterValue, paraLogType.comboBoxen.SelectedItem.ToString(),
-               TimeSpan.Parse(paraLogTime.ParameterValue), float.Parse(paraDeadband.ParameterValue),
-               PlcName, paraVarType.comboBoxen.SelectedItem.ToString(), int.Parse(paraBlockNr.ParameterValue),
-               paraDataType.comboBoxen.SelectedItem.ToString(), int.Parse(paraStartAddress.ParameterValue),
-               int.Parse(paraNrOfValues.ParameterValue), byte.Parse(paraBitAddress.ParameterValue),
-               paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue,
-               float.Parse(paraRawMin.ParameterValue), float.Parse(paraRawMax.ParameterValue), float.Parse(paraScaleMin.ParameterValue),
-               float.Parse(paraScaleMax.ParameterValue), float.Parse(paraScaleOffset.ParameterValue));
+                tbl.Rows.Add(
+                    checkActive.Checked,
+                    paraName.ParameterValue,
+                    paraDescription.ParameterValue,
+                    paraLogType.comboBoxen.SelectedItem.ToString(),
+                    TimeSpan.Parse(paraLogTime.ParameterValue),
+                    float.Parse(paraDeadband.ParameterValue),
+                    PlcName,
+                    paraVarType.comboBoxen.SelectedItem.ToString(),
+                    int.Parse(paraBlockNr.ParameterValue),
+                    paraDataType.comboBoxen.SelectedItem.ToString(),
+                    int.Parse(paraStartAddress.ParameterValue),
+                    int.Parse(paraNrOfValues.ParameterValue),
+                    byte.Parse(paraBitAddress.ParameterValue),
+                    paraFreq.comboBoxen.SelectedItem.ToString(),
+                    paraUnit.ParameterValue,
+                    tag.EventId,
+                    tag.IsBooleanTrigger,
+                    tag.BoolTrigger, tag.AnalogTrigger,
+                    tag.AnalogValue,
+                    float.Parse(paraRawMin.ParameterValue),
+                    float.Parse(paraRawMax.ParameterValue),
+                    float.Parse(paraScaleMin.ParameterValue),
+                    float.Parse(paraScaleMax.ParameterValue),
+                    float.Parse(paraScaleOffset.ParameterValue),
+                    tag.Calculation ?? string.Empty);
+
                 return tbl;
             }
             else
             {
                 tbl.Rows.Add(checkActive.Checked, paraName.ParameterValue, paraDescription.ParameterValue, paraLogType.comboBoxen.SelectedItem.ToString(),
-               TimeSpan.Parse(paraLogTime.ParameterValue), float.Parse(paraDeadband.ParameterValue),
-               PlcName, "", 0, "", 0, 1, byte.Parse(paraBitAddress.ParameterValue),
-               paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue
-               , float.Parse(paraRawMin.ParameterValue), float.Parse(paraRawMax.ParameterValue), float.Parse(paraScaleMin.ParameterValue),
-               float.Parse(paraScaleMax.ParameterValue), float.Parse(paraScaleOffset.ParameterValue));
+                TimeSpan.Parse(paraLogTime.ParameterValue), float.Parse(paraDeadband.ParameterValue),
+                PlcName, "", 0, "", 0, 1, byte.Parse(paraBitAddress.ParameterValue),
+                paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue
+                , float.Parse(paraRawMin.ParameterValue), float.Parse(paraRawMax.ParameterValue), float.Parse(paraScaleMin.ParameterValue),
+                float.Parse(paraScaleMax.ParameterValue), float.Parse(paraScaleOffset.ParameterValue),
+                tag.Calculation);
+
                 return tbl;
             }
-
-
         }
 
         private void comboLogType_SelectedIndexChanged(object sender, EventArgs e)
@@ -793,6 +830,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     paraLogType.Visible = true;
                     paraBitAddress.Visible = true;
                     paraVarType.Visible = true;
+                    btnEkvation.Visible = false;
 
                     break;
                 case "Delta":
@@ -808,6 +846,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     paraLogType.Visible = true;
                     paraBitAddress.Visible = true;
                     paraVarType.Visible = true;
+                    btnEkvation.Visible = false;
 
                     break;
                 case "TimeOfDay":
@@ -823,6 +862,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     paraLogType.Visible = true;
                     paraBitAddress.Visible = true;
                     paraVarType.Visible = true;
+                    btnEkvation.Visible = false;
 
                     break;
                 case "WriteWatchDogInt16":
@@ -834,6 +874,27 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     paraUnit.Visible = false;
                     paraBitAddress.Visible = false;
                     paraVarType.Visible = false;
+                    btnEkvation.Visible = false;
+                    break;
+                case "Calculated":
+                    // Set all fields to inivisible
+                    paraUnit.Visible = true;
+                    paraFreq.Visible = true;
+                    paraLogType.Visible = true;
+                    paraLogTime.Visible = false;
+                    paraVarType.Visible = false;
+                    paraRawMin.Visible = false;
+                    paraRawMax.Visible = false;
+                    paraScaleMax.Visible = false;
+                    paraScaleMin.Visible = false;
+                    paraScaleOffset.Visible = false;
+                    paraBitAddress.Visible = false;
+                    paraDeadband.Visible = false;
+                    paraBlockNr.Visible = false;
+                    paraStartAddress.Visible = false;
+                    paraNrOfValues.Visible = false;
+                    paraDataType.Visible = false;
+                    btnEkvation.Visible = true;
                     break;
                 default:
                     break;
@@ -936,6 +997,28 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         }
 
+        private void clickEkvation(object sender, EventArgs e)
+        {
+            if (tag is null)
+            {
+                paraVarType.comboBoxen.SelectedIndex = 0;
+                paraBlockNr.ParameterValue = "0";
+                paraStartAddress.ParameterValue = "0";
 
+                tag = new TagDefinitions()
+                {
+                    Active = checkActive.Checked,
+                    AnalogTrigger = AnalogTrigger.Equal,
+                    Name = paraName.ParameterValue,
+                    Description = paraDescription.ParameterValue,
+                    BlockNr = 0,
+                    StartByte = 0,
+                    NrOfElements = 0,
+                    BitAddress = 0,
+                };
+            }
+            var calculationForm = new CalculationForm(MyPlc, tag);
+            calculationForm.Show();
+        }
     }
 }

@@ -16,5 +16,6 @@ namespace OptimaValue
         VarType VarType { get; set; }
         int NrOfElements { get; set; }
         byte BitAddress { get; set; }
+        string Calculation { get; set; }
     }
 }

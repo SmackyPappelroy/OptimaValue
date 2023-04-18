@@ -327,6 +327,15 @@ public static class DatabaseSql
     /// <param name="tbl"></param>
     public static void SendLogValuesToSql(DataTable tbl)
     {
+        // Replace float.NaN values with DBNull.Value
+        foreach (DataRow row in tbl.Rows)
+        {
+            if (row["numericValue"] is float numericValue && float.IsNaN(numericValue))
+            {
+                row["numericValue"] = DBNull.Value;
+            }
+        }
+
         using SqlConnection con = new(ConnectionString);
         using SqlBulkCopy objBulk = new(ConnectionString)
         {
@@ -349,6 +358,7 @@ public static class DatabaseSql
             $"Problem vid lagring till Sql \n\r{ex.Message}".SendStatusMessage(Severity.Error);
         }
     }
+
 
     private static void ExecuteNonQuery(string query, string errorMessage = null)
     {

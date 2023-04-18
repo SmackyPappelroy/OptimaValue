@@ -71,6 +71,7 @@ namespace OptimaValue
                 scaleMin = (float)((double)dr["scaleMin"]),
                 scaleMax = (float)((double)dr["scaleMax"]),
                 scaleOffset = (float)((double)dr["scaleOffset"]),
+                Calculation = dr["calculation"].ToString(),
             }).ToList();
 
             // Sorterar listan alfabetiskt

@@ -9,6 +9,7 @@ using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -157,9 +158,9 @@ namespace OptimaValue
         private static void InitializeOnlineTimer()
         {
             onlineTimer ??= new System.Timers.Timer()
-                {
-                    Interval = 500
-                };
+            {
+                Interval = 500
+            };
         }
 
         private static void InitializeLastLogValue()
@@ -370,7 +371,11 @@ namespace OptimaValue
                 if (tiden > MyPlc.lastSyncTime + TimeSpan.FromDays(1) && MyPlc.SyncActive && !MyPlc.isOpc)
                     await SyncPlc(MyPlc, tiden);
 
-                ReadValue readValue = await ReadTagValueAsync(MyPlc, logTag, plcTag);
+                ReadValue readValue = null;
+                if (logTag.LogType != LogType.Calculated)
+                {
+                    readValue = await ReadTagValueAsync(MyPlc, logTag, plcTag);
+                }
 
                 logTag.LastLogTime = tiden;
                 logTag.NrSuccededReadAttempts++;
@@ -415,6 +420,112 @@ namespace OptimaValue
                         {
                             AddValueToSql(logTag, readValue);
                         }
+                    }
+                }
+                else if (logTag.LogType == LogType.Calculated)
+                {
+                    var tagIdsAndOperators = ExtractTagIdsAndOperators(logTag.Calculation);
+                    var allTagsInCalculation = GetTagsFromIds(tagIdsAndOperators.TagIds);
+
+                    var allValues = await ReadAllTagValuesAsync(allTagsInCalculation);
+                    var calculatedValue = CalculateValue(allValues, tagIdsAndOperators.Operators);
+                    var calculateReadValue = new ReadValue(MyPlc.Plc, calculatedValue);
+                    AddValueToSql(logTag, calculateReadValue);
+
+                    (List<string> TagIds, List<string> Operators) ExtractTagIdsAndOperators(string calculation)
+                    {
+                        var tagIds = new List<string>();
+                        var operators = new List<string>();
+                        var currentTagId = new StringBuilder();
+
+                        foreach (char c in calculation)
+                        {
+                            if (char.IsDigit(c))
+                            {
+                                currentTagId.Append(c);
+                            }
+                            else
+                            {
+                                if (currentTagId.Length > 0)
+                                {
+                                    tagIds.Add(currentTagId.ToString());
+                                    currentTagId.Clear();
+                                }
+
+                                if (!char.IsWhiteSpace(c))
+                                {
+                                    operators.Add(c.ToString());
+                                }
+                            }
+                        }
+
+                        if (currentTagId.Length > 0)
+                        {
+                            tagIds.Add(currentTagId.ToString());
+                        }
+
+                        return (TagIds: tagIds, Operators: operators);
+                    }
+
+
+
+                    List<TagDefinitions> GetTagsFromIds(List<string> tagIds)
+                    {
+                        var tags = new List<TagDefinitions>();
+                        foreach (var tagId in tagIds)
+                        {
+                            var tagIdInt = Convert.ToInt32(tagId);
+                            var tagToAdd = TagHelpers.GetTagFromId(tagIdInt);
+                            tags.Add(tagToAdd);
+                        }
+                        return tags;
+                    }
+
+                    async Task<List<ReadValue>> ReadAllTagValuesAsync(List<TagDefinitions> tags)
+                    {
+                        var values = new List<ReadValue>();
+                        foreach (var tag in tags)
+                        {
+                            var plcTag = new PlcTag(tag);
+                            var value = await MyPlc.Plc.ReadAsync(plcTag);
+                            values.Add(value);
+                        }
+                        return values;
+                    }
+
+                    float CalculateValue(List<ReadValue> allValues, List<string> operators)
+                    {
+                        var infix = new StringBuilder();
+                        var allValuesCount = allValues.Count;
+                        var operatorIndex = 0;
+
+                        for (int i = 0; i < allValuesCount; i++)
+                        {
+                            while (operatorIndex < operators.Count && operators[operatorIndex] == "(")
+                            {
+                                infix.Append(operators[operatorIndex]);
+                                operatorIndex++;
+                            }
+
+                            var value = allValues[i];
+                            var valueFloat = Convert.ToSingle(value.Value);
+                            infix.Append(valueFloat);
+
+                            while (operatorIndex < operators.Count && (operators[operatorIndex] == ")" || i == allValuesCount - 1))
+                            {
+                                infix.Append(operators[operatorIndex]);
+                                operatorIndex++;
+                            }
+
+                            if (i < allValuesCount - 1)
+                            {
+                                infix.Append(operators[operatorIndex]);
+                                operatorIndex++;
+                            }
+                        }
+
+                        string postfix = ConvertToPostfix(infix.ToString());
+                        return EvaluatePostfix(postfix);
                     }
                 }
 
@@ -528,6 +639,129 @@ namespace OptimaValue
                 }
             }
         }
+
+        private static int GetPrecedence(char operatorToUse)
+        {
+            switch (operatorToUse)
+            {
+                case '+':
+                case '-':
+                    return 1;
+                case '*':
+                case '/':
+                    return 2;
+                default:
+                    return 0;
+            }
+        }
+
+        private static string ConvertToPostfix(string infix)
+        {
+            var output = new StringBuilder();
+            var operatorStack = new Stack<char>();
+
+            foreach (char token in infix)
+            {
+                if (char.IsWhiteSpace(token))
+                {
+                    continue;
+                }
+
+                if (char.IsDigit(token) || token == '.')
+                {
+                    output.Append(token);
+                }
+                else if (token == '(')
+                {
+                    operatorStack.Push(token);
+                }
+                else if (token == ')')
+                {
+                    while (operatorStack.Count > 0 && operatorStack.Peek() != '(')
+                    {
+                        output.Append(' ');
+                        output.Append(operatorStack.Pop());
+                    }
+                    operatorStack.Pop();
+                }
+                else // token is an operator
+                {
+                    output.Append(' ');
+
+                    while (operatorStack.Count > 0 && GetPrecedence(token) <= GetPrecedence(operatorStack.Peek()))
+                    {
+                        output.Append(operatorStack.Pop());
+                    }
+                    operatorStack.Push(token);
+                }
+            }
+
+            while (operatorStack.Count > 0)
+            {
+                output.Append(' ');
+                output.Append(operatorStack.Pop());
+            }
+
+            return output.ToString();
+        }
+
+
+
+        private static float PerformOperation(float currentValue, float value, string operatorToUse)
+        {
+            switch (operatorToUse)
+            {
+                case "+":
+                    return currentValue + value;
+                case "-":
+                    return currentValue - value;
+                case "*":
+                    return currentValue * value;
+                case "/":
+                    if (value == 0)
+                    {
+                        Apps.Logger.Log("Division by zero", Severity.Error);
+                        return float.NaN; // Return NaN to represent an invalid result
+                    }
+                    return currentValue / value;
+                default:
+                    throw new ArgumentException($"Invalid operator: {operatorToUse}");
+            }
+        }
+
+        private static float EvaluatePostfix(string postfix)
+        {
+            var valueStack = new Stack<float>();
+
+            string[] tokens = postfix.Split(' ');
+            foreach (string token in tokens)
+            {
+                if (float.TryParse(token, out float value))
+                {
+                    valueStack.Push(value);
+                }
+                else
+                {
+                    if (valueStack.Count < 2)
+                    {
+                        throw new InvalidOperationException($"Insufficient operands in the postfix expression: '{postfix}'");
+                    }
+
+                    float right = valueStack.Pop();
+                    float left = valueStack.Pop();
+                    valueStack.Push(PerformOperation(left, right, token));
+                }
+            }
+
+            if (valueStack.Count != 1)
+            {
+                throw new InvalidOperationException($"Invalid postfix expression: '{postfix}'");
+            }
+
+            return valueStack.Pop();
+        }
+
+
 
         private static async Task<ReadValue> ReadTagValueAsync(ExtendedPlc myPlc, TagDefinitions logTag, PlcTag plcTag)
         {

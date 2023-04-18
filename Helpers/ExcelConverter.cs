@@ -13,8 +13,10 @@ namespace OptimaValue
         public static void CsvToXlsx(string csvFileName, string xlsxFileName)
         {
             // Create an instance of Excel, and make it visible
-            var excelApp = new Application();
-            excelApp.Visible = false;
+            var excelApp = new Application
+            {
+                Visible = false
+            };
 
             // Open the CSV file in Excel
             var csvWorkbook = excelApp.Workbooks.Open(csvFileName);

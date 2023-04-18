@@ -2,26 +2,23 @@
 
 namespace OptimaValue
 {
-    public class DataBaseCreationEventArgs : EventArgs
+    public class DatabaseCreationEventArgs : EventArgs
     {
         public bool Created { get; set; }
     }
-    public static class DatabaseCreationEvent
+    public static class DatabaseCreationNotifier
     {
-        public static event EventHandler<DataBaseCreationEventArgs> CreatedEvent;
+        public static event EventHandler<DatabaseCreationEventArgs> DatabaseCreated;
 
-        public static void RaiseMessage(bool created)
+        public static void NotifyDatabaseCreated(bool created)
         {
-            var args = new DataBaseCreationEventArgs()
-            {
-                Created = created
-            };
-            OnCreatedEvent(args);
+            var args = new DatabaseCreationEventArgs { Created = created };
+            RaiseDatabaseCreatedEvent(args);
         }
 
-        public static void OnCreatedEvent(DataBaseCreationEventArgs e)
+        private static void RaiseDatabaseCreatedEvent(DatabaseCreationEventArgs e)
         {
-            CreatedEvent?.Invoke(typeof(DatabaseCreationEvent), e);
+            DatabaseCreated?.Invoke(typeof(DatabaseCreationNotifier), e);
         }
     }
 }

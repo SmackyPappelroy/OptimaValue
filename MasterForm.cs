@@ -471,7 +471,7 @@ namespace OptimaValue
                 Apps.Logger.NewLog += Logger_NewLog;
                 statusTimer.Tick += StatusTimer_Tick;
                 startStopButtonVisibilityTimer.Tick += StartStopButtonVisibilityTimer_Tick;
-                DatabaseCreationEvent.CreatedEvent += DatabaseCreationEvent_CreatedEvent;
+                DatabaseCreationNotifier.DatabaseCreated += DatabaseCreationEvent_CreatedEvent;
                 databaseTimer.Tick += DatabaseTimer_Tick;
                 Logger.RestartEvent += Logger_RestartEvent;
                 this.Resize += MasterForm_Resize;
@@ -483,7 +483,7 @@ namespace OptimaValue
                 Apps.Logger.NewLog -= Logger_NewLog;
                 statusTimer.Tick -= StatusTimer_Tick;
                 startStopButtonVisibilityTimer.Tick -= StartStopButtonVisibilityTimer_Tick;
-                DatabaseCreationEvent.CreatedEvent -= DatabaseCreationEvent_CreatedEvent;
+                DatabaseCreationNotifier.DatabaseCreated -= DatabaseCreationEvent_CreatedEvent;
                 Logger.RestartEvent -= Logger_RestartEvent;
                 this.Resize -= MasterForm_Resize;
             }
@@ -528,7 +528,7 @@ namespace OptimaValue
             btnStart_Click(this, EventArgs.Empty);
         }
 
-        private void DatabaseCreationEvent_CreatedEvent(object sender, DataBaseCreationEventArgs e)
+        private void DatabaseCreationEvent_CreatedEvent(object sender, DatabaseCreationEventArgs e)
         {
             if (InvokeRequired)
             {
