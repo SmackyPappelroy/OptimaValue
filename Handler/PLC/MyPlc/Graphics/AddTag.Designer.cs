@@ -177,12 +177,12 @@
             paraName.ParameterValue = "";
             paraName.Size = new System.Drawing.Size(433, 56);
             paraName.TabIndex = 51;
-            paraName.Validating += txtName_Validating;
+            paraName.Validating += ValidateControl;
             // 
             // paraLogType
             // 
             paraLogType.BackColor = System.Drawing.Color.Transparent;
-            paraLogType.ComboItems = new string[] { "Cyclic", "Delta", "TimeOfDay", "Event", "WriteWatchDogInt16", "Calculated" };
+            paraLogType.ComboItems = new string[] { "Cyclic", "Delta", "TimeOfDay", "Event", "WriteWatchDogInt16", "Calculated", "RateOfChange" };
             paraLogType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraLogType.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
             paraLogType.HeaderText = "Log-typ";
@@ -217,7 +217,7 @@
             paraLogTime.ParameterValue = "";
             paraLogTime.Size = new System.Drawing.Size(433, 56);
             paraLogTime.TabIndex = 53;
-            paraLogTime.Validating += txtTimeOfDay_Validating;
+            paraLogTime.Validating += ValidateControl;
             // 
             // paraFreq
             // 
@@ -270,7 +270,7 @@
             paraBlockNr.ParameterValue = "";
             paraBlockNr.Size = new System.Drawing.Size(433, 50);
             paraBlockNr.TabIndex = 56;
-            paraBlockNr.Validating += txtBlockNr_Validating;
+            paraBlockNr.Validating += ValidateControl;
             // 
             // paraStartAddress
             // 
@@ -284,7 +284,7 @@
             paraStartAddress.ParameterValue = "";
             paraStartAddress.Size = new System.Drawing.Size(433, 56);
             paraStartAddress.TabIndex = 61;
-            paraStartAddress.Validating += txtStartByte_Validating;
+            paraStartAddress.Validating += ValidateControl;
             // 
             // paraBitAddress
             // 
@@ -298,7 +298,7 @@
             paraBitAddress.ParameterValue = "";
             paraBitAddress.Size = new System.Drawing.Size(433, 56);
             paraBitAddress.TabIndex = 63;
-            paraBitAddress.Validating += txtBitAddress_Validating;
+            paraBitAddress.Validating += ValidateControl;
             // 
             // paraDeadband
             // 
@@ -312,7 +312,7 @@
             paraDeadband.ParameterValue = "";
             paraDeadband.Size = new System.Drawing.Size(433, 56);
             paraDeadband.TabIndex = 54;
-            paraDeadband.Validating += txtDeadband_TextChanged;
+            paraDeadband.Validating += ValidateControl;
             // 
             // paraScaleOffset
             // 
@@ -326,7 +326,7 @@
             paraScaleOffset.ParameterValue = "";
             paraScaleOffset.Size = new System.Drawing.Size(433, 56);
             paraScaleOffset.TabIndex = 57;
-            paraScaleOffset.Validating += txtScaleOffset_Validating;
+            paraScaleOffset.Validating += ValidateControl;
             // 
             // paraScaleMin
             // 
@@ -340,7 +340,7 @@
             paraScaleMin.ParameterValue = "";
             paraScaleMin.Size = new System.Drawing.Size(433, 56);
             paraScaleMin.TabIndex = 58;
-            paraScaleMin.Validating += txtScaleMin_Validating;
+            paraScaleMin.Validating += ValidateControl;
             // 
             // paraScaleMax
             // 
@@ -354,7 +354,7 @@
             paraScaleMax.ParameterValue = "";
             paraScaleMax.Size = new System.Drawing.Size(433, 56);
             paraScaleMax.TabIndex = 59;
-            paraScaleMax.Validating += txtScaleMax_Validating;
+            paraScaleMax.Validating += ValidateControl;
             // 
             // paraRawMin
             // 
@@ -368,7 +368,7 @@
             paraRawMin.ParameterValue = "";
             paraRawMin.Size = new System.Drawing.Size(433, 56);
             paraRawMin.TabIndex = 69;
-            paraRawMin.Validating += paraRawMin_Validating;
+            paraRawMin.Validating += ValidateControl;
             // 
             // paraRawMax
             // 
@@ -382,7 +382,7 @@
             paraRawMax.ParameterValue = "";
             paraRawMax.Size = new System.Drawing.Size(433, 56);
             paraRawMax.TabIndex = 68;
-            paraRawMax.Validating += paraRawMax_Validating;
+            paraRawMax.Validating += ValidateControl;
             // 
             // paraNrOfValues
             // 
@@ -396,7 +396,7 @@
             paraNrOfValues.ParameterValue = "";
             paraNrOfValues.Size = new System.Drawing.Size(433, 56);
             paraNrOfValues.TabIndex = 62;
-            paraNrOfValues.Validating += txtNrOfElements_Validating;
+            paraNrOfValues.Validating += ValidateControl;
             // 
             // paraUnit
             // 
@@ -410,7 +410,7 @@
             paraUnit.ParameterValue = "";
             paraUnit.Size = new System.Drawing.Size(433, 56);
             paraUnit.TabIndex = 65;
-            paraUnit.Validating += txtUnit_Validating;
+            paraUnit.Validating += ValidateControl;
             // 
             // flowLayoutPanel2
             // 

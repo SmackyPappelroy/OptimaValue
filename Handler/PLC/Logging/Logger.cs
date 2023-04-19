@@ -34,7 +34,7 @@ namespace OptimaValue
             Interval = 5000,
         };
 
-        private static List<LastValue> lastLogValue;
+        private static List<LastValue> lastLogValues;
 
         private static Task logTask;
         private static CancellationTokenSource cancelTokenSource = new();
@@ -165,7 +165,7 @@ namespace OptimaValue
 
         private static void InitializeLastLogValue()
         {
-            lastLogValue ??= new List<LastValue>();
+            lastLogValues ??= new List<LastValue>();
         }
 
         private static async Task CheckConnectionsAsync()
@@ -383,184 +383,192 @@ namespace OptimaValue
                 if (!MyPlc.IsConnected)
                     return;
 
-                if (logTag.LogType == LogType.Delta)
+                switch (logTag.LogType)
                 {
-                    LastValue lastKnownLogValue = lastLogValue.FindLast(l => l.tag_id == logTag.Id);
-                    if (lastKnownLogValue == null)
-                    {
-                        AddValueToSql(logTag, readValue);
-                        return;
-                    }
-
-                    CheckDeadbandAndAddToSql(logTag, readValue, lastKnownLogValue);
-                }
-                else if (logTag.LogType == LogType.RateOfChange)
-                {
-                    LastValue lastKnownLogValue = lastLogValue.FindLast(l => l.tag_id == logTag.Id);
-                    if (lastKnownLogValue == null)
-                    {
-                        AddValueToSql(logTag, readValue);
-                        return;
-                    }
-
-                    CheckRateOfChangeAndAddToSql(logTag, readValue, lastKnownLogValue);
-
-                    void CheckRateOfChangeAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
-                    {
-                        double rateOfChangeThreshold = 0.1; // Define your rate of change threshold here
-                        DateTime currentTime = DateTime.UtcNow;
-
-                        double valueDifference = Math.Abs(readValue.ValueAsFloat - Convert.ToSingle(lastKnownLogValue.value));
-                        double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.last_updated).TotalSeconds;
-
-                        if (timeDifferenceInSeconds == 0) // Prevent division by zero
+                    case LogType.Delta:
                         {
-                            return;
-                        }
-
-                        double rateOfChange = valueDifference / timeDifferenceInSeconds;
-
-                        if (rateOfChange >= rateOfChangeThreshold)
-                        {
-                            AddValueToSql(logTag, readValue);
-                        }
-                    }
-
-                }
-
-                else if (logTag.LogType == LogType.Cyclic)
-                {
-                    AddValueToSql(logTag, readValue);
-                }
-                else if (logTag.LogType == LogType.WriteWatchDogInt16 && !MyPlc.isOpc)
-                {
-                    var oldWd = await MyPlc.Plc.ReadAsync(plcTag);
-                    var intValue = Convert.ToInt16(oldWd.Value) + 1;
-                    await MyPlc.Plc.WriteAsync(plcTag, (short)intValue);
-                }
-                else if (logTag.LogType == LogType.TimeOfDay)
-                {
-                    var localTime = TimeZoneInfo.ConvertTimeFromUtc(tiden, TimeZoneInfo.Local);
-
-                    bool timeMatches = localTime.Hour == logTag.TimeOfDay.Hours &&
-                                       localTime.Minute == logTag.TimeOfDay.Minutes &&
-                                       (logTag.TimeOfDay.Seconds == 0 || localTime.Second == logTag.TimeOfDay.Seconds);
-
-                    if (timeMatches)
-                    {
-                        var allOccurrencesOfTagInList = lastLogValue.Find(n => n.tag_id == logTag.Id && n.ReadValue.LogTime.Day == tiden.Day);
-
-                        if (allOccurrencesOfTagInList == null)
-                        {
-                            AddValueToSql(logTag, readValue);
-                        }
-                    }
-                }
-                else if (logTag.LogType == LogType.Calculated)
-                {
-                    var tagIdsAndOperators = ExtractTagIdsAndOperators(logTag.Calculation);
-                    var allTagsInCalculation = GetTagsFromIds(tagIdsAndOperators.TagIds);
-
-                    var allValues = await ReadAllTagValuesAsync(allTagsInCalculation);
-                    var calculatedValue = CalculateValue(allValues, tagIdsAndOperators.Operators);
-                    var calculateReadValue = new ReadValue(MyPlc.Plc, calculatedValue);
-                    AddValueToSql(logTag, calculateReadValue);
-
-                    (List<string> TagIds, List<string> Operators) ExtractTagIdsAndOperators(string calculation)
-                    {
-                        var tagIds = new List<string>();
-                        var operators = new List<string>();
-                        var currentTagId = new StringBuilder();
-
-                        foreach (char c in calculation)
-                        {
-                            if (char.IsDigit(c))
+                            LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
+                            if (lastKnownLogValue == null)
                             {
-                                currentTagId.Append(c);
+                                AddValueToSql(logTag, readValue);
+                                return;
                             }
-                            else
+
+                            CheckDeadbandAndAddToSql(logTag, readValue, lastKnownLogValue);
+                            break;
+                        }
+                    case LogType.RateOfChange:
+                        {
+                            LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
+                            if (lastKnownLogValue == null)
                             {
+                                AddValueToSql(logTag, readValue);
+                                return;
+                            }
+
+                            CheckRateOfChangeAndAddToSql(logTag, readValue, lastKnownLogValue);
+
+                            void CheckRateOfChangeAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
+                            {
+                                double rateOfChangeThreshold = 0.1; // Define your rate of change threshold here
+                                DateTime currentTime = DateTime.UtcNow;
+
+                                double valueDifference = Math.Abs(readValue.ValueAsFloat - Convert.ToSingle(lastKnownLogValue.value));
+                                double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.last_updated).TotalSeconds;
+
+                                if (timeDifferenceInSeconds == 0) // Prevent division by zero
+                                {
+                                    return;
+                                }
+
+                                double rateOfChange = valueDifference / timeDifferenceInSeconds;
+
+                                if (rateOfChange >= rateOfChangeThreshold)
+                                {
+                                    AddValueToSql(logTag, readValue);
+                                }
+                            }
+
+                            break;
+                        }
+                    case LogType.Cyclic:
+                        AddValueToSql(logTag, readValue);
+                        break;
+                    case LogType.WriteWatchDogInt16 when !MyPlc.isOpc:
+                        {
+                            var oldWd = await MyPlc.Plc.ReadAsync(plcTag);
+                            var intValue = Convert.ToInt16(oldWd.Value) + 1;
+                            await MyPlc.Plc.WriteAsync(plcTag, (short)intValue);
+                            break;
+                        }
+                    case LogType.TimeOfDay:
+                        {
+                            var localTime = TimeZoneInfo.ConvertTimeFromUtc(tiden, TimeZoneInfo.Local);
+
+                            bool timeMatches = localTime.Hour == logTag.TimeOfDay.Hours &&
+                                               localTime.Minute == logTag.TimeOfDay.Minutes &&
+                                               (logTag.TimeOfDay.Seconds == 0 || localTime.Second == logTag.TimeOfDay.Seconds);
+
+                            if (timeMatches)
+                            {
+                                var allOccurrencesOfTagInList = lastLogValues.Find(n => n.tag_id == logTag.Id && n.ReadValue.LogTime.Day == tiden.Day);
+
+                                if (allOccurrencesOfTagInList == null)
+                                {
+                                    AddValueToSql(logTag, readValue);
+                                }
+                            }
+
+                            break;
+                        }
+                    case LogType.Calculated:
+                        {
+                            var tagIdsAndOperators = ExtractTagIdsAndOperators(logTag.Calculation);
+                            var allTagsInCalculation = GetTagsFromIds(tagIdsAndOperators.TagIds);
+
+                            var allValues = await ReadAllTagValuesAsync(allTagsInCalculation);
+                            var calculatedValue = CalculateValue(allValues, tagIdsAndOperators.Operators);
+                            var calculateReadValue = new ReadValue(MyPlc.Plc, calculatedValue);
+                            AddValueToSql(logTag, calculateReadValue);
+
+                            (List<string> TagIds, List<string> Operators) ExtractTagIdsAndOperators(string calculation)
+                            {
+                                var tagIds = new List<string>();
+                                var operators = new List<string>();
+                                var currentTagId = new StringBuilder();
+
+                                foreach (char c in calculation)
+                                {
+                                    if (char.IsDigit(c))
+                                    {
+                                        currentTagId.Append(c);
+                                    }
+                                    else
+                                    {
+                                        if (currentTagId.Length > 0)
+                                        {
+                                            tagIds.Add(currentTagId.ToString());
+                                            currentTagId.Clear();
+                                        }
+
+                                        if (!char.IsWhiteSpace(c))
+                                        {
+                                            operators.Add(c.ToString());
+                                        }
+                                    }
+                                }
+
                                 if (currentTagId.Length > 0)
                                 {
                                     tagIds.Add(currentTagId.ToString());
-                                    currentTagId.Clear();
                                 }
 
-                                if (!char.IsWhiteSpace(c))
+                                return (TagIds: tagIds, Operators: operators);
+                            }
+
+
+
+                            List<TagDefinitions> GetTagsFromIds(List<string> tagIds)
+                            {
+                                var tags = new List<TagDefinitions>();
+                                foreach (var tagId in tagIds)
                                 {
-                                    operators.Add(c.ToString());
+                                    var tagIdInt = Convert.ToInt32(tagId);
+                                    var tagToAdd = TagHelpers.GetTagFromId(tagIdInt);
+                                    tags.Add(tagToAdd);
                                 }
+                                return tags;
                             }
-                        }
 
-                        if (currentTagId.Length > 0)
-                        {
-                            tagIds.Add(currentTagId.ToString());
-                        }
-
-                        return (TagIds: tagIds, Operators: operators);
-                    }
-
-
-
-                    List<TagDefinitions> GetTagsFromIds(List<string> tagIds)
-                    {
-                        var tags = new List<TagDefinitions>();
-                        foreach (var tagId in tagIds)
-                        {
-                            var tagIdInt = Convert.ToInt32(tagId);
-                            var tagToAdd = TagHelpers.GetTagFromId(tagIdInt);
-                            tags.Add(tagToAdd);
-                        }
-                        return tags;
-                    }
-
-                    async Task<List<ReadValue>> ReadAllTagValuesAsync(List<TagDefinitions> tags)
-                    {
-                        var values = new List<ReadValue>();
-                        foreach (var tag in tags)
-                        {
-                            var plcTag = new PlcTag(tag);
-                            var value = await MyPlc.Plc.ReadAsync(plcTag);
-                            values.Add(value);
-                        }
-                        return values;
-                    }
-
-                    float CalculateValue(List<ReadValue> allValues, List<string> operators)
-                    {
-                        var infix = new StringBuilder();
-                        var allValuesCount = allValues.Count;
-                        var operatorIndex = 0;
-
-                        for (int i = 0; i < allValuesCount; i++)
-                        {
-                            while (operatorIndex < operators.Count && operators[operatorIndex] == "(")
+                            async Task<List<ReadValue>> ReadAllTagValuesAsync(List<TagDefinitions> tags)
                             {
-                                infix.Append(operators[operatorIndex]);
-                                operatorIndex++;
+                                var values = new List<ReadValue>();
+                                foreach (var tag in tags)
+                                {
+                                    var plcTag = new PlcTag(tag);
+                                    var value = await MyPlc.Plc.ReadAsync(plcTag);
+                                    values.Add(value);
+                                }
+                                return values;
                             }
 
-                            var value = allValues[i];
-                            var valueFloat = Convert.ToSingle(value.Value);
-                            infix.Append(valueFloat);
-
-                            while (operatorIndex < operators.Count && (operators[operatorIndex] == ")" || i == allValuesCount - 1))
+                            float CalculateValue(List<ReadValue> allValues, List<string> operators)
                             {
-                                infix.Append(operators[operatorIndex]);
-                                operatorIndex++;
+                                var infix = new StringBuilder();
+                                var allValuesCount = allValues.Count;
+                                var operatorIndex = 0;
+
+                                for (int i = 0; i < allValuesCount; i++)
+                                {
+                                    while (operatorIndex < operators.Count && operators[operatorIndex] == "(")
+                                    {
+                                        infix.Append(operators[operatorIndex]);
+                                        operatorIndex++;
+                                    }
+
+                                    var value = allValues[i];
+                                    var valueFloat = Convert.ToSingle(value.Value);
+                                    infix.Append(valueFloat);
+
+                                    while (operatorIndex < operators.Count && (operators[operatorIndex] == ")" || i == allValuesCount - 1))
+                                    {
+                                        infix.Append(operators[operatorIndex]);
+                                        operatorIndex++;
+                                    }
+
+                                    if (i < allValuesCount - 1)
+                                    {
+                                        infix.Append(operators[operatorIndex]);
+                                        operatorIndex++;
+                                    }
+                                }
+
+                                string postfix = ConvertToPostfix(infix.ToString());
+                                return EvaluatePostfix(postfix);
                             }
 
-                            if (i < allValuesCount - 1)
-                            {
-                                infix.Append(operators[operatorIndex]);
-                                operatorIndex++;
-                            }
+                            break;
                         }
-
-                        string postfix = ConvertToPostfix(infix.ToString());
-                        return EvaluatePostfix(postfix);
-                    }
                 }
 
 
@@ -579,7 +587,7 @@ namespace OptimaValue
                         continue;
 
                     subbedTag.LastLogTime = tiden;
-                    var lastValue = lastLogValue.Find(l => l.tag_id == logTag.Id);
+                    var lastValue = lastLogValues.Find(l => l.tag_id == logTag.Id);
 
                     async Task LogSubscribedTagAsync()
                     {
@@ -674,6 +682,11 @@ namespace OptimaValue
             }
         }
 
+        /// <summary>
+        /// Hämta företrädet för den angivna operatorn.
+        /// </summary>
+        /// <param name="operatorToUse">Operatorns tecken att kontrollera.</param>
+        /// <returns>Ett heltal som representerar företrädet för operatorn</returns>
         private static int GetPrecedence(char operatorToUse)
         {
             switch (operatorToUse)
@@ -689,6 +702,11 @@ namespace OptimaValue
             }
         }
 
+        /// <summary>
+        /// Konvertera infix-uttryck till postfix-uttryck.
+        /// </summary>
+        /// <param name="infix">Infix-uttrycket som ska konverteras.</param>
+        /// <returns>En sträng som representerar det konverterade postfix-uttrycket.</returns>
         private static string ConvertToPostfix(string infix)
         {
             var output = new StringBuilder();
@@ -739,30 +757,13 @@ namespace OptimaValue
             return output.ToString();
         }
 
-
-
-        private static float PerformOperation(float currentValue, float value, string operatorToUse)
-        {
-            switch (operatorToUse)
-            {
-                case "+":
-                    return currentValue + value;
-                case "-":
-                    return currentValue - value;
-                case "*":
-                    return currentValue * value;
-                case "/":
-                    if (value == 0)
-                    {
-                        Apps.Logger.Log("Division by zero", Severity.Error);
-                        return float.NaN; // Return NaN to represent an invalid result
-                    }
-                    return currentValue / value;
-                default:
-                    throw new ArgumentException($"Invalid operator: {operatorToUse}");
-            }
-        }
-
+        /// <summary>
+        /// Utför operationen mellan två värden med hjälp av den angivna operatorn.
+        /// </summary>
+        /// <param name="currentValue">Det första värdet.</param>
+        /// <param name="value">Det andra värdet.</param>
+        /// <param name="operatorToUse">Operatorn som ska användas.</param>
+        /// <returns>Ett flyttal som representerar resultatet av operationen.</returns>
         private static float EvaluatePostfix(string postfix)
         {
             var valueStack = new Stack<float>();
@@ -794,6 +795,36 @@ namespace OptimaValue
 
             return valueStack.Pop();
         }
+
+        /// <summary>
+        /// Utför operationen mellan två värden med hjälp av den angivna operatorn.
+        /// </summary>
+        /// <param name="currentValue">Det första värdet.</param>
+        /// <param name="value">Det andra värdet.</param>
+        /// <param name="operatorToUse">Operatorn som ska användas.</param>
+        /// <returns>Ett flyttal som representerar resultatet av operationen.</returns>
+        private static float PerformOperation(float currentValue, float value, string operatorToUse)
+        {
+            switch (operatorToUse)
+            {
+                case "+":
+                    return currentValue + value;
+                case "-":
+                    return currentValue - value;
+                case "*":
+                    return currentValue * value;
+                case "/":
+                    if (value == 0)
+                    {
+                        Apps.Logger.Log("Division by zero", Severity.Error);
+                        return float.NaN; // Return NaN to represent an invalid result
+                    }
+                    return currentValue / value;
+                default:
+                    throw new ArgumentException($"Invalid operator: {operatorToUse}");
+            }
+        }
+
 
 
 
@@ -985,7 +1016,7 @@ namespace OptimaValue
 
 
             startClosing = false;
-            lastLogValue?.Clear();
+            lastLogValues?.Clear();
 
         }
 
@@ -997,7 +1028,7 @@ namespace OptimaValue
                     return;
 
                 logTag.TimesLogged++;
-                lastLogValue.Add(new LastValue()
+                lastLogValues.Add(new LastValue()
                 {
                     tag_id = logTag.Id,
                     ReadValue = readValue,
@@ -1028,14 +1059,14 @@ namespace OptimaValue
 
         private static void RemoveOldLogValues(int tagId)
         {
-            var allOccurrencesOfTagInList = lastLogValue.FindAll(n => n.tag_id == tagId).OrderBy(dat => dat.ReadValue.LogTime).ToList();
-            var nrOfItemsInLastLog = lastLogValue.FindAll(n => n.tag_id == tagId);
+            var allOccurrencesOfTagInList = lastLogValues.FindAll(n => n.tag_id == tagId).OrderBy(dat => dat.ReadValue.LogTime).ToList();
+            var nrOfItemsInLastLog = lastLogValues.FindAll(n => n.tag_id == tagId);
 
             // Garantera att det bara finns ett värde bakåt
             if (nrOfItemsInLastLog.Count > 2)
             {
                 var removeDate = allOccurrencesOfTagInList[nrOfItemsInLastLog.Count - 3].ReadValue.LogTime;
-                lastLogValue.RemoveAll(i => i.tag_id == tagId && i.ReadValue.LogTime <= removeDate);
+                lastLogValues.RemoveAll(i => i.tag_id == tagId && i.ReadValue.LogTime <= removeDate);
             }
         }
     }

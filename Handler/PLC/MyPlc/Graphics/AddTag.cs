@@ -15,6 +15,9 @@ using OpcUaHm.Common;
 using System.Collections.Generic;
 using OpcUa.DA;
 using OpcUa.UI.Controls;
+using OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters;
+using System.Net;
+using System.Windows.Documents;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
@@ -83,7 +86,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             SetVisibility();
         }
 
-
         bool opcFormOpen = false;
         protected override void OnLoad(EventArgs e)
         {
@@ -103,8 +105,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             }
         }
-
-
 
         private class ComboTag
         {
@@ -290,311 +290,156 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             paraScaleOffset.ParameterValue = tag.scaleOffset.ToString();
         }
 
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
         #region Validation
-        private void txtName_Validating(object sender, CancelEventArgs e)
+
+        private void ValidateControl(object sender, CancelEventArgs e)
         {
-            errorProvider.SetIconAlignment(paraName, ErrorIconAlignment.TopRight);
-            if (string.IsNullOrEmpty(paraName.ParameterValue))
-                errorProvider.SetError(paraName, "Fyll i ett namn");
-            else if (paraName.Text.Length > 50)
-                errorProvider.SetError(paraName, "Max 50 tecken");
-            else
-                errorProvider.SetError(paraName, "");
+            if (sender is parameterTextControl paraTextBox)
+            {
+                string errorMessage = "";
+                errorProvider.SetIconAlignment(paraTextBox, ErrorIconAlignment.MiddleLeft);
+
+                switch (paraTextBox.Name)
+                {
+                    case "paraName":
+                        errorProvider.SetIconAlignment(paraName, ErrorIconAlignment.TopRight);
+                        errorMessage = ValidateName(paraTextBox);
+                        break;
+                    case "paraUnit":
+                        errorProvider.SetIconAlignment(paraUnit, ErrorIconAlignment.BottomLeft);
+                        errorMessage = ValidateUnit(paraTextBox);
+                        break;
+                    case "paraLogTime":
+                        errorMessage = ValidateTimeOfDay(paraTextBox);
+                        break;
+                    case "paraDeadband":
+                        errorProvider.SetIconAlignment(paraDeadband, ErrorIconAlignment.MiddleLeft);
+                        errorMessage = ValidateFloatValue(paraTextBox);
+                        break;
+                    case "paraRawMin":
+                        errorMessage = ValidateFloatValue(paraTextBox);
+                        break;
+                    case "paraRawMax":
+                        errorMessage = ValidateFloatValue(paraTextBox);
+                        break;
+                    case "paraScaleMin":
+                        errorMessage = ValidateFloatValue(paraTextBox);
+                        break;
+                    case "paraScaleMax":
+                        errorMessage = ValidateFloatValue(paraTextBox);
+                        break;
+                    case "paraScaleOffset":
+                        errorMessage = ValidateFloatValue(paraTextBox);
+                        break;
+                    case "paraBlockNr":
+                        errorMessage = ValidateUIntValue(paraTextBox);
+                        break;
+                    case "paraStartAddress":
+                        errorMessage = ValidateUIntValue(paraTextBox);
+                        break;
+                    case "paraNrOfValues":
+                        errorMessage = ValidateUIntValue(paraTextBox);
+                        break;
+                    case "paraBitAddres":
+                        errorMessage = ValidateBitAddress(paraTextBox);
+                        break;
+                }
+
+                errorProvider.SetError(paraTextBox, errorMessage);
+            }
         }
 
-        private void txtUnit_Validating(object sender, CancelEventArgs e)
+        private string ValidateName(parameterTextControl textBox)
         {
-            errorProvider.SetIconAlignment(paraUnit, ErrorIconAlignment.BottomLeft);
+            if (string.IsNullOrEmpty(textBox.ParameterValue))
+                return "Fyll i ett namn";
+            else if (textBox.Text.Length > 50)
+                return "Max 50 tecken";
 
-            if (paraUnit.ParameterValue.Length > 30)
-                errorProvider.SetError(paraUnit, "Max 30 tecken");
-            else
-                errorProvider.SetError(paraUnit, "");
+            return "";
         }
 
-        private void txtTimeOfDay_Validating(object sender, CancelEventArgs e)
+        private string ValidateUnit(parameterTextControl textBox)
         {
-            errorProvider.SetIconAlignment(paraLogTime, ErrorIconAlignment.MiddleLeft);
+            if (textBox.ParameterValue.Length > 30)
+                return "Max 30 tecken";
 
-            if (string.IsNullOrEmpty(paraLogTime.ParameterValue))
-                errorProvider.SetError(paraLogTime, "Ange en tid på dagen");
-            else if (!TimeSpan.TryParse(paraLogTime.ParameterValue, out TimeSpan _))
-                errorProvider.SetError(paraLogTime, "Inte ett klockslag");
-            else
-                errorProvider.SetError(paraLogTime, "");
+            return "";
         }
 
-        private void txtDeadband_TextChanged(object sender, EventArgs e)
+        private string ValidateTimeOfDay(parameterTextControl textBox)
         {
-            errorProvider.SetIconAlignment(paraDeadband, ErrorIconAlignment.MiddleLeft);
+            if (string.IsNullOrEmpty(textBox.ParameterValue))
+                return "Ange en tid på dagen";
+            else if (!TimeSpan.TryParse(textBox.ParameterValue, out TimeSpan _))
+                return "Inte ett klockslag";
 
-            if (string.IsNullOrEmpty(paraDeadband.ParameterValue))
-                errorProvider.SetError(paraDeadband, "Ange ett numeriskt värde");
-            else if (!float.TryParse(paraDeadband.ParameterValue, out float _))
-                errorProvider.SetError(paraDeadband, "Inte ett numeriskt positivt värde");
-            else
-                errorProvider.SetError(paraDeadband, "");
+            return "";
         }
 
-        private void txtBlockNr_Validating(object sender, CancelEventArgs e)
+        private string ValidateFloatValue(parameterTextControl textBox)
         {
-            errorProvider.SetIconAlignment(paraBlockNr, ErrorIconAlignment.MiddleLeft);
+            if (string.IsNullOrEmpty(textBox.ParameterValue))
+                return "Ange ett numeriskt värde";
+            else if (!float.TryParse(textBox.ParameterValue, out float _))
+                return "Inte ett numeriskt positivt värde";
 
-            if (string.IsNullOrEmpty(paraBlockNr.ParameterValue))
-                errorProvider.SetError(paraBlockNr, "Ange ett numeriskt värde");
-            else if (!uint.TryParse(paraBlockNr.ParameterValue, out uint _))
-                errorProvider.SetError(paraBlockNr, "Inte ett numeriskt positivt värde");
-            else
-                errorProvider.SetError(paraBlockNr, "");
+            return "";
         }
 
-        private void paraRawMin_Validating(object sender, CancelEventArgs e)
+        private string ValidateUIntValue(parameterTextControl textBox)
         {
-            errorProvider.SetIconAlignment(paraRawMin, ErrorIconAlignment.MiddleLeft);
+            if (string.IsNullOrEmpty(textBox.ParameterValue))
+                return "Ange ett numeriskt värde";
+            else if (!uint.TryParse(textBox.ParameterValue, out uint _))
+                return "Inte ett numeriskt positivt värde";
 
-            if (string.IsNullOrEmpty(paraRawMin.ParameterValue))
-                errorProvider.SetError(paraRawMin, "Ange ett numeriskt värde");
-            else if (!float.TryParse(paraRawMin.ParameterValue, out float _))
-                errorProvider.SetError(paraRawMin, "Inte ett numeriskt positivt värde");
-            else
-                errorProvider.SetError(paraRawMin, "");
+            return "";
         }
 
-        private void paraRawMax_Validating(object sender, CancelEventArgs e)
+        private string ValidateBitAddress(parameterTextControl textBox)
         {
-            errorProvider.SetIconAlignment(paraRawMin, ErrorIconAlignment.MiddleLeft);
-
-            if (string.IsNullOrEmpty(paraRawMax.ParameterValue))
-                errorProvider.SetError(paraRawMax, "Ange ett numeriskt värde");
-            else if (!float.TryParse(paraRawMax.ParameterValue, out float _))
-                errorProvider.SetError(paraRawMax, "Inte ett numeriskt positivt värde");
-            else
-                errorProvider.SetError(paraRawMax, "");
-        }
-
-        private void txtScaleMin_Validating(object sender, CancelEventArgs e)
-        {
-            errorProvider.SetIconAlignment(paraScaleMin, ErrorIconAlignment.MiddleLeft);
-
-            if (string.IsNullOrEmpty(paraScaleMin.ParameterValue))
-                errorProvider.SetError(paraScaleMin, "Ange ett numeriskt värde");
-            else if (!float.TryParse(paraScaleMin.ParameterValue, out float _))
-                errorProvider.SetError(paraScaleMin, "Inte ett numeriskt positivt värde");
-            else
-                errorProvider.SetError(paraScaleMin, "");
-        }
-        private void txtScaleMax_Validating(object sender, CancelEventArgs e)
-        {
-            errorProvider.SetIconAlignment(paraScaleMax, ErrorIconAlignment.MiddleLeft);
-
-            if (string.IsNullOrEmpty(paraScaleMax.ParameterValue))
-                errorProvider.SetError(paraScaleMax, "Ange ett numeriskt värde");
-            else if (!float.TryParse(paraScaleMax.ParameterValue, out float _))
-                errorProvider.SetError(paraScaleMax, "Inte ett numeriskt positivt värde");
-            else
-                errorProvider.SetError(paraScaleMax, "");
-        }
-        private void txtScaleOffset_Validating(object sender, CancelEventArgs e)
-        {
-            errorProvider.SetIconAlignment(paraScaleOffset, ErrorIconAlignment.MiddleLeft);
-
-            if (string.IsNullOrEmpty(paraScaleOffset.ParameterValue))
-                errorProvider.SetError(paraScaleOffset, "Ange ett numeriskt värde");
-            else if (!float.TryParse(paraScaleOffset.ParameterValue, out float _))
-                errorProvider.SetError(paraScaleOffset, "Inte ett numeriskt positivt värde");
-            else
-                errorProvider.SetError(paraScaleOffset, "");
-        }
-
-        private void txtStartByte_Validating(object sender, CancelEventArgs e)
-        {
-            errorProvider.SetIconAlignment(paraStartAddress, ErrorIconAlignment.MiddleLeft);
-
-            if (string.IsNullOrEmpty(paraStartAddress.ParameterValue))
-                errorProvider.SetError(paraStartAddress, "Ange ett numeriskt värde");
-            else if (!uint.TryParse(paraStartAddress.ParameterValue, out uint _))
-                errorProvider.SetError(paraStartAddress, "Inte ett numeriskt positivt värde");
-            else
-                errorProvider.SetError(paraStartAddress, "");
-        }
-
-        private void txtNrOfElements_Validating(object sender, CancelEventArgs e)
-        {
-            errorProvider.SetIconAlignment(paraNrOfValues, ErrorIconAlignment.MiddleLeft);
-
-            if (string.IsNullOrEmpty(paraNrOfValues.ParameterValue))
-                errorProvider.SetError(paraNrOfValues, "Ange ett numeriskt värde");
-            else if (!uint.TryParse(paraNrOfValues.ParameterValue, out uint _))
-                errorProvider.SetError(paraNrOfValues, "Inte ett numeriskt positivt värde");
-            else
-                errorProvider.SetError(paraNrOfValues, "");
-        }
-
-        private void txtBitAddress_Validating(object sender, CancelEventArgs e)
-        {
-            errorProvider.SetIconAlignment(paraBitAddress, ErrorIconAlignment.MiddleLeft);
-
-            if (string.IsNullOrEmpty(paraBitAddress.ParameterValue))
-                errorProvider.SetError(paraBitAddress, "Ange ett numeriskt värde");
-            else if (!byte.TryParse(paraBitAddress.ParameterValue, out byte resultByte))
-                errorProvider.SetError(paraBitAddress, "Inte ett numeriskt positivt värde");
+            if (string.IsNullOrEmpty(textBox.ParameterValue))
+                return "Ange ett numeriskt värde";
+            else if (!byte.TryParse(textBox.ParameterValue, out byte resultByte))
+                return "Inte ett numeriskt positivt värde";
             else if (resultByte > 16)
-                errorProvider.SetError(paraBitAddress, "För stort värde");
-            else
-                errorProvider.SetError(paraBitAddress, "");
+                return "För stort värde";
+
+            return "";
         }
 
         private bool ValidateAll()
         {
             var logType = paraLogType.comboBoxen.SelectedItem.ToString();
-            var okName = false;
-            var okLogType = false;
-            var okTimeOfDay = false;
-            var okDeadBand = false;
-            var okVarType = false;
-            var okBlockNr = false;
-            var okDataType = false;
-            var okStartByte = false;
-            var okNrOfElements = false;
-            var okBitAddress = false;
-            var okLogFreq = false;
-            var okUnit = false;
-            var tempString = string.Empty;
 
-            var okRawMin = false;
-            var okRawMax = false;
+            bool okName = ValidateName(paraName) == "";
+            bool okLogType = !string.IsNullOrEmpty(logType);
+            bool okUnit = ValidateUnit(paraUnit) == "";
+            bool okTimeOfDay = ValidateTimeOfDay(paraLogTime) == "";
+            bool okDeadBand = ValidateFloatValue(paraDeadband) == "";
+            bool okVarType = paraVarType.comboBoxen.SelectedItem != null && !string.IsNullOrEmpty(paraVarType.comboBoxen.SelectedItem.ToString());
+            bool okDataType = paraDataType.comboBoxen.SelectedItem != null && !string.IsNullOrEmpty(paraDataType.comboBoxen.SelectedItem.ToString());
+            bool okBlockNr = ValidateUIntValue(paraBlockNr) == "";
+            bool okStartByte = ValidateUIntValue(paraStartAddress) == "";
+            bool okNrOfElements = ValidateUIntValue(paraNrOfValues) == "";
+            bool okBitAddress = ValidateBitAddress(paraBitAddress) == "";
+            bool okLogFreq = !string.IsNullOrEmpty(paraFreq.comboBoxen.SelectedItem.ToString());
 
-            var okScaleMin = false;
-            var okScaleMax = false;
-            var okScaleOffset = false;
+            bool okRawMin = ValidateFloatValue(paraRawMin) == "" || logType == "WriteWatchDogInt16";
+            bool okRawMax = ValidateFloatValue(paraRawMax) == "" || logType == "WriteWatchDogInt16";
+            bool okScaleMin = ValidateFloatValue(paraScaleMin) == "" || logType == "WriteWatchDogInt16";
+            bool okScaleMax = ValidateFloatValue(paraScaleMax) == "" || logType == "WriteWatchDogInt16";
+            bool okScaleOffset = ValidateFloatValue(paraScaleOffset) == "" || logType == "WriteWatchDogInt16";
 
-            if (!string.IsNullOrEmpty(paraName.ParameterValue) && paraName.ParameterValue.Length <= 50)
-                okName = true;
+            if (MyPlc.isOpc && okName) return true;
 
-            if (MyPlc.isOpc && okName)
-                return true;
-
-            if (float.TryParse(paraRawMin.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
-                okRawMin = true;
-
-            if (float.TryParse(paraRawMax.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
-                okRawMax = true;
-
-            if (float.TryParse(paraScaleMin.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
-                okScaleMin = true;
-
-            if (float.TryParse(paraScaleMax.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
-                okScaleMax = true;
-
-            if (float.TryParse(paraScaleOffset.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
-                okScaleOffset = true;
-
-            if (paraUnit.ParameterValue.Length <= 30)
-                okUnit = true;
-
-
-            if (!string.IsNullOrEmpty(paraLogType.comboBoxen.SelectedItem.ToString()))
-                okLogType = true;
-
-            if (TimeSpan.TryParse(paraLogTime.ParameterValue, out TimeSpan _) || logType == "WriteWatchDogInt16")
-                okTimeOfDay = true;
-
-            if (float.TryParse(paraDeadband.ParameterValue, out float _) || logType == "WriteWatchDogInt16")
-                okDeadBand = true;
-
-            if (paraVarType.comboBoxen.SelectedItem != null)
-            {
-                if (!string.IsNullOrEmpty(paraVarType.comboBoxen.SelectedItem.ToString()))
-                    okVarType = true;
-            }
-            else if (logType == "WriteWatchDogInt16")
-            {
-                paraVarType.comboBoxen.SelectedItem = "Int";
-                okVarType = true;
-            }
-
-            if (ushort.TryParse(paraBlockNr.ParameterValue, out ushort _))
-                okBlockNr = true;
-
-            if ((paraDataType.comboBoxen.SelectedItem != null))
-            {
-                if (!string.IsNullOrEmpty(paraDataType.comboBoxen.SelectedItem.ToString()))
-                    okDataType = true;
-            }
-
-            if (ushort.TryParse(paraStartAddress.ParameterValue, out ushort _))
-                okStartByte = true;
-
-            if (ushort.TryParse(paraNrOfValues.ParameterValue, out ushort _) || logType == "WriteWatchDogInt16")
-                okNrOfElements = true;
-
-            if (ushort.TryParse(paraBlockNr.ParameterValue, out ushort _))
-                okBlockNr = true;
-
-            if (byte.TryParse(paraBitAddress.ParameterValue, out byte _) || logType == "WriteWatchDogInt16")
-                okBitAddress = true;
-
-            if (!string.IsNullOrEmpty(paraFreq.comboBoxen.SelectedItem.ToString()))
-                okLogFreq = true;
-
-
-            if (okName && okTimeOfDay && okDeadBand && okVarType && okBlockNr
-                && okDataType && okStartByte && okNrOfElements && okBitAddress &&
-                okLogFreq && okLogType && okUnit && okScaleMin && okScaleMax && okScaleOffset
-                && okRawMin && okRawMax)
-            {
-                return true;
-            }
-
-            return false;
-
+            return okName && okLogType && okUnit && okTimeOfDay && okDeadBand && okVarType && okDataType &&
+                okBlockNr && okStartByte && okNrOfElements && okBitAddress && okLogFreq &&
+                okRawMin && okRawMax && okScaleMin && okScaleMax && okScaleOffset;
         }
 
         #endregion
-
-        private void btnUpdate_Click(object sender, EventArgs e)
-        {
-            if (tag == null)
-            {
-                btnSave.BackColor = redColor;
-                timeOut.Start();
-                return;
-            }
-            if (!paraName.ParameterValue.Equals(tag.Name))
-                if (CheckForDuplicateNames)
-                    return;
-
-            if (ValidateAll())
-            {
-                if (tag.EventId == 0)
-                {
-                    tag.EventId = 0;
-                    tag.IsBooleanTrigger = false;
-                    tag.BoolTrigger = BooleanTrigger.OnTrue;
-                    tag.AnalogTrigger = AnalogTrigger.Equal;
-                    tag.AnalogValue = 0;
-                }
-                DataTable tbl = CreateTable();
-                AddTagToSql(tbl);
-            }
-        }
-
-        private void btnAdd_Click(object sender, EventArgs e)
-        {
-            if (!ValidateAll())
-            {
-                btnNew.BackColor = redColor;
-                timeOut.Start();
-                return;
-            }
-            if (!CheckForDuplicateNames)
-                AddNewTag();
-        }
 
         private void AddTagToSql(DataTable dataTable)
         {
@@ -604,104 +449,14 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void AddNewTag()
         {
-            int tagEventId = 0;
-            bool isBoolTrigger = false;
-            float analogValue = 0;
-            string boolTrigger = "OnTrue";
-            string analogTrigger = "Equal";
-
-            int blockNr = MyPlc.isOpc ? 0 : int.Parse(paraBlockNr.ParameterValue);
-            int startAddress = MyPlc.isOpc ? 0 : int.Parse(paraStartAddress.ParameterValue);
-            int nrOfValues = MyPlc.isOpc ? 0 : int.Parse(paraNrOfValues.ParameterValue);
-            byte bitAddress = (byte)(MyPlc.isOpc ? 0 : byte.Parse(paraBitAddress.ParameterValue));
-            string varType = MyPlc.isOpc ? "Opc" : paraVarType.comboBoxen.SelectedItem.ToString();
-            var deadband = paraDeadband.ParameterValue.Replace(",", ".");
-            var calculation = string.Empty;
-
-            if (!(tag == null))
-            {
-                tagEventId = tag.EventId;
-                isBoolTrigger = tag.IsBooleanTrigger;
-                analogTrigger = tag.AnalogTrigger.ToString();
-                boolTrigger = tag.BoolTrigger.ToString();
-                analogValue = tag.AnalogValue;
-                calculation = tag.Calculation;
-            }
-
-
-
-            var query = $"INSERT INTO {Settings.Databas}.dbo.tagConfig ";
-            query += $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
-            query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset,rawMin,rawMax,calculation) ";
-            query += $"VALUES ('{checkActive.Checked}','{paraName.ParameterValue}','{paraDescription.ParameterValue}','{paraLogType.comboBoxen.SelectedItem}','{paraLogTime.ParameterValue}',";
-            query += $"{deadband},'{PlcName}','{varType}',{blockNr}, ";
-            query += $"'{paraDataType.comboBoxen.SelectedItem}',{startAddress},{nrOfValues},";
-            query += $"{bitAddress},'{paraFreq.comboBoxen.SelectedItem}','{paraUnit.ParameterValue}',{tagEventId},'{isBoolTrigger}','";
-            query += $"{boolTrigger}','{analogTrigger}',{analogValue},{paraScaleMin.ParameterValue},{paraScaleMax.ParameterValue},{paraScaleOffset.ParameterValue},{paraRawMin.ParameterValue},{paraRawMax.ParameterValue},'{calculation}')";
-
+            string query = BuildQuery("INSERT");
             DatabaseSql.AddTag(query);
-
 
             var tbl = new DataTable();
             tbl = DatabaseSql.GetLastTag();
 
-            var _active = (tbl.AsEnumerable().ElementAt(0).Field<bool>("active"));
-            var _bitAddress = (tbl.AsEnumerable().ElementAt(0).Field<byte>("bitAddress"));
-            var _blockNr = (tbl.AsEnumerable().ElementAt(0).Field<int>("blockNr"));
-            var _dataType = (S7.Net.DataType)Enum.Parse(typeof(S7.Net.DataType), (tbl.AsEnumerable().ElementAt(0).Field<string>("dataType")));
-            var _deadband = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("deadband"));
-            var _id = (tbl.AsEnumerable().ElementAt(0).Field<int>("id"));
-            var _logFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), (tbl.AsEnumerable().ElementAt(0).Field<string>("logFreq")));
-            var _logType = (LogType)Enum.Parse(typeof(LogType), (tbl.AsEnumerable().ElementAt(0).Field<string>("logType")));
-            var _name = (tbl.AsEnumerable().ElementAt(0).Field<string>("name"));
-            var _description = (tbl.AsEnumerable().ElementAt(0).Field<string>("description"));
-            var _nrOfElements = (tbl.AsEnumerable().ElementAt(0).Field<int>("nrOfElements"));
-            var _plcName = (tbl.AsEnumerable().ElementAt(0).Field<string>("plcName"));
-            var _startByte = (tbl.AsEnumerable().ElementAt(0).Field<int>("startByte"));
-            var _timeOfDay = (tbl.AsEnumerable().ElementAt(0).Field<TimeSpan>("timeOfDay"));
-            var _varType = (VarType)Enum.Parse(typeof(VarType), (tbl.AsEnumerable().ElementAt(0).Field<string>("varType")));
-            var _tagUnit = (tbl.AsEnumerable().ElementAt(0).Field<string>("tagUnit"));
-            var _eventId = (tbl.AsEnumerable().ElementAt(0).Field<int>("eventId"));
-            var _isBooleanTrigger = (tbl.AsEnumerable().ElementAt(0).Field<bool>("isBooleanTrigger"));
-            var _boolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), (tbl.AsEnumerable().ElementAt(0).Field<string>("boolTrigger")));
-            var _analogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), (tbl.AsEnumerable().ElementAt(0).Field<string>("analogTrigger")));
-            var _analogValue = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("analogValue"));
-            var _scaleMin = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("scaleMin"));
-            var _scaleMax = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("scaleMax"));
-            var _scaleOffset = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("scaleOffset"));
+            tag = CreateTagFromDataTable(tbl);
 
-            var _rawMin = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("rawMin"));
-            var _rawMax = (float)(tbl.AsEnumerable().ElementAt(0).Field<double>("rawMax"));
-            calculation = (tbl.AsEnumerable().ElementAt(0).Field<string>("calculation"));
-
-            tag = new TagDefinitions()
-            {
-                Active = _active,
-                BitAddress = _bitAddress,
-                BlockNr = _blockNr,
-                DataType = _dataType,
-                Deadband = _deadband,
-                Id = _id,
-                LogFreq = _logFreq,
-                LastLogTime = DateTime.MinValue,
-                LogType = _logType,
-                NrOfElements = _nrOfElements,
-                StartByte = _startByte,
-                TimeOfDay = _timeOfDay,
-                VarType = _varType,
-                TagUnit = _tagUnit,
-                EventId = _eventId,
-                IsBooleanTrigger = _isBooleanTrigger,
-                BoolTrigger = _boolTrigger,
-                AnalogTrigger = _analogTrigger,
-                AnalogValue = _analogValue,
-                scaleMin = _scaleMin,
-                scaleMax = _scaleMax,
-                scaleOffset = _scaleOffset,
-                rawMin = _rawMin,
-                rawMax = _rawMax,
-                Calculation = calculation
-            };
             btnNew.BackColor = greenColor;
             btnNew.Image = Properties.Resources.add_new_64px_Gray;
             timeOut.Start();
@@ -709,25 +464,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void UpdateTag()
         {
-
-            var temp = paraDeadband.ParameterValue.Replace(',', '.');
-
-            int blockNr = MyPlc.isOpc ? 0 : int.Parse(paraBlockNr.ParameterValue);
-            int startAddress = MyPlc.isOpc ? 0 : int.Parse(paraStartAddress.ParameterValue);
-            int nrOfValues = MyPlc.isOpc ? 0 : int.Parse(paraNrOfValues.ParameterValue);
-            byte bitAddress = (byte)(MyPlc.isOpc ? 0 : byte.Parse(paraBitAddress.ParameterValue));
-            string varType = MyPlc.isOpc ? "Opc" : paraVarType.comboBoxen.SelectedItem.ToString();
-
-            var query = $"UPDATE {Settings.Databas}.dbo.tagConfig ";
-            query += $"SET active='{checkActive.Checked}',name='{paraName.ParameterValue}',description='{paraDescription.ParameterValue}',logType='{paraLogType.comboBoxen.SelectedItem}',timeOfDay='{paraLogTime.ParameterValue}'";
-            query += $",deadband={temp},plcName='{PlcName}',varType='{varType}',blockNr={blockNr}" +
-                $",dataType='{paraDataType.comboBoxen.SelectedItem}',startByte={startAddress},nrOfElements={nrOfValues}" +
-                $",bitAddress={bitAddress},logFreq='{paraFreq.comboBoxen.SelectedItem}',";
-            query += $"tagUnit='{paraUnit.ParameterValue}',eventId={tag.EventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
-                $",boolTrigger='{tag.BoolTrigger}',analogTrigger='{tag.AnalogTrigger}',analogValue={tag.AnalogValue}, " +
-                $"scaleMin={paraScaleMin.ParameterValue},scaleMax={paraScaleMax.ParameterValue},rawMin={paraRawMin.ParameterValue},rawMax={paraRawMax.ParameterValue},scaleOffset={paraScaleOffset.ParameterValue},calculation='{tag.Calculation}'" +
-                $" WHERE id = {tag.Id}";
-
+            string query = BuildQuery("UPDATE");
             bool success = DatabaseSql.UpdateTag(query);
 
             if (success)
@@ -736,6 +473,78 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 btnSave.Image = Properties.Resources.available_updates_64px_gray;
                 timeOut.Start();
             }
+        }
+
+        private string BuildQuery(string action)
+        {
+            string query = string.Empty;
+
+            if (action == "INSERT")
+            {
+                query = $"INSERT INTO {Settings.Databas}.dbo.tagConfig ";
+                query += BuildQueryCommon();
+            }
+            else if (action == "UPDATE")
+            {
+                query = $"UPDATE {Settings.Databas}.dbo.tagConfig ";
+                query += $"SET {BuildQueryCommon()} WHERE id = {tag.Id}";
+            }
+
+            return query;
+        }
+
+        private string BuildQueryCommon()
+        {
+            string deadband = paraDeadband.ParameterValue.Replace(",", ".");
+            string varType = MyPlc.isOpc ? "Opc" : paraVarType.comboBoxen.SelectedItem.ToString();
+
+            int blockNr = MyPlc.isOpc ? 0 : int.Parse(paraBlockNr.ParameterValue);
+            int startAddress = MyPlc.isOpc ? 0 : int.Parse(paraStartAddress.ParameterValue);
+            int nrOfValues = MyPlc.isOpc ? 0 : int.Parse(paraNrOfValues.ParameterValue);
+            byte bitAddress = (byte)(MyPlc.isOpc ? 0 : byte.Parse(paraBitAddress.ParameterValue));
+
+            string queryCommon = $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
+            queryCommon += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset,rawMin,rawMax,calculation) ";
+            queryCommon += $"VALUES ('{checkActive.Checked}','{paraName.ParameterValue}','{paraDescription.ParameterValue}','{paraLogType.comboBoxen.SelectedItem}','{paraLogTime.ParameterValue}',";
+            queryCommon += $"{deadband},'{PlcName}','{varType}',{blockNr}, ";
+            queryCommon += $"'{paraDataType.comboBoxen.SelectedItem}',{startAddress},{nrOfValues},";
+            queryCommon += $"{bitAddress},'{paraFreq.comboBoxen.SelectedItem}','{paraUnit.ParameterValue}',{tag.EventId},'{tag.IsBooleanTrigger}','";
+            queryCommon += $"{tag.BoolTrigger}','{tag.AnalogTrigger}',{tag.AnalogValue},{paraScaleMin.ParameterValue},{paraScaleMax.ParameterValue},{paraScaleOffset.ParameterValue},{paraRawMin.ParameterValue},{paraRawMax.ParameterValue},'{tag.Calculation}')";
+
+            return queryCommon;
+        }
+
+        private TagDefinitions CreateTagFromDataTable(DataTable tbl)
+        {
+            var tagDef = new TagDefinitions()
+            {
+                Active = tbl.AsEnumerable().ElementAt(0).Field<bool>("active"),
+                BitAddress = tbl.AsEnumerable().ElementAt(0).Field<byte>("bitAddress"),
+                BlockNr = tbl.AsEnumerable().ElementAt(0).Field<int>("blockNr"),
+                DataType = (S7.Net.DataType)Enum.Parse(typeof(S7.Net.DataType), tbl.AsEnumerable().ElementAt(0).Field<string>("dataType")),
+                Deadband = (float)tbl.AsEnumerable().ElementAt(0).Field<double>("deadband"),
+                Id = tbl.AsEnumerable().ElementAt(0).Field<int>("id"),
+                LogFreq = (LogFrequency)Enum.Parse(typeof(LogFrequency), tbl.AsEnumerable().ElementAt(0).Field<string>("logFreq")),
+                LastLogTime = DateTime.MinValue,
+                LogType = (LogType)Enum.Parse(typeof(LogType), tbl.AsEnumerable().ElementAt(0).Field<string>("logType")),
+                NrOfElements = tbl.AsEnumerable().ElementAt(0).Field<int>("nrOfElements"),
+                StartByte = tbl.AsEnumerable().ElementAt(0).Field<int>("startByte"),
+                TimeOfDay = tbl.AsEnumerable().ElementAt(0).Field<TimeSpan>("timeOfDay"),
+                VarType = (VarType)Enum.Parse(typeof(VarType), tbl.AsEnumerable().ElementAt(0).Field<string>("varType")),
+                TagUnit = tbl.AsEnumerable().ElementAt(0).Field<string>("tagUnit"),
+                EventId = tbl.AsEnumerable().ElementAt(0).Field<int>("eventId"),
+                IsBooleanTrigger = tbl.AsEnumerable().ElementAt(0).Field<bool>("isBooleanTrigger"),
+                BoolTrigger = (BooleanTrigger)Enum.Parse(typeof(BooleanTrigger), tbl.AsEnumerable().ElementAt(0).Field<string>("boolTrigger")),
+                AnalogTrigger = (AnalogTrigger)Enum.Parse(typeof(AnalogTrigger), tbl.AsEnumerable().ElementAt(0).Field<string>("analogTrigger")),
+                AnalogValue = (float)tbl.AsEnumerable().ElementAt(0).Field<double>("analogValue"),
+                scaleMin = (float)tbl.AsEnumerable().ElementAt(0).Field<double>("scaleMin"),
+                scaleMax = (float)tbl.AsEnumerable().ElementAt(0).Field<double>("scaleMax"),
+                scaleOffset = (float)tbl.AsEnumerable().ElementAt(0).Field<double>("scaleOffset"),
+                rawMin = (float)tbl.AsEnumerable().ElementAt(0).Field<double>("rawMin"),
+                rawMax = (float)tbl.AsEnumerable().ElementAt(0).Field<double>("rawMax"),
+                Calculation = tbl.AsEnumerable().ElementAt(0).Field<string>("calculation")
+            };
+            return tagDef;
         }
 
         private DataTable CreateTable()
@@ -896,6 +705,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     paraDataType.Visible = false;
                     btnEkvation.Visible = true;
                     break;
+                case "RateOfChange":
+                    // TODO: Add RateOfChange
+                    break;
                 default:
                     break;
             }
@@ -968,6 +780,43 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
         }
 
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            if (!ValidateAll())
+            {
+                btnNew.BackColor = redColor;
+                timeOut.Start();
+                return;
+            }
+            if (!CheckForDuplicateNames)
+                AddNewTag();
+        }
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            if (tag == null)
+            {
+                btnSave.BackColor = redColor;
+                timeOut.Start();
+                return;
+            }
+            if (!paraName.ParameterValue.Equals(tag.Name))
+                if (CheckForDuplicateNames)
+                    return;
+
+            if (ValidateAll())
+            {
+                if (tag.EventId == 0)
+                {
+                    tag.EventId = 0;
+                    tag.IsBooleanTrigger = false;
+                    tag.BoolTrigger = BooleanTrigger.OnTrue;
+                    tag.AnalogTrigger = AnalogTrigger.Equal;
+                    tag.AnalogValue = 0;
+                }
+                DataTable tbl = CreateTable();
+                AddTagToSql(tbl);
+            }
+        }
 
         private void EventForm_SaveEvent(object sender, SaveEventArgs e)
         {
@@ -1019,6 +868,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             var calculationForm = new CalculationForm(MyPlc, tag);
             calculationForm.Show();
+        }
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }
