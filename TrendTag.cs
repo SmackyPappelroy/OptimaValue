@@ -18,10 +18,7 @@ namespace OptimaValue
 {
     public partial class TrendTag : Form
     {
-        private CancellationTokenSource source = new CancellationTokenSource();
         private int tagId;
-        private string tagName;
-        private DataTable tbl = new();
         private TrendModel trendModel;
 
         public TrendTag(int _tagId)

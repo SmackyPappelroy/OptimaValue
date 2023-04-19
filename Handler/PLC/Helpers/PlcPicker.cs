@@ -56,15 +56,13 @@ namespace OptimaValue
         public static ExtendedPlc SelectPlc()
         {
             var tbl = PlcConfig.tblPlcConfig;
-            highestPlcId = tbl.SelectRows("Active = 'True'", "id").FindHighestNumber<int>("id");
-            lowestPlcId = tbl.SelectRows("Active = 'True'", "id").FindLowestNumber<int>("id");
+            var activePlcRows = tbl.SelectRows("Active = 'True'", "id");
+            highestPlcId = activePlcRows.FindHighestNumber<int>("id");
+            lowestPlcId = activePlcRows.FindLowestNumber<int>("id");
             if (highestPlcId == default && lowestPlcId == default)
                 return null;
 
-            if (highestPlcId != lowestPlcId)
-                MoreThanOnePlc = true;
-            else
-                MoreThanOnePlc = false;
+            MoreThanOnePlc = (highestPlcId != lowestPlcId);
 
             if (activePlcId == int.MaxValue || !MoreThanOnePlc)
             {
@@ -77,36 +75,29 @@ namespace OptimaValue
                 activePlcId = tbl.SelectRows("Active = 'True'", "id").FindNextNumber<int>(activePlcId, "id");
                 return MapValues();
             }
+
             return null;
         }
-
-
 
         private static ExtendedPlc MapValues()
         {
             var tbl = PlcConfig.tblPlcConfig;
 
-            for (int rowIndex = 0; rowIndex < tbl.Rows.Count; rowIndex++)
+            var row = tbl.AsEnumerable().FirstOrDefault(r => r.Field<int>("id") == activePlcId);
+
+            if (row != null)
             {
-                if (tbl.AsEnumerable().ElementAt(rowIndex).Field<Int32>("id") == activePlcId)
-                {
-                    Active = tbl.AsEnumerable().ElementAt(rowIndex).Field<bool>("Active");
-                    name = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("name"));
-                    ipAddress = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("ipAddress"));
-                    cpuType = (CpuType)Enum.Parse(typeof(CpuType), (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("cpuType")));
-                    rack = (tbl.AsEnumerable().ElementAt(rowIndex).Field<short>("rack"));
-                    slot = (tbl.AsEnumerable().ElementAt(rowIndex).Field<short>("slot"));
-                }
+                Active = row.Field<bool>("Active");
+                name = row.Field<string>("name");
+                ipAddress = row.Field<string>("ipAddress");
+                cpuType = Enum.Parse<CpuType>(row.Field<string>("cpuType"));
+                rack = row.Field<short>("rack");
+                slot = row.Field<short>("slot");
             }
-            foreach (var plc in PlcConfig.PlcList)
-            {
-                if (plc.ActivePlcId == activePlcId)
-                {
-                    return plc;
-                }
-            }
-            return null;
+
+            return PlcConfig.PlcList.FirstOrDefault(p => p.ActivePlcId == activePlcId);
         }
+
 
     }
 }

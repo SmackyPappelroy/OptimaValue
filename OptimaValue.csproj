@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
@@ -12,6 +12,7 @@
 		<ApplicationIcon>Mina Resurser\icons8_gas_idle.ico</ApplicationIcon>
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<AnalysisLevel>latest</AnalysisLevel>
+		<Deterministic>false</Deterministic>
 	</PropertyGroup>
 
 	<ItemGroup>

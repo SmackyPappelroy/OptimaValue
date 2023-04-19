@@ -30,13 +30,13 @@ namespace OptimaValue
             txtDatabas.Text = Config.Settings.Databas;
             txtUser.Text = Config.Settings.User;
             txtPassword.Text = Config.Settings.Password;
-            DatabaseCreationEvent.CreatedEvent += DatabaseCreationEvent_CreatedEvent;
+            DatabaseCreationNotifier.DatabaseCreated += DatabaseCreationEvent_CreatedEvent;
         }
 
         private void SettingForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             PlcConfig.sqlSettingsFormOpen = false;
-            DatabaseCreationEvent.CreatedEvent -= DatabaseCreationEvent_CreatedEvent;
+            DatabaseCreationNotifier.DatabaseCreated -= DatabaseCreationEvent_CreatedEvent;
         }
         #endregion
 
@@ -99,7 +99,7 @@ namespace OptimaValue
             this.ControlBox = true;
         }
 
-        private void DatabaseCreationEvent_CreatedEvent(object sender, DataBaseCreationEventArgs e)
+        private void DatabaseCreationEvent_CreatedEvent(object sender, DatabaseCreationEventArgs e)
         {
             if (InvokeRequired)
             {
@@ -109,7 +109,7 @@ namespace OptimaValue
 
             btnSave.Enabled = true;
             DatabaseCreated = true;
-            DatabaseCreationEvent.CreatedEvent -= DatabaseCreationEvent_CreatedEvent;
+            DatabaseCreationNotifier.DatabaseCreated -= DatabaseCreationEvent_CreatedEvent;
             Close();
         }
 

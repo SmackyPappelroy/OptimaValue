@@ -1,10 +1,8 @@
 ﻿using OpcUaHm.Common;
 using S7.Net;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,63 +10,69 @@ namespace OptimaValue
 {
     public static class SendValuesToSql
     {
-        public static ConcurrentBag<rawValueClass> rawValueBlock;
-
-        private static Task sqlTask;
+        private static ConcurrentBag<RawValueClass> rawValueBlock;
         private static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-
-        private static readonly object addBlock = new object();
-
-        private static List<LogValuesSql> SqlValues;
-        private static List<rawValueClass> rawValueInternal;
+        private static Task sqlTask;
+        private static List<RawValueClass> rawValueInternal;
         private static readonly object sqlLock = new object();
         private static DateTime lastLogTime = DateTime.MinValue;
+        private static List<LogValuesSql> SqlValues;
 
         public static void StartSql()
         {
-            sqlTask = Task.Run(async () =>
-            {
-                await SqlCycler(cancelTokenSource.Token).ConfigureAwait(false);
-            }, cancelTokenSource.Token)
-                .ContinueWith(t =>
-                {
-                    t.Exception?.Handle(e => true);
-                    AbortSqlThread();
-                    Console.WriteLine("You have canceled the task");
-                    cancelTokenSource = new CancellationTokenSource();
-                }, TaskContinuationOptions.OnlyOnCanceled);
+            sqlTask = Task.Run(async () => await SqlCycler(cancelTokenSource.Token), cancelTokenSource.Token)
+                .ContinueWith(HandleTaskCancellation, TaskContinuationOptions.OnlyOnCanceled);
+        }
+
+        private static void HandleTaskCancellation(Task t)
+        {
+            t.Exception?.Handle(e => true);
+            AbortSqlThread();
+            Console.WriteLine("You have canceled the task");
+            cancelTokenSource = new CancellationTokenSource();
         }
 
         private static async Task SqlCycler(CancellationToken cancellationToken)
         {
-            if (rawValueInternal == null)
-                rawValueInternal = new List<rawValueClass>();
+            InitializeCollectionsIfNeeded();
 
             while (true)
             {
-                var tiden = DateTime.UtcNow;
-                if (rawValueBlock == null)
-                    rawValueBlock = new ConcurrentBag<rawValueClass>();
+                ProcessRawValueBlock();
 
-                if (rawValueBlock.Count > 0)
-                {
-
-                    if (rawValueBlock.TryTake(out rawValueClass newRaw))
-                        rawValueInternal.Add(newRaw);
-                }
-
-                if (rawValueInternal.Count > 0 && lastLogTime.AddSeconds(10) < tiden
-                    || (Master.AbortSqlLog && rawValueInternal.Count > 0))
+                if (ShouldMapValues(DateTime.UtcNow))
                 {
                     MapValue();
-                    lastLogTime = tiden;
+                    lastLogTime = DateTime.UtcNow;
                 }
+
                 if (Master.AbortSqlLog)
                     RequestDisconnect();
 
                 await Task.Delay(50);
                 cancellationToken.ThrowIfCancellationRequested();
             }
+        }
+
+        private static void InitializeCollectionsIfNeeded()
+        {
+            if (rawValueInternal == null)
+                rawValueInternal = new List<RawValueClass>();
+
+            if (rawValueBlock == null)
+                rawValueBlock = new ConcurrentBag<RawValueClass>();
+        }
+
+        private static void ProcessRawValueBlock()
+        {
+            if (rawValueBlock.Count > 0 && rawValueBlock.TryTake(out RawValueClass newRaw))
+                rawValueInternal.Add(newRaw);
+        }
+
+        private static bool ShouldMapValues(DateTime currentTime)
+        {
+            return rawValueInternal.Count > 0 && lastLogTime.AddSeconds(10) < currentTime
+                || (Master.AbortSqlLog && rawValueInternal.Count > 0);
         }
 
         public static void RequestDisconnect()
@@ -81,7 +85,7 @@ namespace OptimaValue
         {
             while (rawValueBlock.Count > 0)
             {
-                if (rawValueBlock.TryTake(out rawValueClass newRaw))
+                if (rawValueBlock.TryTake(out RawValueClass newRaw))
                     rawValueInternal.Add(newRaw);
                 MapValue();
                 Thread.Sleep(10);
@@ -94,36 +98,36 @@ namespace OptimaValue
             if (SqlValues == null)
                 SqlValues = new List<LogValuesSql>();
 
-            var startRows = SqlValues.Count;
             SqlValues.Clear();
-
-            foreach (rawValueClass raw in rawValueInternal)
-            {
-                var sql = new LogValuesSql()
-                {
-                    logTime = raw.logValue.LastLogTime,
-                    tag_id = raw.logValue.Id,
-                };
-                sql.opcQuality = raw.ReadValue.Quality;
-                sql.value = raw.ReadValue.ValueAsString;
-                sql.numericValue = raw.ReadValue.ValueAsFloat;
-                SqlValues.Add(sql);
-
-            }
-
+            SqlValues.AddRange(ExtractLogValuesFromRawValues(rawValueInternal));
             rawValueInternal.Clear();
 
             LogToSql();
 
-            return SqlValues.Count - startRows;
+            return SqlValues.Count;
+        }
 
+        private static List<LogValuesSql> ExtractLogValuesFromRawValues(List<RawValueClass> rawValues)
+        {
+            var logValues = new List<LogValuesSql>();
 
+            foreach (RawValueClass raw in rawValues)
+            {
+                logValues.Add(new LogValuesSql
+                {
+                    logTime = raw.logValue.LastLogTime,
+                    tag_id = raw.logValue.Id,
+                    opcQuality = raw.ReadValue.Quality,
+                    value = raw.ReadValue.ValueAsString,
+                    numericValue = raw.ReadValue.ValueAsFloat
+                });
+            }
+            return logValues;
         }
 
         private static void LogToSql()
         {
             var tbl = SqlValues.ConvertToDataTable<LogValuesSql>();
-
 
             if (tbl.Rows.Count == 0)
                 return;
@@ -134,19 +138,20 @@ namespace OptimaValue
             }
         }
 
-
-
-        public static void AddRawValue(ReadValue _readValue, TagDefinitions taggen)
+        public static void AddRawValue(ReadValue readValue, TagDefinitions tag)
         {
-            lock (addBlock)
+            var val = new RawValueClass
             {
-                var val = new rawValueClass()
-                {
-                    logValue = taggen,
-                    ReadValue = _readValue
-                };
-                rawValueBlock.Add(val);
-            }
+                logValue = tag,
+                ReadValue = readValue
+            };
+            rawValueBlock.Add(val);
         }
+    }
+
+    public class RawValueClass
+    {
+        public TagDefinitions logValue { get; set; }
+        public ReadValue ReadValue { get; set; }
     }
 }

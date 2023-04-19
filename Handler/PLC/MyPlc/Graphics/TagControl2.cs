@@ -271,6 +271,7 @@ namespace OptimaValue
                 var _scaleMin = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("scaleMin"));
                 var _scaleMax = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("scaleMax"));
                 var _scaleOffset = (float)(tbl.AsEnumerable().ElementAt(rowIndex).Field<double>("scaleOffset"));
+                var _calculation = (tbl.AsEnumerable().ElementAt(rowIndex).Field<string>("calculation"));
 
                 var myTag = new TagDefinitions()
                 {
@@ -301,6 +302,7 @@ namespace OptimaValue
                     scaleMin = _scaleMin,
                     scaleMax = _scaleMax,
                     scaleOffset = _scaleOffset,
+                    Calculation = _calculation
                 };
                 tags.Add(myTag);
             }
@@ -753,12 +755,12 @@ namespace OptimaValue
             {
                 var query = $"INSERT INTO {Settings.Databas}.dbo.tagConfig ";
                 query += $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
-                query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset) ";
+                query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset,calculation) ";
                 query += $"VALUES ('{tag.Active}','{tag.Name}','{tag.Description}','{tag.LogType}','{tag.TimeOfDay}',";
                 query += $"{tag.Deadband},'{tag.PlcName}','{tag.VarType}',{tag.BlockNr}, ";
                 query += $"'{tag.DataType}',{tag.StartByte},{tag.NrOfElements},";
                 query += $"{tag.BitAddress},'{tag.LogFreq}','{tag.TagUnit}',{tag.EventId},'{tag.IsBooleanTrigger}','";
-                query += $"{tag.BoolTrigger}','{tag.AnalogTrigger}',{tag.AnalogValue},{tag.scaleMin},{tag.scaleMax},{tag.scaleOffset})";
+                query += $"{tag.BoolTrigger}','{tag.AnalogTrigger}',{tag.AnalogValue},{tag.scaleMin},{tag.scaleMax},{tag.scaleOffset},'{tag.Calculation}')";
 
                 DatabaseSql.AddTag(query);
 
@@ -777,7 +779,7 @@ namespace OptimaValue
                     $",bitAddress={tag.BitAddress},logFreq='{tag.LogFreq}',";
                 query += $"tagUnit='{tag.TagUnit}',eventId={tag.EventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
                     $",boolTrigger='{tag.BoolTrigger}',analogTrigger='{tag.AnalogTrigger}',analogValue={tag.AnalogValue}, " +
-                    $"scaleMin={tag.scaleMin},scaleMax={tag.scaleMax},scaleOffset={tag.scaleOffset}" +
+                    $"scaleMin={tag.scaleMin},scaleMax={tag.scaleMax},scaleOffset={tag.scaleOffset},calculation='{tag.Calculation}'" +
                     $" WHERE id = {tag.Id}";
 
                 DatabaseSql.UpdateTag(query);

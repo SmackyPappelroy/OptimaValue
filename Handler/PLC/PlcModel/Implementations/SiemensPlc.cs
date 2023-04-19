@@ -79,13 +79,7 @@ namespace OptimaValue
 
         public string PlcName { get; set; }
 
-        public bool IsConnected
-        {
-            get
-            {
-                return myPlc.IsConnected && ConnectionStatus == ConnectionStatus.Connected;
-            }
-        }
+        public bool IsConnected => myPlc.IsConnected && ConnectionStatus == ConnectionStatus.Connected;
 
         public CpuType CpuType => cpuType;
 
@@ -119,7 +113,6 @@ namespace OptimaValue
             }
         }
 
-
         public bool Active { get; set; } = false;
         public DateTime LastReconnect { get; set; } = DateTime.MinValue;
         public bool UnableToPing { get; private set; }
@@ -134,7 +127,6 @@ namespace OptimaValue
                     watchDog = 0;
                 return watchDog;
             }
-
         }
         public bool Alarm { get; set; } = false;
         public bool isNotPlc { get; } = false;
@@ -211,7 +203,7 @@ namespace OptimaValue
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
-            catch(IOException ex)
+            catch (IOException ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
@@ -335,7 +327,6 @@ namespace OptimaValue
             }
             catch (IOException ex) { ConnectionStatus = ConnectionStatus.Disconnected; throw; }
         }
-
         public void Write(PlcTag tag, object value)
         {
             myPlc.Write(tag.DataType, tag.BlockNr, tag.StartByte, value, tag.BitAddress);
@@ -410,7 +401,5 @@ namespace OptimaValue
             }
             return Pingable;
         }
-
-
     }
 }

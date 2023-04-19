@@ -32,7 +32,7 @@ namespace OptimaValue.Config
 
         private static readonly string filePath = @"c:\OptimaSettings\OptimaValue";
         private static readonly string fileName = "SqlSettings.json";
-        public static string fullPathName => filePath + "\\" + fileName;
+        public static string FullPathName => filePath + "\\" + fileName;
 
         public static string ConnectionString => ($"Server={Settings.Server};Database={Settings.Databas};User Id={Settings.User};Password={Settings.Password}; ");
 
@@ -163,16 +163,16 @@ namespace OptimaValue.Config
                 IsOptimaValueRunning = IsOptimaValueRunning
             };
 
-            File.WriteAllText(fullPathName, JsonSerializer.Serialize(settings));
+            File.WriteAllText(FullPathName, JsonSerializer.Serialize(settings));
         }
 
         private static void LoadValuesFromFile()
         {
             lock (lockObject)
             {
-                if (File.Exists(fullPathName))
+                if (File.Exists(FullPathName))
                 {
-                    var json = File.ReadAllText(fullPathName);
+                    var json = File.ReadAllText(FullPathName);
                     SettingsClass settings = JsonSerializer.Deserialize<SettingsClass>(json);
                     Server = settings.Server;
                     Databas = settings.Database;
@@ -197,7 +197,7 @@ namespace OptimaValue.Config
                         IsOptimaValueRunning = false
                     };
                     Directory.CreateDirectory(filePath);
-                    File.WriteAllText(fullPathName, JsonSerializer.Serialize(settings));
+                    File.WriteAllText(FullPathName, JsonSerializer.Serialize(settings));
                 }
             }
 

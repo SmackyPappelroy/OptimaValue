@@ -93,7 +93,9 @@ namespace OptimaValue
         [Column(TypeName = "float")]
         public float scaleOffset { get; set; }
 
-
+        [Column(TypeName = "nvarchar")]
+        [StringLength(2000)]
+        public string calculation { get; set; }
 
     }
 }

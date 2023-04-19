@@ -34,17 +34,7 @@ namespace OptimaValue
         /// <returns></returns>
         public static DateTime DTLtoDateTime(DTL dtl)
         {
-            var temp = dtl.Year.ToString();
-            temp += "-" + (dtl.Month.ToString().Count() == 1 ? ("0" + dtl.Month.ToString()) : dtl.Month.ToString());
-            temp += "-" + (dtl.Day.ToString().Count() == 1 ? ("0" + dtl.Day.ToString()) : dtl.Day.ToString());
-            temp += " " + (dtl.Hour.ToString().Count() == 1 ? ("0" + dtl.Hour.ToString()) : dtl.Hour.ToString());
-            temp += ":" + (dtl.Minute.ToString().Count() == 1 ? ("0" + dtl.Minute.ToString()) : dtl.Minute.ToString());
-            temp += ":" + (dtl.Second.ToString().Count() == 1 ? ("0" + dtl.Second.ToString()) : dtl.Second.ToString());
-            var temp2 = dtl.NanoSecond / 1000000;
-            if (temp2.ToString().Length > 2)
-                temp += "." + (temp2.ToString()).Substring(0, 3);
-            else
-                temp += "." + temp2.ToString();
+            var temp = $"{dtl.Year}-{dtl.Month:00}-{dtl.Day:00} {dtl.Hour:00}:{dtl.Minute:00}:{dtl.Second:00}.{dtl.NanoSecond / 1000000:000}";
             return Convert.ToDateTime(temp);
         }
 
@@ -114,8 +104,8 @@ namespace OptimaValue
 
                 try
                 {
-                    char[] chars = new char[bytes.Count()];
-                    for (int i = 0; i < bytes.Count() - 1; i++)
+                    char[] chars = new char[bytes.Length];
+                    for (int i = 0; i < bytes.Length; i++)
                     {
                         chars[i] = Convert.ToChar(bytes[i]);
                     }

@@ -1,2 +1,0 @@
-﻿Fixa datum vid stopp
-Fixa när man kör delta loggning

@@ -20,7 +20,7 @@ namespace OptimaValue
         public string value { get; set; }
 
         [Column(TypeName = "float")]
-        public float numericValue { get; set; }
+        public float? numericValue { get; set; }
 
         [Column(TypeName = "nvarchar")]
         [StringLength(10)]

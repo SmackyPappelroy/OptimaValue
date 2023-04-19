@@ -38,5 +38,6 @@ namespace OptimaValue
         public VarType VarType { get; set; }
         public int NrOfElements { get; set; }
         public byte BitAddress { get; set; }
+        public string Calculation { get; set; }
     }
 }

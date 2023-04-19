@@ -437,9 +437,6 @@ namespace OptimaValue.Handler.PLC.Graphics
             else
                 activeString = "False";
 
-            var ip = "";
-
-
             DatabaseSql.SavePlcConfig(activeString,
                 name: txtName.Text,
                 ip: txtIp.Text,
