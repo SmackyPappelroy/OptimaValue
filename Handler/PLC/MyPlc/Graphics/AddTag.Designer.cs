@@ -182,7 +182,7 @@
             // paraLogType
             // 
             paraLogType.BackColor = System.Drawing.Color.Transparent;
-            paraLogType.ComboItems = new string[] { "Cyclic", "Delta", "TimeOfDay", "Event", "WriteWatchDogInt16", "Calculated", "RateOfChange" };
+            paraLogType.ComboItems = new string[] { "Cyclic", "Delta", "TimeOfDay", "Event", "WriteWatchDogInt16", "Calculated", "RateOfChange", "Adaptive" };
             paraLogType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraLogType.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
             paraLogType.HeaderText = "Log-typ";
@@ -333,7 +333,7 @@
             paraScaleMin.BackColor = System.Drawing.Color.Transparent;
             paraScaleMin.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraScaleMin.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
-            paraScaleMin.Header = "Skalering Min";
+            paraScaleMin.Header = "Skalering Min / Adaptiv låg threshhold";
             paraScaleMin.Location = new System.Drawing.Point(6, 414);
             paraScaleMin.Margin = new System.Windows.Forms.Padding(6);
             paraScaleMin.Name = "paraScaleMin";
@@ -347,7 +347,7 @@
             paraScaleMax.BackColor = System.Drawing.Color.Transparent;
             paraScaleMax.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraScaleMax.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
-            paraScaleMax.Header = "Skalering Max";
+            paraScaleMax.Header = "Skalering Max / Adaptiv hög threshhold";
             paraScaleMax.Location = new System.Drawing.Point(451, 414);
             paraScaleMax.Margin = new System.Windows.Forms.Padding(6);
             paraScaleMax.Name = "paraScaleMax";
@@ -361,7 +361,7 @@
             paraRawMin.BackColor = System.Drawing.Color.Transparent;
             paraRawMin.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraRawMin.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
-            paraRawMin.Header = "Rå skal min";
+            paraRawMin.Header = "Rå skal min / Adaptiv låg logtid (millisekunder)";
             paraRawMin.Location = new System.Drawing.Point(6, 482);
             paraRawMin.Margin = new System.Windows.Forms.Padding(6);
             paraRawMin.Name = "paraRawMin";
@@ -375,7 +375,7 @@
             paraRawMax.BackColor = System.Drawing.Color.Transparent;
             paraRawMax.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraRawMax.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
-            paraRawMax.Header = "Rå skal max";
+            paraRawMax.Header = "Rå skal max / Adaptiv hög logtid (millisekunder)";
             paraRawMax.Location = new System.Drawing.Point(450, 481);
             paraRawMax.Margin = new System.Windows.Forms.Padding(5, 5, 10, 5);
             paraRawMax.Name = "paraRawMax";

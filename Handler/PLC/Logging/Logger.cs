@@ -300,9 +300,19 @@ namespace OptimaValue
 
         private static async Task ReadValueIfReady(ExtendedPlc plc, TagDefinitions tag, int logFreq)
         {
-            if (tag.LastLogTime.AddMilliseconds((double)logFreq) < DateTime.UtcNow.AddMilliseconds(100))
+            if (tag.LogType != LogType.Adaptive)
             {
-                await ReadValue(plc, tag);
+                if (tag.LastLogTime.AddMilliseconds((double)logFreq) < DateTime.UtcNow.AddMilliseconds(100))
+                {
+                    await ReadValue(plc, tag);
+                }
+            }
+            else
+            {
+                if (tag.LastLogTime.AddMilliseconds((double)tag.CustomLogFrequency) < DateTime.UtcNow.AddMilliseconds(100))
+                {
+                    await ReadValue(plc, tag);
+                }
             }
         }
 
@@ -566,11 +576,88 @@ namespace OptimaValue
                                 string postfix = ConvertToPostfix(infix.ToString());
                                 return EvaluatePostfix(postfix);
                             }
-
                             break;
                         }
-                }
+                    case LogType.Adaptive:
+                        {
+                            LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
+                            if (lastKnownLogValue == null)
+                            {
+                                AddValueToSql(logTag, readValue);
+                                return;
+                            }
 
+                            CheckAdaptiveRateOfChangeAndAddToSql(logTag, readValue, lastKnownLogValue);
+
+                            void CheckAdaptiveRateOfChangeAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
+                            {
+                                if (logTag.scaleMin == 0)
+                                {
+                                    logTag.scaleMin = 0.1f;
+                                }
+                                if (logTag.scaleMax == 0)
+                                {
+                                    logTag.scaleMax = 1;
+                                }
+                                if (logTag.scaleMin > logTag.scaleMax)
+                                {
+                                    logTag.scaleMin = 0.1f;
+                                    logTag.scaleMax = 1;
+                                }
+
+                                double lowThreshold = logTag.scaleMin; // Define your low rate of change threshold here
+                                double highThreshold = logTag.scaleMax; // Define your high rate of change threshold here
+                                DateTime currentTime = DateTime.UtcNow;
+
+                                double valueDifference = Math.Abs(readValue.ValueAsFloat - lastKnownLogValue.ReadValue.ValueAsFloat);
+                                double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.last_updated).TotalSeconds;
+
+                                if (timeDifferenceInSeconds == 0) // Prevent division by zero
+                                {
+                                    return;
+                                }
+
+                                double rateOfChange = valueDifference / timeDifferenceInSeconds;
+
+                                if (logTag.rawMin == 0)
+                                {
+                                    logTag.rawMin = 1000;
+                                }
+                                if (logTag.rawMax == 0)
+                                {
+                                    logTag.rawMax = 10000;
+                                }
+                                if (logTag.rawMin > logTag.rawMax)
+                                {
+                                    logTag.rawMin = 1000;
+                                    logTag.rawMax = 10000;
+                                }
+
+                                // Set logging intervals based on the rate of change
+                                double lowChangeInterval = (int)logTag.rawMax; // In seconds, for rateOfChange <= lowThreshold
+                                double highChangeInterval = (int)logTag.rawMin;  // In seconds
+
+                                if (rateOfChange <= lowThreshold)
+                                {
+                                    logTag.CustomLogFrequency = (int)lowChangeInterval;
+                                }
+                                else if (rateOfChange >= highThreshold)
+                                {
+                                    logTag.CustomLogFrequency = (int)highChangeInterval;
+                                }
+                                else
+                                {
+                                    // Linear interpolation between lowChangeInterval and highChangeInterval
+                                    double slope = (highChangeInterval - lowChangeInterval) / (highThreshold - lowThreshold);
+                                    double intercept = lowChangeInterval - slope * lowThreshold;
+                                    logTag.CustomLogFrequency = (int)(slope * rateOfChange + intercept);
+                                }
+
+                            }
+                            break;
+
+                        }
+                }
 
                 // Check if tag has any subscribed event tags
                 if (logTag.SubscribedTags.Count <= 0)

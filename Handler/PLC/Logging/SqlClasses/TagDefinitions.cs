@@ -44,6 +44,8 @@ namespace OptimaValue
         [Name("TagUnit")]
         public string TagUnit { get; set; } = string.Empty;
 
+        public int CustomLogFrequency { get; set; } = 1000;
+
         [Name("Calculation")]
         public string Calculation { get; set; } = string.Empty;
         #region Skalering

@@ -9,5 +9,6 @@
         WriteWatchDogInt16 = 4,
         Calculated = 5,
         RateOfChange = 6,
+        Adaptive = 7,
     }
 }
