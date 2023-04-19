@@ -588,25 +588,13 @@ namespace OptimaValue
                             }
 
                             CheckAdaptiveRateOfChangeAndAddToSql(logTag, readValue, lastKnownLogValue);
-
                             void CheckAdaptiveRateOfChangeAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
                             {
-                                if (logTag.scaleMin == 0)
-                                {
-                                    logTag.scaleMin = 0.1f;
-                                }
-                                if (logTag.scaleMax == 0)
-                                {
-                                    logTag.scaleMax = 1;
-                                }
-                                if (logTag.scaleMin > logTag.scaleMax)
-                                {
-                                    logTag.scaleMin = 0.1f;
-                                    logTag.scaleMax = 1;
-                                }
+                                SetDefaultScale(logTag);
+                                SetDefaultRaw(logTag);
 
-                                double lowThreshold = logTag.scaleMin; // Define your low rate of change threshold here
-                                double highThreshold = logTag.scaleMax; // Define your high rate of change threshold here
+                                double lowThreshold = logTag.scaleMin;
+                                double highThreshold = logTag.scaleMax;
                                 DateTime currentTime = DateTime.UtcNow;
 
                                 double valueDifference = Math.Abs(readValue.ValueAsFloat - lastKnownLogValue.ReadValue.ValueAsFloat);
@@ -619,24 +607,36 @@ namespace OptimaValue
 
                                 double rateOfChange = valueDifference / timeDifferenceInSeconds;
 
-                                if (logTag.rawMin == 0)
+                                double lowChangeInterval = logTag.rawMax;
+                                double highChangeInterval = logTag.rawMin;
+
+                                UpdateCustomLogFrequency(logTag, rateOfChange, lowThreshold, highThreshold, lowChangeInterval, highChangeInterval);
+                                AddValueToSql(logTag, readValue);
+
+                            }
+                            void SetDefaultScale(TagDefinitions logTag)
+                            {
+                                if (logTag.scaleMin == 0) logTag.scaleMin = 0.1f;
+                                if (logTag.scaleMax == 0) logTag.scaleMax = 1;
+                                if (logTag.scaleMin > logTag.scaleMax)
                                 {
-                                    logTag.rawMin = 1000;
+                                    logTag.scaleMin = 0.1f;
+                                    logTag.scaleMax = 1;
                                 }
-                                if (logTag.rawMax == 0)
-                                {
-                                    logTag.rawMax = 10000;
-                                }
+                            }
+
+                            void SetDefaultRaw(TagDefinitions logTag)
+                            {
+                                if (logTag.rawMin == 0) logTag.rawMin = 1000;
+                                if (logTag.rawMax == 0) logTag.rawMax = 10000;
                                 if (logTag.rawMin > logTag.rawMax)
                                 {
                                     logTag.rawMin = 1000;
                                     logTag.rawMax = 10000;
                                 }
-
-                                // Set logging intervals based on the rate of change
-                                double lowChangeInterval = (int)logTag.rawMax; // In seconds, for rateOfChange <= lowThreshold
-                                double highChangeInterval = (int)logTag.rawMin;  // In seconds
-
+                            }
+                            void UpdateCustomLogFrequency(TagDefinitions logTag, double rateOfChange, double lowThreshold, double highThreshold, double lowChangeInterval, double highChangeInterval)
+                            {
                                 if (rateOfChange <= lowThreshold)
                                 {
                                     logTag.CustomLogFrequency = (int)lowChangeInterval;
@@ -652,10 +652,8 @@ namespace OptimaValue
                                     double intercept = lowChangeInterval - slope * lowThreshold;
                                     logTag.CustomLogFrequency = (int)(slope * rateOfChange + intercept);
                                 }
-
                             }
                             break;
-
                         }
                 }
 

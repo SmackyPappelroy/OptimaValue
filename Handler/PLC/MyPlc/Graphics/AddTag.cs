@@ -948,5 +948,16 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
 
         }
+
+        public bool logInfoFormOpen = false;
+        private void btnInfo_Click(object sender, EventArgs e)
+        {
+            if (logInfoFormOpen)
+                return;
+
+            var logInfoForm = new LogTypeInfoForm(this);
+            logInfoForm.Show();
+            logInfoFormOpen = true;
+        }
     }
 }

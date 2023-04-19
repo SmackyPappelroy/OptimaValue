@@ -36,9 +36,9 @@
             errorProvider = new System.Windows.Forms.ErrorProvider(components);
             toolTip = new System.Windows.Forms.ToolTip(components);
             checkActive = new System.Windows.Forms.CheckBox();
-            flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            paraName = new Parameters.parameterTextControl();
             paraLogType = new Parameters.paramaterComboControl();
+            paraName = new Parameters.parameterTextControl();
+            flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             paraDescription = new Parameters.parameterTextControl();
             paraLogTime = new Parameters.parameterTextControl();
             paraFreq = new Parameters.paramaterComboControl();
@@ -59,6 +59,7 @@
             flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             btnOpc = new System.Windows.Forms.Button();
             btnEkvation = new System.Windows.Forms.Button();
+            btnInfo = new System.Windows.Forms.Button();
             tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)errorProvider).BeginInit();
             flowLayoutPanel1.SuspendLayout();
@@ -138,6 +139,33 @@
             toolTip.SetToolTip(checkActive, "Ska taggen loggas?");
             checkActive.UseVisualStyleBackColor = true;
             // 
+            // paraLogType
+            // 
+            paraLogType.BackColor = System.Drawing.Color.Transparent;
+            paraLogType.ComboItems = new string[] { "Cyclic", "Delta", "TimeOfDay", "Event", "WriteWatchDogInt16", "Calculated", "RateOfChange", "Adaptive" };
+            paraLogType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraLogType.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraLogType.HeaderText = "Log-typ";
+            paraLogType.Location = new System.Drawing.Point(451, 6);
+            paraLogType.Margin = new System.Windows.Forms.Padding(6);
+            paraLogType.Name = "paraLogType";
+            paraLogType.Size = new System.Drawing.Size(433, 56);
+            paraLogType.TabIndex = 52;
+            // 
+            // paraName
+            // 
+            paraName.BackColor = System.Drawing.Color.Transparent;
+            paraName.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            paraName.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            paraName.Header = "Namn";
+            paraName.Location = new System.Drawing.Point(6, 6);
+            paraName.Margin = new System.Windows.Forms.Padding(6);
+            paraName.Name = "paraName";
+            paraName.ParameterValue = "";
+            paraName.Size = new System.Drawing.Size(433, 56);
+            paraName.TabIndex = 51;
+            paraName.Validating += ValidateControl;
+            // 
             // flowLayoutPanel1
             // 
             flowLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -164,33 +192,6 @@
             flowLayoutPanel1.Name = "flowLayoutPanel1";
             flowLayoutPanel1.Size = new System.Drawing.Size(895, 615);
             flowLayoutPanel1.TabIndex = 1;
-            // 
-            // paraName
-            // 
-            paraName.BackColor = System.Drawing.Color.Transparent;
-            paraName.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            paraName.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
-            paraName.Header = "Namn";
-            paraName.Location = new System.Drawing.Point(6, 6);
-            paraName.Margin = new System.Windows.Forms.Padding(6);
-            paraName.Name = "paraName";
-            paraName.ParameterValue = "";
-            paraName.Size = new System.Drawing.Size(433, 56);
-            paraName.TabIndex = 51;
-            paraName.Validating += ValidateControl;
-            // 
-            // paraLogType
-            // 
-            paraLogType.BackColor = System.Drawing.Color.Transparent;
-            paraLogType.ComboItems = new string[] { "Cyclic", "Delta", "TimeOfDay", "Event", "WriteWatchDogInt16", "Calculated", "RateOfChange", "Adaptive" };
-            paraLogType.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            paraLogType.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
-            paraLogType.HeaderText = "Log-typ";
-            paraLogType.Location = new System.Drawing.Point(451, 6);
-            paraLogType.Margin = new System.Windows.Forms.Padding(6);
-            paraLogType.Name = "paraLogType";
-            paraLogType.Size = new System.Drawing.Size(433, 56);
-            paraLogType.TabIndex = 52;
             // 
             // paraDescription
             // 
@@ -435,7 +436,7 @@
             // 
             btnOpc.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             btnOpc.ForeColor = System.Drawing.Color.Black;
-            btnOpc.Location = new System.Drawing.Point(302, 8);
+            btnOpc.Location = new System.Drawing.Point(362, 8);
             btnOpc.Name = "btnOpc";
             btnOpc.Size = new System.Drawing.Size(273, 31);
             btnOpc.TabIndex = 4;
@@ -447,13 +448,25 @@
             // 
             btnEkvation.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             btnEkvation.ForeColor = System.Drawing.Color.Black;
-            btnEkvation.Location = new System.Drawing.Point(620, 8);
+            btnEkvation.Location = new System.Drawing.Point(667, 8);
             btnEkvation.Name = "btnEkvation";
             btnEkvation.Size = new System.Drawing.Size(200, 31);
             btnEkvation.TabIndex = 5;
             btnEkvation.Text = "Kalkylerade värde...";
             btnEkvation.UseVisualStyleBackColor = true;
             btnEkvation.Click += clickEkvation;
+            // 
+            // btnInfo
+            // 
+            btnInfo.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            btnInfo.ForeColor = System.Drawing.Color.Black;
+            btnInfo.Location = new System.Drawing.Point(174, 8);
+            btnInfo.Name = "btnInfo";
+            btnInfo.Size = new System.Drawing.Size(157, 31);
+            btnInfo.TabIndex = 6;
+            btnInfo.Text = "Logtyp info...";
+            btnInfo.UseVisualStyleBackColor = true;
+            btnInfo.Click += btnInfo_Click;
             // 
             // AddPlcFromFile
             // 
@@ -462,6 +475,7 @@
             AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             BackColor = System.Drawing.Color.FromArgb(67, 62, 71);
             ClientSize = new System.Drawing.Size(920, 806);
+            Controls.Add(btnInfo);
             Controls.Add(btnEkvation);
             Controls.Add(btnOpc);
             Controls.Add(flowLayoutPanel3);
@@ -515,5 +529,6 @@
         private Parameters.parameterTextControl paraRawMin;
         private System.Windows.Forms.Button btnOpc;
         private System.Windows.Forms.Button btnEkvation;
+        private System.Windows.Forms.Button btnInfo;
     }
 }
