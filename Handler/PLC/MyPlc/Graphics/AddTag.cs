@@ -246,6 +246,26 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 paraDataType.Visible = false;
                 btnEkvation.Visible = true;
             }
+            else if (tag is not null && tag.LogType == LogType.RateOfChange)
+            {
+                paraUnit.Visible = true;
+                paraFreq.Visible = true;
+                paraLogType.Visible = true;
+                paraLogTime.Visible = false;
+                paraVarType.Visible = true;
+                paraRawMin.Visible = true;
+                paraRawMax.Visible = true;
+                paraScaleMax.Visible = true;
+                paraScaleMin.Visible = true;
+                paraScaleOffset.Visible = true;
+                paraBitAddress.Visible = true;
+                paraDeadband.Visible = true;
+                paraBlockNr.Visible = true;
+                paraStartAddress.Visible = true;
+                paraNrOfValues.Visible = false;
+                paraDataType.Visible = true;
+                btnEkvation.Visible = false;
+            }
         }
 
         private void TimeOut_Tick(object sender, EventArgs e)
@@ -706,7 +726,23 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     btnEkvation.Visible = true;
                     break;
                 case "RateOfChange":
-                    // TODO: Add RateOfChange
+                    paraUnit.Visible = true;
+                    paraFreq.Visible = true;
+                    paraLogType.Visible = true;
+                    paraLogTime.Visible = false;
+                    paraVarType.Visible = true;
+                    paraRawMin.Visible = true;
+                    paraRawMax.Visible = true;
+                    paraScaleMax.Visible = true;
+                    paraScaleMin.Visible = true;
+                    paraScaleOffset.Visible = true;
+                    paraBitAddress.Visible = true;
+                    paraDeadband.Visible = true;
+                    paraBlockNr.Visible = true;
+                    paraStartAddress.Visible = true;
+                    paraNrOfValues.Visible = false;
+                    paraDataType.Visible = true;
+                    btnEkvation.Visible = false;
                     break;
                 default:
                     break;

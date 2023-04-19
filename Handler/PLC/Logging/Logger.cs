@@ -410,7 +410,7 @@ namespace OptimaValue
 
                             void CheckRateOfChangeAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
                             {
-                                double rateOfChangeThreshold = 0.1; // Define your rate of change threshold here
+                                double rateOfChangeThreshold = logTag.Deadband; // Define your rate of change threshold here
                                 DateTime currentTime = DateTime.UtcNow;
 
                                 double valueDifference = Math.Abs(readValue.ValueAsFloat - Convert.ToSingle(lastKnownLogValue.value));
