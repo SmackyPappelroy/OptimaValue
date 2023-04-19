@@ -305,7 +305,7 @@
             paraDeadband.BackColor = System.Drawing.Color.Transparent;
             paraDeadband.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             paraDeadband.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
-            paraDeadband.Header = "Dödband / Rate-of-change";
+            paraDeadband.Header = "Dödband / Rate-of-change faktor";
             paraDeadband.Location = new System.Drawing.Point(6, 346);
             paraDeadband.Margin = new System.Windows.Forms.Padding(6);
             paraDeadband.Name = "paraDeadband";
