@@ -18,6 +18,7 @@ using OpcUa.UI.Controls;
 using OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters;
 using System.Net;
 using System.Windows.Documents;
+using OptimaValue.ML;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
@@ -522,18 +523,18 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (action == "INSERT")
             {
                 query = $"INSERT INTO {Settings.Databas}.dbo.tagConfig ";
-                query += BuildQueryCommon();
+                query += BuildQueryCommon(action);
             }
             else if (action == "UPDATE")
             {
                 query = $"UPDATE {Settings.Databas}.dbo.tagConfig ";
-                query += $"SET {BuildQueryCommon()} WHERE id = {tag.Id}";
+                query += $"SET {BuildQueryCommon(action)} WHERE id = {tag.Id}";
             }
 
             return query;
         }
 
-        private string BuildQueryCommon()
+        private string BuildQueryCommon(string action)
         {
             string deadband = paraDeadband.ParameterValue.Replace(",", ".");
             string varType = MyPlc.isOpc ? "Opc" : paraVarType.comboBoxen.SelectedItem.ToString();
@@ -543,16 +544,37 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             int nrOfValues = MyPlc.isOpc ? 0 : int.Parse(paraNrOfValues.ParameterValue);
             byte bitAddress = (byte)(MyPlc.isOpc ? 0 : byte.Parse(paraBitAddress.ParameterValue));
 
-            string queryCommon = $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
-            queryCommon += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset,rawMin,rawMax,calculation) ";
-            queryCommon += $"VALUES ('{checkActive.Checked}','{paraName.ParameterValue}','{paraDescription.ParameterValue}','{paraLogType.comboBoxen.SelectedItem}','{paraLogTime.ParameterValue}',";
-            queryCommon += $"{deadband},'{PlcName}','{varType}',{blockNr}, ";
-            queryCommon += $"'{paraDataType.comboBoxen.SelectedItem}',{startAddress},{nrOfValues},";
-            queryCommon += $"{bitAddress},'{paraFreq.comboBoxen.SelectedItem}','{paraUnit.ParameterValue}',{tag.EventId},'{tag.IsBooleanTrigger}','";
-            queryCommon += $"{tag.BoolTrigger}','{tag.AnalogTrigger}',{tag.AnalogValue},{paraScaleMin.ParameterValue},{paraScaleMax.ParameterValue},{paraScaleOffset.ParameterValue},{paraRawMin.ParameterValue},{paraRawMax.ParameterValue},'{tag.Calculation}')";
+            string[] columns = new string[] {
+                "active", "name", "description", "logType", "timeOfDay", "deadband",
+                "plcName", "varType", "blockNr", "dataType", "startByte", "nrOfElements",
+                "bitAddress", "logFreq", "tagUnit", "eventId", "isBooleanTrigger", "boolTrigger",
+                "analogTrigger", "analogValue", "scaleMin", "scaleMax", "scaleOffset", "rawMin",
+                "rawMax", "calculation"
+            };
 
-            return queryCommon;
+            string[] values = new string[] {
+                $"'{checkActive.Checked}'", $"'{paraName.ParameterValue}'", $"'{paraDescription.ParameterValue}'",
+                $"'{paraLogType.comboBoxen.SelectedItem}'", $"'{paraLogTime.ParameterValue}'", deadband,
+                $"'{PlcName}'", $"'{varType}'", $"{blockNr}", $"'{paraDataType.comboBoxen.SelectedItem}'",
+                $"{startAddress}", $"{nrOfValues}", $"{bitAddress}", $"'{paraFreq.comboBoxen.SelectedItem}'",
+                $"'{paraUnit.ParameterValue}'", $"{tag.EventId}", $"'{tag.IsBooleanTrigger}'",
+                $"'{tag.BoolTrigger}'", $"'{tag.AnalogTrigger}'", $"{tag.AnalogValue}",
+                $"{paraScaleMin.ParameterValue}", $"{paraScaleMax.ParameterValue}", $"{paraScaleOffset.ParameterValue}",
+                $"{paraRawMin.ParameterValue}", $"{paraRawMax.ParameterValue}", $"'{tag.Calculation}'"
+            };
+
+            if (action == "INSERT")
+            {
+                return $"({string.Join(",", columns)}) VALUES ({string.Join(",", values)})";
+            }
+            else if (action == "UPDATE")
+            {
+                return string.Join(",", columns.Zip(values, (c, v) => $"{c} = {v}"));
+            }
+
+            return string.Empty;
         }
+
 
         private TagDefinitions CreateTagFromDataTable(DataTable tbl)
         {
@@ -958,6 +980,12 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             var logInfoForm = new LogTypeInfoForm(this);
             logInfoForm.Show();
             logInfoFormOpen = true;
+        }
+
+        private void btnPredict_Click(object sender, EventArgs e)
+        {
+            var mlForm = new MLForm();
+            mlForm.Show();
         }
     }
 }

@@ -1,41 +1,58 @@
-﻿using CsvHelper;
-using CsvHelper.Configuration;
-using IWshRuntimeLibrary;
+﻿using IWshRuntimeLibrary;
 using OptimaValue.Handler.PLC.Graphics;
 using OptimaValue.Handler.PLC.MyPlc.Graphics;
 using OptimaValue.Properties;
-using S7.Net;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using OptimaValue.Config;
 using System.Diagnostics;
 
 namespace OptimaValue
 {
     public partial class MasterForm : Form
     {
-        #region Properties
-        private object lockObject = new();
-        private List<TagDefinitions> AvailableTagsTrend
+        private class TagId
         {
-            get
+            public string Name { get; set; }
+            public int Id { get; set; }
+        }
+        #region Fields
+        private AutoCompleteStringCollection stringCollection = new AutoCompleteStringCollection();
+        private ExtendedPlc activePlc;
+        private PlcSettingsControl settingsControl;
+        private StatusControl statusControl;
+        private TagControl2 tagControl;
+        private PerformanceForm perForm;
+        private bool perFormOpen = false;
+        private readonly System.Windows.Forms.Timer statusTimer;
+        private readonly System.Windows.Forms.Timer databaseTimer;
+        private readonly System.Windows.Forms.Timer startStopButtonVisibilityTimer;
+        private sqlForm SqlForm;
+        private bool IsOpenSqlForm = false;
+        private bool isSubscribed = false;
+        private Image noDatabase;
+        private Image okDatabase;
+        private object lockObject = new();
+        #endregion
+
+        #region Properties
+        private List<TagDefinitions> AvailableTagsTrend => GetAvailableTagsTrend();
+
+        private List<TagDefinitions> GetAvailableTagsTrend()
+        {
+            lock (lockObject)
             {
-                lock (lockObject)
-                {
-                    var activePlcs = PlcConfig.PlcList.Where(p => p.ConnectionStatus == ConnectionStatus.Connected);
-                    var tags = TagsToLog.AllLogValues.Where(x => x.PlcName == activePlcs.First().PlcName).ToList();
-                    tags = tags.Where(x => x.Active).ToList();
-                    tags = tags.OrderBy(x => x.PlcName).ThenBy(x => x.Name).ToList();
-                    return tags;
-                }
+                var activePlcs = PlcConfig.PlcList.Where(p => p.ConnectionStatus == ConnectionStatus.Connected);
+                var tags = TagsToLog.AllLogValues.Where(x => x.PlcName == activePlcs.First().PlcName).ToList();
+                tags = tags.Where(x => x.Active).ToList();
+                tags = tags.OrderBy(x => x.PlcName).ThenBy(x => x.Name).ToList();
+                return tags;
             }
         }
+
         private List<TagId> TagIds => GetTagIds();
 
         private List<TagId> GetTagIds()
@@ -55,29 +72,8 @@ namespace OptimaValue
             return ids;
         }
 
-        private class TagId
-        {
-            public string Name { get; set; }
-            public int Id { get; set; }
-        }
 
-        private AutoCompleteStringCollection stringCollection = new AutoCompleteStringCollection();
-        private ExtendedPlc activePlc;
-        private PlcSettingsControl settingsControl;
-        private StatusControl statusControl;
-        private TagControl2 tagControl;
-        private PerformanceForm perForm;
-        private bool perFormOpen = false;
-        private readonly System.Windows.Forms.Timer statusTimer;
-        private readonly System.Windows.Forms.Timer databaseTimer;
-        private readonly System.Windows.Forms.Timer startStopButtonVisibilityTimer;
-        private sqlForm SqlForm;
-        private bool IsOpenSqlForm = false;
 
-        private bool isSubscribed = false;
-
-        private Image noDatabase;
-        private Image okDatabase;
 
         private string databaseTooltip => DatabaseSql.isConnected ? "Ansluten till SQL-server" : "Ingen anslutning till SQL";
         #endregion
@@ -133,11 +129,6 @@ namespace OptimaValue
             comboTrend.AutoCompleteMode = AutoCompleteMode.Suggest;
             comboTrend.AutoCompleteSource = AutoCompleteSource.CustomSource;
         }
-        //private void ClearTrendTags()
-        //{
-        //    comboTrend.Items.Clear();
-
-        //}
         #endregion
 
         #region Form
@@ -323,7 +314,6 @@ namespace OptimaValue
                 if (!treeView.SelectedNode.IsEditing)
                     treeView.SelectedNode.BeginEdit();
             }
-
         }
 
         private void CloseUserControls()
@@ -369,7 +359,6 @@ namespace OptimaValue
                 SelectedImageIndex = 6
             };
 
-
             var plcNode = new TreeNode(plcLabel, new TreeNode[] { configurationNode, statusNode, tagNode })
             {
                 Name = "PLC",
@@ -378,7 +367,6 @@ namespace OptimaValue
             };
 
             treeView.TopNode.Nodes.Add(plcNode);
-
             treeView.TopNode.Expand();
         }
 
@@ -674,8 +662,10 @@ namespace OptimaValue
                         treeNode.SelectedImageIndex = 2;
                     }
                     comboTrend.Visible = true;
-                    AddTrendTags();
+                    if (comboTrend.Items.Count == 0)
+                        AddTrendTags();
                     isConnected = true;
+                    btnStartTrend.Visible = true;
                     break;
                 case ConnectionStatus.Disconnecting:
                     break;

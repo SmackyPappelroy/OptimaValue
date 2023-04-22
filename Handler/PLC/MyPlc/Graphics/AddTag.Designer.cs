@@ -60,6 +60,7 @@
             btnOpc = new System.Windows.Forms.Button();
             btnEkvation = new System.Windows.Forms.Button();
             btnInfo = new System.Windows.Forms.Button();
+            btnPredict = new System.Windows.Forms.Button();
             tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)errorProvider).BeginInit();
             flowLayoutPanel1.SuspendLayout();
@@ -429,7 +430,7 @@
             flowLayoutPanel3.Location = new System.Drawing.Point(1, 2);
             flowLayoutPanel3.Margin = new System.Windows.Forms.Padding(4);
             flowLayoutPanel3.Name = "flowLayoutPanel3";
-            flowLayoutPanel3.Size = new System.Drawing.Size(154, 37);
+            flowLayoutPanel3.Size = new System.Drawing.Size(104, 37);
             flowLayoutPanel3.TabIndex = 3;
             // 
             // btnOpc
@@ -468,6 +469,16 @@
             btnInfo.UseVisualStyleBackColor = true;
             btnInfo.Click += btnInfo_Click;
             // 
+            // btnPredict
+            // 
+            btnPredict.Location = new System.Drawing.Point(118, 11);
+            btnPredict.Name = "btnPredict";
+            btnPredict.Size = new System.Drawing.Size(41, 27);
+            btnPredict.TabIndex = 7;
+            btnPredict.Text = "button1";
+            btnPredict.UseVisualStyleBackColor = true;
+            btnPredict.Click += btnPredict_Click;
+            // 
             // AddPlcFromFile
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -475,6 +486,7 @@
             AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             BackColor = System.Drawing.Color.FromArgb(67, 62, 71);
             ClientSize = new System.Drawing.Size(920, 806);
+            Controls.Add(btnPredict);
             Controls.Add(btnInfo);
             Controls.Add(btnEkvation);
             Controls.Add(btnOpc);
@@ -530,5 +542,6 @@
         private System.Windows.Forms.Button btnOpc;
         private System.Windows.Forms.Button btnEkvation;
         private System.Windows.Forms.Button btnInfo;
+        private System.Windows.Forms.Button btnPredict;
     }
 }
