@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OptimaValue.API.Models;
+using System;
 
 namespace OptimaValue
 {
@@ -16,6 +17,18 @@ namespace OptimaValue
         public ReadValue(ExtendedPlc plc, object value) : this(plc.Plc, value)
         {
         }
+
+        public DataPoint ToDataPoint(string tagName, string plcName)
+        {
+            return new DataPoint
+            {
+                TagName = tagName,
+                PlcName = plcName,
+                Timestamp = SourceTimestamp,
+                Value = ValueAsFloat
+            };
+        }
+
 
         public string Quality => (PlcType, Value) switch
         {

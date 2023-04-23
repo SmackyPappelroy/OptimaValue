@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using OptimaValue.Config;
 
 namespace OptimaValue;
@@ -25,6 +27,10 @@ static class Program
         using Mutex mutex = new(true, "OptimaValue", out createdNew);
         if (createdNew)
         {
+            // Create and start the embedded Web API and SignalR host
+            var host = CreateHostBuilder().Build();
+            host.Start();
+
             Apps.Logger = new FileLogger(@"C:\OptimaValue\", true);
             Settings.Load();
             Settings.OptimaValueFilePath = Application.ExecutablePath;
@@ -51,5 +57,14 @@ static class Program
         Apps.Logger.Log($"Applikationen krashade{Environment.NewLine + e.ExceptionObject}", Severity.Error);
         Environment.Exit(0);
     }
+
+    public static IHostBuilder CreateHostBuilder() =>
+        Host.CreateDefaultBuilder()
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseStartup<Startup>();
+                // Set the URL where the embedded Web API should listen
+                webBuilder.UseUrls("http://localhost:5000"); // Replace with your desired URL
+            });
 }
 

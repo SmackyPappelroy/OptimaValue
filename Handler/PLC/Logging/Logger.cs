@@ -1,6 +1,7 @@
 ﻿using Opc.Ua;
 using OpcUaHm;
 using OpcUaHm.Common;
+using OptimaValue.API.Models;
 using S7.Net;
 using System;
 using System.Collections.Concurrent;
@@ -383,6 +384,16 @@ public static class Logger
             if (logTag.LogType != LogType.Calculated)
             {
                 readValue = await ReadTagValueAsync(MyPlc, logTag, plcTag);
+            }
+
+
+            // Check if the tag name exists in the monitored tags
+            if (PlcDataStore.IsTagMonitored(logTag.Name, MyPlc.PlcName))
+            {
+                // Convert ReadValue to DataPoint
+                DataPoint dataPoint = readValue.ToDataPoint(logTag.Name, MyPlc.PlcName);
+                // Update the PlcDataStore
+                PlcDataStore.UpdateValue(dataPoint);
             }
 
             logTag.LastLogTime = tiden;
