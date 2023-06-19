@@ -557,10 +557,10 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 $"'{paraLogType.comboBoxen.SelectedItem}'", $"'{paraLogTime.ParameterValue}'", deadband,
                 $"'{PlcName}'", $"'{varType}'", $"{blockNr}", $"'{paraDataType.comboBoxen.SelectedItem}'",
                 $"{startAddress}", $"{nrOfValues}", $"{bitAddress}", $"'{paraFreq.comboBoxen.SelectedItem}'",
-                $"'{paraUnit.ParameterValue}'", $"{tag.EventId}", $"'{tag.IsBooleanTrigger}'",
-                $"'{tag.BoolTrigger}'", $"'{tag.AnalogTrigger}'", $"{tag.AnalogValue}",
+                $"'{paraUnit.ParameterValue}'", $"{tag?.EventId ?? 0}", $"'{tag?.IsBooleanTrigger ?? false}'",
+                $"'{tag?.BoolTrigger ?? BooleanTrigger.OnTrue}'", $"'{tag?.AnalogTrigger ?? AnalogTrigger.LessThan}'", $"{tag?.AnalogValue ?? 0}",
                 $"{paraScaleMin.ParameterValue}", $"{paraScaleMax.ParameterValue}", $"{paraScaleOffset.ParameterValue}",
-                $"{paraRawMin.ParameterValue}", $"{paraRawMax.ParameterValue}", $"'{tag.Calculation}'"
+                $"{paraRawMin.ParameterValue}", $"{paraRawMax.ParameterValue}", $"'{tag?.Calculation ?? ""}'"
             };
 
             if (action == "INSERT")
