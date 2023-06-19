@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OptimaValue.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,6 +21,8 @@ public static class PlcDataStore
                 && string.Equals(tagRequest.PlcName, plcName, StringComparison.OrdinalIgnoreCase)));
     }
 
+    public static bool IsPlcConnected(string plcName) => PlcConfig.PlcList.Any(plc => plc.PlcName.ToLower() == plcName.ToLower() && plc.IsConnected);
+
 
 
     public static void UpdateValue(DataPoint dataPoint)
@@ -34,4 +37,5 @@ public static class PlcDataStore
             UpdateValue(dataPoint);
         }
     }
+
 }

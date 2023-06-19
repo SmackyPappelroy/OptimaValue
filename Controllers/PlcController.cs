@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OptimaValue.API.Models;
+using OptimaValue.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,30 @@ public class PlcController : ControllerBase
     {
     }
 
+    [HttpGet("plc-list")]
+    public ActionResult<List<string>> GetPlcList()
+    {
+        var plcList = PlcConfig.PlcList.Select(plc => plc.PlcName).ToList();
+        return Ok(plcList);
+    }
+
+    [HttpGet("tag-list")]
+    public ActionResult<List<string>> GetTagList([FromQuery] string plcName)
+    {
+        if (plcName is null)
+        {
+            return BadRequest("Invalid PLC name");
+        }
+        string lowerPlcName = plcName.ToLower();
+        if (TagsToLog.AllLogValues.Count == 0)
+        {
+            TagsToLog.GetAllTagsFromSql();
+        }
+
+        var tagList = TagsToLog.AllLogValues.Where(tag => tag.PlcName.ToLower() == lowerPlcName).Select(tag => tag.Name).ToList();
+        return Ok(tagList);
+    }
+
 
     [HttpGet("fetch")]
     public ActionResult<List<DataPoint>> FetchCurrentValues([FromQuery] List<string> tagnames, [FromQuery] string plcName, [FromQuery] string clientId)
@@ -26,6 +51,18 @@ public class PlcController : ControllerBase
             return BadRequest("Invalid PLC name");
         }
         string lowerPlcName = plcName.ToLower();
+
+        // Check if the clientId is valid
+        if (string.IsNullOrEmpty(clientId))
+        {
+            return BadRequest("Invalid client ID");
+        }
+
+        // Check if the plc has connectionstatus connected
+        if (!PlcDataStore.IsPlcConnected(plcName))
+        {
+            return BadRequest("PLC is not connected");
+        }
 
         // Get the monitored tags for the specified client
         if (!PlcDataStore.MonitoredTagsPerApplication.TryGetValue(clientId, out var monitoredTags))
@@ -95,6 +132,29 @@ public class PlcController : ControllerBase
                 }
             }
         }
+
+        return Ok();
+    }
+
+    [HttpDelete("unmonitor")]
+    public IActionResult UnmonitorTag([FromBody] TagRequest tagRequest, [FromQuery] string clientId)
+    {
+        if (string.IsNullOrEmpty(clientId))
+        {
+            return BadRequest("Invalid client ID");
+        }
+
+        if (!PlcDataStore.MonitoredTagsPerApplication.TryGetValue(clientId, out var monitoredTags))
+        {
+            return BadRequest("Invalid client ID");
+        }
+
+        monitoredTags = new HashSet<TagRequest>(
+            monitoredTags.Where(tag => !(tag.TagName.Equals(tagRequest.TagName, StringComparison.OrdinalIgnoreCase)
+                && tag.PlcName.Equals(tagRequest.PlcName, StringComparison.OrdinalIgnoreCase))));
+
+        // Update the MonitoredTagsPerApplication dictionary with the modified monitoredTags
+        PlcDataStore.MonitoredTagsPerApplication[clientId] = monitoredTags;
 
         return Ok();
     }

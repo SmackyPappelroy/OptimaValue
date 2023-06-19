@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using OptimaValue.Config;
+using MQTTnet.AspNetCore;
 
 namespace OptimaValue;
 
@@ -62,6 +63,16 @@ static class Program
         Host.CreateDefaultBuilder()
             .ConfigureWebHostDefaults(webBuilder =>
             {
+                webBuilder.UseKestrel(
+                       o =>
+                       {
+                           // This will allow MQTT connections based on TCP port 1883.
+                           o.ListenAnyIP(1883, l => l.UseMqtt());
+
+                           // This will allow MQTT connections based on HTTP WebSockets with URI "localhost:5000/mqtt"
+                           // See code below for URI configuration.
+                           o.ListenAnyIP(5070); // Default HTTP pipeline
+                       });
                 webBuilder.UseStartup<Startup>();
                 // Set the URL where the embedded Web API should listen
                 webBuilder.UseUrls("http://localhost:5000"); // Replace with your desired URL

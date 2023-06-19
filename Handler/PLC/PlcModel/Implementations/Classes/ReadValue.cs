@@ -1,4 +1,5 @@
 ﻿using OptimaValue.API.Models;
+using OptimaValue.Common;
 using System;
 
 namespace OptimaValue

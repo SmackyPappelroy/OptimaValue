@@ -2,6 +2,7 @@
 using OpcUaHm;
 using OpcUaHm.Common;
 using OptimaValue.API.Models;
+using OptimaValue.Common;
 using S7.Net;
 using System;
 using System.Collections.Concurrent;
@@ -139,11 +140,29 @@ public static class Logger
         InitializeLastLogValue();
         await CheckConnectionsAsync();
 
+        // Todo: Implement MQTT
+        //if (Config.Settings.UseMqtt)
+        //{
+        //    var mqttConnectionResult = await Mqtt.MqttServiceSingleton.Instance.InitializeMqttAsync("client1", "localhost");
+        //    if (mqttConnectionResult)
+        //    {
+        //        // Start sending values to MQTT broker async and continue
+        //        _ = Task.Run(async () =>
+        //        {
+        //            await Mqtt.MqttServiceSingleton.Instance.PublishAsync();
+        //        }, ct).ContinueWith(t =>
+        //        {
+        //            t.Exception?.Handle(e => true);
+        //        }, TaskContinuationOptions.OnlyOnCanceled);
+
+        //    }
+        //}
         while (PlcConfig.PlcList.Any(p => p.LoggerIsStarted))
         {
             var sw = Stopwatch.StartNew();
 
             long minReadTime = TagsToLog.AllLogValues.Min(x => (long)x.LogFreq);
+
             await ProcessAllPlcTagsAndHandleClosing();
 
             sw.Stop();
@@ -395,6 +414,15 @@ public static class Logger
                 // Update the PlcDataStore
                 PlcDataStore.UpdateValue(dataPoint);
             }
+
+            // Todo: Add value to mqtt list
+            // Add value to mqtt list
+            //if (Config.Settings.UseMqtt && Mqtt.MqttServiceSingleton.Instance.IsClientConnected)
+            //{
+            //    // Convert ReadValue to DataPoint
+            //    DataPoint dataPoint = readValue.ToDataPoint(logTag.Name, MyPlc.PlcName);
+            //    await Mqtt.MqttServiceSingleton.Instance.PublishDataPointAsync(dataPoint);
+            //}
 
             logTag.LastLogTime = tiden;
             logTag.NrSuccededReadAttempts++;

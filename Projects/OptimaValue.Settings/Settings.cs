@@ -18,6 +18,7 @@ namespace OptimaValue.Config
         public string? OptimaValueWpfFilePath { get; set; }
         public bool IsTrendRunning { get; set; }
         public bool IsOptimaValueRunning { get; set; }
+        public bool UseMqtt { get; set; }
 
     }
 
@@ -146,6 +147,20 @@ namespace OptimaValue.Config
             }
         }
 
+        private static bool useMqtt;
+        public static bool UseMqtt
+        {
+            get
+            {
+                return useMqtt;
+            }
+            set
+            {
+                useMqtt = value;
+                Save();
+            }
+        }
+
         private static void Save()
         {
             if (!Directory.Exists(filePath))
@@ -160,7 +175,8 @@ namespace OptimaValue.Config
                 OptimaValueFilePath = OptimaValueFilePath,
                 OptimaValueWpfFilePath = OptimaValueWpfFilePath,
                 IsTrendRunning = IsTrendRunning,
-                IsOptimaValueRunning = IsOptimaValueRunning
+                IsOptimaValueRunning = IsOptimaValueRunning,
+                UseMqtt = UseMqtt
             };
 
             File.WriteAllText(FullPathName, JsonSerializer.Serialize(settings));
@@ -182,6 +198,7 @@ namespace OptimaValue.Config
                     OptimaValueWpfFilePath = settings.OptimaValueWpfFilePath;
                     IsTrendRunning = settings.IsTrendRunning;
                     IsOptimaValueRunning = settings.IsOptimaValueRunning;
+                    UseMqtt = settings.UseMqtt;
                 }
                 else
                 {
@@ -194,7 +211,8 @@ namespace OptimaValue.Config
                         OptimaValueFilePath = string.Empty,
                         OptimaValueWpfFilePath = string.Empty,
                         IsTrendRunning = false,
-                        IsOptimaValueRunning = false
+                        IsOptimaValueRunning = false,
+                        UseMqtt = false
                     };
                     Directory.CreateDirectory(filePath);
                     File.WriteAllText(FullPathName, JsonSerializer.Serialize(settings));

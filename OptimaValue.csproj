@@ -13,6 +13,7 @@
 		<PlatformTarget>AnyCPU</PlatformTarget>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Deterministic>false</Deterministic>
+		<UserSecretsId>0046c002-8718-4f78-9cfd-4b4984eccba6</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -65,21 +66,25 @@
 		<PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
 		<PackageReference Include="Microsoft.ML.TimeSeries" Version="2.0.1" />
 		<PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
 		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.11.0" />
+		<PackageReference Include="MQTTnet" Version="4.2.0.706" />
+		<PackageReference Include="MQTTnet.AspNetCore" Version="4.2.0.706" />
+		<PackageReference Include="MQTTnet.Extensions.ManagedClient" Version="4.2.0.706" />
 		<PackageReference Include="S7netplus" Version="0.16.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\..\Utveckling\Mqtt\Mqtt.Broker\OptimaValue.Mqtt.csproj" />
 		<ProjectReference Include="..\..\Opc\OpcUa.UI\OpcUa.UI.csproj" />
 		<ProjectReference Include="..\..\Opc\OpcUa\OpcUa.csproj" />
+		<ProjectReference Include="..\OptimaValue.Common\OptimaValue.Common.csproj" />
 		<ProjectReference Include="Projects\OptimaValue.Settings\OptimaValue.Config.csproj" />
 	</ItemGroup>
 
