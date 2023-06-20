@@ -973,11 +973,12 @@ public static class Logger
     {
         bool shouldAdd = false;
 
-        if (logTag.Deadband <= 0)
+        // Add new condition to check if the value has changed and Deadband is 0
+        if (logTag.Deadband == 0 && !Equals(readValue.Value, lastKnownLogValue.value))
         {
             shouldAdd = true;
         }
-        else
+        else if (logTag.Deadband > 0)
         {
             switch (logTag.VarType)
             {
@@ -1019,6 +1020,7 @@ public static class Logger
             AddValueToSql(logTag, readValue);
         }
     }
+
 
     /// <summary>
     /// Synkronisera PLC-klockan en gång om dagen
