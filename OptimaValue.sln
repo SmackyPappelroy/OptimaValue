@@ -17,9 +17,11 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Installer", "..\Installer\I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Service", "..\OptimaValue.Service\OptimaValue.Service.csproj", "{C9041FA6-064A-4729-991E-575952AFAE2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Optimavalue.API", "..\Optimavalue.API\Optimavalue.API.csproj", "{4A4C8002-9D55-4CB1-822A-44DCBD5DC4E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Optimavalue.API", "..\Optimavalue.API\Optimavalue.API.csproj", "{4A4C8002-9D55-4CB1-822A-44DCBD5DC4E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OptimaValue.Common", "..\OptimaValue.Common\OptimaValue.Common.csproj", "{824DA12C-1679-4AFF-B1FB-72AB4B3196FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.Common", "..\OptimaValue.Common\OptimaValue.Common.csproj", "{824DA12C-1679-4AFF-B1FB-72AB4B3196FD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OptimaValue.LogViewer", "Projects\OptimaValue.LogViewer\OptimaValue.LogViewer.csproj", "{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -241,6 +243,30 @@ Global
 		{824DA12C-1679-4AFF-B1FB-72AB4B3196FD}.Release|x64.Build.0 = Release|Any CPU
 		{824DA12C-1679-4AFF-B1FB-72AB4B3196FD}.Release|x86.ActiveCfg = Release|Any CPU
 		{824DA12C-1679-4AFF-B1FB-72AB4B3196FD}.Release|x86.Build.0 = Release|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Debug|arm64.Build.0 = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Debug|x64.Build.0 = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Debug|x86.Build.0 = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.DefaultBuild|Any CPU.ActiveCfg = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.DefaultBuild|Any CPU.Build.0 = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.DefaultBuild|arm64.ActiveCfg = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.DefaultBuild|arm64.Build.0 = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.DefaultBuild|x64.ActiveCfg = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.DefaultBuild|x64.Build.0 = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.DefaultBuild|x86.ActiveCfg = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.DefaultBuild|x86.Build.0 = Debug|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Release|arm64.ActiveCfg = Release|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Release|arm64.Build.0 = Release|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Release|x64.ActiveCfg = Release|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Release|x64.Build.0 = Release|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Release|x86.ActiveCfg = Release|Any CPU
+		{79A13010-4BFC-40BD-8CD1-5E85FB8E68C8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
