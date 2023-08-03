@@ -10,15 +10,16 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Input;
+using System.Globalization;
 
 namespace OptimaValue.LogViewer;
 
 public class MainViewModel : INotifyPropertyChanged
 {
-    private string fileName = string.Empty;
+
     public ICommand SortCommand { get; private set; }
     public ICommand OpenFileCommand { get; private set; }
-    public List<string> LogLevels { get; } = new List<string> { "Alla", "Error", "Warning", "Information", "Debug"  }; // Add all log levels that are present in your log files
+    public List<string> LogLevels { get; } = new List<string> { "Alla", "Error", "Warning", "Information", "Debug" }; // Add all log levels that are present in your log files
     public ObservableCollection<LogFrequency> LogFrequencies { get; set; } = new ObservableCollection<LogFrequency>();
 
     private ObservableCollection<LogEntry> _logEntries;
@@ -31,6 +32,48 @@ public class MainViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(LogEntries));
         }
     }
+
+    private string fileName = string.Empty;
+    public string FileName
+    {
+        get { return fileName; }
+        set
+        {
+            fileName = value;
+            OnPropertyChanged(nameof(FileName));
+        }
+    }
+
+    private DateTime _startDate;
+    public DateTime StartDate
+    {
+        get { return _startDate; }
+        set
+        {
+            if (_startDate != value)
+            {
+                _startDate = value;
+                OnPropertyChanged(nameof(StartDate));
+                UpdateFilteredEntries();
+            }
+        }
+    }
+
+    private DateTime _endDate;
+    public DateTime EndDate
+    {
+        get { return _endDate; }
+        set
+        {
+            if (_endDate != value)
+            {
+                _endDate = value;
+                OnPropertyChanged(nameof(EndDate));
+                UpdateFilteredEntries();
+            }
+        }
+    }
+
 
     private ObservableCollection<LogEntry> _filteredEntries;
     public ObservableCollection<LogEntry> FilteredEntries
@@ -55,7 +98,7 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
 
-    private string _searchTerm;
+    private string _searchTerm = "";
     public string SearchTerm
     {
         get { return _searchTerm; }
@@ -77,7 +120,8 @@ public class MainViewModel : INotifyPropertyChanged
         OpenFileCommand = new RelayCommand(SelectFile);
         SortCommand = new RelayCommand(SortLogEntries);
         SelectedLogLevel = LogLevels.FirstOrDefault();
-        if (!string.IsNullOrWhiteSpace(fileName))
+        FileName = Properties.Settings.Default.LastOpenedFile;
+        if (!string.IsNullOrWhiteSpace(FileName))
         {
             UpdateList();
         }
@@ -96,7 +140,9 @@ public class MainViewModel : INotifyPropertyChanged
         openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         if (openFileDialog.ShowDialog() == true)
         {
-            fileName = openFileDialog.FileName;
+            FileName = openFileDialog.FileName;
+            Properties.Settings.Default.LastOpenedFile = FileName; // save the file name
+            Properties.Settings.Default.Save(); // persist the settings
             UpdateList();
         }
     }
@@ -106,18 +152,29 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (isOrderbyAscending)
         {
-            FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderByDescending(entry => entry.LogDate));
+            FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderByDescending(entry => entry.LogDate)
+                .Where(e => DateTime.TryParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
+                && DateTime.TryParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate)
+                && parsedDate >= StartDate && parsedDate <= EndDate));
+            if (FilteredEntries.Count == 0)
+                FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderByDescending(entry => entry.LogDate));
             isOrderbyAscending = false;
             SortArrow = "↓";
         }
         else
         {
-            FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderBy(entry => entry.LogDate));
+            FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderBy(entry => entry.LogDate)
+                .Where(e => DateTime.TryParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
+                && DateTime.TryParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate)
+                && parsedDate >= StartDate && parsedDate <= EndDate));
+            if (FilteredEntries.Count == 0)
+                FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderBy(entry => entry.LogDate));
             isOrderbyAscending = true;
             SortArrow = "↑";
         }
         OnPropertyChanged(nameof(LogEntries));
     }
+
 
 
     private void UpdateLogFrequencies()
@@ -164,14 +221,15 @@ public class MainViewModel : INotifyPropertyChanged
             if (SelectedLogLevel == "All")
                 FilteredEntries = new ObservableCollection<LogEntry>(LogEntries);
             else
-            FilteredEntries = new ObservableCollection<LogEntry>(LogEntries.Where(entry => entry.LogLevel == SelectedLogLevel));
+                FilteredEntries = new ObservableCollection<LogEntry>(LogEntries.Where(entry => entry.LogLevel == SelectedLogLevel
+                && entry.LogDateTime >= StartDate && entry.LogDateTime <= EndDate));
             OnPropertyChanged(nameof(LogEntries));
         }
     }
 
     private void LoadLogFile()
     {
-        string logFileContent = File.ReadAllText(fileName);
+        string logFileContent = File.ReadAllText(FileName);
 
         string pattern = @"\[(.*?)\]\s*(.*?)\r\n\[(.*?)\]\r\n(.*?)\r\nLine number: \[(.*?)\]\r\n((?:(?!\[Error\]|Meddelande:).)*)(Meddelande: (.*?))?\r\n\-{60}";
 
@@ -190,14 +248,26 @@ public class MainViewModel : INotifyPropertyChanged
                 Exception = match.Groups[6].Value.Trim()
             };
 
-          
+
             // If any of the extracted strings are null, skip adding to LogEntries collection
             if (string.IsNullOrEmpty(logEntry.LogLevel) || string.IsNullOrEmpty(logEntry.LogDate) || string.IsNullOrEmpty(logEntry.FilePath)
                 || string.IsNullOrEmpty(logEntry.Method) || string.IsNullOrEmpty(logEntry.LineNumber) || (string.IsNullOrEmpty(logEntry.Message) && string.IsNullOrEmpty(logEntry.Exception)))
                 continue;
 
             LogEntries.Add(logEntry);
+
         }
+        DateTime tempStartDate;
+        DateTime tempEndDate;
+
+        DateTime.TryParseExact(LogEntries.Min(e => e.LogDate), "yyyy-MM-dd HH:mm:ss.fff",
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out tempStartDate);
+
+        DateTime.TryParseExact(LogEntries.Max(e => e.LogDate), "yyyy-MM-dd HH:mm:ss.fff",
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out tempEndDate);
+
+        StartDate = tempStartDate;
+        EndDate = tempEndDate;
 
         UpdateFilteredEntries();
     }
@@ -206,17 +276,24 @@ public class MainViewModel : INotifyPropertyChanged
     private void UpdateFilteredEntries()
     {
         if (string.IsNullOrEmpty(SearchTerm))
-        {
-            FilteredEntries = new ObservableCollection<LogEntry>(LogEntries);
-        }
+            FilteredEntries = new ObservableCollection<LogEntry>(LogEntries.Where(e =>
+                           DateTime.ParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) >= StartDate &&
+                           DateTime.ParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) <= EndDate));
         else
-        {
             FilteredEntries = new ObservableCollection<LogEntry>(
-                LogEntries.Where(e => e.Message.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
-            );
-        }
+                LogEntries.Where(e =>
+                    e.Message.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) &&
+                    DateTime.ParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) >= StartDate &&
+                    DateTime.ParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) <= EndDate));
+
+        if (isOrderbyAscending)
+            FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderBy(entry => entry.LogDate));
+        else
+            FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderByDescending(entry => entry.LogDate));
         UpdateLogFrequencies();
     }
+
+
 
     public event PropertyChangedEventHandler PropertyChanged;
     protected virtual void OnPropertyChanged(string propertyName)

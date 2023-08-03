@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OptimaValue.LogViewer"
         mc:Ignorable="d"
-        Title="Log Viewer" Height="800" Width="1600"
+        Title="{Binding FileName,FallbackValue=Log viewer}" Height="800" Width="1600"
         Background="LightBlue">
 
   <Window.DataContext>
@@ -21,11 +21,16 @@
     </Grid.RowDefinitions>
 
     <StackPanel Orientation="Horizontal" Background="LightGray" >
-      <Label Content="Filtrera på log-nivå: " Foreground="Black" FontWeight="Bold" FontSize="16"/>
-      <ComboBox ItemsSource="{Binding LogLevels}" SelectedItem="{Binding SelectedLogLevel}" Margin="10,0"/>
-      <Button Content="Sortera på datum" Command="{Binding SortCommand}" Background="DarkGray" Foreground="White" Margin="10,0"/>
-      <TextBlock Text="{Binding SortArrow}" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="Black" FontSize="22" FontWeight="Bold"/>
-      <Button Content="Öppna fil" Command="{Binding OpenFileCommand}" Background="DarkGray" Foreground="White" Margin="10,0"/>
+      <Label Content="Filtrera på log-nivå: " Foreground="Black" FontWeight="Bold" FontSize="16" VerticalAlignment="Center"/>
+      <ComboBox ItemsSource="{Binding LogLevels}" VerticalAlignment="Center" SelectedItem="{Binding SelectedLogLevel}" Margin="0 0 5 0" FontSize="16"/>
+      <Button Content="Sortera på datum" Command="{Binding SortCommand}" Background="DarkGray" Foreground="White" Margin="5 0 0 0" Padding="5" FontSize="16"/>
+      <TextBlock Text="{Binding SortArrow}" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="Black" FontSize="30" FontWeight="Bold"/>
+      <Button Content="Öppna fil..." Command="{Binding OpenFileCommand}" Background="DarkGray" Foreground="White" Margin="10,0" Padding="5" FontSize="16"/>
+      <Label Content="Startdatum: " Foreground="Black" VerticalAlignment="Center"/>
+      <DatePicker SelectedDate="{Binding StartDate, StringFormat='yyyy-MM-dd'}" Margin="0 0 20 0" VerticalAlignment="Center"/>
+      <Label Content="Slutdatum: " Foreground="Black" VerticalAlignment="Center"/>
+      <DatePicker SelectedDate="{Binding EndDate, StringFormat='yyyy-MM-dd'}" Margin="0" VerticalAlignment="Center"/>
+
     </StackPanel>
 
     <ListView FontSize="16" FontWeight="Bold" ItemsSource="{Binding LogFrequencies,UpdateSourceTrigger=PropertyChanged}" Margin="10" Grid.Row="1" Background="White">
@@ -63,6 +68,11 @@
           </Setter>
         </Style>
       </ListBox.Resources>
+      <!--<ListBox.ItemsPanel>
+        <ItemsPanelTemplate>
+          <WrapPanel Orientation="Vertical" />
+        </ItemsPanelTemplate>
+      </ListBox.ItemsPanel>-->
       <ListBox.ItemTemplate>
         <DataTemplate>
           <StackPanel Orientation="Vertical" Margin="10">

@@ -224,6 +224,11 @@ public static class Logger
             else
             {
                 ReconnectPlc(MyPlc);
+                var isPlcRunning = await MyPlc.Plc.IsCpuInRun();
+                if (!isPlcRunning)
+                {
+                    Apps.Logger.Log($"{MyPlc.PlcName} är i STOPP", Severity.Error);
+                }
             }
 
             MyPlc.LastReconnect = tiden;

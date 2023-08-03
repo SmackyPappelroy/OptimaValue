@@ -64,7 +64,7 @@
 		<PackageReference Include="Microsoft.ML.TimeSeries" Version="2.0.1" />
 		<PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
 		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.11.0" />
-		<PackageReference Include="S7netplus" Version="0.16.0" />
+		<PackageReference Include="S7netplus" Version="0.20.0" />
 		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
 	</ItemGroup>
 

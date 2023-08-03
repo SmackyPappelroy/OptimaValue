@@ -384,6 +384,9 @@ namespace OptimaValue
             throw new NotImplementedException();
         }
 
-
+        public Task<bool> IsCpuInRun()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -191,6 +191,17 @@ namespace OptimaValue
             return false;
         }
 
+        public async Task<bool> IsCpuInRun()
+        {
+            byte result = 0;
+            try
+            {
+                result = await myPlc.ReadStatusAsync();
+                return result == 0x08;
+            }
+            catch (Exception) { return false; }
+        }
+
         public ReadValue Read(PlcTag tag)
         {
             try

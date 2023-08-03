@@ -10,6 +10,7 @@ public class LogEntry
 {
     public string LogLevel { get; set; }
     public string LogDate { get; set; }
+    public DateTime LogDateTime => DateTime.Parse(LogDate);
     public string FilePath { get; set; }
     public string Method { get; set; }
     public string LineNumber { get; set; }

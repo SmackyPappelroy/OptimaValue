@@ -46,5 +46,6 @@ namespace OptimaValue
         Task WriteAsync(string address, object value, CancellationToken cancellationToken = default);
         Task WriteBytesAsync(PlcTag tag, byte[] value, CancellationToken cancellationToken = default);
         Task WriteAsync(PlcTag tag, object value, CancellationToken cancellationToken = default);
+        Task<bool> IsCpuInRun();
     }
 }
