@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Wordprocessing;
+using Logger;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 

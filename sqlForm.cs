@@ -6,6 +6,7 @@ using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using OptimaValue.Config;
+using Logger;
 
 namespace OptimaValue
 {

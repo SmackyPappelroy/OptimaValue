@@ -1,4 +1,5 @@
-﻿using Opc.Ua.Export;
+﻿using Logger;
+using Opc.Ua.Export;
 using OpcUa;
 using OpcUa.UI;
 using OpcUa.UI.Controls;

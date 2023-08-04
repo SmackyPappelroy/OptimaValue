@@ -484,22 +484,22 @@ namespace OptimaValue
         {
             if (InvokeRequired)
             {
-                Invoke((MethodInvoker)delegate { Logger_NewLog(obj); });
+                Invoke((MethodInvoker)delegate { Instance_NewLog(obj); });
                 return;
             }
 
             statusPanel.AutoScroll = obj.Exception != null;
-            txtStatus.Text = obj.Exception != null ? obj.Exception.ToString() : obj.hmiString;
+            txtStatus.Text = obj.Exception != null ? obj.Exception.ToString() : obj.ToHmiString();
             txtStatus.Visible = true;
             statusTimer.Start();
 
-            if (obj.LogSeverity == Severity.Error || obj.LogSeverity == Severity.Warning)
+            if (obj.Severity == Severity.Error || obj.Severity == Severity.Warning)
             {
                 var tiden = DateTime.UtcNow + Logger.UtcOffset;
-                var icon = obj.LogSeverity == Severity.Error ? ToolTipIcon.Error : ToolTipIcon.Warning;
+                var icon = obj.Severity == Severity.Error ? ToolTipIcon.Error : ToolTipIcon.Warning;
                 if (Properties.Settings.Default.notify)
                 {
-                    notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, icon);
+                    notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.ToHmiString(), icon);
                 }
                 errorImage.Visible = true;
             }
