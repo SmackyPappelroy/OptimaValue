@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Logger;
+using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using System;
 using System.IO;
@@ -8,7 +9,7 @@ using System.Threading;
 
 namespace OptimaValue
 {
-    public class FileLogger 
+    public class FileLoggerOld
     {
         #region Properties
         protected string FilePath;
@@ -30,10 +31,18 @@ namespace OptimaValue
         /// </summary>
         /// <param name="filePath">Format: C:\Katalog\</param>
         /// <param name="enableFileLog">Log to file?</param>
-        public FileLogger(string filePath, bool enableFileLog, ILogger serviceLogger = null)
+        public FileLoggerOld(string filePath, bool enableFileLog, ILogger serviceLogger = null)
         {
             //Normalize filepath
-            FilePath = filePath?.Replace('/', '\\').Trim();
+            try
+            {
+                // This will throw an exception if the path is invalid.
+                string fullPath = Path.GetFullPath(filePath);
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"Invalid file path: {filePath}", ex);
+            }
 
             // Check that the last character is a \
             if (!(FilePath.Last().CompareTo('\\') == 0))
@@ -42,6 +51,7 @@ namespace OptimaValue
             EnableFileLog = enableFileLog;
             this.serviceLogger = serviceLogger;
         }
+
 
         /// <summary>
         /// An event that fires when a log occurs
@@ -73,7 +83,10 @@ namespace OptimaValue
         /// <param name="filePath">The path to the file that generated the log message</param>
         /// <param name="ex">Optional exception</param>
         /// <param name="lineNumber">What line number generated the log</param>
-        public void Log(string message, Severity severity = Severity.Information, Exception ex = null, Level logLevel = Level.Debug, [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0)
+        public void Log(string message, Severity severity = Severity.Information,
+            Exception ex = null, Level logLevel = Level.Debug,
+            [CallerMemberName] string origin = "", [CallerFilePath] string filePath = "",
+            [CallerLineNumber] int lineNumber = 0)
         {
             var tiden = DateTime.UtcNow + Logger.UtcOffset;
 

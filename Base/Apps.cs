@@ -1,4 +1,6 @@
 ﻿
+using Logger;
+
 namespace OptimaValue
 {
     public static class Apps

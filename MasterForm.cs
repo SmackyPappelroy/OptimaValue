@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using Logger;
 
 namespace OptimaValue
 {
@@ -456,7 +457,7 @@ namespace OptimaValue
             {
                 RedrawTreeEvent.NewMessage += RedrawTreeEvent_NewMessage;
                 OnlineStatusEvent.NewMessage += OnlineStatusEvent_NewMessage;
-                Apps.Logger.NewLog += Logger_NewLog;
+                FileLoggerInstance.Instance.NewLog += Instance_NewLog;
                 statusTimer.Tick += StatusTimer_Tick;
                 startStopButtonVisibilityTimer.Tick += StartStopButtonVisibilityTimer_Tick;
                 DatabaseCreationNotifier.DatabaseCreated += DatabaseCreationEvent_CreatedEvent;
@@ -468,7 +469,7 @@ namespace OptimaValue
             {
                 RedrawTreeEvent.NewMessage -= RedrawTreeEvent_NewMessage;
                 OnlineStatusEvent.NewMessage -= OnlineStatusEvent_NewMessage;
-                Apps.Logger.NewLog -= Logger_NewLog;
+                FileLoggerInstance.Instance.NewLog -= Instance_NewLog;
                 statusTimer.Tick -= StatusTimer_Tick;
                 startStopButtonVisibilityTimer.Tick -= StartStopButtonVisibilityTimer_Tick;
                 DatabaseCreationNotifier.DatabaseCreated -= DatabaseCreationEvent_CreatedEvent;
@@ -479,6 +480,30 @@ namespace OptimaValue
             isSubscribed = subscribe;
         }
 
+        private void Instance_NewLog(LogTemplate obj)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((MethodInvoker)delegate { Logger_NewLog(obj); });
+                return;
+            }
+
+            statusPanel.AutoScroll = obj.Exception != null;
+            txtStatus.Text = obj.Exception != null ? obj.Exception.ToString() : obj.hmiString;
+            txtStatus.Visible = true;
+            statusTimer.Start();
+
+            if (obj.LogSeverity == Severity.Error || obj.LogSeverity == Severity.Warning)
+            {
+                var tiden = DateTime.UtcNow + Logger.UtcOffset;
+                var icon = obj.LogSeverity == Severity.Error ? ToolTipIcon.Error : ToolTipIcon.Warning;
+                if (Properties.Settings.Default.notify)
+                {
+                    notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, icon);
+                }
+                errorImage.Visible = true;
+            }
+        }
 
         private void DatabaseTimer_Tick(object sender, EventArgs e)
         {
@@ -606,27 +631,7 @@ namespace OptimaValue
 
         private void Logger_NewLog((string message, string hmiString, Severity LogSeverity, DateTime Tid, bool LogSuccess, Exception exception) obj)
         {
-            if (InvokeRequired)
-            {
-                Invoke((MethodInvoker)delegate { Logger_NewLog(obj); });
-                return;
-            }
 
-            statusPanel.AutoScroll = obj.exception != null;
-            txtStatus.Text = obj.exception != null ? obj.exception.ToString() : obj.hmiString;
-            txtStatus.Visible = true;
-            statusTimer.Start();
-
-            if (obj.LogSeverity == Severity.Error || obj.LogSeverity == Severity.Warning)
-            {
-                var tiden = DateTime.UtcNow + Logger.UtcOffset;
-                var icon = obj.LogSeverity == Severity.Error ? ToolTipIcon.Error : ToolTipIcon.Warning;
-                if (Properties.Settings.Default.notify)
-                {
-                    notifyIcon.ShowBalloonTip(3000, $"OptimaValue {tiden.ToShortDateString()} {tiden.ToShortTimeString()}", obj.hmiString, icon);
-                }
-                errorImage.Visible = true;
-            }
         }
 
 

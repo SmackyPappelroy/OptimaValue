@@ -1,4 +1,5 @@
-﻿using Opc.Ua;
+﻿using Logger;
+using Opc.Ua;
 using OpcUaHm;
 using OpcUaHm.Common;
 using S7.Net;
@@ -56,7 +57,7 @@ public static class Logger
     {
         if (!AreActivePlcsAndTags())
         {
-            Apps.Logger.Log("Inga aktiva Plc eller aktiva taggar", Severity.Error);
+            FileLoggerInstance.Log("Inga aktiva Plc eller aktiva taggar", Severity.Error);
             return;
         }
 
@@ -103,7 +104,7 @@ public static class Logger
             t.Exception?.Handle(e => true);
             AbortLogThread(string.Empty);
             Console.WriteLine("You have canceled the task");
-            Apps.Logger.Log("Loggningscykel avslutad", Severity.Error);
+            FileLoggerInstance.Log("Loggningscykel avslutad", Severity.Error);
             cancelTokenSource = new CancellationTokenSource();
         }, TaskContinuationOptions.OnlyOnCanceled);
     }
@@ -223,12 +224,7 @@ public static class Logger
             }
             else
             {
-                ReconnectPlc(MyPlc);
-                var isPlcRunning = await MyPlc.Plc.IsCpuInRun();
-                if (!isPlcRunning)
-                {
-                    Apps.Logger.Log($"{MyPlc.PlcName} är i STOPP", Severity.Error);
-                }
+                await ReconnectPlc(MyPlc);
             }
 
             MyPlc.LastReconnect = tiden;
@@ -242,7 +238,7 @@ public static class Logger
 
     private static void LogConnectionError(ExtendedPlc plc, Exception ex = null)
     {
-        Apps.Logger.Log($"Lyckas ej ansluta till {plc.PlcName}", Severity.Error, ex);
+        FileLoggerInstance.Log($"Lyckas ej ansluta till {plc.PlcName}", Severity.Error, ex);
     }
 
     private static async Task ProcessAllPlcTagsAndHandleClosing()
@@ -251,6 +247,7 @@ public static class Logger
         {
             if (!MyPlc.Active)
                 continue;
+            await CheckPlcStatusAsync(MyPlc);
             await CheckReconnectAsync(MyPlc);
             await ProcessPlcTags(MyPlc);
 
@@ -258,6 +255,23 @@ public static class Logger
             {
                 RequestDisconnect();
             }
+        }
+    }
+
+    private static async Task CheckPlcStatusAsync(ExtendedPlc myPlc)
+    {
+        // Check Plc status once a minute
+        if (myPlc.Plc.LastPlcStatusCheck != default
+                && DateTime.UtcNow - myPlc.Plc.LastPlcStatusCheck <= TimeSpan.FromMinutes(1))
+        {
+            return;
+        }
+
+        myPlc.Plc.LastPlcStatusCheck = DateTime.UtcNow;
+        var isPlcRunning = await myPlc.Plc.IsCpuInRunAsync();
+        if (!isPlcRunning)
+        {
+            FileLoggerInstance.Log($"{myPlc.PlcName}-PLC är i STOPP", Severity.Error);
         }
     }
 
@@ -330,12 +344,13 @@ public static class Logger
         LogConnectionStatus(MyPlc);
     }
 
-    private static void ReconnectPlc(ExtendedPlc MyPlc)
+    private static async Task ReconnectPlc(ExtendedPlc MyPlc)
     {
         if (MyPlc.Plc.Ping())
         {
             MyPlc.Plc.Disconnect();
             MyPlc.Plc.Connect();
+
         }
 
         LogConnectionStatus(MyPlc);
@@ -348,13 +363,13 @@ public static class Logger
         var severity = MyPlc.IsConnected ? Severity.Information : Severity.Error;
 
         MyPlc.SendPlcStatusMessage($"{action} till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", status);
-        Apps.Logger.Log($"{action} till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", severity);
+        FileLoggerInstance.Log($"{action} till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", severity);
     }
 
     private static void LogReconnectError(ExtendedPlc MyPlc, Exception ex)
     {
         MyPlc.SendPlcStatusMessage($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Status.Error);
-        Apps.Logger.Log($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Severity.Error, ex);
+        FileLoggerInstance.Log($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Severity.Error, ex);
     }
 
     private static async Task ReadValue(ExtendedPlc MyPlc, TagDefinitions logTag)
@@ -763,7 +778,7 @@ public static class Logger
 
             if (!logError)
                 return;
-            Apps.Logger.Log(fullMessage, Severity.Error, ex);
+            FileLoggerInstance.Log(fullMessage, Severity.Error, ex);
             logTag.NrFailedReadAttempts++;
             logTag.LastErrorMessage = ex.Message;
         }
@@ -903,7 +918,7 @@ public static class Logger
             case "/":
                 if (value == 0)
                 {
-                    Apps.Logger.Log("Division by zero", Severity.Error);
+                    FileLoggerInstance.Log("Division by zero", Severity.Error);
                     return float.NaN; // Return NaN to represent an invalid result
                 }
                 return currentValue / value;
@@ -1069,14 +1084,14 @@ public static class Logger
         }
         catch (PlcException)
         {
-            Apps.Logger.Log($"Misslyckades att synka {MyPlc.PlcName}", Severity.Error);
+            FileLoggerInstance.Log($"Misslyckades att synka {MyPlc.PlcName}", Severity.Error);
             throw;
         }
         MyPlc.lastSyncTime = tid;
 
         DatabaseSql.SaveSyncTime(tid: tid, plcName: MyPlc.PlcName);
 
-        Apps.Logger.Log($"Synkade {MyPlc.PlcName}", Severity.Success);
+        FileLoggerInstance.Log($"Synkade {MyPlc.PlcName}", Severity.Success);
     }
 
     private static void AbortLogThread(string message)
@@ -1091,7 +1106,7 @@ public static class Logger
             if (message == string.Empty)
                 MyPlc.SendPlcStatusMessage($"Kommunikationen till {MyPlc.PlcName} avbruten", Status.Warning);
             else
-                Apps.Logger.Log($"Kommunikationen upprättades ej till {MyPlc.PlcName}\n\r{message}", Severity.Error);
+                FileLoggerInstance.Log($"Kommunikationen upprättades ej till {MyPlc.PlcName}\n\r{message}", Severity.Error);
 
             OnlineStatusEvent.RaiseMessage(MyPlc.ConnectionStatus, MyPlc.PlcName);
             MyPlc.LoggerIsStarted = false;

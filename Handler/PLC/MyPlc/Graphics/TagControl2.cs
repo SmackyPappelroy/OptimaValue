@@ -18,6 +18,7 @@ using System.Runtime.CompilerServices;
 using S7.Net.Types;
 using System.Reflection;
 using System.Data.SqlTypes;
+using Logger;
 
 namespace OptimaValue
 {
@@ -97,7 +98,7 @@ namespace OptimaValue
 
             if (fileEnding != ".csv".ToLower() && fileEnding != "json".ToLower())
             {
-                Apps.Logger.Log("Fel fil-format", Severity.Error);
+                FileLoggerInstance.Log("Fel fil-format", Severity.Error);
                 return;
             }
             if (fileEnding == "json")
@@ -371,12 +372,12 @@ namespace OptimaValue
                     var wr = new CsvWriter(sw, config);
 
                     wr.WriteRecords(tags);
-                    Apps.Logger.Log($"Sparade {myPlc.PlcName}s taggar till {fileName}", Severity.Success);
+                    FileLoggerInstance.Log($"Sparade {myPlc.PlcName}s taggar till {fileName}", Severity.Success);
                 }
             }
             catch (IOException)
             {
-                Apps.Logger.Log($"Lyckades ej spara {myPlc.PlcName}s taggar till {fileName}", Severity.Error);
+                FileLoggerInstance.Log($"Lyckades ej spara {myPlc.PlcName}s taggar till {fileName}", Severity.Error);
             }
         }
 
@@ -513,7 +514,7 @@ namespace OptimaValue
 
                             AddTag(records);
                             UpdateTag(records);
-                            Apps.Logger.Log($"Importerade {myPlc.PlcName}s taggar från {fileName}", Severity.Success);
+                            FileLoggerInstance.Log($"Importerade {myPlc.PlcName}s taggar från {fileName}", Severity.Success);
                             return;
                         }
                         catch (HeaderValidationException)
@@ -631,7 +632,7 @@ namespace OptimaValue
             }
             catch (IOException)
             {
-                Apps.Logger.Log($"Lyckades ej läsa {myPlc.PlcName}s taggar från {fileName}", Severity.Error);
+                FileLoggerInstance.Log($"Lyckades ej läsa {myPlc.PlcName}s taggar från {fileName}", Severity.Error);
             }
         }
 

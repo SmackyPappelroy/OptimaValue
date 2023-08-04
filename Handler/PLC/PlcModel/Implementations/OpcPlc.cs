@@ -166,6 +166,7 @@ namespace OptimaValue
         public ConnectionStatus ExternalCommunicationStatus { get; set; } = ConnectionStatus.Disconnected;
         public Color ExternalOnlineColor { get; set; } = Color.Gray;
         public string ExternalOnlineMessage { get; set; } = "Ej ansluten";
+        public DateTime LastPlcStatusCheck { get; set; }
 
 
         // Constructor
@@ -384,7 +385,7 @@ namespace OptimaValue
             throw new NotImplementedException();
         }
 
-        public Task<bool> IsCpuInRun()
+        public Task<bool> IsCpuInRunAsync()
         {
             throw new NotImplementedException();
         }

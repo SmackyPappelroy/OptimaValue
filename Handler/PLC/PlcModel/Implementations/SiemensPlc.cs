@@ -139,6 +139,7 @@ namespace OptimaValue
         public Color ExternalOnlineColor { get; set; } = Color.Gray;
         public string ExternalOnlineMessage { get; set; } = "Ej ansluten";
         public string ConnectionString { get; set; }
+        public DateTime LastPlcStatusCheck { get; set; }
         #endregion
 
         #region Sync Plc
@@ -191,7 +192,7 @@ namespace OptimaValue
             return false;
         }
 
-        public async Task<bool> IsCpuInRun()
+        public async Task<bool> IsCpuInRunAsync()
         {
             byte result = 0;
             try

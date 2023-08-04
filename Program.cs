@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using Logger;
 using OptimaValue.Config;
 
 namespace OptimaValue;
@@ -25,7 +26,7 @@ static class Program
         using Mutex mutex = new(true, "OptimaValue", out createdNew);
         if (createdNew)
         {
-            Apps.Logger = new FileLogger(@"C:\OptimaValue\", true);
+            FileLoggerInstance.Initialize(@"C:\OptimaValue\", true);
             Settings.Load();
             Settings.OptimaValueFilePath = Application.ExecutablePath;
 #if RELEASE
@@ -39,7 +40,8 @@ static class Program
             catch (Exception ex)
             {
                 Apps.Logger.EnableFileLog = true;
-                Apps.Logger.Log($"Applikationen krashade", Severity.Error, ex);
+                FileLoggerInstance.Log($"Applikationen krashade", Severity.Error, ex);
+
                 Environment.Exit(0);
             }
         }
@@ -48,7 +50,7 @@ static class Program
     private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
         Apps.Logger.EnableFileLog = true;
-        Apps.Logger.Log($"Applikationen krashade{Environment.NewLine + e.ExceptionObject}", Severity.Error);
+        FileLoggerInstance.Log($"Applikationen krashade{Environment.NewLine + e.ExceptionObject}", Severity.Error);
         Environment.Exit(0);
     }
 }

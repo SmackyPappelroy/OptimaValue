@@ -23,6 +23,7 @@ namespace OptimaValue
         public TimeSpan UpTime { get; }
         public string UpTimeString { get; }
         DateTime LastReconnect { get; set; }
+        public DateTime LastPlcStatusCheck { get; set; }
 
         public short WatchDog { get; }
         bool Alarm { get; set; }
@@ -46,6 +47,6 @@ namespace OptimaValue
         Task WriteAsync(string address, object value, CancellationToken cancellationToken = default);
         Task WriteBytesAsync(PlcTag tag, byte[] value, CancellationToken cancellationToken = default);
         Task WriteAsync(PlcTag tag, object value, CancellationToken cancellationToken = default);
-        Task<bool> IsCpuInRun();
+        Task<bool> IsCpuInRunAsync();
     }
 }
