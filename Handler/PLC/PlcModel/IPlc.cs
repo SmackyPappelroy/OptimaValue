@@ -14,6 +14,7 @@ namespace OptimaValue
         event Action<ConnectionStatus> OnConnectionChanged;
         ConnectionStatus ConnectionStatus { get; set; }
         bool IsConnected { get; }
+        bool IsStreamConnected { get; }
         CpuType CpuType { get; }
         bool isNotPlc { get; }
         bool UnableToPing { get; }

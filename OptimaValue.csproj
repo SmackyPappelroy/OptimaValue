@@ -69,7 +69,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\Utveckling\Logger\Logger\Logger.csproj" />
+		<ProjectReference Include="..\..\..\Utveckling\Logger\Logger\FileLogger.csproj" />
 		<ProjectReference Include="..\..\Opc\OpcUa.UI\OpcUa.UI.csproj" />
 		<ProjectReference Include="..\..\Opc\OpcUa\OpcUa.csproj" />
 		<ProjectReference Include="Projects\OptimaValue.Settings\OptimaValue.Config.csproj" />
@@ -113,6 +113,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Base\Enums\" />
+	  <Folder Include="Base\Loggers\" />
 	</ItemGroup>
 
 </Project>

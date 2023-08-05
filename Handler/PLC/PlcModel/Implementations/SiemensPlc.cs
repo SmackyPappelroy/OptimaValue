@@ -80,6 +80,7 @@ namespace OptimaValue
         public string PlcName { get; set; }
 
         public bool IsConnected => myPlc.IsConnected && ConnectionStatus == ConnectionStatus.Connected;
+        public bool IsStreamConnected => myPlc.IsConnected;
 
         public CpuType CpuType => cpuType;
 

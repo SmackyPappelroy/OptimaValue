@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Logger;
+using FileLogger;
 using OptimaValue.Config;
 
 namespace OptimaValue;
@@ -75,7 +75,7 @@ public static class DatabaseSql
         }
         catch (SqlException ex)
         {
-            FileLoggerInstance.Log(string.Empty, Severity.Error, ex);
+            Logger.LogError(string.Empty, ex);
             return false;
         }
         return result != null;
@@ -105,12 +105,12 @@ public static class DatabaseSql
         }
         catch (SqlException ex)
         {
-            FileLoggerInstance.Log(string.Empty, Severity.Error, ex);
+            Logger.LogError(string.Empty, ex);
             return null;
         }
         catch (Exception ex)
         {
-            FileLoggerInstance.Log(string.Empty, Severity.Error, ex);
+            Logger.LogError(string.Empty, ex);
             return null;
         }
 

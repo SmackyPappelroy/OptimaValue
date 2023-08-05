@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
-using Logger;
+using FileLogger;
 using OptimaValue.Config;
 
 namespace OptimaValue;
@@ -26,22 +26,24 @@ static class Program
         using Mutex mutex = new(true, "OptimaValue", out createdNew);
         if (createdNew)
         {
-            FileLoggerInstance.Initialize(@"C:\OptimaValue\", true);
             Settings.Load();
             Settings.OptimaValueFilePath = Application.ExecutablePath;
 #if RELEASE
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            System.Threading.Tasks.TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 #endif
             ApplicationConfiguration.Initialize();
             try
             {
+                Logger.Initialize(@"C:\OptimaValue\", true);
                 Application.Run(new MasterForm());
+                Logger.Instance.Dispose();
             }
             catch (Exception ex)
             {
-                Apps.Logger.EnableFileLog = true;
-                FileLoggerInstance.Log($"Applikationen krashade", Severity.Error, ex);
-
+                Logger.Initialize(@"C:\OptimaValue\", true);
+                Logger.LogError($"Applikationen krashade", ex);
+                Logger.Instance.Dispose();
                 Environment.Exit(0);
             }
         }
@@ -49,8 +51,17 @@ static class Program
 
     private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        Apps.Logger.EnableFileLog = true;
-        FileLoggerInstance.Log($"Applikationen krashade{Environment.NewLine + e.ExceptionObject}", Severity.Error);
+        Logger.Initialize(@"C:\OptimaValue\", true);
+        Logger.LogError($"Applikationen krashade{Environment.NewLine + e.ExceptionObject}");
+        Logger.Instance.Dispose(); // Ensure all logs are written before application crashes
+        Environment.Exit(0);
+    }
+
+    private static void TaskScheduler_UnobservedTaskException(object sender, System.Threading.Tasks.UnobservedTaskExceptionEventArgs e)
+    {
+        Logger.Initialize(@"C:\OptimaValue\", true);
+        Logger.LogError($"Applikationen krashade{Environment.NewLine + e.Exception}");
+        Logger.Instance.Dispose(); // Ensure all logs are written before application crashes
         Environment.Exit(0);
     }
 }

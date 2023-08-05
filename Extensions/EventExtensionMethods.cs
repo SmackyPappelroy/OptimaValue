@@ -1,4 +1,4 @@
-﻿using Logger;
+﻿using FileLogger;
 using System;
 
 namespace OptimaValue
@@ -7,7 +7,7 @@ namespace OptimaValue
     {
         public static void SendStatusMessage(this string message, Severity severity = Severity.Information, Exception ex = null)
         {
-            FileLoggerInstance.Instance.Log(new LogTemplate(message, ex, severity));
+            Logger.Instance.Log(new LogTemplate(message, ex, severity));
         }
     }
 }

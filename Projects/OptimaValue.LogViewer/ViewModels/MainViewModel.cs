@@ -11,6 +11,8 @@ using System.Windows.Controls;
 using System.Windows;
 using System.Windows.Input;
 using System.Globalization;
+using FileLogger;
+using System.Text.Json;
 
 namespace OptimaValue.LogViewer;
 
@@ -22,8 +24,8 @@ public class MainViewModel : INotifyPropertyChanged
     public List<string> LogLevels { get; } = new List<string> { "Alla", "Error", "Warning", "Information", "Debug" }; // Add all log levels that are present in your log files
     public ObservableCollection<LogFrequency> LogFrequencies { get; set; } = new ObservableCollection<LogFrequency>();
 
-    private ObservableCollection<LogEntry> _logEntries;
-    public ObservableCollection<LogEntry> LogEntries
+    private ObservableCollection<LogTemplate> _logEntries;
+    public ObservableCollection<LogTemplate> LogEntries
     {
         get { return _logEntries; }
         set
@@ -75,8 +77,8 @@ public class MainViewModel : INotifyPropertyChanged
     }
 
 
-    private ObservableCollection<LogEntry> _filteredEntries;
-    public ObservableCollection<LogEntry> FilteredEntries
+    private ObservableCollection<LogTemplate> _filteredEntries;
+    public ObservableCollection<LogTemplate> FilteredEntries
     {
         get { return _filteredEntries; }
         set
@@ -115,12 +117,13 @@ public class MainViewModel : INotifyPropertyChanged
 
     public MainViewModel()
     {
-        LogEntries = new ObservableCollection<LogEntry>();
-        FilteredEntries = new ObservableCollection<LogEntry>();
+        LogEntries = new ObservableCollection<LogTemplate>();
+        FilteredEntries = new ObservableCollection<LogTemplate>();
         OpenFileCommand = new RelayCommand(SelectFile);
         SortCommand = new RelayCommand(SortLogEntries);
         SelectedLogLevel = LogLevels.FirstOrDefault();
         FileName = Properties.Settings.Default.LastOpenedFile;
+        FileName = @"C:\OptimaValue\Log.json";
         if (!string.IsNullOrWhiteSpace(FileName))
         {
             UpdateList();
@@ -152,23 +155,19 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (isOrderbyAscending)
         {
-            FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderByDescending(entry => entry.LogDate)
-                .Where(e => DateTime.TryParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
-                && DateTime.TryParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate)
-                && parsedDate >= StartDate && parsedDate <= EndDate));
+            FilteredEntries = new ObservableCollection<LogTemplate>(FilteredEntries.OrderByDescending(entry => entry.DateTime)
+                .Where(e => e.DateTime >= StartDate && e.DateTime <= EndDate));
             if (FilteredEntries.Count == 0)
-                FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderByDescending(entry => entry.LogDate));
+                FilteredEntries = new ObservableCollection<LogTemplate>(FilteredEntries.OrderByDescending(entry => entry.DateTime));
             isOrderbyAscending = false;
             SortArrow = "↓";
         }
         else
         {
-            FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderBy(entry => entry.LogDate)
-                .Where(e => DateTime.TryParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)
-                && DateTime.TryParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate)
-                && parsedDate >= StartDate && parsedDate <= EndDate));
+            FilteredEntries = new ObservableCollection<LogTemplate>(FilteredEntries.OrderBy(entry => entry.DateTime)
+                .Where(e => e.DateTime >= StartDate && e.DateTime <= EndDate));
             if (FilteredEntries.Count == 0)
-                FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderBy(entry => entry.LogDate));
+                FilteredEntries = new ObservableCollection<LogTemplate>(FilteredEntries.OrderBy(entry => entry.DateTime));
             isOrderbyAscending = true;
             SortArrow = "↑";
         }
@@ -180,17 +179,7 @@ public class MainViewModel : INotifyPropertyChanged
     private void UpdateLogFrequencies()
     {
         LogFrequencies.Clear();
-        var replaceMessageWithExceptionIfMessageIsEmpty = FilteredEntries.Select(entry => new LogEntry
-        {
-            LogLevel = entry.LogLevel,
-            LogDate = entry.LogDate,
-            FilePath = entry.FilePath,
-            Method = entry.Method,
-            LineNumber = entry.LineNumber,
-            Message = string.IsNullOrWhiteSpace(entry.Message) ? entry.Exception : entry.Message,
-            Exception = entry.Exception
-        });
-        var groupedLogs = replaceMessageWithExceptionIfMessageIsEmpty.GroupBy(l => l.Message);
+        var groupedLogs = FilteredEntries.GroupBy(l => l.Message);
         groupedLogs = groupedLogs.OrderByDescending(g => g.Count());
         foreach (var group in groupedLogs)
         {
@@ -219,55 +208,28 @@ public class MainViewModel : INotifyPropertyChanged
         if (!string.IsNullOrEmpty(SelectedLogLevel))
         {
             if (SelectedLogLevel == "All")
-                FilteredEntries = new ObservableCollection<LogEntry>(LogEntries);
+                FilteredEntries = new ObservableCollection<LogTemplate>(LogEntries);
             else
-                FilteredEntries = new ObservableCollection<LogEntry>(LogEntries.Where(entry => entry.LogLevel == SelectedLogLevel
-                && entry.LogDateTime >= StartDate && entry.LogDateTime <= EndDate));
+                FilteredEntries = new ObservableCollection<LogTemplate>(LogEntries.Where(entry => entry.Level.ToString() == SelectedLogLevel
+                && entry.DateTime >= StartDate && entry.DateTime <= EndDate));
             OnPropertyChanged(nameof(LogEntries));
         }
     }
 
     private void LoadLogFile()
     {
-        string logFileContent = File.ReadAllText(FileName);
+        var entries = FileLog.ReadLogs(FileName);
 
-        string pattern = @"\[(.*?)\]\s*(.*?)\r\n\[(.*?)\]\r\n(.*?)\r\nLine number: \[(.*?)\]\r\n((?:(?!\[Error\]|Meddelande:).)*)(Meddelande: (.*?))?\r\n\-{60}";
-
-        var matches = Regex.Matches(logFileContent, pattern, RegexOptions.Singleline);
-
-        foreach (Match match in matches)
+        foreach (var entry in entries)
         {
-            var logEntry = new LogEntry
-            {
-                LogLevel = match.Groups[1].Value,
-                LogDate = match.Groups[2].Value,
-                FilePath = match.Groups[3].Value,
-                Method = match.Groups[4].Value,
-                LineNumber = match.Groups[5].Value,
-                Message = match.Groups[8].Value,
-                Exception = match.Groups[6].Value.Trim()
-            };
-
-
-            // If any of the extracted strings are null, skip adding to LogEntries collection
-            if (string.IsNullOrEmpty(logEntry.LogLevel) || string.IsNullOrEmpty(logEntry.LogDate) || string.IsNullOrEmpty(logEntry.FilePath)
-                || string.IsNullOrEmpty(logEntry.Method) || string.IsNullOrEmpty(logEntry.LineNumber) || (string.IsNullOrEmpty(logEntry.Message) && string.IsNullOrEmpty(logEntry.Exception)))
-                continue;
-
-            LogEntries.Add(logEntry);
-
+            LogEntries.Add(entry);
         }
         DateTime tempStartDate;
         DateTime tempEndDate;
 
-        DateTime.TryParseExact(LogEntries.Min(e => e.LogDate), "yyyy-MM-dd HH:mm:ss.fff",
-            CultureInfo.InvariantCulture, DateTimeStyles.None, out tempStartDate);
 
-        DateTime.TryParseExact(LogEntries.Max(e => e.LogDate), "yyyy-MM-dd HH:mm:ss.fff",
-            CultureInfo.InvariantCulture, DateTimeStyles.None, out tempEndDate);
-
-        StartDate = tempStartDate;
-        EndDate = tempEndDate;
+        StartDate = LogEntries.Min(x => x.DateTime);
+        EndDate = LogEntries.Max(x => x.DateTime);
 
         UpdateFilteredEntries();
     }
@@ -276,20 +238,19 @@ public class MainViewModel : INotifyPropertyChanged
     private void UpdateFilteredEntries()
     {
         if (string.IsNullOrEmpty(SearchTerm))
-            FilteredEntries = new ObservableCollection<LogEntry>(LogEntries.Where(e =>
-                           DateTime.ParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) >= StartDate &&
-                           DateTime.ParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) <= EndDate));
+            FilteredEntries = new ObservableCollection<LogTemplate>(LogEntries.Where(e => e.DateTime >= StartDate &&
+                           e.DateTime <= EndDate));
         else
-            FilteredEntries = new ObservableCollection<LogEntry>(
+            FilteredEntries = new ObservableCollection<LogTemplate>(
                 LogEntries.Where(e =>
                     e.Message.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase) &&
-                    DateTime.ParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) >= StartDate &&
-                    DateTime.ParseExact(e.LogDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) <= EndDate));
+                    e.DateTime >= StartDate &&
+                    e.DateTime <= EndDate));
 
         if (isOrderbyAscending)
-            FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderBy(entry => entry.LogDate));
+            FilteredEntries = new ObservableCollection<LogTemplate>(FilteredEntries.OrderBy(entry => entry.DateTime));
         else
-            FilteredEntries = new ObservableCollection<LogEntry>(FilteredEntries.OrderByDescending(entry => entry.LogDate));
+            FilteredEntries = new ObservableCollection<LogTemplate>(FilteredEntries.OrderByDescending(entry => entry.DateTime));
         UpdateLogFrequencies();
     }
 

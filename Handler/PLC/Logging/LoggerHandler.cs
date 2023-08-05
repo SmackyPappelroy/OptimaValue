@@ -1,4 +1,4 @@
-﻿using Logger;
+﻿using FileLogger;
 using Opc.Ua;
 using OpcUaHm;
 using OpcUaHm.Common;
@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace OptimaValue;
 
-public static class Logger
+public static class LoggerHandler
 {
     public static int FastestLogTime = int.MaxValue;
 
@@ -45,19 +45,19 @@ public static class Logger
 
     public static void OnStartedEvent(EventArgs e)
     {
-        StartedEvent?.Invoke(typeof(Logger), e);
+        StartedEvent?.Invoke(typeof(LoggerHandler), e);
     }
 
     public static void OnRestartEvent(EventArgs e)
     {
-        RestartEvent?.Invoke(typeof(Logger), e);
+        RestartEvent?.Invoke(typeof(LoggerHandler), e);
     }
 
     public static void Start()
     {
         if (!AreActivePlcsAndTags())
         {
-            FileLoggerInstance.Log("Inga aktiva Plc eller aktiva taggar", Severity.Error);
+            Logger.LogError("Inga aktiva Plc eller aktiva taggar");
             return;
         }
 
@@ -104,7 +104,7 @@ public static class Logger
             t.Exception?.Handle(e => true);
             AbortLogThread(string.Empty);
             Console.WriteLine("You have canceled the task");
-            FileLoggerInstance.Log("Loggningscykel avslutad", Severity.Error);
+            Logger.LogError("Loggningscykel avslutad");
             cancelTokenSource = new CancellationTokenSource();
         }, TaskContinuationOptions.OnlyOnCanceled);
     }
@@ -238,7 +238,7 @@ public static class Logger
 
     private static void LogConnectionError(ExtendedPlc plc, Exception ex = null)
     {
-        FileLoggerInstance.Log($"Lyckas ej ansluta till {plc.PlcName}", Severity.Error, ex);
+        Logger.LogError($"Lyckas ej ansluta till {plc.PlcName}", ex);
     }
 
     private static async Task ProcessAllPlcTagsAndHandleClosing()
@@ -260,6 +260,10 @@ public static class Logger
 
     private static async Task CheckPlcStatusAsync(ExtendedPlc myPlc)
     {
+        if (!myPlc.Plc.IsStreamConnected)
+        {
+            return;
+        }
         // Check Plc status once a minute
         if (myPlc.Plc.LastPlcStatusCheck != default
                 && DateTime.UtcNow - myPlc.Plc.LastPlcStatusCheck <= TimeSpan.FromMinutes(1))
@@ -271,7 +275,7 @@ public static class Logger
         var isPlcRunning = await myPlc.Plc.IsCpuInRunAsync();
         if (!isPlcRunning)
         {
-            FileLoggerInstance.Log($"{myPlc.PlcName}-PLC är i STOPP", Severity.Error);
+            Logger.LogError($"{myPlc.PlcName}-PLC är i STOPP");
         }
     }
 
@@ -363,13 +367,13 @@ public static class Logger
         var severity = MyPlc.IsConnected ? Severity.Information : Severity.Error;
 
         MyPlc.SendPlcStatusMessage($"{action} till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", status);
-        FileLoggerInstance.Log($"{action} till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", severity);
+        Logger.Log($"{action} till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", severity);
     }
 
     private static void LogReconnectError(ExtendedPlc MyPlc, Exception ex)
     {
         MyPlc.SendPlcStatusMessage($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Status.Error);
-        FileLoggerInstance.Log($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", Severity.Error, ex);
+        Logger.LogError($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", ex);
     }
 
     private static async Task ReadValue(ExtendedPlc MyPlc, TagDefinitions logTag)
@@ -778,7 +782,7 @@ public static class Logger
 
             if (!logError)
                 return;
-            FileLoggerInstance.Log(fullMessage, Severity.Error, ex);
+            Logger.LogError(fullMessage, ex);
             logTag.NrFailedReadAttempts++;
             logTag.LastErrorMessage = ex.Message;
         }
@@ -918,7 +922,7 @@ public static class Logger
             case "/":
                 if (value == 0)
                 {
-                    FileLoggerInstance.Log("Division by zero", Severity.Error);
+                    Logger.LogError("Division by zero");
                     return float.NaN; // Return NaN to represent an invalid result
                 }
                 return currentValue / value;
@@ -1084,14 +1088,14 @@ public static class Logger
         }
         catch (PlcException)
         {
-            FileLoggerInstance.Log($"Misslyckades att synka {MyPlc.PlcName}", Severity.Error);
+            Logger.LogError($"Misslyckades att synka {MyPlc.PlcName}");
             throw;
         }
         MyPlc.lastSyncTime = tid;
 
         DatabaseSql.SaveSyncTime(tid: tid, plcName: MyPlc.PlcName);
 
-        FileLoggerInstance.Log($"Synkade {MyPlc.PlcName}", Severity.Success);
+        Logger.LogSuccess($"Synkade {MyPlc.PlcName}");
     }
 
     private static void AbortLogThread(string message)
@@ -1106,7 +1110,7 @@ public static class Logger
             if (message == string.Empty)
                 MyPlc.SendPlcStatusMessage($"Kommunikationen till {MyPlc.PlcName} avbruten", Status.Warning);
             else
-                FileLoggerInstance.Log($"Kommunikationen upprättades ej till {MyPlc.PlcName}\n\r{message}", Severity.Error);
+                Logger.LogError($"Kommunikationen upprättades ej till {MyPlc.PlcName}\n\r{message}");
 
             OnlineStatusEvent.RaiseMessage(MyPlc.ConnectionStatus, MyPlc.PlcName);
             MyPlc.LoggerIsStarted = false;

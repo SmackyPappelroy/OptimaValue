@@ -1,4 +1,4 @@
-﻿using Logger;
+﻿using FileLogger;
 using Opc.Ua.Export;
 using OpcUa;
 using OpcUa.UI;

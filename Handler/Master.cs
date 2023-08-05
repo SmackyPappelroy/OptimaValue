@@ -1,5 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Wordprocessing;
-using Logger;
+using FileLogger;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
@@ -26,11 +26,11 @@ namespace OptimaValue
 
             foreach (TagDefinitions item in TagsToLog.AllLogValues)
             {
-                if ((int)item.LogFreq < Logger.FastestLogTime && item.Active)
-                    Logger.FastestLogTime = (int)item.LogFreq;
+                if ((int)item.LogFreq < LoggerHandler.FastestLogTime && item.Active)
+                    LoggerHandler.FastestLogTime = (int)item.LogFreq;
             }
 
-            Logger.Start();
+            LoggerHandler.Start();
             ActivePlcs = true;
 
             if (ActivePlcs)
@@ -41,7 +41,7 @@ namespace OptimaValue
 
         public static void StopLog(bool applicationShutdown)
         {
-            Logger.Stop(applicationShutdown);
+            LoggerHandler.Stop(applicationShutdown);
             AbortSqlLog = true;
             IsStarted = false;
         }

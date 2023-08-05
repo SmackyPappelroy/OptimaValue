@@ -32,6 +32,8 @@ namespace OptimaValue
                 return Client.Status == OpcStatus.Connected;
             }
         }
+        public bool IsStreamConnected => IsConnected;
+
         public string RootNodeName => Client.RootNode.Name;
         public bool UnableToPing { get; private set; }
         public OpcType OpcType
