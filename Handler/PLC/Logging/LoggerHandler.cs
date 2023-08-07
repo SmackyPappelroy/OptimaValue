@@ -4,9 +4,7 @@ using OpcUaHm;
 using OpcUaHm.Common;
 using S7.Net;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -15,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace OptimaValue;
+
 
 public static class LoggerHandler
 {

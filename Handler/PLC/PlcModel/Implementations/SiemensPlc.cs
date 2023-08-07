@@ -151,10 +151,11 @@ namespace OptimaValue
         public DateTime lastSyncTime;
         #endregion
 
-        public void Connect()
+        public bool Connect()
         {
             myPlc.Open();
             ConnectionStatus = myPlc.IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
+            return myPlc.IsConnected;
         }
 
         public async Task ConnectAsync(int timeOut = 1000)

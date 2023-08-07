@@ -203,11 +203,12 @@ namespace OptimaValue
                 Client = new DaClient(ConnectionString);
         }
 
-        public void Connect()
+        public bool Connect()
         {
             if (Client == null)
                 Initialize();
             Task.Run(async () => await Client.Connect());
+            return IsConnected;
         }
 
         public async Task ConnectAsync(int timeout = 1000)

@@ -30,7 +30,7 @@ namespace OptimaValue
         bool Alarm { get; set; }
 
         bool Ping();
-        void Connect();
+        bool Connect();
         Task ConnectAsync(int timeOut = 1000);
         Task<bool> TestConnectionAsync();
         void Disconnect();
