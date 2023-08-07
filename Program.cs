@@ -35,13 +35,19 @@ static class Program
             ApplicationConfiguration.Initialize();
             try
             {
-                Logger.Initialize(@"C:\OptimaValue\", true);
+                Logger.Configure()
+                    .WithDirectoryPath(@"C:\OptimaValue\")
+                    .EnableFileLog(true)
+                    .Build();
                 Application.Run(new MasterForm());
                 Logger.Instance.Dispose();
             }
             catch (Exception ex)
             {
-                Logger.Initialize(@"C:\OptimaValue\", true);
+                Logger.Configure()
+                    .WithDirectoryPath(@"C:\OptimaValue\")
+                    .EnableFileLog(true)
+                    .Build();
                 Logger.LogError($"Applikationen krashade", ex);
                 Logger.Instance.Dispose();
                 Environment.Exit(0);
@@ -51,7 +57,10 @@ static class Program
 
     private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        Logger.Initialize(@"C:\OptimaValue\", true);
+        Logger.Configure()
+                    .WithDirectoryPath(@"C:\OptimaValue\")
+                    .EnableFileLog(true)
+                    .Build();
         Logger.LogError($"Applikationen krashade{Environment.NewLine + e.ExceptionObject}");
         Logger.Instance.Dispose(); // Ensure all logs are written before application crashes
         Environment.Exit(0);
@@ -59,7 +68,10 @@ static class Program
 
     private static void TaskScheduler_UnobservedTaskException(object sender, System.Threading.Tasks.UnobservedTaskExceptionEventArgs e)
     {
-        Logger.Initialize(@"C:\OptimaValue\", true);
+        Logger.Configure()
+                    .WithDirectoryPath(@"C:\OptimaValue\")
+                    .EnableFileLog(true)
+                    .Build();
         Logger.LogError($"Applikationen krashade{Environment.NewLine + e.Exception}");
         Logger.Instance.Dispose(); // Ensure all logs are written before application crashes
         Environment.Exit(0);
