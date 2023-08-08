@@ -462,7 +462,7 @@ public partial class MasterForm : Form
         {
             RedrawTreeEvent.NewMessage += RedrawTreeEvent_NewMessage;
             OnlineStatusEvent.NewMessage += OnlineStatusEvent_NewMessage;
-            Logger.Instance.NewLog += Instance_NewLog;
+            Logger.NewLog += Instance_NewLog;
             messageTimer.Tick += MessageTimer_Tick;
             statusTimer.Tick += StatusTimer_Tick;
             startStopButtonVisibilityTimer.Tick += StartStopButtonVisibilityTimer_Tick;
@@ -475,7 +475,7 @@ public partial class MasterForm : Form
         {
             RedrawTreeEvent.NewMessage -= RedrawTreeEvent_NewMessage;
             OnlineStatusEvent.NewMessage -= OnlineStatusEvent_NewMessage;
-            Logger.Instance.NewLog -= Instance_NewLog;
+            Logger.NewLog -= Instance_NewLog;
             statusTimer.Tick -= StatusTimer_Tick;
             messageTimer.Tick -= MessageTimer_Tick;
             startStopButtonVisibilityTimer.Tick -= StartStopButtonVisibilityTimer_Tick;
