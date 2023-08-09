@@ -7,7 +7,7 @@ namespace OptimaValue
     {
         public static void SendStatusMessage(this string message, Severity severity = Severity.Information, Exception ex = null)
         {
-            Logger.Instance.Log(new LogTemplate(message, ex, severity));
+            Logger.Log(message, severity, ex);
         }
     }
 }

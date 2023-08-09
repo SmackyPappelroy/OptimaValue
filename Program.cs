@@ -35,21 +35,21 @@ static class Program
             ApplicationConfiguration.Initialize();
             try
             {
-                Logger.Configure()
+                using var logger = new Logger.LoggerBuilder()
                     .WithDirectoryPath(@"C:\OptimaValue\")
                     .EnableFileLog(true)
+                    .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
                     .Build();
                 Application.Run(new MasterForm());
-                Logger.Instance.Dispose();
             }
             catch (Exception ex)
             {
-                Logger.Configure()
+                using var logger = new Logger.LoggerBuilder()
                     .WithDirectoryPath(@"C:\OptimaValue\")
                     .EnableFileLog(true)
+                    .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
                     .Build();
                 Logger.LogError($"Applikationen krashade", ex);
-                Logger.Instance.Dispose();
                 Environment.Exit(0);
             }
         }
@@ -57,23 +57,23 @@ static class Program
 
     private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        Logger.Configure()
+        using var logger = new Logger.LoggerBuilder()
                     .WithDirectoryPath(@"C:\OptimaValue\")
                     .EnableFileLog(true)
+                    .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
                     .Build();
         Logger.LogError($"Applikationen krashade{Environment.NewLine + e.ExceptionObject}");
-        Logger.Instance.Dispose(); // Ensure all logs are written before application crashes
         Environment.Exit(0);
     }
 
     private static void TaskScheduler_UnobservedTaskException(object sender, System.Threading.Tasks.UnobservedTaskExceptionEventArgs e)
     {
-        Logger.Configure()
+        using var logger = new Logger.LoggerBuilder()
                     .WithDirectoryPath(@"C:\OptimaValue\")
                     .EnableFileLog(true)
+                    .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
                     .Build();
         Logger.LogError($"Applikationen krashade{Environment.NewLine + e.Exception}");
-        Logger.Instance.Dispose(); // Ensure all logs are written before application crashes
         Environment.Exit(0);
     }
 }

@@ -103,7 +103,7 @@ public static class LoggerHandler
             t.Exception?.Handle(e => true);
             AbortLogThread(string.Empty);
             Console.WriteLine("You have canceled the task");
-            Logger.LogError("Loggningscykel avslutad");
+            Logger.LogInfo("Loggningscykel avslutad");
             cancelTokenSource = new CancellationTokenSource();
         }, TaskContinuationOptions.OnlyOnCanceled);
     }
