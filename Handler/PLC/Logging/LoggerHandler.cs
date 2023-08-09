@@ -274,7 +274,7 @@ public static class LoggerHandler
         var isPlcRunning = await myPlc.Plc.IsCpuInRunAsync();
         if (!isPlcRunning)
         {
-            Logger.LogError($"{myPlc.PlcName}-PLC är i STOPP");
+            Logger.LogWarning($"{myPlc.PlcName}-PLC är i STOPP");
         }
     }
 

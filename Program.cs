@@ -1,80 +1,87 @@
 ﻿using System;
+using System.Data.Entity.Core.Mapping;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 using FileLogger;
 using OptimaValue.Config;
 
-namespace OptimaValue;
-
-static class Program
+namespace OptimaValue
 {
-    /// <summary>
-    /// The main entry point for the application.
-    /// </summary>
-    [STAThread]
-    static void Main()
+    static class Program
     {
-        bool createdNew = true;
-        // Check if OptimaValue.Service is running
-        if (Process.GetProcessesByName("OptimaValue.Service").Length > 0)
-        {
-            MessageBox.Show("OptimaValue.Service is already running");
-            return;
-        }
+        private static FileLog LoggerInstance;
 
-        using Mutex mutex = new(true, "OptimaValue", out createdNew);
-        if (createdNew)
+        [STAThread]
+        static void Main()
         {
-            Settings.Load();
-            Settings.OptimaValueFilePath = Application.ExecutablePath;
+            if (Process.GetProcessesByName("OptimaValue.Service").Length > 0)
+            {
+                MessageBox.Show("OptimaValue.Service is already running");
+                return;
+            }
+
+            using Mutex mutex = new(true, "Global\\OptimaValueUniqueMutexName", out bool createdNew);
+            if (createdNew)
+            {
+                Settings.Load();
+                LoggerInstance = CreateFileLogger();
+                Settings.OptimaValueFilePath = Application.ExecutablePath;
+
 #if RELEASE
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-            System.Threading.Tasks.TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
+                AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+                System.Threading.Tasks.TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 #endif
-            ApplicationConfiguration.Initialize();
-            try
-            {
-                using var logger = new Logger.LoggerBuilder()
-                    .WithDirectoryPath(@"C:\OptimaValue\")
-                    .EnableFileLog(true)
-                    .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
-                    .Build();
-                Application.Run(new MasterForm());
-            }
-            catch (Exception ex)
-            {
-                using var logger = new Logger.LoggerBuilder()
-                    .WithDirectoryPath(@"C:\OptimaValue\")
-                    .EnableFileLog(true)
-                    .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
-                    .Build();
-                Logger.LogError($"Applikationen krashade", ex);
-                Environment.Exit(0);
+                ApplicationConfiguration.Initialize();
+                try
+                {
+                    Application.Run(new MasterForm());
+                    Logger.LogInfo($"Applikationen avslutades av {Environment.UserName}");
+                    Logger.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    LogErrorAndExit($"Applikationen krashade", ex);
+                }
+
             }
         }
-    }
 
-    private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-    {
-        using var logger = new Logger.LoggerBuilder()
-                    .WithDirectoryPath(@"C:\OptimaValue\")
-                    .EnableFileLog(true)
-                    .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
-                    .Build();
-        Logger.LogError($"Applikationen krashade{Environment.NewLine + e.ExceptionObject}");
-        Environment.Exit(0);
-    }
+        private static void LogErrorAndExit(string message, Exception ex = null)
+        {
+            if (LoggerInstance != null)
+            {
+                if (ex != null)
+                {
+                    Logger.LogError(message, ex);
+                }
+                else
+                {
+                    Logger.LogError(message);
+                }
+            }
+            Logger.Dispose();
+            Environment.Exit(0);
+        }
 
-    private static void TaskScheduler_UnobservedTaskException(object sender, System.Threading.Tasks.UnobservedTaskExceptionEventArgs e)
-    {
-        using var logger = new Logger.LoggerBuilder()
-                    .WithDirectoryPath(@"C:\OptimaValue\")
-                    .EnableFileLog(true)
-                    .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
-                    .Build();
-        Logger.LogError($"Applikationen krashade{Environment.NewLine + e.Exception}");
-        Environment.Exit(0);
+        public static FileLog CreateFileLogger()
+        {
+            return new Logger.LoggerBuilder()
+                .WithDirectoryPath(@"C:\OptimaValue\")
+                .WithLogDelay(5)
+                .EnableFileLog(true)
+                .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
+                .Build();
+        }
+
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            LogErrorAndExit($"Applikationen krashade", new Exception(e.ExceptionObject.ToString()));
+        }
+
+        private static void TaskScheduler_UnobservedTaskException(object sender, System.Threading.Tasks.UnobservedTaskExceptionEventArgs e)
+        {
+            LogErrorAndExit($"Applikationen krashade", e.Exception);
+        }
     }
 }
-
