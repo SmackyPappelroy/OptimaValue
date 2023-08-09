@@ -77,11 +77,13 @@ namespace OptimaValue
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             LogErrorAndExit($"Applikationen krashade", new Exception(e.ExceptionObject.ToString()));
+            Logger.Dispose();
         }
 
         private static void TaskScheduler_UnobservedTaskException(object sender, System.Threading.Tasks.UnobservedTaskExceptionEventArgs e)
         {
             LogErrorAndExit($"Applikationen krashade", e.Exception);
+            Logger.Dispose();
         }
     }
 }
