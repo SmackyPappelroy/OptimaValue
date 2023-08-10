@@ -982,10 +982,5 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             logInfoFormOpen = true;
         }
 
-        private void btnPredict_Click(object sender, EventArgs e)
-        {
-            var mlForm = new MLForm();
-            mlForm.Show();
-        }
     }
 }

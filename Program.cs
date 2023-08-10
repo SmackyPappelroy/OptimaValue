@@ -71,7 +71,6 @@ namespace OptimaValue
                 .WithLogDelay(5)
                 .EnableFileLogging(true)
                 .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
-                .EnableWindowEventLogging("OptimaValue")
                 .Build();
         }
 
