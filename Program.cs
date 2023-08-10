@@ -69,8 +69,9 @@ namespace OptimaValue
             return new Logger.LoggerBuilder()
                 .WithDirectoryPath(@"C:\OptimaValue\")
                 .WithLogDelay(5)
-                .EnableFileLog(true)
+                .EnableFileLogging(true)
                 .EnableSqlLogging(Settings.Server, Settings.Databas, Settings.User, Settings.Password)
+                .EnableWindowEventLogging("OptimaValue")
                 .Build();
         }
 
