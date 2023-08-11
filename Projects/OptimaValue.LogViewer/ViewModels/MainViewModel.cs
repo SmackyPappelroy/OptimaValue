@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Globalization;
 using FileLogger;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace OptimaValue.LogViewer;
 
@@ -233,6 +234,7 @@ public class MainViewModel : INotifyPropertyChanged
 
         UpdateFilteredEntries();
     }
+
 
 
     private void UpdateFilteredEntries()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Entity.Core.Mapping;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
@@ -11,10 +10,13 @@ namespace OptimaValue
     static class Program
     {
         private static FileLog LoggerInstance;
+        private static bool AppCrashed = false;
 
         [STAThread]
         static void Main()
         {
+            AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+
             if (Process.GetProcessesByName("OptimaValue.Service").Length > 0)
             {
                 MessageBox.Show("OptimaValue.Service is already running");
@@ -24,31 +26,44 @@ namespace OptimaValue
             using Mutex mutex = new(true, "Global\\OptimaValueUniqueMutexName", out bool createdNew);
             if (createdNew)
             {
-                Settings.Load();
-                LoggerInstance = CreateFileLogger();
-                Settings.OptimaValueFilePath = Application.ExecutablePath;
-
 #if RELEASE
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                 System.Threading.Tasks.TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 #endif
+                Settings.Load();
+                LoggerInstance = CreateFileLogger();
+                Settings.OptimaValueFilePath = Application.ExecutablePath;
+
                 ApplicationConfiguration.Initialize();
                 try
                 {
                     Application.Run(new MasterForm());
-                    Logger.LogInfo($"Applikationen avslutades av {Environment.UserName}");
-                    Logger.Dispose();
                 }
                 catch (Exception ex)
                 {
-                    LogErrorAndExit($"Applikationen krashade", ex);
+                    LogError($"Applikationen krashade", ex);
                 }
 
             }
         }
 
-        private static void LogErrorAndExit(string message, Exception ex = null)
+        private static void OnProcessExit(object sender, EventArgs e)
         {
+            if (LoggerInstance != null)
+            {
+                if (!AppCrashed)
+                {
+                    Logger.LogInfo($"Applikationen avslutades av {Environment.UserName}");
+                }
+                LoggerInstance.Dispose();
+                LoggerInstance = null;
+            }
+        }
+
+        private static void LogError(string message, Exception ex = null)
+        {
+            AppCrashed = true;
+
             if (LoggerInstance != null)
             {
                 if (ex != null)
@@ -60,8 +75,6 @@ namespace OptimaValue
                     Logger.LogError(message);
                 }
             }
-            Logger.Dispose();
-            Environment.Exit(0);
         }
 
         public static FileLog CreateFileLogger()
@@ -76,14 +89,12 @@ namespace OptimaValue
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            LogErrorAndExit($"Applikationen krashade", new Exception(e.ExceptionObject.ToString()));
-            Logger.Dispose();
+            LogError($"Applikationen krashade", new Exception(e.ExceptionObject.ToString()));
         }
 
         private static void TaskScheduler_UnobservedTaskException(object sender, System.Threading.Tasks.UnobservedTaskExceptionEventArgs e)
         {
-            LogErrorAndExit($"Applikationen krashade", e.Exception);
-            Logger.Dispose();
+            LogError($"Applikationen krashade", e.Exception);
         }
     }
 }
