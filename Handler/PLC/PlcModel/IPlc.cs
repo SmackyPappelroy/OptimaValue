@@ -17,7 +17,6 @@ namespace OptimaValue
         bool IsStreamConnected { get; }
         CpuType CpuType { get; }
         bool isNotPlc { get; }
-        bool UnableToPing { get; }
         string ConnectionString { get; set; }
 
         DateTime UpTimeStart { get; set; }
@@ -29,7 +28,6 @@ namespace OptimaValue
         public short WatchDog { get; }
         bool Alarm { get; set; }
 
-        bool Ping();
         bool Connect();
         Task ConnectAsync(int timeOut = 1000);
         Task<bool> TestConnectionAsync();

@@ -155,7 +155,6 @@ namespace OptimaValue
         public int Id = 0;
 
         public DateTime LastReconnect = DateTime.MinValue;
-        public bool UnableToPing => Plc.UnableToPing;
 
         private string plcName;
         public string PlcName

@@ -1,4 +1,5 @@
-﻿using OpcUa.DA;
+﻿using FileLogger;
+using OpcUa.DA;
 using OpcUaHm.Common;
 using S7.Net;
 using System;
@@ -18,10 +19,7 @@ namespace OptimaValue
     {
         private S7.Net.Plc myPlc;
         private CpuType cpuType;
-        private readonly System.Timers.Timer timerPing = new System.Timers.Timer()
-        {
-            Interval = 30 * 1000
-        };
+
         private System.Windows.Forms.Timer onlineTimer = new System.Windows.Forms.Timer()
         {
             Interval = 500,
@@ -42,29 +40,14 @@ namespace OptimaValue
                     if (value == ConnectionStatus.Connected)
                     {
                         UpTimeStart = DateTime.UtcNow;
-                        timerPing.Start();
                     }
                 }
-                if (value != ConnectionStatus.Connected)
-                    timerPing.Stop();
+
                 status = value;
                 OnConnectionChanged?.Invoke(value);
             }
         }
 
-        private void TimerPing_Tick(object sender, EventArgs e)
-        {
-            if (!Ping())
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                UnableToPing = true;
-
-            }
-            else
-            {
-                UnableToPing = false;
-            }
-        }
 
         public SiemensPlc()
         {
@@ -74,7 +57,6 @@ namespace OptimaValue
         {
             this.cpuType = (CpuType)cpuType;
             myPlc = new Plc(cpuType, ip, rack, slot);
-            timerPing.Elapsed += TimerPing_Tick;
         }
 
         public string PlcName { get; set; }
@@ -116,7 +98,6 @@ namespace OptimaValue
 
         public bool Active { get; set; } = false;
         public DateTime LastReconnect { get; set; } = DateTime.MinValue;
-        public bool UnableToPing { get; private set; }
 
         private short watchDog = 0;
         public short WatchDog
@@ -169,7 +150,8 @@ namespace OptimaValue
             }
             catch (OperationCanceledException ex)
             {
-                throw new TimeoutException("Timeout when connecting to PLC", ex);
+                Logger.LogError("Timeout when connecting to PLC", ex);
+                throw new TimeoutException($"Timeout when connecting to PLC {PlcName}", ex);
             }
         }
 
@@ -186,7 +168,7 @@ namespace OptimaValue
                 await myPlc.OpenAsync();
                 return IsConnected;
             }
-            catch (Exception) { }
+            catch (Exception ex) { Logger.LogError($"Misslyckades att ansluta till {PlcName}", ex); }
             finally
             {
                 myPlc.Close();
@@ -212,12 +194,17 @@ namespace OptimaValue
                 var temp = myPlc.Read(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.NrOfElements, tag.BitAddress);
                 return new ReadValue(this, temp);
             }
-            catch (PlcException)
+            catch (PlcException ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
             catch (IOException ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
+            catch (Exception ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
@@ -237,6 +224,11 @@ namespace OptimaValue
                 throw;
             }
             catch (IOException ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
+            catch (Exception ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
@@ -261,6 +253,11 @@ namespace OptimaValue
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
+            catch (Exception ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task<ReadValue> ReadAsync(string address, CancellationToken cancellationToken = default)
@@ -276,6 +273,11 @@ namespace OptimaValue
                 throw;
             }
             catch (IOException ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
+            catch (Exception ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
@@ -298,6 +300,11 @@ namespace OptimaValue
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
+            catch (Exception ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task<byte[]> ReadBytesAsync(PlcTag tag, CancellationToken cancellationToken = default)
@@ -312,6 +319,11 @@ namespace OptimaValue
                 throw;
             }
             catch (IOException ex) { ConnectionStatus = ConnectionStatus.Disconnected; throw; }
+            catch (Exception ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public byte[] ReadBytes(PlcTag tag, int nrOfElements)
@@ -326,6 +338,11 @@ namespace OptimaValue
                 throw;
             }
             catch (IOException ex) { ConnectionStatus = ConnectionStatus.Disconnected; throw; }
+            catch (Exception ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task<byte[]> ReadBytesAsync(PlcTag tag, int nrOfElements, CancellationToken cancellationToken = default)
@@ -340,6 +357,11 @@ namespace OptimaValue
                 throw;
             }
             catch (IOException ex) { ConnectionStatus = ConnectionStatus.Disconnected; throw; }
+            catch (Exception ex)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
         public void Write(PlcTag tag, object value)
         {
@@ -373,47 +395,9 @@ namespace OptimaValue
 
         public void Dispose()
         {
-            timerPing.Elapsed += TimerPing_Tick;
             myPlc.Close();
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Returns True if pingable<para></para>Timeout of 2 seconds <para></para>
-        /// Throws a <see cref="NullReferenceException"/> if <paramref name="plc"/> is null<para></para>
-        /// Throws a <see cref="PingException"/> if not valid IP address format
-        /// </summary>
-        /// <returns></returns>
-        public bool Ping()
-        {
-            if (myPlc == null)
-                throw new NullReferenceException("Plc kan ej vara null");
-            if (!myPlc.IP.CheckValidIpAddress())
-                throw new PingException("Inte giltig IP-adress");
-            Ping pinger = null;
-            var Pingable = false;
-            try
-            {
-                pinger = new Ping();
-                PingReply reply = pinger.Send(myPlc.IP, 2000); // Timeout-tid 2 sekunder
-                Pingable = reply.Status == IPStatus.Success;
-
-                if (!Pingable)
-                {
-                    return false;
-                }
-            }
-            catch (PingException)
-            {
-                if (!Pingable)
-                    return false;
-            }
-            finally
-            {
-                if (pinger != null)
-                    pinger.Dispose();
-            }
-            return Pingable;
-        }
     }
 }

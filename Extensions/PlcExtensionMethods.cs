@@ -46,43 +46,6 @@ namespace OptimaValue
             return true;
         }
 
-        /// <summary>
-        /// Returns true if able to Ping<para></para>Timeout of 2 seconds<para></para>
-        /// Throws a <see cref="PingException"/> if not valid IP address format
-        /// </summary>
-        /// <param name="ipAddress"></param>
-        /// <returns></returns>
-        public static bool Ping(this string ipAddress)
-        {
-
-            if (!ipAddress.CheckValidIpAddress())
-                throw new PingException("Inte giltig IP-adress");
-            Ping pinger = null;
-            var Pingable = false;
-            try
-            {
-                pinger = new Ping();
-                PingReply reply = pinger.Send(ipAddress, 2000); // Timeout-tid 2 sekunder
-                Pingable = reply.Status == IPStatus.Success;
-
-                if (!Pingable)
-                {
-                    return false;
-                }
-            }
-            catch (PingException)
-            {
-                if (!Pingable)
-                    return false;
-            }
-            finally
-            {
-                if (pinger != null)
-                    pinger.Dispose();
-            }
-            return Pingable;
-        }
-
         public static void SendPlcStatusMessage(this ExtendedPlc plc, string message, Status status)
         {
             PlcStatusEvent.RaiseMessage(message, plc.PlcName, status);

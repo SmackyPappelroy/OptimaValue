@@ -291,10 +291,18 @@ public static class LoggerHandler
         }
     }
 
-    private static bool IsPlcConnectedAndActive(ExtendedPlc plc) =>
-        plc.IsConnected &&
+    private static bool IsPlcConnectedAndActive(ExtendedPlc plc)
+    {
+        var returnValue = plc.IsConnected &&
         plc.ConnectionStatus == ConnectionStatus.Connected &&
         plc.Active;
+
+        if (!returnValue)
+        {
+            plc.Plc.ConnectionStatus = ConnectionStatus.Disconnected;
+        }
+        return returnValue;
+    }
 
     private static List<IGrouping<LogFrequency, TagDefinitions>> GetGroupedActiveTags(string plcName)
     {
@@ -349,12 +357,8 @@ public static class LoggerHandler
 
     private static async Task ReconnectPlc(ExtendedPlc MyPlc)
     {
-        if (MyPlc.Plc.Ping())
-        {
-            MyPlc.Plc.Disconnect();
-            MyPlc.Plc.Connect();
-
-        }
+        MyPlc.Plc.Disconnect();
+        MyPlc.Plc.Connect();
 
         LogConnectionStatus(MyPlc);
     }
@@ -390,9 +394,7 @@ public static class LoggerHandler
 
             if (MyPlc.ConnectionStatus != ConnectionStatus.Connected || !MyPlc.IsConnected)
             {
-                if (!MyPlc.UnableToPing)
-                    return;
-                var errorString = $"Lyckas ej pinga {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}";
+                var errorString = $"Får ej kontakt med {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}";
                 logTag.LastErrorMessage = errorString;
                 MyPlc.SendPlcStatusMessage(errorString, Status.Error);
                 return;
@@ -769,6 +771,10 @@ public static class LoggerHandler
             HandleException(ex, "Misslyckades att läsa", logError: false);
         }
         catch (ServiceResultException ex)
+        {
+            HandleException(ex, "Misslyckades att läsa");
+        }
+        catch (Exception ex)
         {
             HandleException(ex, "Misslyckades att läsa", logError: false);
         }
