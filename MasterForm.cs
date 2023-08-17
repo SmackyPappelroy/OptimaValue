@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using FileLogger;
+using System.IO.Pipes;
+using System.IO;
 
 namespace OptimaValue;
 
@@ -403,6 +405,10 @@ public partial class MasterForm : Form
                         Dock = DockStyle.Fill
                     };
                 }
+                statusControl?.Hide(); 
+                statusControl = null;
+                tagControl?.Hide();
+                tagControl = null;
                 settingsControl?.Show();
                 break;
 
@@ -421,6 +427,10 @@ public partial class MasterForm : Form
                     Parent = contentPanel,
                     Dock = DockStyle.Fill
                 };
+                settingsControl?.Hide();
+                settingsControl = null;
+                tagControl?.Hide();
+                tagControl = null;
                 statusControl?.Show();
                 break;
 
@@ -439,6 +449,10 @@ public partial class MasterForm : Form
                     Parent = contentPanel,
                     Dock = DockStyle.Fill
                 };
+                settingsControl?.Hide();
+                settingsControl = null;
+                statusControl?.Hide();
+                statusControl = null;
                 tagControl?.Show();
                 break;
 
@@ -498,16 +512,40 @@ public partial class MasterForm : Form
         messageQueue.Enqueue(obj);
         ShowNextMessage();
     }
-
+    private Color originalForegroundColor = Color.FromArgb(175, 175, 175);
     private void ShowNextMessage()
     {
         if (!messageTimer.Enabled && messageQueue.Count > 0)
         {
             var obj = messageQueue.Dequeue();
 
-            statusPanel.AutoScroll = obj.Exception != null;
-            txtStatus.Text = obj.Exception != null ? obj.Exception.ToString() : obj.ToHmiString();
-            txtStatus.Visible = true;
+            statusPanel.AutoScroll = obj.ToHmiString().Length > 100;
+            txtStatus.Text = obj.ToHmiString(true);
+            //txtStatus.Text = obj.Exception != null ? obj.Exception.ToString() : obj.ToHmiString();
+            switch (obj.Severity)
+            {
+                case Severity.Warning:
+                    lblStatus.ForeColor = Color.Yellow;
+                    lblStatus.Text = "Warning";
+                    break;
+                case Severity.Error:
+                    lblStatus.ForeColor = Color.OrangeRed;
+                    lblStatus.Text = "Error";
+                    break;
+                case Severity.Information:
+                    lblStatus.ForeColor = originalForegroundColor;
+                    lblStatus.Text = "Information";
+                    break;
+                case Severity.Success:
+                    lblStatus.ForeColor = Color.LightGreen;
+                    lblStatus.Text = "Success";
+                    break;
+                default:
+                    lblStatus.ForeColor = originalForegroundColor;
+                    break;
+            }
+
+            var labelsInControl = statusPanel.Controls;
             messageTimer.Start();
 
             if (obj.Severity == Severity.Error || obj.Severity == Severity.Warning)
@@ -520,6 +558,11 @@ public partial class MasterForm : Form
                 }
                 errorImage.Visible = true;
             }
+        }
+        if (txtStatus.Text.Length == 0)
+        {
+            lblStatus.ForeColor = originalForegroundColor;
+            lblStatus.Text = "Status";
         }
     }
 
@@ -647,8 +690,8 @@ public partial class MasterForm : Form
                 notifyIcon.Text = "Ej ansluten";
             }
         }
-    }
 
+    }
 
     private void StatusTimer_Tick(object sender, EventArgs e)
     {
@@ -657,12 +700,6 @@ public partial class MasterForm : Form
         errorImage.Visible = false;
         statusPanel.AutoScroll = false;
     }
-
-    private void Logger_NewLog((string message, string hmiString, Severity LogSeverity, DateTime Tid, bool LogSuccess, Exception exception) obj)
-    {
-
-    }
-
 
     private bool isConnected = false;
     private void OnlineStatusEvent_NewMessage(object sender, OnlineStatusEventArgs e)

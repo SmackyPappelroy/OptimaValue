@@ -1,10 +1,10 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using FileLogger;
+﻿using FileLogger;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace OptimaValue
 {
+
     public static class Master
     {
         public static bool AbortSqlLog = false;
@@ -35,6 +35,7 @@ namespace OptimaValue
 
             if (ActivePlcs)
                 SendValuesToSql.StartSql();
+
             IsStarted = true;
             return true;
         }

@@ -13,12 +13,12 @@ using System.Windows.Forms;
 using OptimaValue.Config;
 using System.Threading.Tasks;
 using System.Text.Json;
-using ClosedXML.Excel;
 using System.Runtime.CompilerServices;
 using S7.Net.Types;
 using System.Reflection;
 using System.Data.SqlTypes;
 using FileLogger;
+using ClosedXML.Excel;
 
 namespace OptimaValue;
 
@@ -431,7 +431,6 @@ public partial class TagControl2 : UserControl
         }
         catch (Exception ex)
         {
-
             throw;
         }
 

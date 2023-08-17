@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
 using FileLogger;
+using Microsoft.Extensions.Hosting;
 using OptimaValue.Config;
 
 namespace OptimaValue
@@ -37,13 +38,12 @@ namespace OptimaValue
                 ApplicationConfiguration.Initialize();
                 try
                 {
-                    Application.Run(new MasterForm());
+                    Application.Run(new MasterForm());     // Startar WinForms-fönstret
                 }
                 catch (Exception ex)
                 {
                     LogError($"Applikationen krashade", ex);
                 }
-
             }
         }
 
@@ -96,5 +96,7 @@ namespace OptimaValue
         {
             LogError($"Applikationen krashade", e.Exception);
         }
+
+
     }
 }

@@ -1,7 +1,4 @@
-﻿using DocumentFormat.OpenXml.Drawing.Charts;
-using OpcUa.DA;
-using OpcUaHm.Common;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
 

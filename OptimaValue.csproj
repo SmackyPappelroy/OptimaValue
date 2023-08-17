@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net7.0-windows</TargetFramework>
@@ -58,14 +57,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.102.0" />
 		<PackageReference Include="CsvHelper" Version="30.0.1" />
 		<PackageReference Include="EntityFramework" Version="6.4.4" />
+		<PackageReference Include="LiveCharts.Geared" Version="1.2.9" />
 		<PackageReference Include="LiveCharts.WinForms.NetCore3" Version="0.9.7" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
 		<PackageReference Include="Microsoft.ML.TimeSeries" Version="2.0.1" />
 		<PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
-		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.11.0" />
+		<PackageReference Include="Microsoft.OpenApi" Version="1.6.6" />
+		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.18.0" />
 		<PackageReference Include="S7netplus" Version="0.20.0" />
-		<PackageReference Include="System.ServiceModel.Primitives" Version="4.10.0" />
+		<PackageReference Include="System.ServiceModel.Primitives" Version="6.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -109,11 +112,6 @@
 			<Generator>SettingsSingleFileGenerator</Generator>
 			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
 		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Base\Enums\" />
-	  <Folder Include="Base\Loggers\" />
 	</ItemGroup>
 
 </Project>

@@ -598,13 +598,11 @@ namespace OptimaValue.Handler.PLC.Graphics
             {
                 loading = true;
                 tableLayoutPanel2.Enabled = false;
-                var sw = new Stopwatch();
                 try
                 {
                     tryConnect = true;
                     btnConnect.Enabled = false;
                     Application.UseWaitCursor = true;
-                    sw.Start();
                     await MyPlc.Plc.ConnectAsync();
                     if (MyPlc.isOpc)
                     {
@@ -628,8 +626,6 @@ namespace OptimaValue.Handler.PLC.Graphics
                 }
                 finally
                 {
-                    sw.Stop();
-                    Debug.WriteLine($"Connection time: {sw.ElapsedMilliseconds} ms");
                     if (!MyPlc.isOpc)
                         MyPlc.Plc.Disconnect();
                     else if (MyPlc.IsConnected)
@@ -639,6 +635,12 @@ namespace OptimaValue.Handler.PLC.Graphics
                     Application.UseWaitCursor = false;
                     tableLayoutPanel2.Enabled = true;
                     loading = false;
+                    if(connected)
+                    {
+                        $"Frånkopplad från {MyPlc.PlcName}"
+                            .SendStatusMessage(Severity.Success);
+                    }
+                    connected = false;
                 }
             }
         }

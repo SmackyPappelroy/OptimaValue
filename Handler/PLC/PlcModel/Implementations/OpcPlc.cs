@@ -1,18 +1,12 @@
-﻿using DocumentFormat.OpenXml.Office.PowerPoint.Y2021.M06.Main;
-using OpcUa.DA;
+﻿using OpcUa.DA;
 using OpcUa.UI.Controls;
 using OpcUaHm.Common;
-using S7.Net;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Navigation;
 
 namespace OptimaValue
 {

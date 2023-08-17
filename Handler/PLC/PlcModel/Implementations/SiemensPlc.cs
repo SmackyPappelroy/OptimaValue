@@ -1,17 +1,9 @@
 ﻿using FileLogger;
-using OpcUa.DA;
-using OpcUaHm.Common;
 using S7.Net;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace OptimaValue
 {
@@ -60,42 +52,39 @@ namespace OptimaValue
         }
 
         public string PlcName { get; set; }
+        public bool IsConnected 
+        {
+            get
+            {
+                if (!myPlc.IsConnected)
+                    ConnectionStatus = ConnectionStatus.Disconnected;
+                return ConnectionStatus == ConnectionStatus.Connected;
+            }
+        } 
 
-        public bool IsConnected => myPlc.IsConnected && ConnectionStatus == ConnectionStatus.Connected;
         public bool IsStreamConnected => myPlc.IsConnected;
-
         public CpuType CpuType => cpuType;
-
         public int Id { get; set; } = 0;
         public DateTime UpTimeStart { get; set; } = DateTime.MaxValue;
-        public TimeSpan UpTime
-        {
-            get
-            {
-                if (UpTimeStart == DateTime.MaxValue)
-                    return TimeSpan.FromSeconds(0);
-                else
-                    return DateTime.UtcNow - UpTimeStart;
-            }
-        }
-        public string UpTimeString
-        {
-            get
-            {
-                if (UpTimeStart == DateTime.MaxValue)
-                    return "0s";
-                var tid = DateTime.UtcNow - UpTimeStart;
-                if (tid < TimeSpan.FromMinutes(1))
-                    return tid.ToString("s's'");
-                else if (tid < TimeSpan.FromHours(1))
-                    return tid.ToString("m'm 's's'");
-                else if (tid > TimeSpan.FromHours(1) && (tid < TimeSpan.FromDays(1)))
-                    return tid.ToString("h'h 'm'm 's's'");
-                else
-                    return tid.ToString("d'd 'h'h 'm'm 's's'");
-            }
-        }
 
+        public TimeSpan UpTime => UpTimeStart == DateTime.MaxValue ? TimeSpan.FromSeconds(0) : DateTime.UtcNow - UpTimeStart;
+        public string UpTimeString => GetUptimeString();
+        private string GetUptimeString()
+        {
+            if (UpTimeStart == DateTime.MaxValue)
+                return "0s";
+
+            var tid = DateTime.UtcNow - UpTimeStart;
+
+            if (tid < TimeSpan.FromMinutes(1))
+                return tid.ToString("s's'");
+            if (tid < TimeSpan.FromHours(1))
+                return tid.ToString("m'm 's's'");
+            if (tid > TimeSpan.FromHours(1) && (tid < TimeSpan.FromDays(1)))
+                return tid.ToString("h'h 'm'm 's's'");
+
+            return tid.ToString("d'd 'h'h 'm'm 's's'");
+        }
         public bool Active { get; set; } = false;
         public DateTime LastReconnect { get; set; } = DateTime.MinValue;
 
@@ -194,16 +183,6 @@ namespace OptimaValue
                 var temp = myPlc.Read(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.NrOfElements, tag.BitAddress);
                 return new ReadValue(this, temp);
             }
-            catch (PlcException ex)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-            catch (IOException ex)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
             catch (Exception ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
@@ -217,16 +196,6 @@ namespace OptimaValue
             {
                 var temp = myPlc.Read(address);
                 return new ReadValue(this, temp);
-            }
-            catch (PlcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-            catch (IOException ex)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
             }
             catch (Exception ex)
             {
@@ -243,16 +212,6 @@ namespace OptimaValue
                 return new ReadValue(this, temp);
 
             }
-            catch (PlcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-            catch (IOException ex)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
             catch (Exception ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
@@ -267,16 +226,6 @@ namespace OptimaValue
                 var temp = await myPlc.ReadAsync(address, cancellationToken);
                 return new ReadValue(this, temp);
             }
-            catch (PlcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-            catch (IOException ex)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
             catch (Exception ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
@@ -289,16 +238,6 @@ namespace OptimaValue
             try
             {
                 return myPlc.ReadBytes(tag.DataType, tag.BlockNr, tag.StartByte, tag.NrOfElements);
-            }
-            catch (PlcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-            catch (IOException ex)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
             }
             catch (Exception ex)
             {
@@ -313,12 +252,6 @@ namespace OptimaValue
             {
                 return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, tag.NrOfElements, cancellationToken);
             }
-            catch (PlcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-            catch (IOException ex) { ConnectionStatus = ConnectionStatus.Disconnected; throw; }
             catch (Exception ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
@@ -332,12 +265,6 @@ namespace OptimaValue
             {
                 return myPlc.ReadBytes(tag.DataType, tag.BlockNr, tag.StartByte, nrOfElements);
             }
-            catch (PlcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-            catch (IOException ex) { ConnectionStatus = ConnectionStatus.Disconnected; throw; }
             catch (Exception ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
@@ -351,12 +278,6 @@ namespace OptimaValue
             {
                 return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, nrOfElements, cancellationToken);
             }
-            catch (PlcException)
-            {
-                ConnectionStatus = ConnectionStatus.Disconnected;
-                throw;
-            }
-            catch (IOException ex) { ConnectionStatus = ConnectionStatus.Disconnected; throw; }
             catch (Exception ex)
             {
                 ConnectionStatus = ConnectionStatus.Disconnected;
@@ -398,6 +319,5 @@ namespace OptimaValue
             myPlc.Close();
             GC.SuppressFinalize(this);
         }
-
     }
 }

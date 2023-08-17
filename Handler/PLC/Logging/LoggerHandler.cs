@@ -188,17 +188,7 @@ public static class LoggerHandler
                     onlineTimer.Start();
                 }
             }
-            catch (TimeoutException ex)
-            {
-                LogConnectionError(plc, ex);
-                RequestDisconnect();
-            }
-            catch (PlcException ex)
-            {
-                LogConnectionError(plc, ex);
-                RequestDisconnect();
-            }
-            catch (ServiceResultException ex)
+            catch (Exception ex)
             {
                 LogConnectionError(plc, ex);
                 RequestDisconnect();
@@ -345,8 +335,6 @@ public static class LoggerHandler
         }
     }
 
-
-
     private static async Task ReconnectOpc(ExtendedPlc MyPlc)
     {
         if (!MyPlc.IsConnected)
@@ -381,8 +369,7 @@ public static class LoggerHandler
 
     private static async Task ReadValue(ExtendedPlc MyPlc, TagDefinitions logTag)
     {
-        if (!MyPlc.IsConnected || logTag.Active != true || MyPlc.PlcName != logTag.PlcName
-            || MyPlc.ConnectionStatus != ConnectionStatus.Connected)
+        if (!MyPlc.IsConnected || logTag.Active != true || MyPlc.PlcName != logTag.PlcName)
             return;
 
         var tiden = DateTime.UtcNow;
@@ -1091,9 +1078,9 @@ public static class LoggerHandler
                     break;
             }
         }
-        catch (PlcException)
+        catch (Exception ex)
         {
-            Logger.LogError($"Misslyckades att synka {MyPlc.PlcName}");
+            Logger.LogError($"Misslyckades att synka {MyPlc.PlcName}", ex);
             throw;
         }
         MyPlc.lastSyncTime = tid;
@@ -1120,11 +1107,8 @@ public static class LoggerHandler
             OnlineStatusEvent.RaiseMessage(MyPlc.ConnectionStatus, MyPlc.PlcName);
             MyPlc.LoggerIsStarted = false;
         }
-
-
         startClosing = false;
         lastLogValues?.Clear();
-
     }
 
     private static void AddValueToSql(TagDefinitions logTag, ReadValue readValue)

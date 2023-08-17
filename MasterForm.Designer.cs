@@ -28,394 +28,383 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            components = new System.ComponentModel.Container();
             System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Optima");
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MasterForm));
-            this.addPlcMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.addPlc = new System.Windows.Forms.ToolStripMenuItem();
-            this.treeView = new System.Windows.Forms.TreeView();
-            this.imageList = new System.Windows.Forms.ImageList(this.components);
-            this.contentPanel = new System.Windows.Forms.Panel();
-            this.statusPanel = new System.Windows.Forms.Panel();
-            this.databaseImage = new System.Windows.Forms.PictureBox();
-            this.errorImage = new System.Windows.Forms.PictureBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.txtStatus = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.btnStart = new System.Windows.Forms.Button();
-            this.btnStop = new System.Windows.Forms.Button();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.menuStrip = new System.Windows.Forms.MenuStrip();
-            this.menuSettings = new System.Windows.Forms.ToolStripMenuItem();
-            this.databasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.debugMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
-            this.autoStartTool = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
-            this.comboTrend = new System.Windows.Forms.ToolStripComboBox();
-            this.btnStartTrend = new System.Windows.Forms.ToolStripMenuItem();
-            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.databaseImageList = new System.Windows.Forms.ImageList(this.components);
-            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.addPlcMenu.SuspendLayout();
-            this.statusPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.databaseImage)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.panel1.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
-            this.tableLayoutPanel2.SuspendLayout();
-            this.menuStrip.SuspendLayout();
-            this.SuspendLayout();
+            addPlcMenu = new System.Windows.Forms.ContextMenuStrip(components);
+            addPlc = new System.Windows.Forms.ToolStripMenuItem();
+            treeView = new System.Windows.Forms.TreeView();
+            imageList = new System.Windows.Forms.ImageList(components);
+            contentPanel = new System.Windows.Forms.Panel();
+            statusPanel = new System.Windows.Forms.Panel();
+            databaseImage = new System.Windows.Forms.PictureBox();
+            errorImage = new System.Windows.Forms.PictureBox();
+            pictureBox1 = new System.Windows.Forms.PictureBox();
+            txtStatus = new System.Windows.Forms.Label();
+            lblStatus = new System.Windows.Forms.Label();
+            panel1 = new System.Windows.Forms.Panel();
+            btnStart = new System.Windows.Forms.Button();
+            btnStop = new System.Windows.Forms.Button();
+            tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
+            menuStrip = new System.Windows.Forms.MenuStrip();
+            menuSettings = new System.Windows.Forms.ToolStripMenuItem();
+            databasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            debugMenu = new System.Windows.Forms.ToolStripMenuItem();
+            notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
+            autoStartTool = new System.Windows.Forms.ToolStripMenuItem();
+            menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
+            comboTrend = new System.Windows.Forms.ToolStripComboBox();
+            btnStartTrend = new System.Windows.Forms.ToolStripMenuItem();
+            notifyIcon = new System.Windows.Forms.NotifyIcon(components);
+            databaseImageList = new System.Windows.Forms.ImageList(components);
+            toolTip = new System.Windows.Forms.ToolTip(components);
+            addPlcMenu.SuspendLayout();
+            statusPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)databaseImage).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)errorImage).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            panel1.SuspendLayout();
+            tableLayoutPanel1.SuspendLayout();
+            tableLayoutPanel2.SuspendLayout();
+            menuStrip.SuspendLayout();
+            SuspendLayout();
             // 
             // addPlcMenu
             // 
-            this.addPlcMenu.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.addPlcMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.addPlc});
-            this.addPlcMenu.Name = "addPlcMenu";
-            this.addPlcMenu.Size = new System.Drawing.Size(141, 26);
+            addPlcMenu.ImageScalingSize = new System.Drawing.Size(24, 24);
+            addPlcMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { addPlc });
+            addPlcMenu.Name = "addPlcMenu";
+            addPlcMenu.Size = new System.Drawing.Size(141, 26);
             // 
             // addPlc
             // 
-            this.addPlc.Name = "addPlc";
-            this.addPlc.Size = new System.Drawing.Size(140, 22);
-            this.addPlc.Text = "Lägg till PLC";
-            this.addPlc.Click += new System.EventHandler(this.addPlc_Click);
+            addPlc.Name = "addPlc";
+            addPlc.Size = new System.Drawing.Size(140, 22);
+            addPlc.Text = "Lägg till PLC";
+            addPlc.Click += addPlc_Click;
             // 
             // treeView
             // 
-            this.treeView.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.treeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.treeView.ForeColor = System.Drawing.Color.Black;
-            this.treeView.ImageIndex = 0;
-            this.treeView.ImageList = this.imageList;
-            this.treeView.Location = new System.Drawing.Point(4, 105);
-            this.treeView.Margin = new System.Windows.Forms.Padding(4);
-            this.treeView.Name = "treeView";
-            treeNode1.ContextMenuStrip = this.addPlcMenu;
+            treeView.BackColor = System.Drawing.Color.WhiteSmoke;
+            treeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            treeView.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            treeView.ForeColor = System.Drawing.Color.Black;
+            treeView.ImageIndex = 0;
+            treeView.ImageList = imageList;
+            treeView.Location = new System.Drawing.Point(4, 105);
+            treeView.Margin = new System.Windows.Forms.Padding(4);
+            treeView.Name = "treeView";
+            treeNode1.ContextMenuStrip = addPlcMenu;
             treeNode1.Name = "Optima";
             treeNode1.Text = "Optima";
-            this.treeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
-            this.treeView.SelectedImageIndex = 0;
-            this.treeView.Size = new System.Drawing.Size(342, 567);
-            this.treeView.TabIndex = 0;
-            this.treeView.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.treeView_MouseDoubleClick);
+            treeView.Nodes.AddRange(new System.Windows.Forms.TreeNode[] { treeNode1 });
+            treeView.SelectedImageIndex = 0;
+            treeView.Size = new System.Drawing.Size(342, 567);
+            treeView.TabIndex = 0;
+            treeView.MouseDoubleClick += treeView_MouseDoubleClick;
             // 
             // imageList
             // 
-            this.imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
-            this.imageList.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList.Images.SetKeyName(0, "optima");
-            this.imageList.Images.SetKeyName(1, "stop_circled_16px.png");
-            this.imageList.Images.SetKeyName(2, "play");
-            this.imageList.Images.SetKeyName(3, "warning");
-            this.imageList.Images.SetKeyName(4, "job_16px.png");
-            this.imageList.Images.SetKeyName(5, "status");
-            this.imageList.Images.SetKeyName(6, "tags_16px.png");
-            this.imageList.Images.SetKeyName(7, "icons8_gas_running_16.png");
-            this.imageList.Images.SetKeyName(8, "cipStation.png");
+            imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            imageList.ImageStream = (System.Windows.Forms.ImageListStreamer)resources.GetObject("imageList.ImageStream");
+            imageList.TransparentColor = System.Drawing.Color.Transparent;
+            imageList.Images.SetKeyName(0, "optima");
+            imageList.Images.SetKeyName(1, "stop_circled_16px.png");
+            imageList.Images.SetKeyName(2, "play");
+            imageList.Images.SetKeyName(3, "warning");
+            imageList.Images.SetKeyName(4, "job_16px.png");
+            imageList.Images.SetKeyName(5, "status");
+            imageList.Images.SetKeyName(6, "tags_16px.png");
+            imageList.Images.SetKeyName(7, "icons8_gas_running_16.png");
+            imageList.Images.SetKeyName(8, "cipStation.png");
             // 
             // contentPanel
             // 
-            this.contentPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
-            this.contentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.contentPanel.Location = new System.Drawing.Point(4, 240);
-            this.contentPanel.Margin = new System.Windows.Forms.Padding(4);
-            this.contentPanel.Name = "contentPanel";
-            this.contentPanel.Size = new System.Drawing.Size(852, 431);
-            this.contentPanel.TabIndex = 1;
+            contentPanel.BackColor = System.Drawing.Color.FromArgb(38, 38, 38);
+            contentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            contentPanel.Location = new System.Drawing.Point(4, 240);
+            contentPanel.Margin = new System.Windows.Forms.Padding(4);
+            contentPanel.Name = "contentPanel";
+            contentPanel.Size = new System.Drawing.Size(852, 431);
+            contentPanel.TabIndex = 1;
             // 
             // statusPanel
             // 
-            this.statusPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
-            this.statusPanel.Controls.Add(this.databaseImage);
-            this.statusPanel.Controls.Add(this.errorImage);
-            this.statusPanel.Controls.Add(this.pictureBox1);
-            this.statusPanel.Controls.Add(this.txtStatus);
-            this.statusPanel.Controls.Add(this.label4);
-            this.statusPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.statusPanel.Location = new System.Drawing.Point(4, 4);
-            this.statusPanel.Margin = new System.Windows.Forms.Padding(4);
-            this.statusPanel.Name = "statusPanel";
-            this.statusPanel.Size = new System.Drawing.Size(852, 228);
-            this.statusPanel.TabIndex = 2;
+            statusPanel.BackColor = System.Drawing.Color.FromArgb(38, 38, 38);
+            statusPanel.Controls.Add(databaseImage);
+            statusPanel.Controls.Add(errorImage);
+            statusPanel.Controls.Add(pictureBox1);
+            statusPanel.Controls.Add(txtStatus);
+            statusPanel.Controls.Add(lblStatus);
+            statusPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            statusPanel.Location = new System.Drawing.Point(4, 4);
+            statusPanel.Margin = new System.Windows.Forms.Padding(4);
+            statusPanel.Name = "statusPanel";
+            statusPanel.Size = new System.Drawing.Size(852, 228);
+            statusPanel.TabIndex = 2;
             // 
             // databaseImage
             // 
-            this.databaseImage.BackColor = System.Drawing.Color.Transparent;
-            this.databaseImage.Location = new System.Drawing.Point(821, 35);
-            this.databaseImage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.databaseImage.Name = "databaseImage";
-            this.databaseImage.Size = new System.Drawing.Size(28, 28);
-            this.databaseImage.TabIndex = 15;
-            this.databaseImage.TabStop = false;
+            databaseImage.BackColor = System.Drawing.Color.Transparent;
+            databaseImage.Location = new System.Drawing.Point(821, 35);
+            databaseImage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            databaseImage.Name = "databaseImage";
+            databaseImage.Size = new System.Drawing.Size(28, 28);
+            databaseImage.TabIndex = 15;
+            databaseImage.TabStop = false;
             // 
             // errorImage
             // 
-            this.errorImage.BackColor = System.Drawing.Color.Transparent;
-            this.errorImage.Image = ((System.Drawing.Image)(resources.GetObject("errorImage.Image")));
-            this.errorImage.Location = new System.Drawing.Point(778, 4);
-            this.errorImage.Margin = new System.Windows.Forms.Padding(4);
-            this.errorImage.Name = "errorImage";
-            this.errorImage.Size = new System.Drawing.Size(38, 37);
-            this.errorImage.TabIndex = 14;
-            this.errorImage.TabStop = false;
-            this.errorImage.Visible = false;
+            errorImage.BackColor = System.Drawing.Color.Transparent;
+            errorImage.Image = (System.Drawing.Image)resources.GetObject("errorImage.Image");
+            errorImage.Location = new System.Drawing.Point(778, 4);
+            errorImage.Margin = new System.Windows.Forms.Padding(4);
+            errorImage.Name = "errorImage";
+            errorImage.Size = new System.Drawing.Size(38, 37);
+            errorImage.TabIndex = 14;
+            errorImage.TabStop = false;
+            errorImage.Visible = false;
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(826, 7);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(18, 19);
-            this.pictureBox1.TabIndex = 13;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            pictureBox1.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            pictureBox1.Image = (System.Drawing.Image)resources.GetObject("pictureBox1.Image");
+            pictureBox1.Location = new System.Drawing.Point(826, 7);
+            pictureBox1.Margin = new System.Windows.Forms.Padding(4);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new System.Drawing.Size(18, 19);
+            pictureBox1.TabIndex = 13;
+            pictureBox1.TabStop = false;
+            pictureBox1.Click += pictureBox1_Click;
             // 
             // txtStatus
             // 
-            this.txtStatus.AutoSize = true;
-            this.txtStatus.Dock = System.Windows.Forms.DockStyle.Top;
-            this.txtStatus.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.txtStatus.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.txtStatus.Location = new System.Drawing.Point(0, 28);
-            this.txtStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.txtStatus.MaximumSize = new System.Drawing.Size(501, 0);
-            this.txtStatus.Name = "txtStatus";
-            this.txtStatus.Padding = new System.Windows.Forms.Padding(10, 9, 0, 0);
-            this.txtStatus.Size = new System.Drawing.Size(69, 30);
-            this.txtStatus.TabIndex = 12;
-            this.txtStatus.Text = "Status";
+            txtStatus.AutoSize = true;
+            txtStatus.Dock = System.Windows.Forms.DockStyle.Top;
+            txtStatus.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            txtStatus.ForeColor = System.Drawing.Color.FromArgb(230, 230, 230);
+            txtStatus.Location = new System.Drawing.Point(0, 28);
+            txtStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            txtStatus.MaximumSize = new System.Drawing.Size(501, 0);
+            txtStatus.Name = "txtStatus";
+            txtStatus.Padding = new System.Windows.Forms.Padding(10, 9, 0, 0);
+            txtStatus.Size = new System.Drawing.Size(69, 30);
+            txtStatus.TabIndex = 12;
+            txtStatus.Text = "Status";
             // 
-            // label4
+            // lblStatus
             // 
-            this.label4.AutoSize = true;
-            this.label4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.label4.Font = new System.Drawing.Font("Century Gothic", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(175)))), ((int)(((byte)(175)))), ((int)(((byte)(175)))));
-            this.label4.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.label4.Location = new System.Drawing.Point(0, 0);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Padding = new System.Windows.Forms.Padding(24, 4, 24, 0);
-            this.label4.Size = new System.Drawing.Size(117, 28);
-            this.label4.TabIndex = 11;
-            this.label4.Text = "Status";
+            lblStatus.AutoSize = true;
+            lblStatus.Dock = System.Windows.Forms.DockStyle.Top;
+            lblStatus.Font = new System.Drawing.Font("Century Gothic", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            lblStatus.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
+            lblStatus.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            lblStatus.Location = new System.Drawing.Point(0, 0);
+            lblStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Padding = new System.Windows.Forms.Padding(24, 4, 24, 0);
+            lblStatus.Size = new System.Drawing.Size(117, 28);
+            lblStatus.TabIndex = 11;
+            lblStatus.Text = "Status";
             // 
             // panel1
             // 
-            this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
-            this.panel1.Controls.Add(this.btnStart);
-            this.panel1.Controls.Add(this.btnStop);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(4, 4);
-            this.panel1.Margin = new System.Windows.Forms.Padding(4);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(342, 93);
-            this.panel1.TabIndex = 3;
+            panel1.BackColor = System.Drawing.Color.FromArgb(38, 38, 38);
+            panel1.Controls.Add(btnStart);
+            panel1.Controls.Add(btnStop);
+            panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            panel1.Location = new System.Drawing.Point(4, 4);
+            panel1.Margin = new System.Windows.Forms.Padding(4);
+            panel1.Name = "panel1";
+            panel1.Size = new System.Drawing.Size(342, 93);
+            panel1.TabIndex = 3;
             // 
             // btnStart
             // 
-            this.btnStart.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
-            this.btnStart.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnStart.BackgroundImage")));
-            this.btnStart.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.btnStart.Dock = System.Windows.Forms.DockStyle.Left;
-            this.btnStart.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
-            this.btnStart.FlatAppearance.BorderSize = 0;
-            this.btnStart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStart.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnStart.Location = new System.Drawing.Point(0, 0);
-            this.btnStart.Margin = new System.Windows.Forms.Padding(4);
-            this.btnStart.Name = "btnStart";
-            this.btnStart.Size = new System.Drawing.Size(109, 93);
-            this.btnStart.TabIndex = 9;
-            this.btnStart.UseVisualStyleBackColor = false;
-            this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
+            btnStart.BackColor = System.Drawing.Color.FromArgb(38, 38, 38);
+            btnStart.BackgroundImage = (System.Drawing.Image)resources.GetObject("btnStart.BackgroundImage");
+            btnStart.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            btnStart.Dock = System.Windows.Forms.DockStyle.Left;
+            btnStart.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(38, 38, 38);
+            btnStart.FlatAppearance.BorderSize = 0;
+            btnStart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnStart.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            btnStart.Location = new System.Drawing.Point(0, 0);
+            btnStart.Margin = new System.Windows.Forms.Padding(4);
+            btnStart.Name = "btnStart";
+            btnStart.Size = new System.Drawing.Size(109, 93);
+            btnStart.TabIndex = 9;
+            btnStart.UseVisualStyleBackColor = false;
+            btnStart.Click += btnStart_Click;
             // 
             // btnStop
             // 
-            this.btnStop.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnStop.BackgroundImage")));
-            this.btnStop.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.btnStop.Dock = System.Windows.Forms.DockStyle.Right;
-            this.btnStop.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(38)))), ((int)(((byte)(38)))));
-            this.btnStop.FlatAppearance.BorderSize = 0;
-            this.btnStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStop.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnStop.Location = new System.Drawing.Point(220, 0);
-            this.btnStop.Margin = new System.Windows.Forms.Padding(4);
-            this.btnStop.Name = "btnStop";
-            this.btnStop.Size = new System.Drawing.Size(122, 93);
-            this.btnStop.TabIndex = 8;
-            this.btnStop.UseVisualStyleBackColor = true;
-            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
+            btnStop.BackgroundImage = (System.Drawing.Image)resources.GetObject("btnStop.BackgroundImage");
+            btnStop.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            btnStop.Dock = System.Windows.Forms.DockStyle.Right;
+            btnStop.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(38, 38, 38);
+            btnStop.FlatAppearance.BorderSize = 0;
+            btnStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            btnStop.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            btnStop.Location = new System.Drawing.Point(220, 0);
+            btnStop.Margin = new System.Windows.Forms.Padding(4);
+            btnStop.Name = "btnStop";
+            btnStop.Size = new System.Drawing.Size(122, 93);
+            btnStop.TabIndex = 8;
+            btnStop.UseVisualStyleBackColor = true;
+            btnStop.Click += btnStop_Click;
             // 
             // tableLayoutPanel1
             // 
-            this.tableLayoutPanel1.ColumnCount = 1;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.treeView, 0, 1);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(14, 34);
-            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 2;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 85F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(350, 676);
-            this.tableLayoutPanel1.TabIndex = 4;
+            tableLayoutPanel1.ColumnCount = 1;
+            tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanel1.Controls.Add(panel1, 0, 0);
+            tableLayoutPanel1.Controls.Add(treeView, 0, 1);
+            tableLayoutPanel1.Location = new System.Drawing.Point(14, 34);
+            tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 2;
+            tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15F));
+            tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 85F));
+            tableLayoutPanel1.Size = new System.Drawing.Size(350, 676);
+            tableLayoutPanel1.TabIndex = 4;
             // 
             // tableLayoutPanel2
             // 
-            this.tableLayoutPanel2.ColumnCount = 2;
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel2.Controls.Add(this.statusPanel, 0, 0);
-            this.tableLayoutPanel2.Controls.Add(this.contentPanel, 0, 1);
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(368, 34);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4);
-            this.tableLayoutPanel2.Name = "tableLayoutPanel2";
-            this.tableLayoutPanel2.RowCount = 3;
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 35F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 65F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(860, 676);
-            this.tableLayoutPanel2.TabIndex = 5;
+            tableLayoutPanel2.ColumnCount = 2;
+            tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            tableLayoutPanel2.Controls.Add(statusPanel, 0, 0);
+            tableLayoutPanel2.Controls.Add(contentPanel, 0, 1);
+            tableLayoutPanel2.Location = new System.Drawing.Point(368, 34);
+            tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4);
+            tableLayoutPanel2.Name = "tableLayoutPanel2";
+            tableLayoutPanel2.RowCount = 3;
+            tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 35F));
+            tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 65F));
+            tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            tableLayoutPanel2.Size = new System.Drawing.Size(860, 676);
+            tableLayoutPanel2.TabIndex = 5;
             // 
             // menuStrip
             // 
-            this.menuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuSettings,
-            this.menuQuestion,
-            this.comboTrend,
-            this.btnStartTrend});
-            this.menuStrip.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
-            this.menuStrip.Size = new System.Drawing.Size(1228, 32);
-            this.menuStrip.TabIndex = 6;
-            this.menuStrip.Text = "menuStrip1";
+            menuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
+            menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { menuSettings, menuQuestion, comboTrend, btnStartTrend });
+            menuStrip.Location = new System.Drawing.Point(0, 0);
+            menuStrip.Name = "menuStrip";
+            menuStrip.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
+            menuStrip.Size = new System.Drawing.Size(1228, 32);
+            menuStrip.TabIndex = 6;
+            menuStrip.Text = "menuStrip1";
             // 
             // menuSettings
             // 
-            this.menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.databasToolStripMenuItem,
-            this.debugMenu,
-            this.notifyMenu,
-            this.autoStartTool});
-            this.menuSettings.Name = "menuSettings";
-            this.menuSettings.Size = new System.Drawing.Size(84, 28);
-            this.menuSettings.Text = "Inställningar";
+            menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { databasToolStripMenuItem, debugMenu, notifyMenu, autoStartTool });
+            menuSettings.Name = "menuSettings";
+            menuSettings.Size = new System.Drawing.Size(84, 28);
+            menuSettings.Text = "Inställningar";
             // 
             // databasToolStripMenuItem
             // 
-            this.databasToolStripMenuItem.Name = "databasToolStripMenuItem";
-            this.databasToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
-            this.databasToolStripMenuItem.Text = "Databas...";
-            this.databasToolStripMenuItem.Click += new System.EventHandler(this.databasToolStripMenuItem_Click);
+            databasToolStripMenuItem.Name = "databasToolStripMenuItem";
+            databasToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            databasToolStripMenuItem.Text = "Databas...";
+            databasToolStripMenuItem.Click += databasToolStripMenuItem_Click;
             // 
             // debugMenu
             // 
-            this.debugMenu.CheckOnClick = true;
-            this.debugMenu.Name = "debugMenu";
-            this.debugMenu.Size = new System.Drawing.Size(133, 22);
-            this.debugMenu.Text = "Debug";
-            this.debugMenu.CheckedChanged += new System.EventHandler(this.debugMeny_CheckedChanged);
+            debugMenu.CheckOnClick = true;
+            debugMenu.Name = "debugMenu";
+            debugMenu.Size = new System.Drawing.Size(133, 22);
+            debugMenu.Text = "Debug";
+            debugMenu.CheckedChanged += debugMeny_CheckedChanged;
             // 
             // notifyMenu
             // 
-            this.notifyMenu.CheckOnClick = true;
-            this.notifyMenu.Name = "notifyMenu";
-            this.notifyMenu.Size = new System.Drawing.Size(133, 22);
-            this.notifyMenu.Text = "Notify Ikon";
-            this.notifyMenu.CheckedChanged += new System.EventHandler(this.notifyMenu_CheckedChanged);
+            notifyMenu.CheckOnClick = true;
+            notifyMenu.Name = "notifyMenu";
+            notifyMenu.Size = new System.Drawing.Size(133, 22);
+            notifyMenu.Text = "Notify Ikon";
+            notifyMenu.CheckedChanged += notifyMenu_CheckedChanged;
             // 
             // autoStartTool
             // 
-            this.autoStartTool.CheckOnClick = true;
-            this.autoStartTool.Name = "autoStartTool";
-            this.autoStartTool.Size = new System.Drawing.Size(133, 22);
-            this.autoStartTool.Text = "Autostart";
-            this.autoStartTool.CheckedChanged += new System.EventHandler(this.autoStartTool_CheckedChanged);
+            autoStartTool.CheckOnClick = true;
+            autoStartTool.Name = "autoStartTool";
+            autoStartTool.Size = new System.Drawing.Size(133, 22);
+            autoStartTool.Text = "Autostart";
+            autoStartTool.CheckedChanged += autoStartTool_CheckedChanged;
             // 
             // menuQuestion
             // 
-            this.menuQuestion.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.menuQuestion.Name = "menuQuestion";
-            this.menuQuestion.Size = new System.Drawing.Size(25, 28);
-            this.menuQuestion.Text = "?";
-            this.menuQuestion.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
+            menuQuestion.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            menuQuestion.Name = "menuQuestion";
+            menuQuestion.Size = new System.Drawing.Size(25, 28);
+            menuQuestion.Text = "?";
+            menuQuestion.Click += toolStripMenuItem1_Click;
             // 
             // comboTrend
             // 
-            this.comboTrend.Name = "comboTrend";
-            this.comboTrend.Size = new System.Drawing.Size(300, 28);
-            this.comboTrend.TextChanged += new System.EventHandler(this.comboTrend_TextChanged);
+            comboTrend.Name = "comboTrend";
+            comboTrend.Size = new System.Drawing.Size(300, 28);
+            comboTrend.TextChanged += comboTrend_TextChanged;
             // 
             // btnStartTrend
             // 
-            this.btnStartTrend.Image = ((System.Drawing.Image)(resources.GetObject("btnStartTrend.Image")));
-            this.btnStartTrend.Name = "btnStartTrend";
-            this.btnStartTrend.Size = new System.Drawing.Size(95, 28);
-            this.btnStartTrend.Text = "Visa trend";
-            this.btnStartTrend.Click += new System.EventHandler(this.btnStartTrend_Click);
+            btnStartTrend.Image = (System.Drawing.Image)resources.GetObject("btnStartTrend.Image");
+            btnStartTrend.Name = "btnStartTrend";
+            btnStartTrend.Size = new System.Drawing.Size(95, 28);
+            btnStartTrend.Text = "Visa trend";
+            btnStartTrend.Click += btnStartTrend_Click;
             // 
             // notifyIcon
             // 
-            this.notifyIcon.Text = "notifyIcon1";
-            this.notifyIcon.Visible = true;
-            this.notifyIcon.Click += new System.EventHandler(this.notifyIcon_Click);
+            notifyIcon.Text = "notifyIcon1";
+            notifyIcon.Visible = true;
+            notifyIcon.Click += notifyIcon_Click;
             // 
             // databaseImageList
             // 
-            this.databaseImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            this.databaseImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("databaseImageList.ImageStream")));
-            this.databaseImageList.TransparentColor = System.Drawing.Color.Transparent;
-            this.databaseImageList.Images.SetKeyName(0, "no_database_26px.png");
-            this.databaseImageList.Images.SetKeyName(1, "database_view_26px.png");
+            databaseImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            databaseImageList.ImageStream = (System.Windows.Forms.ImageListStreamer)resources.GetObject("databaseImageList.ImageStream");
+            databaseImageList.TransparentColor = System.Drawing.Color.Transparent;
+            databaseImageList.Images.SetKeyName(0, "no_database_26px.png");
+            databaseImageList.Images.SetKeyName(1, "database_view_26px.png");
             // 
             // MasterForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(1228, 715);
-            this.Controls.Add(this.menuStrip);
-            this.Controls.Add(this.tableLayoutPanel2);
-            this.Controls.Add(this.tableLayoutPanel1);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.menuStrip;
-            this.Margin = new System.Windows.Forms.Padding(4);
-            this.MaximizeBox = false;
-            this.MaximumSize = new System.Drawing.Size(1249, 879);
-            this.Name = "MasterForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Optima Value";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MasterForm_FormClosing);
-            this.Load += new System.EventHandler(this.MasterForm_Load);
-            this.addPlcMenu.ResumeLayout(false);
-            this.statusPanel.ResumeLayout(false);
-            this.statusPanel.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.databaseImage)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.errorImage)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.panel1.ResumeLayout(false);
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel2.ResumeLayout(false);
-            this.menuStrip.ResumeLayout(false);
-            this.menuStrip.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            BackColor = System.Drawing.Color.Black;
+            ClientSize = new System.Drawing.Size(1228, 715);
+            Controls.Add(menuStrip);
+            Controls.Add(tableLayoutPanel2);
+            Controls.Add(tableLayoutPanel1);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            MainMenuStrip = menuStrip;
+            Margin = new System.Windows.Forms.Padding(4);
+            MaximizeBox = false;
+            MaximumSize = new System.Drawing.Size(1249, 879);
+            Name = "MasterForm";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            Text = "Optima Value";
+            FormClosing += MasterForm_FormClosing;
+            Load += MasterForm_Load;
+            addPlcMenu.ResumeLayout(false);
+            statusPanel.ResumeLayout(false);
+            statusPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)databaseImage).EndInit();
+            ((System.ComponentModel.ISupportInitialize)errorImage).EndInit();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            panel1.ResumeLayout(false);
+            tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel2.ResumeLayout(false);
+            menuStrip.ResumeLayout(false);
+            menuStrip.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -424,7 +413,7 @@
         private System.Windows.Forms.Panel contentPanel;
         private System.Windows.Forms.Panel statusPanel;
         private System.Windows.Forms.Label txtStatus;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label lblStatus;
         private System.Windows.Forms.ToolStripMenuItem addPlc;
         private System.Windows.Forms.ContextMenuStrip addPlcMenu;
         private System.Windows.Forms.Panel panel1;

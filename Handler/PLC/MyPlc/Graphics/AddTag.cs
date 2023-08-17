@@ -18,7 +18,6 @@ using OpcUa.UI.Controls;
 using OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters;
 using System.Net;
 using System.Windows.Documents;
-using OptimaValue.ML;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
