@@ -1,19 +1,16 @@
-﻿using LiveCharts;
-using LiveCharts.Configurations;
+﻿using LiveCharts.Configurations;
 using LiveCharts.Defaults;
 using LiveCharts.Geared;
 using LiveCharts.Helpers;
 using LiveCharts.Wpf;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -258,6 +255,10 @@ public class TrendModel
 
                 });
                 break;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
             }
             finally
             {

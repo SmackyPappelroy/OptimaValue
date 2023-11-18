@@ -635,10 +635,10 @@ namespace OptimaValue.Handler.PLC.Graphics
                     Application.UseWaitCursor = false;
                     tableLayoutPanel2.Enabled = true;
                     loading = false;
-                    if(connected)
+                    if (connected)
                     {
                         $"Frånkopplad från {MyPlc.PlcName}"
-                            .SendStatusMessage(Severity.Success);
+                            .SendStatusMessage(Severity.Information);
                     }
                     connected = false;
                 }

@@ -33,6 +33,8 @@ public static class LoggerHandler
         Interval = 5000,
     };
 
+    public static LoggingStats LoggingStats = new LoggingStats(100, 5000);
+
     private static List<LastValue> lastLogValues;
 
     private static Task logTask;
@@ -131,25 +133,31 @@ public static class LoggerHandler
         startClosing = true;
     }
 
+    static DateTime startDateTime = DateTime.Now;
     private static async Task Cycler(CancellationToken ct)
     {
         InitializeOnlineTimer();
         //    InitializeSendValuesToSql();
         InitializeLastLogValue();
         await CheckConnectionsAsync();
+        Logger.LogInfo("Loggning startad");
+        long minReadTime = TagsToLog.AllLogValues.Min(x => (long)x.LogFreq);
 
         while (PlcConfig.PlcList.Any(p => p.LoggerIsStarted))
         {
+            startDateTime = DateTime.Now;
             var sw = Stopwatch.StartNew();
 
-            long minReadTime = TagsToLog.AllLogValues.Min(x => (long)x.LogFreq);
             await ProcessAllPlcTagsAndHandleClosing();
 
             sw.Stop();
             long executionTime = sw.ElapsedMilliseconds;
             var delay = executionTime > minReadTime ? 10 : minReadTime - executionTime;
-            await Task.Delay((int)delay, ct);
+            LoggingStats.Update(DateTime.Now - startDateTime);
 
+            await Task.Delay((int)delay, ct);
+            if (ct.IsCancellationRequested)
+                LoggingStats.Reset();
             ct.ThrowIfCancellationRequested();
         }
     }

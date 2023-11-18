@@ -27,7 +27,7 @@ namespace OptimaValue
 
             cycleTimer.Tick += CycleTimer_Tick;
             cycleTimer.Start();
-            Text = "CPU-belastning";
+            Text = "Loggningsstatistik";
         }
 
         private void CycleTimer_Tick(object sender, EventArgs e)
@@ -38,8 +38,24 @@ namespace OptimaValue
                 double ram = myAppRam.NextValue();
                 txtCpu.Text = (pct / 1000).ToString("P");
                 txtRam.Text = $"{(ram / 1024 / 1024).ToString("F", CultureInfo.CurrentCulture)} MB";
+                AddLoggingStats();
             }
             txtThread.Text = Process.GetCurrentProcess().Threads.Count.ToString();
+        }
+
+        private void AddLoggingStats()
+        {
+            try
+            {
+                lblLastCycle.Text = LoggerHandler.LoggingStats.LastCycleTime.FormatTime();
+                lblAvgCycle.Text = LoggerHandler.LoggingStats.AverageCycleTime.FormatTime();
+                lblMaxCycle.Text = LoggerHandler.LoggingStats.MaxCycleTime.FormatTime();
+                lblMinCycle.Text = LoggerHandler.LoggingStats.MinCycleTime.FormatTime();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         private void txtCpu_Leave(object sender, EventArgs e)

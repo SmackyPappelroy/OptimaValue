@@ -1,4 +1,5 @@
-﻿using LiveCharts.Defaults;
+﻿using FileLogger;
+using LiveCharts.Defaults;
 using LiveCharts.Geared;
 using LiveCharts.WinForms;
 using LiveCharts.Wpf;
@@ -33,64 +34,71 @@ namespace OptimaValue
 
         private void TrendModel_OnValuesUpdated(bool obj)
         {
-            this.Invoke((MethodInvoker)delegate
+            try
             {
-                if (chart.AxisX.Count > 0 && (trendModel.PlayActive || trendModel.InputDatesOk))
+                this.Invoke((MethodInvoker)delegate
                 {
-                    chart.AxisX.First().MaxValue = trendModel.MaxValueX;
-                    chart.AxisX.First().MinValue = trendModel.MinValueX;
-                    if (trendModel.Minimum > double.MinValue && trendModel.Maximum < double.MaxValue)
+                    if (chart.AxisX.Count > 0 && (trendModel.PlayActive || trendModel.InputDatesOk))
                     {
-                        chart.AxisY.First().MinValue = trendModel.Minimum;
-                        chart.AxisY.First().MaxValue = trendModel.Maximum;
-                    }
-                    else
-                    {
-                        chart.AxisY.First().MaxValue = trendModel.MaxValueY;
-                        chart.AxisY.First().MinValue = trendModel.MinValueY;
-                    }
-
-                    chart.AxisX.First().Separator = DefaultAxes.CleanSeparator;
-                    chart.AxisX.First().LabelFormatter = trendModel.FormatterX;
-                    chart.AxisY.First().LabelFormatter = trendModel.FormatterY;
-                    chart.AxisY.First().Separator = DefaultAxes.CleanSeparator;
-
-
-                    var startTime = new DateTime((long)trendModel.MinValueX);
-                    var stopTime = new DateTime((long)trendModel.MaxValueX);
-                    lblStartTime.Text = startTime.ToString("yyyy-MM-dd HH:mm:ss");
-                    lblStopTime.Text = stopTime.ToString("yyyy-MM-dd HH:mm:ss");
-                    lblTimeSpan.Text = (stopTime - startTime).ToReadableString();
-
-                }
-
-                if (trendModel.MinValueX < trendModel.MaxValueX && (trendModel.PlayActive || trendModel.InputDatesOk))
-                {
-                    trendModel.LineSeries.Values = trendModel.ChartValuesDateTimePoints;
-                    if (chart.Series.Count == 0)
-                    {
-                        chart.Series.Add(trendModel.LineSeries);
-                    }
-                    else
-                        chart.Series[0].Values = trendModel.ChartValuesDateTimePoints;
-                    if (trendModel.ChartSetpointDateTimePoints.Count > 0)
-                    {
-                        if (chart.Series.Count == 1)
+                        chart.AxisX.First().MaxValue = trendModel.MaxValueX;
+                        chart.AxisX.First().MinValue = trendModel.MinValueX;
+                        if (trendModel.Minimum > double.MinValue && trendModel.Maximum < double.MaxValue)
                         {
-                            chart.Series.Add(trendModel.LineSeriesSetpoint);
+                            chart.AxisY.First().MinValue = trendModel.Minimum;
+                            chart.AxisY.First().MaxValue = trendModel.Maximum;
                         }
-                    }
-                    else
-                    {
-                        if (chart.Series.Count == 2)
+                        else
                         {
-                            chart.Series.RemoveAt(1);
+                            chart.AxisY.First().MaxValue = trendModel.MaxValueY;
+                            chart.AxisY.First().MinValue = trendModel.MinValueY;
                         }
+
+                        chart.AxisX.First().Separator = DefaultAxes.CleanSeparator;
+                        chart.AxisX.First().LabelFormatter = trendModel.FormatterX;
+                        chart.AxisY.First().LabelFormatter = trendModel.FormatterY;
+                        chart.AxisY.First().Separator = DefaultAxes.CleanSeparator;
+
+
+                        var startTime = new DateTime((long)trendModel.MinValueX);
+                        var stopTime = new DateTime((long)trendModel.MaxValueX);
+                        lblStartTime.Text = startTime.ToString("yyyy-MM-dd HH:mm:ss");
+                        lblStopTime.Text = stopTime.ToString("yyyy-MM-dd HH:mm:ss");
+                        lblTimeSpan.Text = (stopTime - startTime).ToReadableString();
+
                     }
 
-                }
+                    if (trendModel.MinValueX < trendModel.MaxValueX && (trendModel.PlayActive || trendModel.InputDatesOk))
+                    {
+                        trendModel.LineSeries.Values = trendModel.ChartValuesDateTimePoints;
+                        if (chart.Series.Count == 0)
+                        {
+                            chart.Series.Add(trendModel.LineSeries);
+                        }
+                        else
+                            chart.Series[0].Values = trendModel.ChartValuesDateTimePoints;
+                        if (trendModel.ChartSetpointDateTimePoints.Count > 0)
+                        {
+                            if (chart.Series.Count == 1)
+                            {
+                                chart.Series.Add(trendModel.LineSeriesSetpoint);
+                            }
+                        }
+                        else
+                        {
+                            if (chart.Series.Count == 2)
+                            {
+                                chart.Series.RemoveAt(1);
+                            }
+                        }
 
-            });
+                    }
+
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("Trend problem", ex);
+            }
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

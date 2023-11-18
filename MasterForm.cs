@@ -405,7 +405,7 @@ public partial class MasterForm : Form
                         Dock = DockStyle.Fill
                     };
                 }
-                statusControl?.Hide(); 
+                statusControl?.Hide();
                 statusControl = null;
                 tagControl?.Hide();
                 tagControl = null;
@@ -845,7 +845,15 @@ public partial class MasterForm : Form
         var tagId = TagIds.Where(x => x.Id == (int)comboTrend.ComboBox.SelectedValue
             ).First();
         var trendForm = new TrendTag(tagId.Id);
-        trendForm.Show();
+        try
+        {
+            trendForm.Show();
+
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError("", ex);
+        }
     }
 
 

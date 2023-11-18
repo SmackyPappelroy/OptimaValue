@@ -942,6 +942,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         }
 
+        private bool calcFormIsOpen = false;
         private void clickEkvation(object sender, EventArgs e)
         {
             if (tag is null)
@@ -962,8 +963,15 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     BitAddress = 0,
                 };
             }
-            var calculationForm = new CalculationForm(MyPlc, tag);
+            if (calcFormIsOpen)
+                return;
+            calculationForm = new CalculationForm(MyPlc, tag);
+            calculationForm.FormClosing += (s, e) =>
+            {
+                calcFormIsOpen = false;
+            };
             calculationForm.Show();
+            calcFormIsOpen = true;
         }
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {
@@ -971,6 +979,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         }
 
         public bool logInfoFormOpen = false;
+        private CalculationForm calculationForm;
+
         private void btnInfo_Click(object sender, EventArgs e)
         {
             if (logInfoFormOpen)
