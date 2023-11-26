@@ -1,4 +1,5 @@
-﻿using OpcUa.DA;
+﻿using FileLogger;
+using OpcUa.DA;
 using OpcUa.UI.Controls;
 using OpcUaHm.Common;
 using System;
@@ -190,10 +191,23 @@ namespace OptimaValue
 
         private void Initialize()
         {
+            ValidateUriString(ConnectionString);
             if (opcType == OpcType.OpcUa)
                 Client = new UaClient(new Uri(ConnectionString), Application.ProductName);
             else
                 Client = new DaClient(ConnectionString);
+        }
+
+        private void ValidateUriString(string connectionString)
+        {
+            if (string.IsNullOrEmpty(connectionString))
+                throw new ArgumentNullException(nameof(connectionString));
+
+            if (opcType == OpcType.OpcUa)
+            {
+                if (!Uri.IsWellFormedUriString(connectionString, UriKind.Absolute))
+                    throw new ArgumentException("Invalid OPC UA connection string", nameof(connectionString));
+            }
         }
 
         public bool Connect()

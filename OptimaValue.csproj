@@ -1,117 +1,104 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net7.0-windows</TargetFramework>
-		<UseWindowsForms>true</UseWindowsForms>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-
-		<RootNamespace>OptimaValue</RootNamespace>
-		<AssemblyName>OptimaValue</AssemblyName>
-		<StartupObject>OptimaValue.Program</StartupObject>
-		<ApplicationIcon>Mina Resurser\icons8_gas_idle.ico</ApplicationIcon>
-		<PlatformTarget>AnyCPU</PlatformTarget>
-		<AnalysisLevel>latest</AnalysisLevel>
-		<Deterministic>false</Deterministic>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<Compile Remove="CIP%281%29\**" />
-		<Compile Remove="CIP\**" />
-		<Compile Remove="Projects\**" />
-		<EmbeddedResource Remove="CIP%281%29\**" />
-		<EmbeddedResource Remove="CIP\**" />
-		<EmbeddedResource Remove="Projects\**" />
-		<None Remove="CIP%281%29\**" />
-		<None Remove="CIP\**" />
-		<None Remove="Projects\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Remove="Mina Resurser\cancel_16px.png" />
-		<None Remove="Mina Resurser\Logos\opc.svg" />
-		<None Remove="Mina Resurser\Logos\opcualogo.png" />
-		<None Remove="Mina Resurser\Logos\siemens-logo-512x512.png" />
-		<None Remove="Mina Resurser\Logos\siemens.svg" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<COMReference Include="IWshRuntimeLibrary">
-			<WrapperTool>tlbimp</WrapperTool>
-			<VersionMinor>0</VersionMinor>
-			<VersionMajor>1</VersionMajor>
-			<Guid>f935dc20-1cf0-11d0-adb9-00c04fd58a0b</Guid>
-			<Lcid>0</Lcid>
-			<Isolated>false</Isolated>
-			<EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Include="Mina Resurser\icons8_gas_idle.ico" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Include="Mina Resurser\Logos\opcualogo.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="ClosedXML" Version="0.102.0" />
-		<PackageReference Include="CsvHelper" Version="30.0.1" />
-		<PackageReference Include="EntityFramework" Version="6.4.4" />
-		<PackageReference Include="LiveCharts.Geared" Version="1.2.9" />
-		<PackageReference Include="LiveCharts.WinForms.NetCore3" Version="0.9.7" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-		<PackageReference Include="Microsoft.ML.TimeSeries" Version="2.0.1" />
-		<PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
-		<PackageReference Include="Microsoft.OpenApi" Version="1.6.6" />
-		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.18.0" />
-		<PackageReference Include="S7netplus" Version="0.20.0" />
-		<PackageReference Include="System.ServiceModel.Primitives" Version="6.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\..\..\Utveckling\Logger\Logger\FileLogger.csproj" />
-		<ProjectReference Include="..\..\Opc\OpcUa.UI\OpcUa.UI.csproj" />
-		<ProjectReference Include="..\..\Opc\OpcUa\OpcUa.csproj" />
-		<ProjectReference Include="Projects\OptimaValue.Settings\OptimaValue.Config.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Resource Include="Mina Resurser\cancel_16px.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Resource>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="Handler\PLC\MyPlc\Graphics\ReadTagControl.cs">
-			<SubType>UserControl</SubType>
-		</Compile>
-		<Compile Update="Properties\Resources.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Resources.resx</DependentUpon>
-		</Compile>
-		<Compile Update="Properties\Settings.Designer.cs">
-			<DesignTimeSharedInput>True</DesignTimeSharedInput>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Settings.settings</DependentUpon>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Update="Properties\Resources.resx">
-			<Generator>PublicResXFileCodeGenerator</Generator>
-			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="Properties\Settings.settings">
-			<Generator>SettingsSingleFileGenerator</Generator>
-			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
-		</None>
-	</ItemGroup>
-
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <RootNamespace>OptimaValue</RootNamespace>
+    <AssemblyName>OptimaValue</AssemblyName>
+    <StartupObject>OptimaValue.Program</StartupObject>
+    <ApplicationIcon>Mina Resurser\icons8_gas_idle.ico</ApplicationIcon>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="CIP%281%29\**" />
+    <Compile Remove="CIP\**" />
+    <Compile Remove="Projects\**" />
+    <EmbeddedResource Remove="CIP%281%29\**" />
+    <EmbeddedResource Remove="CIP\**" />
+    <EmbeddedResource Remove="Projects\**" />
+    <None Remove="CIP%281%29\**" />
+    <None Remove="CIP\**" />
+    <None Remove="Projects\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Mina Resurser\cancel_16px.png" />
+    <None Remove="Mina Resurser\Logos\opc.svg" />
+    <None Remove="Mina Resurser\Logos\opcualogo.png" />
+    <None Remove="Mina Resurser\Logos\siemens-logo-512x512.png" />
+    <None Remove="Mina Resurser\Logos\siemens.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="IWshRuntimeLibrary">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>f935dc20-1cf0-11d0-adb9-00c04fd58a0b</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Mina Resurser\icons8_gas_idle.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Mina Resurser\Logos\opcualogo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.102.0" />
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
+    <PackageReference Include="LiveCharts.Geared" Version="1.2.9" />
+    <PackageReference Include="LiveCharts.WinForms.NetCore3" Version="0.9.7" />
+    <PackageReference Include="Microsoft.ML.TimeSeries" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
+    <PackageReference Include="Microsoft.OpenApi" Version="1.6.6" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.18.0" />
+    <PackageReference Include="S7netplus" Version="0.20.0" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="6.0.0" />
+    <PackageReference Include="EntityFramework" Version="6.4.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Utveckling\Logger\Logger\FileLogger.csproj" />
+    <ProjectReference Include="..\..\Opc\OpcUa.UI\OpcUa.UI.csproj" />
+    <ProjectReference Include="..\..\Opc\OpcUa\OpcUa.csproj" />
+    <ProjectReference Include="Projects\OptimaValue.Settings\OptimaValue.Config.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Mina Resurser\cancel_16px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Handler\PLC\MyPlc\Graphics\ReadTagControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
 </Project>

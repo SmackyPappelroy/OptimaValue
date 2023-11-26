@@ -51,6 +51,8 @@ namespace OptimaValue
             }
         }
 
+
+
         private void InitializeProperties()
         {
             Plc.PlcName = PlcConfiguration.PlcName;

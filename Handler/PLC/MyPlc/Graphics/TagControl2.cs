@@ -161,7 +161,7 @@ public partial class TagControl2 : UserControl
                                 var newTag = new SingleTagControl(tag, myPlc, myTreeView);
                                 newTag.TagChanged -= NewTag_TagChanged;
                                 newTag.TagChanged += NewTag_TagChanged;
-                                flowLayoutPanel.Invoke((MethodInvoker)delegate
+                                flowLayoutPanel.Invoke((System.Windows.Forms.MethodInvoker)delegate
                                 {
                                     flowLayoutPanel.Controls.Add(newTag);
                                 });
@@ -182,7 +182,7 @@ public partial class TagControl2 : UserControl
                             var newTag = new SingleTagControl(tag, myPlc, myTreeView);
                             newTag.TagChanged -= NewTag_TagChanged;
                             newTag.TagChanged += NewTag_TagChanged;
-                            flowLayoutPanel.Invoke((MethodInvoker)delegate
+                            flowLayoutPanel.Invoke((System.Windows.Forms.MethodInvoker)delegate
                             {
                                 flowLayoutPanel.Controls.Add(newTag);
                             });

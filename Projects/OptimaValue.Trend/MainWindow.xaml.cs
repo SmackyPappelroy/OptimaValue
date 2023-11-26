@@ -33,6 +33,7 @@ namespace OptimaValue.Trend
 
         public MainWindow()
         {
+            Xceed.Wpf.Toolkit.ColorPicker colorPicker = new Xceed.Wpf.Toolkit.ColorPicker();
             InitializeComponent();
             viewModel = new MainWindowViewModel(this);
             DataContext = viewModel;

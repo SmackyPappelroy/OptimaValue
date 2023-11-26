@@ -1,96 +1,86 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net7.0-windows</TargetFramework>
-		<Nullable>enable</Nullable>
-		<UseWPF>true</UseWPF>
-		<ApplicationIcon>Resurser\icons8_area_chart.ico</ApplicationIcon>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<None Remove="icons8_area_chart_64.png" />
-		<None Remove="Resurser\falling_edge_24px.png" />
-		<None Remove="Resurser\flash_on_24px.png" />
-		<None Remove="Resurser\moon_symbol_24px.png" />
-		<None Remove="Resurser\opened_folder_24px.png" />
-		<None Remove="Resurser\refresh_24px.png" />
-		<None Remove="Resurser\rising_edge_24px.png" />
-		<None Remove="Resurser\save_24px.png" />
-		<None Remove="Resurser\scale_24px.png" />
-		<None Remove="Resurser\sun_24px.png" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Include="Resurser\icons8_area_chart.ico" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Extended.Wpf.Toolkit" Version="4.3.0" />
-		<PackageReference Include="gong-wpf-dragdrop" Version="3.2.0" />
-		<PackageReference Include="LiveCharts.Core" Version="0.9.8" />
-		<PackageReference Include="LiveCharts.Geared" Version="1.2.9" />
-		<PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
-		<PackageReference Include="Serilog.Extensions.Hosting" Version="5.0.1" />
-		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-		<PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
-		<PackageReference Include="System.ServiceModel.Primitives" Version="6.0.0" />
-		<PackageReference Include="System.Text.Json" Version="7.0.3" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\OptimaValue.Settings\OptimaValue.Config.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Resource Include="icons8_area_chart_64.png" />
-		<Resource Include="Resurser\falling_edge_24px.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resurser\flash_on_24px.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resurser\moon_symbol_24px.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resurser\opened_folder_24px.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resurser\refresh_24px.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resurser\rising_edge_24px.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resurser\save_24px.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resurser\scale_24px.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resurser\sun_24px.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Resource>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="Properties\Settings.Designer.cs">
-			<DesignTimeSharedInput>True</DesignTimeSharedInput>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Settings.settings</DependentUpon>
-		</Compile>
-		<Compile Update="ViewModels\MainWindowViewModel.cs">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="Properties\Settings.settings">
-			<Generator>SettingsSingleFileGenerator</Generator>
-			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
-		</None>
-	</ItemGroup>
-
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>Resurser\icons8_area_chart.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="icons8_area_chart_64.png" />
+    <None Remove="Resurser\falling_edge_24px.png" />
+    <None Remove="Resurser\flash_on_24px.png" />
+    <None Remove="Resurser\moon_symbol_24px.png" />
+    <None Remove="Resurser\opened_folder_24px.png" />
+    <None Remove="Resurser\refresh_24px.png" />
+    <None Remove="Resurser\rising_edge_24px.png" />
+    <None Remove="Resurser\save_24px.png" />
+    <None Remove="Resurser\scale_24px.png" />
+    <None Remove="Resurser\sun_24px.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resurser\icons8_area_chart.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="4.5.1" />
+    <PackageReference Include="gong-wpf-dragdrop" Version="3.2.1" />
+    <PackageReference Include="LiveCharts.Core" Version="0.9.8" />
+    <PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
+    <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="5.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+    <PackageReference Include="System.ServiceModel.Primitives" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\OptimaValue.Settings\OptimaValue.Config.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="icons8_area_chart_64.png" />
+    <Resource Include="Resurser\falling_edge_24px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resurser\flash_on_24px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resurser\moon_symbol_24px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resurser\opened_folder_24px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resurser\refresh_24px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resurser\rising_edge_24px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resurser\save_24px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resurser\scale_24px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resurser\sun_24px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Update="ViewModels\MainWindowViewModel.cs">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
 </Project>

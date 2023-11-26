@@ -425,9 +425,28 @@ namespace OptimaValue.Handler.PLC.Graphics
                 rackOk = true;
             if (!string.IsNullOrEmpty(txtName.Text))
                 nameOk = true;
+            if (comboCpu.SelectedItem.ToString().ToLower().StartsWith("opc"))
+            {
+                ValidateUriString(txtIp.Text, out ipOk);
+            }
 
             btnConnect.Enabled = (cpuOk && ipOk && slotOk && rackOk && nameOk);
             return btnConnect.Enabled;
+        }
+
+        private void ValidateUriString(string text, out bool ipOk)
+        {
+            if (!Uri.IsWellFormedUriString(text, UriKind.Absolute))
+            {
+                errorProvider.SetError(txtIp, "Ingen giltig OPC UA adress");
+                Logger.LogWarning($"Ingen giltig OPC UA adress: {text}");
+                ipOk = false;
+            }
+            else
+            {
+                errorProvider.SetError(txtIp, "");
+                ipOk = true;
+            }
         }
 
         private void SavePlcConfig()
