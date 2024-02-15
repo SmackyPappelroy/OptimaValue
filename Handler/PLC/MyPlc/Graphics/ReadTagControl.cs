@@ -104,7 +104,7 @@ namespace OptimaValue
                             lblTagName.Text = tag.Name;
                             lblQuality.Text = "Bra";
                             lblTime.Text = DateTime.Now.ToString();
-                            lblDataType.Text = returnValue.GetType() == null ? "null" : returnValue.GetType().ToString();
+                            lblDataType.Text = returnValue.Type == null ? "null" : returnValue.Type.ToString();
                         }));
                     }
                     catch { plc.SendPlcStatusMessage($"Lyckades ej ansluta till {plc.PlcName}", Status.Warning); }
