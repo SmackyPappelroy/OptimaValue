@@ -28,17 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.SuspendLayout();
+            SuspendLayout();
             // 
             // ReadTagForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(411, 407);
-            this.Name = "ReadTagForm";
-            this.Text = "ReadTagForm";
-            this.ResumeLayout(false);
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(411, 407);
+            Name = "ReadTagForm";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            Text = "ReadTagForm";
+            ResumeLayout(false);
         }
 
         #endregion
