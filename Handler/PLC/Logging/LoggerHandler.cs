@@ -442,7 +442,7 @@ public static class LoggerHandler
                             DateTime currentTime = DateTime.UtcNow;
 
                             double valueDifference = Math.Abs(readValue.ValueAsFloat - Convert.ToSingle(lastKnownLogValue.value));
-                            double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.last_updated).TotalSeconds;
+                            double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.lastTimeLoggedToSql).TotalSeconds;
 
                             if (timeDifferenceInSeconds == 0) // Prevent division by zero
                             {
@@ -479,9 +479,10 @@ public static class LoggerHandler
 
                         if (timeMatches)
                         {
-                            var allOccurrencesOfTagInList = lastLogValues.Find(n => n.tag_id == logTag.Id && n.ReadValue.LogTime.Day == tiden.Day);
+                            bool alreadyLoggedToday = lastLogValues.Any(n => n.tag_id == logTag.Id &&
+                                                         n.lastTimeLoggedToSql.Date == tiden.Date);
 
-                            if (allOccurrencesOfTagInList == null)
+                            if (!alreadyLoggedToday)
                             {
                                 AddValueToSql(logTag, readValue);
                             }
@@ -616,7 +617,7 @@ public static class LoggerHandler
                             DateTime currentTime = DateTime.UtcNow;
 
                             double valueDifference = Math.Abs(readValue.ValueAsFloat - lastKnownLogValue.ReadValue.ValueAsFloat);
-                            double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.last_updated).TotalSeconds;
+                            double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.lastTimeLoggedToSql).TotalSeconds;
 
                             if (timeDifferenceInSeconds == 0) // Prevent division by zero
                             {
@@ -1131,7 +1132,7 @@ public static class LoggerHandler
             {
                 tag_id = logTag.Id,
                 ReadValue = readValue,
-                last_updated = DateTime.UtcNow
+                lastTimeLoggedToSql = DateTime.UtcNow
             });
 
             RemoveOldLogValues(logTag.Id);
