@@ -87,7 +87,7 @@ namespace OptimaValue
         {
             return value switch
             {
-                null => "null",
+                null => string.Empty,
                 Array a => $"[{string.Join(", ", a)}]",
                 _ => value.ToString()
             };

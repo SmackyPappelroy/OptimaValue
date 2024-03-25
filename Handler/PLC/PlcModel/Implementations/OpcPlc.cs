@@ -397,7 +397,9 @@ namespace OptimaValue
 
         public Task<bool> IsCpuInRunAsync()
         {
-            throw new NotImplementedException();
+            //TODO: Implement this method
+            return Task.FromResult(true);
+            //throw new NotImplementedException();
         }
     }
 }

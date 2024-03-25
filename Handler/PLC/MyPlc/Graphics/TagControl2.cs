@@ -30,7 +30,7 @@ public partial class TagControl2 : UserControl
     private List<TagDefinitions> tags;
     private DataTable myTable = new DataTable();
     private readonly TreeView myTreeView;
-    private AddPlcFromFile addTagForm;
+    private AddTag addTagForm;
     private readonly ExtendedPlc myPlc;
     private bool statFormOpen = false;
     private AllTagsStatsForm statForm;
@@ -329,7 +329,7 @@ public partial class TagControl2 : UserControl
         }
         if (!addMenuOpen)
         {
-            addTagForm = new AddPlcFromFile(PlcName, myPlc);
+            addTagForm = new AddTag(PlcName, myPlc);
             addTagForm.FormClosing += AddTagForm_FormClosing;
             addTagForm.Show();
         }

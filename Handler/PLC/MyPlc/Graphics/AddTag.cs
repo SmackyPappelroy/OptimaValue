@@ -1,27 +1,19 @@
-﻿using S7.Net;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using OptimaValue.Config;
 using OpcUa.UI;
-using System.Threading.Tasks;
-using OpcUa;
-using System.Windows.Controls;
 using OpcUaHm.Common;
 using System.Collections.Generic;
 using OpcUa.DA;
 using OpcUa.UI.Controls;
 using OptimaValue.Handler.PLC.MyPlc.Graphics.Parameters;
-using System.Net;
-using System.Windows.Documents;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
-    public partial class AddPlcFromFile : Form
+    public partial class AddTag : Form
     {
         private ExtendedPlc MyPlc;
         private readonly string PlcName = string.Empty;
@@ -38,49 +30,123 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private bool CheckForDuplicateNames => DatabaseSql.CheckForDuplicateTagNames(tagName: paraName.ParameterValue, plcName: PlcName);
 
-        protected virtual void OnTagChanged(EventArgs e)
-        {
-            TagChanged?.Invoke(this, e);
-        }
-        public AddPlcFromFile(string plcName, ExtendedPlc myPlc, TagDefinitions taggen = null)
+        public AddTag(string plcName, ExtendedPlc myPlc, TagDefinitions taggen = null)
         {
             InitializeComponent();
-            PlcName = plcName;
+            PlcName = plcName ?? throw new ArgumentNullException(nameof(plcName));
+            MyPlc = myPlc ?? throw new ArgumentNullException(nameof(myPlc));
             tag = taggen;
-            if (taggen != null)
-                PopulateInputs();
-            MyPlc = myPlc;
+
+            InitializeForm();
+            InitializeTimers();
+            SubscribeToEvents();
+        }
+
+        private void InitializeForm()
+        {
             if (MyPlc.LoggerIsStarted)
             {
                 btnSave.Enabled = false;
                 btnNew.Enabled = false;
             }
 
-            if (taggen == null)
+            if (tag == null)
             {
-                paraLogTime.ParameterValue = "12:00";
-                paraDeadband.ParameterValue = 0.ToString();
-                paraBitAddress.ParameterValue = 0.ToString();
-                paraFreq.comboBoxen.SelectedItem = "_1s";
-                paraNrOfValues.ParameterValue = 1.ToString();
-                paraFreq.comboBoxen.Text = "_1s";
-                paraDataType.comboBoxen.Text = "DataBlock";
-                paraDataType.comboBoxen.SelectedItem = "DataBlock";
-                paraLogType.comboBoxen.Text = "Cyclic";
-                paraLogType.comboBoxen.SelectedItem = "Cyclic";
-                paraRawMin.ParameterValue = 0.ToString();
-                paraRawMax.ParameterValue = 0.ToString();
-                paraScaleMin.ParameterValue = 0.ToString();
-                paraScaleMax.ParameterValue = 0.ToString();
-                paraScaleOffset.ParameterValue = 0.ToString();
+                SetDefaultValues();
             }
+            else
+            {
+                PopulateInputs();
+            }
+
+            btnOpc.Visible = MyPlc.isOpc;
+        }
+
+        private void InitializeTimers()
+        {
             timeOut.Interval = 300;
             timeOut.Tick += TimeOut_Tick;
+        }
+
+        private void SubscribeToEvents()
+        {
+            if (MyPlc.isOpc)
+            {
+                btnOpc.Click += BtnOpc_Click;
+            }
+
             paraLogType.comboBoxen.SelectedIndexChanged += comboLogType_SelectedIndexChanged;
             paraVarType.comboBoxen.SelectedIndexChanged += comboVarType_SelectedIndexChanged;
             comboLogType_SelectedIndexChanged(this, EventArgs.Empty);
             comboVarType_SelectedIndexChanged(this, EventArgs.Empty);
+            this.FormClosing += AddTag_FormClosing;
             SetVisibility();
+        }
+
+        private void SetDefaultValues()
+        {
+            paraLogTime.ParameterValue = "12:00";
+            paraDeadband.ParameterValue = 0.ToString();
+            paraBitAddress.ParameterValue = 0.ToString();
+            paraFreq.comboBoxen.SelectedItem = "_1s";
+            paraNrOfValues.ParameterValue = 1.ToString();
+            paraFreq.comboBoxen.Text = "_1s";
+            paraDataType.comboBoxen.Text = "DataBlock";
+            paraDataType.comboBoxen.SelectedItem = "DataBlock";
+            paraLogType.comboBoxen.Text = "Cyclic";
+            paraLogType.comboBoxen.SelectedItem = "Cyclic";
+            paraRawMin.ParameterValue = 0.ToString();
+            paraRawMax.ParameterValue = 0.ToString();
+            paraScaleMin.ParameterValue = 0.ToString();
+            paraScaleMax.ParameterValue = 0.ToString();
+            paraScaleOffset.ParameterValue = 0.ToString();
+        }
+
+        private void PopulateInputs()
+        {
+            checkActive.Checked = tag.Active;
+            paraName.ParameterValue = tag.Name;
+            paraDescription.ParameterValue = tag.Description;
+            paraLogType.comboBoxen.Text = tag.LogType.ToString();
+            paraLogType.comboBoxen.SelectedItem = tag.LogType;
+
+            paraLogTime.ParameterValue = tag.TimeOfDay.ToString();
+            paraDeadband.ParameterValue = tag.Deadband.ToString();
+            paraVarType.comboBoxen.Text = tag.VarType.ToString();
+            paraVarType.comboBoxen.SelectedItem = tag.VarType;
+
+            paraBlockNr.ParameterValue = tag.BlockNr.ToString();
+            paraDataType.comboBoxen.Text = tag.DataType.ToString();
+            paraDataType.comboBoxen.SelectedItem = tag.DataType;
+
+            paraStartAddress.ParameterValue = tag.StartByte.ToString();
+            paraNrOfValues.ParameterValue = tag.NrOfElements.ToString();
+            paraBitAddress.ParameterValue = tag.BitAddress.ToString();
+            paraFreq.comboBoxen.Text = tag.LogFreq.ToString();
+            paraFreq.comboBoxen.SelectedItem = tag.LogFreq;
+
+            paraUnit.ParameterValue = tag.TagUnit;
+
+            paraRawMin.ParameterValue = tag.rawMin.ToString();
+            paraRawMax.ParameterValue = tag.rawMax.ToString();
+
+            paraScaleMin.ParameterValue = tag.scaleMin.ToString();
+            paraScaleMax.ParameterValue = tag.scaleMax.ToString();
+            paraScaleOffset.ParameterValue = tag.scaleOffset.ToString();
+        }
+
+        private void BtnOpc_Click(object sender, EventArgs e)
+        {
+            if (!opcFormOpen)
+            {
+                PopulateOpcTags();
+                opcFormOpen = true;
+            }
+        }
+
+        protected virtual void OnTagChanged(EventArgs e)
+        {
+            TagChanged?.Invoke(this, e);
         }
 
         bool opcFormOpen = false;
@@ -294,38 +360,6 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             timeOut.Stop();
         }
 
-        private void PopulateInputs()
-        {
-            checkActive.Checked = tag.Active;
-            paraName.ParameterValue = tag.Name;
-            paraDescription.ParameterValue = tag.Description;
-            paraLogType.comboBoxen.Text = tag.LogType.ToString();
-            paraLogType.comboBoxen.SelectedItem = tag.LogType;
-
-            paraLogTime.ParameterValue = tag.TimeOfDay.ToString();
-            paraDeadband.ParameterValue = tag.Deadband.ToString();
-            paraVarType.comboBoxen.Text = tag.VarType.ToString();
-            paraVarType.comboBoxen.SelectedItem = tag.VarType;
-
-            paraBlockNr.ParameterValue = tag.BlockNr.ToString();
-            paraDataType.comboBoxen.Text = tag.DataType.ToString();
-            paraDataType.comboBoxen.SelectedItem = tag.DataType;
-
-            paraStartAddress.ParameterValue = tag.StartByte.ToString();
-            paraNrOfValues.ParameterValue = tag.NrOfElements.ToString();
-            paraBitAddress.ParameterValue = tag.BitAddress.ToString();
-            paraFreq.comboBoxen.Text = tag.LogFreq.ToString();
-            paraFreq.comboBoxen.SelectedItem = tag.LogFreq;
-
-            paraUnit.ParameterValue = tag.TagUnit;
-
-            paraRawMin.ParameterValue = tag.rawMin.ToString();
-            paraRawMax.ParameterValue = tag.rawMax.ToString();
-
-            paraScaleMin.ParameterValue = tag.scaleMin.ToString();
-            paraScaleMax.ParameterValue = tag.scaleMax.ToString();
-            paraScaleOffset.ParameterValue = tag.scaleOffset.ToString();
-        }
 
         #region Validation
 
@@ -638,17 +672,17 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             if (!MyPlc.isOpc)
             {
                 tbl.Rows.Add(
-                    checkActive.Checked,
-                    paraName.ParameterValue,
-                    paraDescription.ParameterValue,
-                    paraLogType.comboBoxen.SelectedItem.ToString(),
-                    TimeSpan.Parse(paraLogTime.ParameterValue),
-                    float.Parse(paraDeadband.ParameterValue),
-                    PlcName,
-                    paraVarType.comboBoxen.SelectedItem.ToString(),
-                    int.Parse(paraBlockNr.ParameterValue),
-                    paraDataType.comboBoxen.SelectedItem.ToString(),
-                    int.Parse(paraStartAddress.ParameterValue),
+                    checkActive.Checked, // bool
+                    paraName.ParameterValue, // string
+                    paraDescription.ParameterValue, // string
+                    paraLogType.comboBoxen.SelectedItem.ToString(), // string
+                    TimeSpan.Parse(paraLogTime.ParameterValue), // TimeSpan
+                    float.Parse(paraDeadband.ParameterValue), // float
+                    PlcName, // string
+                    paraVarType.comboBoxen.SelectedItem.ToString(), // string
+                    int.Parse(paraBlockNr.ParameterValue), // int
+                    paraDataType.comboBoxen.SelectedItem.ToString(), // string
+                    int.Parse(paraStartAddress.ParameterValue), // int
                     int.Parse(paraNrOfValues.ParameterValue),
                     byte.Parse(paraBitAddress.ParameterValue),
                     paraFreq.comboBoxen.SelectedItem.ToString(),
@@ -668,13 +702,33 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             else
             {
-                tbl.Rows.Add(checkActive.Checked, paraName.ParameterValue, paraDescription.ParameterValue, paraLogType.comboBoxen.SelectedItem.ToString(),
-                TimeSpan.Parse(paraLogTime.ParameterValue), float.Parse(paraDeadband.ParameterValue),
-                PlcName, "", 0, "", 0, 1, byte.Parse(paraBitAddress.ParameterValue),
-                paraFreq.comboBoxen.SelectedItem.ToString(), tag.EventId, tag.IsBooleanTrigger, tag.BoolTrigger, tag.AnalogTrigger, tag.AnalogValue
-                , float.Parse(paraRawMin.ParameterValue), float.Parse(paraRawMax.ParameterValue), float.Parse(paraScaleMin.ParameterValue),
-                float.Parse(paraScaleMax.ParameterValue), float.Parse(paraScaleOffset.ParameterValue),
-                tag.Calculation);
+                tbl.Rows.Add(
+                    checkActive.Checked, // bool
+                    paraName.ParameterValue, // string 
+                    paraDescription.ParameterValue, // string
+                    paraLogType.comboBoxen.SelectedItem.ToString(), // string
+                    TimeSpan.Parse(paraLogTime.ParameterValue), // Timespan 
+                    float.Parse(paraDeadband.ParameterValue), // float
+                    PlcName, // string
+                    "", // string
+                    0, // int
+                    "", // string
+                    0, // int
+                    1, // int
+                    byte.Parse(paraBitAddress.ParameterValue), // byte
+                    paraFreq.comboBoxen.SelectedItem.ToString(), // string
+                    paraUnit.ParameterValue, // string
+                    tag.EventId, // int
+                    tag.IsBooleanTrigger, // bool
+                    tag.BoolTrigger, // BooleanTrigger
+                    tag.AnalogTrigger, // AnalogTrigger
+                    tag.AnalogValue, // float
+                    float.Parse(paraRawMin.ParameterValue), // float
+                    float.Parse(paraRawMax.ParameterValue), // float
+                    float.Parse(paraScaleMin.ParameterValue), // float
+                    float.Parse(paraScaleMax.ParameterValue), // float
+                    float.Parse(paraScaleOffset.ParameterValue),// float
+                    tag.Calculation); // string
 
                 return tbl;
             }
@@ -696,7 +750,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     paraRawMax.Visible = true;
                     paraLogType.Visible = true;
                     paraBitAddress.Visible = true;
-                    paraVarType.Visible = true;
+                    paraVarType.Visible = MyPlc.isOpc ? false : true;
                     btnEkvation.Visible = false;
 
                     break;
@@ -712,7 +766,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     paraRawMax.Visible = true;
                     paraLogType.Visible = true;
                     paraBitAddress.Visible = true;
-                    paraVarType.Visible = true;
+                    paraVarType.Visible = MyPlc.isOpc ? false : true;
                     btnEkvation.Visible = false;
 
                     break;
@@ -728,7 +782,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     paraRawMax.Visible = true;
                     paraLogType.Visible = true;
                     paraBitAddress.Visible = true;
-                    paraVarType.Visible = true;
+                    paraVarType.Visible = MyPlc.isOpc ? false : true;
                     btnEkvation.Visible = false;
 
                     break;
@@ -768,7 +822,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     paraFreq.Visible = true;
                     paraLogType.Visible = true;
                     paraLogTime.Visible = false;
-                    paraVarType.Visible = true;
+                    paraVarType.Visible = MyPlc.isOpc ? false : true;
                     paraRawMin.Visible = true;
                     paraRawMax.Visible = true;
                     paraScaleMax.Visible = true;
@@ -786,7 +840,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                     paraUnit.Visible = true;
                     paraFreq.Visible = true;
                     paraLogType.Visible = true;
-                    paraVarType.Visible = true;
+                    paraVarType.Visible = MyPlc.isOpc ? false : true;
                     paraRawMin.Visible = true;
                     paraRawMax.Visible = true;
                     paraScaleMax.Visible = true;

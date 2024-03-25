@@ -33,7 +33,7 @@ public static class LoggerHandler
         Interval = 5000,
     };
 
-    public static LoggingStats LoggingStats = new LoggingStats(100, 5000);
+    public static LoggingStats LoggingStats = new LoggingStats(1, 5000);
 
     private static List<LastValue> lastLogValues;
 

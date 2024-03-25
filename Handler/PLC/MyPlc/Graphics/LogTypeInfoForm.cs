@@ -12,9 +12,9 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 {
     public partial class LogTypeInfoForm : Form
     {
-        private AddPlcFromFile addTag;
+        private AddTag addTag;
 
-        public LogTypeInfoForm(AddPlcFromFile addTag)
+        public LogTypeInfoForm(AddTag addTag)
         {
             InitializeComponent();
             this.addTag = addTag;

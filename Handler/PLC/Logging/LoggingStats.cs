@@ -6,56 +6,49 @@ namespace OptimaValue
     public class LoggingStats
     {
         private TimeSpan _totalCycleTime;
-
-        private TimeSpan minCycleTimeFilter;
-        private TimeSpan maxCycleTimeAlarm;
+        private readonly TimeSpan _minCycleTimeFilter;
+        private readonly TimeSpan _maxCycleTimeAlarm;
 
         public TimeSpan LastCycleTime { get; private set; }
-        public TimeSpan AverageCycleTime { get; private set; }
-        public TimeSpan MaxCycleTime { get; private set; }
-        public TimeSpan MinCycleTime { get; private set; }
+        public TimeSpan AverageCycleTime => TotalCycles > 0 ? TimeSpan.FromTicks(_totalCycleTime.Ticks / TotalCycles) : TimeSpan.Zero;
+        public TimeSpan MaxCycleTime { get; private set; } = TimeSpan.Zero;
+        public TimeSpan MinCycleTime { get; private set; } = TimeSpan.MaxValue;
         public int TotalCycles { get; private set; }
 
         public LoggingStats(int minimumMillisecondFilter, int maximumMillisecondAlarm)
         {
-            minCycleTimeFilter = TimeSpan.FromMilliseconds(minimumMillisecondFilter);
-            maxCycleTimeAlarm = TimeSpan.FromMilliseconds(maximumMillisecondAlarm);
-            Reset();
+            _minCycleTimeFilter = TimeSpan.FromMilliseconds(minimumMillisecondFilter);
+            _maxCycleTimeAlarm = TimeSpan.FromMilliseconds(maximumMillisecondAlarm);
         }
 
         public void Update(TimeSpan cycleTime)
         {
-            if (cycleTime < minCycleTimeFilter)
+            if (cycleTime < _minCycleTimeFilter)
             {
                 return;
             }
+
             LastCycleTime = cycleTime;
             TotalCycles++;
             _totalCycleTime += cycleTime;
 
-            AverageCycleTime = TimeSpan.FromTicks(_totalCycleTime.Ticks / TotalCycles);
-
             if (cycleTime > MaxCycleTime)
             {
                 MaxCycleTime = cycleTime;
-                if (MaxCycleTime > maxCycleTimeAlarm)
+                if (MaxCycleTime > _maxCycleTimeAlarm)
                 {
                     Logger.LogError($"Max cykeltid överskriden: {MaxCycleTime.FormatTime()}");
                 }
             }
 
-            if (cycleTime < MinCycleTime || MinCycleTime == TimeSpan.Zero)
-            {
-                MinCycleTime = cycleTime;
-            }
+            MinCycleTime = (cycleTime < MinCycleTime || MinCycleTime == TimeSpan.MaxValue) ? cycleTime : MinCycleTime;
         }
 
         public void Reset()
         {
             LastCycleTime = TimeSpan.Zero;
-            AverageCycleTime = TimeSpan.Zero;
             MaxCycleTime = TimeSpan.Zero;
-            MinCycleTime = TimeSpan.Zero;
+            MinCycleTime = TimeSpan.MaxValue;
             TotalCycles = 0;
             _totalCycleTime = TimeSpan.Zero;
         }
@@ -64,49 +57,27 @@ namespace OptimaValue
 
         public override string ToString()
         {
-            return $"Last: {LastCycleTime.FormatTime()}, Avg: {AverageCycleTime.FormatTime()}, Max: {MaxCycleTime.FormatTime()}, Min: {MinCycleTime.FormatTime()}, Total: {TotalCycles}";
+            string minCycleTimeString = MinCycleTime == TimeSpan.MaxValue ? "N/A" : MinCycleTime.FormatTime();
+            return $"Last: {LastCycleTime.FormatTime()}, Avg: {AverageCycleTime.FormatTime()}, Max: {MaxCycleTime.FormatTime()}, Min: {minCycleTimeString}, Total: {TotalCycles}";
         }
+
     }
 
     public static class TimeSpanExtensions
     {
         public static string FormatTime(this TimeSpan timeSpan)
         {
-            string format;
-            double value;
+            // Improved format readability and maintainability
+            if (timeSpan.TotalMilliseconds < 1000)
+                return $"{timeSpan.TotalMilliseconds:F2} ms";
+            if (timeSpan.TotalSeconds < 60)
+                return $"{timeSpan.TotalSeconds:F2} sek";
+            if (timeSpan.TotalMinutes < 60)
+                return $"{timeSpan.TotalMinutes:F2} min";
+            if (timeSpan.TotalHours < 24)
+                return $"{timeSpan.TotalHours:F2} timmar";
 
-            if (timeSpan.TotalMilliseconds < 1)
-            {
-                format = "{0:F2} ms";
-                value = timeSpan.TotalMilliseconds;
-            }
-            else if (timeSpan.TotalSeconds < 1)
-            {
-                format = "{0:F2} ms";
-                value = timeSpan.TotalMilliseconds;
-            }
-            else if (timeSpan.TotalMinutes < 1)
-            {
-                format = "{0:F2} sek";
-                value = timeSpan.TotalSeconds;
-            }
-            else if (timeSpan.TotalHours < 1)
-            {
-                format = "{0:F2} min";
-                value = timeSpan.TotalMinutes;
-            }
-            else if (timeSpan.TotalDays < 1)
-            {
-                format = "{0:F2} timmar";
-                value = timeSpan.TotalHours;
-            }
-            else
-            {
-                format = "{0:F2} dagar";
-                value = timeSpan.TotalDays;
-            }
-
-            return string.Format(format, value);
+            return $"{timeSpan.TotalDays:F2} dagar";
         }
     }
 }
