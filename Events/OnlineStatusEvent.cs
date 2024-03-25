@@ -18,7 +18,7 @@ namespace OptimaValue
             {
                 Message = connectionStatus == ConnectionStatus.Connected ? "Ansluten" : "Ej Ansluten",
                 connectionStatus = connectionStatus,
-                Color = connectionStatus == ConnectionStatus.Connected ? UIColors.Active : Color.FromArgb(67, 62, 71),
+                Color = connectionStatus == ConnectionStatus.Connected ? UIColors.Active : UIColors.GreyColor,
                 ElapsedTime = elapsedTime,
                 PlcName = plcName
             };

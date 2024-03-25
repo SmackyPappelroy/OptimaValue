@@ -32,10 +32,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private bool eventFormOpen = false;
         private bool startup = true;
         private System.Windows.Forms.Timer timeOut = new System.Windows.Forms.Timer();
-        private Color greyColor = Color.FromArgb(67, 62, 71);
-        private Color greenColor = Color.FromArgb(46, 148, 66);
-        private Color blueColor = Color.FromArgb(46, 127, 148);
-        private Color redColor = Color.FromArgb(201, 74, 74);
+
 
         private bool CheckIfExists => DatabaseSql.TagExist(tag.Id);
 
@@ -185,7 +182,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 {
                     var descriptionNode = subNodes.Where(x => x.Name.Contains("escription")).FirstOrDefault();
                     var description = opcPlc.Read(descriptionNode.Tag);
-                    paraDescription.ParameterValue = description.Value.ToString();
+                    paraDescription.ParameterValue = description.ValueAsString;
                 }
                 catch (Exception) { }
 
@@ -196,17 +193,17 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 var scaleLowNode = subNodes.Where(x => x.Name.Contains("ScaledLow")).FirstOrDefault();
                 var scaleHiNode = subNodes.Where(x => x.Name.Contains("ScaledHigh")).FirstOrDefault();
 
-                var units = opcPlc.Read(unitsNode.Tag).Value.ToString();
+                var units = opcPlc.Read(unitsNode.Tag).ValueAsString;
                 var rawLo = opcPlc.Read(rawLowNode.Tag);
                 var rawHi = opcPlc.Read(rawHiNode.Tag);
                 var scaledLo = opcPlc.Read(scaleLowNode.Tag);
                 var scaleHi = opcPlc.Read(scaleHiNode.Tag);
 
-                paraRawMin.ParameterValue = rawLo.Value.ToString();
-                paraRawMax.ParameterValue = rawHi.Value.ToString();
+                paraRawMin.ParameterValue = rawLo.ValueAsString;
+                paraRawMax.ParameterValue = rawHi.ValueAsString;
 
-                paraScaleMin.ParameterValue = scaledLo.Value.ToString();
-                paraScaleMax.ParameterValue = scaleHi.Value.ToString();
+                paraScaleMin.ParameterValue = scaledLo.ValueAsString;
+                paraScaleMax.ParameterValue = scaleHi.ValueAsString;
 
                 paraUnit.ParameterValue = units;
             }
@@ -290,8 +287,8 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
         private void TimeOut_Tick(object sender, EventArgs e)
         {
-            btnNew.BackColor = greyColor;
-            btnSave.BackColor = greyColor;
+            btnNew.BackColor = UIColors.GreyColor;
+            btnSave.BackColor = UIColors.GreyColor;
             btnNew.Image = Properties.Resources.add_new_64px;
             btnSave.Image = Properties.Resources.available_updates_64px;
             timeOut.Stop();
@@ -497,7 +494,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             tag = CreateTagFromDataTable(tbl);
 
-            btnNew.BackColor = greenColor;
+            btnNew.BackColor = UIColors.GreenColor;
             btnNew.Image = Properties.Resources.add_new_64px_Gray;
             timeOut.Start();
         }
@@ -509,7 +506,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
 
             if (success)
             {
-                btnSave.BackColor = blueColor;
+                btnSave.BackColor = UIColors.BlueColor;
                 btnSave.Image = Properties.Resources.available_updates_64px_gray;
                 timeOut.Start();
             }
@@ -880,7 +877,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             if (!ValidateAll())
             {
-                btnNew.BackColor = redColor;
+                btnNew.BackColor = UIColors.RedColor;
                 timeOut.Start();
                 return;
             }
@@ -891,7 +888,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         {
             if (tag == null)
             {
-                btnSave.BackColor = redColor;
+                btnSave.BackColor = UIColors.RedColor;
                 timeOut.Start();
                 return;
             }

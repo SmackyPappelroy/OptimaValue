@@ -17,7 +17,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             txtPlc.Text = PlcName;
             lblPlcStatus.Text = $"{PlcName} Status";
             txtStatus.Text = string.Empty;
-            panelStatus.BackColor = Color.FromArgb(67, 62, 71);
+            panelStatus.BackColor = UIColors.GreyColor;
             Subscribe(true);
             statusTimer.Interval = 5000;
             this.HandleDestroyed += StatusControl_HandleDestroyed;

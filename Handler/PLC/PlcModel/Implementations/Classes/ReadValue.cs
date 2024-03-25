@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpcUaHm.Common;
+using System;
 
 namespace OptimaValue
 {
@@ -39,28 +40,58 @@ namespace OptimaValue
             (plcType.OpcPlc, OpcUaHm.Common.ReadEvent<object> { ServerTimestamp: var ts }) => ts.DateTime,
             _ => DateTime.Now
         };
-        public float ValueAsFloat => Value switch
+        public float ValueAsFloat
         {
-            null => 0,
-            float f => f,
-            double d => (float)d,
-            int i => i,
-            uint ui => ui,
-            short s => s,
-            ushort us => us,
-            long l => l,
-            ulong ul => ul,
-            byte b => b,
-            sbyte sb => sb,
-            bool b => b ? 1 : 0,
-            _ => 0
-        };
-        public string ValueAsString => Value switch
+            get
+            {
+                if (Value is ReadEvent<object> readEventValue)
+                {
+                    return ConvertToFloat(readEventValue.Value);
+                }
+                return ConvertToFloat(Value);
+            }
+        }
+
+        private float ConvertToFloat(object value)
         {
-            null => "null",
-            Array a => $"[{string.Join(", ", a)}]",
-            _ => Value.ToString()
-        };
+            return value switch
+            {
+                null => 0,
+                float f => f,
+                double d => (float)d,
+                int i => i,
+                uint ui => ui,
+                short s => s,
+                ushort us => us,
+                long l => l,
+                ulong ul => ul,
+                byte b => b,
+                sbyte sb => sb,
+                bool boolValue => boolValue ? 1 : 0,
+                _ => 0
+            };
+        }
+        public string ValueAsString
+        {
+            get
+            {
+                if (Value is ReadEvent<object> readEventValue)
+                {
+                    return ConvertToString(readEventValue.Value);
+                }
+                return ConvertToString(Value);
+            }
+        }
+
+        private string ConvertToString(object value)
+        {
+            return value switch
+            {
+                null => "null",
+                Array a => $"[{string.Join(", ", a)}]",
+                _ => value.ToString()
+            };
+        }
 
         private enum plcType
         {

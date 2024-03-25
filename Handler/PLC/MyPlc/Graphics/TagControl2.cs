@@ -63,7 +63,7 @@ public partial class TagControl2 : UserControl
 
     private void FlowLayoutPanel_DragLeave(object sender, EventArgs e)
     {
-        this.flowLayoutPanel.BackColor = Color.FromArgb(67, 62, 71);
+        this.flowLayoutPanel.BackColor = UIColors.GreyColor;
     }
 
     private void TagControl2_DragEnter(object sender, DragEventArgs e)
@@ -74,7 +74,7 @@ public partial class TagControl2 : UserControl
             if (FileList[0].Substring(FileList[0].Length - 3, 3).ToLower() == "csv")
             {
                 e.Effect = DragDropEffects.Copy;
-                this.flowLayoutPanel.BackColor = Color.FromArgb(92, 81, 100);
+                this.flowLayoutPanel.BackColor = UIColors.GreyLightColor;
             }
             else
             {
@@ -83,7 +83,7 @@ public partial class TagControl2 : UserControl
         }
         else
         {
-            this.flowLayoutPanel.BackColor = Color.FromArgb(67, 62, 71);
+            this.flowLayoutPanel.BackColor = UIColors.GreyColor;
             e.Effect = DragDropEffects.None;
         }
     }
@@ -91,7 +91,7 @@ public partial class TagControl2 : UserControl
     private void TagControl2_DragDrop(object sender, DragEventArgs e)
     {
         string[] FileList = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-        this.flowLayoutPanel.BackColor = Color.FromArgb(67, 62, 71);
+        this.flowLayoutPanel.BackColor = UIColors.GreyColor;
 
         fileName = FileList[0];
         var fileEnding = fileName.Substring(fileName.Length - 4, 4).ToLower();

@@ -512,7 +512,6 @@ public partial class MasterForm : Form
         messageQueue.Enqueue(obj);
         ShowNextMessage();
     }
-    private Color originalForegroundColor = Color.FromArgb(175, 175, 175);
     private void ShowNextMessage()
     {
         if (!messageTimer.Enabled && messageQueue.Count > 0)
@@ -525,23 +524,23 @@ public partial class MasterForm : Form
             switch (obj.Severity)
             {
                 case Severity.Warning:
-                    lblStatus.ForeColor = Color.Yellow;
+                    lblStatus.ForeColor = UIColors.WarningColor;
                     lblStatus.Text = "Warning";
                     break;
                 case Severity.Error:
-                    lblStatus.ForeColor = Color.OrangeRed;
+                    lblStatus.ForeColor = UIColors.ErrorColor;
                     lblStatus.Text = "Error";
                     break;
                 case Severity.Information:
-                    lblStatus.ForeColor = originalForegroundColor;
+                    lblStatus.ForeColor = UIColors.GreyVeryLightColor;
                     lblStatus.Text = "Information";
                     break;
                 case Severity.Success:
-                    lblStatus.ForeColor = Color.LightGreen;
+                    lblStatus.ForeColor = UIColors.SuccessColor;
                     lblStatus.Text = "Success";
                     break;
                 default:
-                    lblStatus.ForeColor = originalForegroundColor;
+                    lblStatus.ForeColor = UIColors.GreyVeryLightColor;
                     break;
             }
 
@@ -561,7 +560,7 @@ public partial class MasterForm : Form
         }
         if (txtStatus.Text.Length == 0)
         {
-            lblStatus.ForeColor = originalForegroundColor;
+            lblStatus.ForeColor = UIColors.GreyVeryLightColor;
             lblStatus.Text = "Status";
         }
     }
