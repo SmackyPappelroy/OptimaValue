@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LiveCharts;
+using LiveCharts.Wpf;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Windows.Forms;
@@ -10,6 +12,7 @@ namespace OptimaValue
         private readonly Timer cycleTimer;
         private readonly PerformanceCounter myAppCpu;
         private readonly PerformanceCounter myAppRam;
+        private SeriesCollection seriesCollection; // Serie-samling för diagrammet
 
         public PerformanceForm()
         {
@@ -28,6 +31,21 @@ namespace OptimaValue
             cycleTimer.Tick += CycleTimer_Tick;
             cycleTimer.Start();
             Text = "Loggningsstatistik";
+            InitializeTrend();
+        }
+
+        private void InitializeTrend()
+        {
+            seriesCollection = new SeriesCollection
+        {
+            new LineSeries
+            {
+                Title = "Last Cycle Time",
+                Values = new ChartValues<double>()
+            }
+        };
+            // Anta att du har en CartesianChart som heter chart
+            cartesianChart1.Series = seriesCollection;
         }
 
         private void CycleTimer_Tick(object sender, EventArgs e)
@@ -41,6 +59,16 @@ namespace OptimaValue
                 AddLoggingStats();
             }
             txtThread.Text = Process.GetCurrentProcess().Threads.Count.ToString();
+
+            // Lägg till det senaste värdet i diagrammet
+            double lastCycleTimeValue = LoggerHandler.LoggingStats.LastCycleTime.TotalMilliseconds; // Ersätt detta med faktiska värdet
+            seriesCollection[0].Values.Add(lastCycleTimeValue);
+
+            // Ta bort gamla värden så att diagrammet visar data för endast den senaste minuten
+            if (seriesCollection[0].Values.Count > 60) // Anta att Tick-händelsen inträffar varje sekund
+            {
+                seriesCollection[0].Values.RemoveAt(0);
+            }
         }
 
         private void AddLoggingStats()
