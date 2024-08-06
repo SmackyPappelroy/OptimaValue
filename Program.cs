@@ -8,9 +8,9 @@ using OptimaValue.Config;
 
 namespace OptimaValue
 {
-    static class Program
+    public static class Program
     {
-        private static FileLog LoggerInstance;
+        internal static FileLog LoggerInstance;
         private static bool AppCrashed = false;
 
         [STAThread]
@@ -32,7 +32,7 @@ namespace OptimaValue
                 System.Threading.Tasks.TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 #endif
                 Settings.Load();
-                LoggerInstance = CreateFileLogger();
+            //    LoggerInstance = CreateFileLogger();
                 Settings.OptimaValueFilePath = Application.ExecutablePath;
 
                 ApplicationConfiguration.Initialize();

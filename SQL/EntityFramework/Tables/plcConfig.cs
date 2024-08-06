@@ -12,8 +12,9 @@ namespace OptimaValue
         [Column(TypeName = "bit")]
         public bool active { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(50)]
+        //[Column(TypeName = "nvarchar")]
+        //[StringLength(50)]
+        [Column(TypeName = "nvarchar(MAX)")]
         public string name { get; set; }
 
         [Column(TypeName = "nvarchar")]

@@ -65,7 +65,7 @@ namespace OptimaValue
 
             btnSave.Enabled = false;
 
-            var result = await DatabaseSql.TestConnectionAsync();
+            var result = await DatabaseSql.TestConnectionAsync() && DatabaseSql.TableExist();
             if (!result)
             {
                 $"Misslyckades att ansluta med följande Connection-sträng: {DatabaseSql.ConnectionString}".SendStatusMessage(Severity.Error);
@@ -111,6 +111,7 @@ namespace OptimaValue
             btnSave.Enabled = true;
             DatabaseCreated = true;
             DatabaseCreationNotifier.DatabaseCreated -= DatabaseCreationEvent_CreatedEvent;
+            Program.LoggerInstance =  Program.CreateFileLogger();
             Close();
         }
 

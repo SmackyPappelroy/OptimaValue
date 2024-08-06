@@ -152,10 +152,20 @@ public partial class MasterForm : Form
         autoStartTool.Checked = Properties.Settings.Default.AutoStart;
 
 
-        var result = await DatabaseSql.TestConnectionAsync();
-        if (!result)
+        var connectionOK = await DatabaseSql.TestConnectionAsync();
+        bool tableExist = false;
+        if (connectionOK)
+        {
+            tableExist = DatabaseSql.TableExist();
+        }
+        if (!connectionOK)
         {
             txtStatus.Text = "Misslyckades att ansluta till Sql";
+            databaseImage.Image = noDatabase;
+        }
+        else if(!tableExist)
+        {
+            txtStatus.Text = "Databasen finns inte";
             databaseImage.Image = noDatabase;
         }
         else

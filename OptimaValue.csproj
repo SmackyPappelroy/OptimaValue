@@ -64,9 +64,9 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Utveckling\Logger\Logger\FileLogger.csproj" />
-    <ProjectReference Include="..\..\Opc\OpcUa.UI\OpcUa.UI.csproj" />
-    <ProjectReference Include="..\..\Opc\OpcUa\OpcUa.csproj" />
+    <ProjectReference Include="..\FileLogger\Logger\FileLogger.csproj" />
+    <ProjectReference Include="..\OpcUa\OpcUa.UI\OpcUa.UI.csproj" />
+    <ProjectReference Include="..\OpcUa\OpcUa\OpcUaHm.csproj" />
     <ProjectReference Include="Projects\OptimaValue.Settings\OptimaValue.Config.csproj" />
   </ItemGroup>
   <ItemGroup>

@@ -55,6 +55,49 @@ public static class DatabaseSql
         return isConnected;
     }
 
+    // Does the database exist?
+    public static bool DatabaseExist()
+    {
+        var databaseName = Settings.Databas;
+        object result;
+        string query = $"SELECT TOP 1 name FROM master.dbo.sysdatabases WHERE name = '{databaseName}'";
+
+        try
+        {
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            result = cmd.ExecuteScalar();
+        }
+        catch (SqlException ex)
+        {
+            Logger.LogError(string.Empty, ex);
+            return false;
+        }
+        return result != null;
+    }
+
+    // Check if table exists
+    public static bool TableExist()
+    {
+        var tableName = "tagConfig";
+        object result;
+        string query = $"SELECT TOP 1 name FROM {Settings.Databas}.sys.tables WHERE name = '{tableName}'";
+
+        try
+        {
+            using SqlConnection con = new(ConnectionString);
+            using SqlCommand cmd = new(query, con);
+            con.Open();
+            result = cmd.ExecuteScalar();
+        }
+        catch (SqlException ex)
+        {
+            Logger.LogError(string.Empty, ex);
+            return false;
+        }
+        return result != null;
+    }
 
     /// <summary>
     /// Does the tag exist?

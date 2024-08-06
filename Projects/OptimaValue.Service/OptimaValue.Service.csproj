@@ -11,8 +11,8 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\..\..\Utveckling\Logger\Logger\FileLogger.csproj" />
-	  <ProjectReference Include="..\..\..\OptimaValue.Common\OptimaValue.Common.csproj" />
+	  <ProjectReference Include="..\..\..\FileLogger\Logger\FileLogger.csproj" />
 	  <ProjectReference Include="..\..\OptimaValue.csproj" />
+	  <ProjectReference Include="..\OptimaValue.Settings\OptimaValue.Config.csproj" />
 	</ItemGroup>
 </Project>
