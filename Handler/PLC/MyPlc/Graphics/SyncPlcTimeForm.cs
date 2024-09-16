@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
@@ -15,90 +16,45 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
         private bool syncOffsetOk;
         private bool syncBitOk;
 
+        private bool ValidateField(TextBox textBox, string errorMessage, bool requirePositiveInteger = false)
+        {
+            if (string.IsNullOrEmpty(textBox.Text))
+            {
+                errorProvider.SetError(textBox, "Fältet får ej vara tomt");
+                return false;
+            }
+            if (requirePositiveInteger && !uint.TryParse(textBox.Text, out uint _))
+            {
+                errorProvider.SetError(textBox, "Inte ett positivt heltal");
+                return false;
+            }
+            errorProvider.SetError(textBox, string.Empty);
+            return true;
+        }
+
 
         private void txtSynkDb_Validating(object sender, CancelEventArgs e)
         {
-            if (string.IsNullOrEmpty(txtSynkDb.Text))
-            {
-                errorProvider.SetError(txtSynkDb, "Fältet får ej va tomt");
-                syncDbOk = false;
-            }
-            else if (!uint.TryParse(txtSynkDb.Text, out uint _))
-            {
-                errorProvider.SetError(txtSynkDb, "Inte ett positivt heltal");
-                syncDbOk = false;
-            }
-            else
-                syncDbOk = true;
+            syncDbOk = ValidateField(txtSynkDb, "Fältet får ej vara tomt", requirePositiveInteger: true);
         }
         private void txtSynkByte_Validating(object sender, CancelEventArgs e)
         {
-            if (string.IsNullOrEmpty(txtSynkByte.Text))
-            {
-                errorProvider.SetError(txtSynkByte, "Fältet får ej va tomt");
-                syncOffsetOk = false;
-            }
-            else if (!uint.TryParse(txtSynkByte.Text, out uint _))
-            {
-                errorProvider.SetError(txtSynkByte, "Inte ett positivt heltal");
-                syncOffsetOk = false;
-            }
-            else
-                syncOffsetOk = true;
+            syncOffsetOk = ValidateField(txtSynkByte, "Fältet får ej vara tomt", requirePositiveInteger: true);
         }
         private void txtSyncBool_Validating(object sender, CancelEventArgs e)
         {
-            if (string.IsNullOrEmpty(txtSyncBool.Text))
-            {
-                errorProvider.SetError(txtSyncBool, "Fältet får ej va tomt");
-                syncBitOk = false;
-            }
-            else
-                syncBitOk = true;
+            syncBitOk = ValidateField(txtSyncBool, "Fältet får ej vara tomt");
         }
 
         private bool ValidateAll()
         {
+            syncDbOk = ValidateField(txtSynkDb, "Fältet får ej vara tomt", requirePositiveInteger: true);
+            syncOffsetOk = ValidateField(txtSynkByte, "Fältet får ej vara tomt", requirePositiveInteger: true);
+            syncBitOk = ValidateField(txtSyncBool, "Fältet får ej vara tomt");
 
-            if (string.IsNullOrEmpty(txtSynkDb.Text))
-            {
-                errorProvider.SetError(txtSynkDb, "Fältet får ej va tomt");
-                syncDbOk = false;
-            }
-            else if (!uint.TryParse(txtSynkDb.Text, out uint _))
-            {
-                errorProvider.SetError(txtSynkDb, "Inte ett positivt heltal");
-                syncDbOk = false;
-            }
-            else
-                syncDbOk = true;
-
-            if (string.IsNullOrEmpty(txtSynkByte.Text))
-            {
-                errorProvider.SetError(txtSynkByte, "Fältet får ej va tomt");
-                syncOffsetOk = false;
-            }
-            else if (!uint.TryParse(txtSynkByte.Text, out uint _))
-            {
-                errorProvider.SetError(txtSynkByte, "Inte ett positivt heltal");
-                syncOffsetOk = false;
-            }
-            else
-                syncOffsetOk = true;
-
-            if (string.IsNullOrEmpty(txtSyncBool.Text))
-            {
-                errorProvider.SetError(txtSyncBool, "Fältet får ej va tomt");
-                syncBitOk = false;
-            }
-            else
-                syncBitOk = true;
-
-            if (!syncDbOk || !syncOffsetOk || !syncBitOk)
-                return false;
-            else
-                return true;
+            return syncDbOk && syncOffsetOk && syncBitOk;
         }
+
         #endregion
 
         public SyncPlcTimeForm(ExtendedPlc myPlc)
@@ -110,9 +66,15 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             checkActive.Checked = myPlc.SyncActive;
             txtSyncBool.Text = myPlc.SyncBoolAddress.ToString();
             if ((S7.Net.CpuType)MyPlc.CpuType == S7.Net.CpuType.S7300 || (S7.Net.CpuType)MyPlc.CpuType == S7.Net.CpuType.S7400)
+            {
                 pictureBox1.Image = Properties.Resources.S7300Sync;
+                pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
+            }
             else
+            {
                 pictureBox1.Image = Properties.Resources.S71500Sync__Custom_;
+                pictureBox1.SizeMode = PictureBoxSizeMode.AutoSize;
+            }
 
         }
 
@@ -129,22 +91,28 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
         }
 
-        private void SaveToSql()
+        private async void SaveToSql()
         {
-            string activeString;
-            if (checkActive.Checked)
-                activeString = "True";
-            else
-                activeString = "False";
+            string activeString = checkActive.Checked ? "True" : "False";
 
-
-            DatabaseSql.SavePlcSyncParameters(
-                syncDb: txtSynkDb.Text
-                , syncByte: txtSynkByte.Text
-                , syncBool: txtSyncBool.Text
-                , activeString: activeString
-                , plcId: MyPlc.Id);
-
+            try
+            {
+                await Task.Run(() =>
+                {
+                    DatabaseSql.SavePlcSyncParameters(
+                        syncDb: txtSynkDb.Text,
+                        syncByte: txtSynkByte.Text,
+                        syncBool: txtSyncBool.Text,
+                        activeString: activeString,
+                        plcId: MyPlc.Id);
+                });
+            }
+            catch (SqlException ex)
+            {
+                MessageBox.Show($"Ett fel uppstod vid sparandet till databasen: {ex.Message}");
+            }
         }
+
+
     }
 }

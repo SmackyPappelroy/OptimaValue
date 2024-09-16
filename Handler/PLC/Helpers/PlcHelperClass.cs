@@ -34,9 +34,27 @@ namespace OptimaValue
         /// <returns></returns>
         public static DateTime DTLtoDateTime(DTL dtl)
         {
-            var temp = $"{dtl.Year}-{dtl.Month:00}-{dtl.Day:00} {dtl.Hour:00}:{dtl.Minute:00}:{dtl.Second:00}.{dtl.NanoSecond / 1000000:000}";
-            return Convert.ToDateTime(temp);
+            try
+            {
+                DateTime dateTime = new DateTime(
+                    year: dtl.Year,
+                    month: dtl.Month,
+                    day: dtl.Day,
+                    hour: dtl.Hour,
+                    minute: dtl.Minute,
+                    second: dtl.Second,
+                    millisecond: dtl.NanoSecond / 1000000 // Konverterar nanosekunder till millisekunder
+                );
+
+                return dateTime;
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                // Hantera fall där DTL-värdena är utanför giltiga gränser
+                throw new ArgumentException("Ogiltiga värden i DTL-objektet.", ex);
+            }
         }
+
 
         /// <summary>
         /// Konverterar <see cref="DateTime"/> till Siemens DTL
@@ -45,19 +63,25 @@ namespace OptimaValue
         /// <returns></returns>
         public static DTL DateTimeToDTL(DateTime dt)
         {
+            // Justerar veckodag: DayOfWeek returnerar 0 för söndag, vi vill kanske justera för PLC-system
+            byte weekDay = (byte)(dt.DayOfWeek == DayOfWeek.Sunday ? 7 : (int)dt.DayOfWeek);
+
+            // Skapar ett nytt DTL-objekt och tilldelar värden från DateTime
             var dtl = new DTL()
             {
-                Year = (short)dt.Year,
-                Month = (byte)dt.Month,
-                Day = (byte)dt.Day,
-                Hour = (byte)dt.Hour,
-                Minute = (byte)dt.Minute,
-                Second = (byte)dt.Second,
-                NanoSecond = dt.Millisecond * 1000000,
-                WeekDay = (byte)(dt.DayOfWeek + 1),
+                Year = (short)dt.Year, // DateTime.Year är alltid inom giltigt short-intervall
+                Month = (byte)dt.Month, // Giltig månad från 1 till 12
+                Day = (byte)dt.Day, // Giltigt datum från 1 till 31
+                Hour = (byte)dt.Hour, // Giltig timme från 0 till 23
+                Minute = (byte)dt.Minute, // Giltig minut från 0 till 59
+                Second = (byte)dt.Second, // Giltig sekund från 0 till 59
+                NanoSecond = dt.Millisecond * 1000000, // Konverterar millisekunder till nanosekunder
+                WeekDay = weekDay // Veckodag, justerad enligt ovan
             };
+
             return dtl;
         }
+
 
         public static string S7StringSwedish(this byte[] bytes)
         {

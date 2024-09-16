@@ -58,10 +58,13 @@
     <PackageReference Include="Microsoft.Office.Interop.Excel" Version="15.0.4795.1001" />
     <PackageReference Include="Microsoft.OpenApi" Version="1.6.6" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.18.0" />
+    <PackageReference Include="PacketDotNet" Version="1.4.7" />
     <PackageReference Include="S7netplus" Version="0.20.0" />
+    <PackageReference Include="SharpPcap" Version="6.3.0" />
     <PackageReference Include="System.ServiceModel.Primitives" Version="6.0.0" />
     <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FileLogger\Logger\FileLogger.csproj" />

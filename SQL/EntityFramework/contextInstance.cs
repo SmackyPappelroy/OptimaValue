@@ -20,7 +20,7 @@ namespace OptimaValue
                 Instantiate();
 
             var result = await Task.FromResult(instance.Database.CreateIfNotExists());
-            DatabaseCreationNotifier.NotifyDatabaseCreated(result);
+            DatabaseCreationNotifier.OnDatabaseCreated(result);
             return result;
         }
 

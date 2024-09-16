@@ -9,6 +9,10 @@ namespace OptimaValue
 {
     public interface IPlc : IDisposable
     {
+        int TotalConnectionAttempts { get; set; }
+        int FailedConnectionAttempts { get; set; }
+        TimeSpan TotalReconnectTime { get; set; }
+
         System.Drawing.Image Image { get; set; }
         string PlcName { get; set; }
         event Action<ConnectionStatus> OnConnectionChanged;

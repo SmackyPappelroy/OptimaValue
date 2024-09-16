@@ -37,6 +37,7 @@
             imageList = new System.Windows.Forms.ImageList(components);
             contentPanel = new System.Windows.Forms.Panel();
             statusPanel = new System.Windows.Forms.Panel();
+            serviceImage = new System.Windows.Forms.PictureBox();
             databaseImage = new System.Windows.Forms.PictureBox();
             errorImage = new System.Windows.Forms.PictureBox();
             pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -53,6 +54,7 @@
             debugMenu = new System.Windows.Forms.ToolStripMenuItem();
             notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
             autoStartTool = new System.Windows.Forms.ToolStripMenuItem();
+            serviceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
             comboTrend = new System.Windows.Forms.ToolStripComboBox();
             btnStartTrend = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,6 +63,7 @@
             toolTip = new System.Windows.Forms.ToolTip(components);
             addPlcMenu.SuspendLayout();
             statusPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)serviceImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)databaseImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)errorImage).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -88,7 +91,7 @@
             // 
             treeView.BackColor = System.Drawing.Color.WhiteSmoke;
             treeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            treeView.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            treeView.Font = new System.Drawing.Font("Arial", 12F);
             treeView.ForeColor = System.Drawing.Color.Black;
             treeView.ImageIndex = 0;
             treeView.ImageList = imageList;
@@ -132,6 +135,7 @@
             // statusPanel
             // 
             statusPanel.BackColor = System.Drawing.Color.FromArgb(38, 38, 38);
+            statusPanel.Controls.Add(serviceImage);
             statusPanel.Controls.Add(databaseImage);
             statusPanel.Controls.Add(errorImage);
             statusPanel.Controls.Add(pictureBox1);
@@ -143,6 +147,19 @@
             statusPanel.Name = "statusPanel";
             statusPanel.Size = new System.Drawing.Size(852, 228);
             statusPanel.TabIndex = 2;
+            // 
+            // serviceImage
+            // 
+            serviceImage.BackColor = System.Drawing.Color.Transparent;
+            serviceImage.Image = (System.Drawing.Image)resources.GetObject("serviceImage.Image");
+            serviceImage.Location = new System.Drawing.Point(805, 76);
+            serviceImage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            serviceImage.Name = "serviceImage";
+            serviceImage.Size = new System.Drawing.Size(48, 48);
+            serviceImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            serviceImage.TabIndex = 16;
+            serviceImage.TabStop = false;
+            toolTip.SetToolTip(serviceImage, "Service installerad");
             // 
             // databaseImage
             // 
@@ -182,7 +199,7 @@
             // 
             txtStatus.AutoSize = true;
             txtStatus.Dock = System.Windows.Forms.DockStyle.Top;
-            txtStatus.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            txtStatus.Font = new System.Drawing.Font("Century Gothic", 12F);
             txtStatus.ForeColor = System.Drawing.Color.FromArgb(230, 230, 230);
             txtStatus.Location = new System.Drawing.Point(0, 28);
             txtStatus.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
@@ -197,7 +214,7 @@
             // 
             lblStatus.AutoSize = true;
             lblStatus.Dock = System.Windows.Forms.DockStyle.Top;
-            lblStatus.Font = new System.Drawing.Font("Century Gothic", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            lblStatus.Font = new System.Drawing.Font("Century Gothic", 15.75F);
             lblStatus.ForeColor = System.Drawing.Color.FromArgb(175, 175, 175);
             lblStatus.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             lblStatus.Location = new System.Drawing.Point(0, 0);
@@ -229,7 +246,7 @@
             btnStart.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(38, 38, 38);
             btnStart.FlatAppearance.BorderSize = 0;
             btnStart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnStart.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            btnStart.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold);
             btnStart.Location = new System.Drawing.Point(0, 0);
             btnStart.Margin = new System.Windows.Forms.Padding(4);
             btnStart.Name = "btnStart";
@@ -246,7 +263,7 @@
             btnStop.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(38, 38, 38);
             btnStop.FlatAppearance.BorderSize = 0;
             btnStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            btnStop.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            btnStop.Font = new System.Drawing.Font("Century Gothic", 14.25F, System.Drawing.FontStyle.Bold);
             btnStop.Location = new System.Drawing.Point(220, 0);
             btnStop.Margin = new System.Windows.Forms.Padding(4);
             btnStop.Name = "btnStop";
@@ -300,7 +317,7 @@
             // 
             // menuSettings
             // 
-            menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { databasToolStripMenuItem, debugMenu, notifyMenu, autoStartTool });
+            menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { databasToolStripMenuItem, debugMenu, notifyMenu, autoStartTool, serviceToolStripMenuItem });
             menuSettings.Name = "menuSettings";
             menuSettings.Size = new System.Drawing.Size(84, 28);
             menuSettings.Text = "Inställningar";
@@ -336,9 +353,16 @@
             autoStartTool.Text = "Autostart";
             autoStartTool.CheckedChanged += autoStartTool_CheckedChanged;
             // 
+            // serviceToolStripMenuItem
+            // 
+            serviceToolStripMenuItem.Name = "serviceToolStripMenuItem";
+            serviceToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            serviceToolStripMenuItem.Text = "Service";
+            serviceToolStripMenuItem.Click += serviceToolStripMenuItem_Click;
+            // 
             // menuQuestion
             // 
-            menuQuestion.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            menuQuestion.Font = new System.Drawing.Font("Arial Narrow", 9.75F);
             menuQuestion.Name = "menuQuestion";
             menuQuestion.Size = new System.Drawing.Size(25, 28);
             menuQuestion.Text = "?";
@@ -395,6 +419,7 @@
             addPlcMenu.ResumeLayout(false);
             statusPanel.ResumeLayout(false);
             statusPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)serviceImage).EndInit();
             ((System.ComponentModel.ISupportInitialize)databaseImage).EndInit();
             ((System.ComponentModel.ISupportInitialize)errorImage).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
@@ -437,5 +462,7 @@
         private System.Windows.Forms.ToolStripMenuItem autoStartTool;
         private System.Windows.Forms.ToolStripComboBox comboTrend;
         private System.Windows.Forms.ToolStripMenuItem btnStartTrend;
+        private System.Windows.Forms.ToolStripMenuItem serviceToolStripMenuItem;
+        private System.Windows.Forms.PictureBox serviceImage;
     }
 }

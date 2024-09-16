@@ -184,7 +184,7 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
                 await MyPlc.Plc.ConnectAsync();
                 if (MyPlc.IsConnected)
                 {
-                    if (MyPlc.CpuType == CpuType.OpcUa)
+                    if (MyPlc.PlcConfiguration.CpuType == CpuType.OpcUa)
                     {
                         if (MyPlc.Plc is OpcPlc opc)
                         {

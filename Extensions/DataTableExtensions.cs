@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FileLogger;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -23,10 +24,23 @@ namespace OptimaValue
         /// <returns>Rader som upp fyller villkoren</returns>
         public static DataTable SelectRows(this DataTable tbl, string whereExpression, string orderByExpression)
         {
-            tbl.DefaultView.RowFilter = whereExpression;
-            tbl.DefaultView.Sort = orderByExpression;
-            return tbl.DefaultView.ToTable();
+            try
+            {
+                DataView view = new DataView(tbl)
+                {
+                    RowFilter = whereExpression,
+                    Sort = orderByExpression
+                };
+                return view.ToTable();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Fel vid filtrering/sortering: {ex.Message}");
+                return null; 
+            }
         }
+
+
 
         /// <summary>
         /// Finds a cell value at a specific row index<para></para>
@@ -52,21 +66,11 @@ namespace OptimaValue
         /// <returns>T som måste vara en <see cref="IComparable"/></returns>
         public static T FindLowestNumber<T>(this DataTable tbl, string columnName) where T : IComparable
         {
-            // Om tabellen inte innhåller några rader, returnera "default" värde av T.
             if (tbl.Rows.Count == 0)
                 return default;
 
-            // Skapar en lista av T
-            List<T> lowestNumberId = new List<T>();
-
-            // Itererar av över alla rader 
-            foreach (DataRow rad in tbl.AsEnumerable())
-            {
-                // Lägger till alla värden i kolumnen "columnName"
-                lowestNumberId.Add(rad.Field<T>(columnName));
-            }
-            // Returnerar de lägsta värdet i listan
-            return (lowestNumberId.Min());
+            // Använd LINQ för att hitta minsta värdet direkt
+            return tbl.AsEnumerable().Min(row => row.Field<T>(columnName));
         }
 
         /// <summary>
@@ -78,21 +82,11 @@ namespace OptimaValue
         /// <returns>T som måste vara en <see cref="IComparable"/></returns>
         public static T FindHighestNumber<T>(this DataTable tbl, string columnName) where T : IComparable
         {
-            // Om tabellen inte innhåller några rader, returnera "default" värde av T.
             if (tbl.Rows.Count == 0)
                 return default;
 
-            // Skapar en lista av T
-            List<T> highestNumberId = new List<T>();
-
-            // Itererar av över alla rader 
-            foreach (DataRow rad in tbl.AsEnumerable())
-            {
-                // Lägger till alla värden i kolumnen "columnName"
-                highestNumberId.Add(rad.Field<T>(columnName));
-            }
-            // Returnerar de högsta värdet i listan
-            return (highestNumberId.Max());
+            // Använd LINQ för att hitta högsta värdet direkt
+            return tbl.AsEnumerable().Max(row => row.Field<T>(columnName));
         }
 
         /// <summary>
@@ -106,35 +100,23 @@ namespace OptimaValue
         /// <returns>T som måste vara en <see cref="IComparable"/></returns>
         public static T FindNextNumber<T>(this DataTable tbl, T currentNumber, string columnName) where T : IComparable
         {
-            // Om tabellen inte innhåller några rader, returnera "default" värde av T.
             if (tbl.Rows.Count == 0)
                 return default;
 
-            // Hittar de högsta värdet i kolumnen
             var highest = FindHighestNumber<T>(tbl, columnName);
-
-            // Hittar de lägsta värdet i kolumnen
             var lowest = FindLowestNumber<T>(tbl, columnName);
 
-            // Om högsta = lägsta returnera lägsta
+            // Om högsta = nuvarande nummer, returnera lägsta
             if (currentNumber.CompareTo(highest) == 0)
                 return lowest;
 
-            // Skapar en lista av T
-            List<T> idList = new List<T>();
-
-            // Itererar av över alla rader 
-            foreach (DataRow rad in tbl.AsEnumerable())
-            {
-                idList.Add(rad.Field<T>(columnName));
-            }
-
-            // Ta bort alla rader som är lägre eller lika med currentNumber
-            idList.RemoveAll(item => item.CompareTo(currentNumber) == -1 || item.CompareTo(currentNumber) == 0);
-
-            // Returnera det minsta värdet
-            return idList.Min();
+            // Hitta nästa nummer som är större än currentNumber
+            return tbl.AsEnumerable()
+                .Select(row => row.Field<T>(columnName))
+                .Where(val => val.CompareTo(currentNumber) > 0)
+                .Min();
         }
+
 
         /// <summary>
         /// Converts a <see cref="IList{T}"/> object to DataTable
@@ -154,7 +136,17 @@ namespace OptimaValue
 
                 foreach (PropertyDescriptor prop in properties)
                 {
-                    row[prop.Name] = prop.GetValue(item) ?? DBNull.Value;
+                    try
+                    {
+                        // Hanterar null-värden och potentiella konverteringsproblem
+                        row[prop.Name] = prop.GetValue(item) ?? DBNull.Value;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Logga felet eller hantera det på annat sätt
+                        Logger.LogError($"Fel vid konvertering av egenskap: {prop.Name}. Felmeddelande: {ex.Message}",ex);
+                        row[prop.Name] = DBNull.Value; // Sätt standardvärde vid fel
+                    }
                 }
 
                 table.Rows.Add(row);
@@ -162,6 +154,7 @@ namespace OptimaValue
 
             return table;
         }
+
 
         private static DataTable CreateTable<T>()
         {

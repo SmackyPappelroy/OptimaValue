@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using OptimaValue.Config;
 using FileLogger;
+using Settings = OptimaValue.Config.Settings;
 
 namespace OptimaValue
 {
@@ -68,7 +69,7 @@ namespace OptimaValue
             var result = await DatabaseSql.TestConnectionAsync() && DatabaseSql.TableExist();
             if (!result)
             {
-                $"Misslyckades att ansluta med följande Connection-sträng: {DatabaseSql.ConnectionString}".SendStatusMessage(Severity.Error);
+                $"Misslyckades att ansluta med följande Connection-sträng: {Settings.ConnectionString}".SendStatusMessage(Severity.Error);
                 btnSave.Enabled = true;
                 //}
                 //else

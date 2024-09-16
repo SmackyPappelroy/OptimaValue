@@ -84,7 +84,7 @@ namespace OptimaValue.Handler.PLC.Graphics
             {
                 if (myPlc.isOpc)
                 {
-                    CpuType = myPlc.CpuType;
+                    CpuType = myPlc.PlcConfiguration.CpuType;
                     btnBrowseOpc.Visible = true;
                     picLogo.BackgroundImage = new Bitmap(Properties.Resources.opcualogo);
                 }

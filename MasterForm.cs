@@ -10,8 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using FileLogger;
-using System.IO.Pipes;
-using System.IO;
+using System.Security.Principal;
 
 namespace OptimaValue;
 
@@ -116,7 +115,6 @@ public partial class MasterForm : Form
         menuQuestion.ForeColor = UIColors.HeaderText;
         menuSettings.ForeColor = UIColors.HeaderText;
         btnStartTrend.ForeColor = UIColors.HeaderText;
-        //menuSettings.KeepOpenOnDropdownCheck();
 
         menuSettings.ChangeForeColorMenuItem(Color.Black, UIColors.HeaderText);
         menuQuestion.MouseHoverMenuItem(Color.Black, UIColors.HeaderText);
@@ -129,7 +127,6 @@ public partial class MasterForm : Form
     private void AddTrendTags()
     {
         stringCollection.AddRange(AvailableTagsTrend.Select(x => x.Name).ToArray());
-        //comboTrend.Items.AddRange(AvailableTagsTrend.Select(x => x.Name).ToArray());
         comboTrend.ComboBox.DataSource = TagIds;
         comboTrend.ComboBox.DisplayMember = "Name";
         comboTrend.ComboBox.ValueMember = "Id";
@@ -142,6 +139,7 @@ public partial class MasterForm : Form
     #region Form
     private async void MasterForm_Load(object sender, EventArgs e)
     {
+        serviceImage.Visible = ServiceInstallerAppForm.ServiceExists();
         noDatabase = databaseImageList.Images[0];
         okDatabase = databaseImageList.Images[1];
 
@@ -163,7 +161,7 @@ public partial class MasterForm : Form
             txtStatus.Text = "Misslyckades att ansluta till Sql";
             databaseImage.Image = noDatabase;
         }
-        else if(!tableExist)
+        else if (!tableExist)
         {
             txtStatus.Text = "Databasen finns inte";
             databaseImage.Image = noDatabase;
@@ -178,6 +176,8 @@ public partial class MasterForm : Form
 
         if (autoStartTool.Checked)
             await AutoStart();
+
+
     }
 
     private async Task AutoStart()
@@ -267,6 +267,7 @@ public partial class MasterForm : Form
         tagControl?.Hide();
 
         addPlc.Enabled = false;
+
     }
 
 
@@ -720,7 +721,7 @@ public partial class MasterForm : Form
         }
         var treeNodeCollection = treeView.Nodes.Find("PLC", true);
         var treeNode = treeNodeCollection.First(n => n.Text == e.PlcName);
-        switch (e.connectionStatus)
+        switch (e.ConnectionStatus)
         {
             case ConnectionStatus.Disconnected:
                 if (treeNode.ImageIndex != 1)
@@ -864,6 +865,35 @@ public partial class MasterForm : Form
             Logger.LogError("", ex);
         }
     }
+
+    private bool serviceFormOpen = false;
+    private void serviceToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        if (!IsUserAdministrator())
+        {
+            MessageBox.Show("Du måste köra programmet som administratör för att kunna installera tjänsten","Fel",MessageBoxButtons.OK,MessageBoxIcon.Error);
+            return;
+        }
+        if (!serviceFormOpen)
+        {
+            var serviceForm = new ServiceInstallerAppForm();
+            serviceForm.FormClosed += (s, e) =>
+            {
+                serviceFormOpen = false;
+                serviceImage.Visible = ServiceInstallerAppForm.ServiceExists();
+            };
+            serviceForm.Show();
+        }
+    }
+
+    private bool IsUserAdministrator()
+    {
+        // Kolla om användaren är administratör
+        WindowsIdentity identity = WindowsIdentity.GetCurrent();
+        WindowsPrincipal principal = new WindowsPrincipal(identity);
+        return principal.IsInRole(WindowsBuiltInRole.Administrator);
+    }
+  
 
 
 }

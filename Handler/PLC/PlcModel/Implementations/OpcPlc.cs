@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace OptimaValue
 {
-    internal class OpcPlc : IPlc
+    internal class OpcPlc : IPlc, IDisposable
     {
         public IClient<Node> Client;
         private OpcType opcType;
@@ -20,27 +20,9 @@ namespace OptimaValue
         public event Action<ConnectionStatus> OnConnectionChanged;
         public string ConnectionString { get; set; }
         public string PlcName { get; set; }
-        public bool IsConnected
-        {
-            get
-            {
-                return Client.Status == OpcStatus.Connected;
-            }
-        }
+        public bool IsConnected => Client?.Status == OpcStatus.Connected;
         public bool IsStreamConnected => IsConnected;
-
         public string RootNodeName => Client.RootNode.Name;
-        public OpcType OpcType
-        {
-            get
-            {
-                if (Client is UaClient)
-                {
-                    return OpcType.OpcUa;
-                }
-                return OpcType.OpcDa;
-            }
-        }
 
         private bool opcDaDisconnectedFlag = false;
         private ConnectionStatus status;
@@ -52,8 +34,7 @@ namespace OptimaValue
                 {
                     if (Client == null || !IsConnected)
                     {
-                        status = ConnectionStatus.Disconnected;
-                        return status;
+                        UpdateConnectionStatus(ConnectionStatus.Disconnected);
                     }
                     return status;
                 }
@@ -67,9 +48,9 @@ namespace OptimaValue
                     }
                     if (newStatus != status)
                     {
-                        OnConnectionChanged?.Invoke(newStatus);
+                        UpdateConnectionStatus(newStatus);
                     }
-                    return newStatus;
+                    return status;
                 }
                 return ConnectionStatus.Disconnected;
             }
@@ -79,66 +60,40 @@ namespace OptimaValue
                 {
                     if (status == ConnectionStatus.Disconnected && value == ConnectionStatus.Connected)
                         UpTimeStart = DateTime.Now;
-                    status = value;
+                    UpdateConnectionStatus(value);
                 }
-                else if (Client is DaClient daClient)
+                else if (Client is DaClient)
                 {
                     if (value == ConnectionStatus.Disconnected)
                     {
                         opcDaDisconnectedFlag = true;
                     }
+                    UpdateConnectionStatus(value);
                 }
-                OnConnectionChanged?.Invoke(value);
             }
         }
 
-
         public int Id { get; set; } = 0;
+        private CpuType _cpuType;
+
         public CpuType CpuType
         {
             get
             {
-                switch (OpcType)
+                return _cpuType switch
                 {
-                    case OpcType.OpcUa:
-                        return CpuType.OpcUa;
-                    case OpcType.OpcDa:
-                        return CpuType.OpcDa;
-                    default:
-                        return CpuType.Unknown;
-                }
+                    CpuType.OpcUa => CpuType.OpcUa,
+                    CpuType.OpcDa => CpuType.OpcDa,
+                    _ => CpuType.Unknown,
+                };
             }
         }
 
+
         public bool isNotPlc { get; } = true;
         public DateTime UpTimeStart { get; set; } = DateTime.MaxValue;
-        public TimeSpan UpTime
-        {
-            get
-            {
-                if (UpTimeStart == DateTime.MaxValue)
-                    return TimeSpan.FromSeconds(0);
-                else
-                    return DateTime.Now - UpTimeStart;
-            }
-        }
-        public string UpTimeString
-        {
-            get
-            {
-                if (UpTimeStart == DateTime.MaxValue)
-                    return "0s";
-                var tid = DateTime.Now - UpTimeStart;
-                if (tid < TimeSpan.FromMinutes(1))
-                    return tid.ToString("s's'");
-                else if (tid < TimeSpan.FromHours(1))
-                    return tid.ToString("m'm 's's'");
-                else if (tid > TimeSpan.FromHours(1) && (tid < TimeSpan.FromDays(1)))
-                    return tid.ToString("h'h 'm'm 's's'");
-                else
-                    return tid.ToString("d'd 'h'h 'm'm 's's'");
-            }
-        }
+        public TimeSpan UpTime => UpTimeStart == DateTime.MaxValue ? TimeSpan.FromSeconds(0) : DateTime.Now - UpTimeStart;
+        public string UpTimeString => GetUptimeString();
 
         public bool Active { get; set; } = false;
         public DateTime LastReconnect { get; set; } = DateTime.MinValue;
@@ -156,6 +111,8 @@ namespace OptimaValue
             }
         }
         public bool Alarm { get; set; } = false;
+
+        #region External Status Properties
         public string ExternalStatusMessage { get; set; } = string.Empty;
         public Status ExternalStatus { get; set; } = Status.Ok;
         public string ExternalElapsedTime { get; set; } = string.Empty;
@@ -163,7 +120,12 @@ namespace OptimaValue
         public Color ExternalOnlineColor { get; set; } = Color.Gray;
         public string ExternalOnlineMessage { get; set; } = "Ej ansluten";
         public DateTime LastPlcStatusCheck { get; set; }
+        public int TotalConnectionAttempts { get; set; }
+        public int FailedConnectionAttempts { get; set; }
+        public TimeSpan TotalReconnectTime { get; set; }
+        #endregion
 
+        private bool disposed = false;
 
         // Constructor
         public OpcPlc(string connectionString, OpcType opcType, int id)
@@ -172,6 +134,7 @@ namespace OptimaValue
             ConnectionString = connectionString;
             this.opcType = opcType;
             Initialize();
+
             if (Client is UaClient uaClient)
             {
                 uaClient.ServerConnectionLost += OpcClient_ServerConnectionLost;
@@ -181,21 +144,23 @@ namespace OptimaValue
 
         private void OpcClient_ServerConnectionRestored(object sender, EventArgs e)
         {
-            ConnectionStatus = ConnectionStatus.Connected;
+            UpdateConnectionStatus(ConnectionStatus.Connected);
         }
 
         private void OpcClient_ServerConnectionLost(object sender, EventArgs e)
         {
-            ConnectionStatus = ConnectionStatus.Disconnected;
+            UpdateConnectionStatus(ConnectionStatus.Disconnected);
         }
 
         private void Initialize()
         {
             ValidateUriString(ConnectionString);
-            if (opcType == OpcType.OpcUa)
-                Client = new UaClient(new Uri(ConnectionString), Application.ProductName);
-            else
-                Client = new DaClient(ConnectionString);
+            Client = opcType switch
+            {
+                OpcType.OpcUa => new UaClient(new Uri(ConnectionString), Application.ProductName),
+                OpcType.OpcDa => new DaClient(ConnectionString),
+                _ => throw new InvalidOperationException("Invalid OPC type specified."),
+            };
         }
 
         private void ValidateUriString(string connectionString)
@@ -214,7 +179,7 @@ namespace OptimaValue
         {
             if (Client == null)
                 Initialize();
-            Task.Run(async () => await Client.Connect());
+            Task.Run(async () => await Client.Connect().ConfigureAwait(false));
             return IsConnected;
         }
 
@@ -227,7 +192,7 @@ namespace OptimaValue
             {
                 using CancellationTokenSource cts = new CancellationTokenSource(timeout);
                 cts.Token.ThrowIfCancellationRequested();
-                await Client.Connect(cts);
+                await Client.Connect(cts).ConfigureAwait(false);
             }
             catch (OperationCanceledException ex)
             {
@@ -244,7 +209,7 @@ namespace OptimaValue
         {
             try
             {
-                await ConnectAsync();
+                await ConnectAsync().ConfigureAwait(false);
                 if (IsConnected)
                     return true;
             }
@@ -263,9 +228,10 @@ namespace OptimaValue
                 var temp = Client.Read<object>(tag.Name);
                 return new ReadValue(this, temp);
             }
-            catch (OpcException)
+            catch (OpcException ex)
             {
-                ConnectionStatus = ConnectionStatus.Disconnected;
+                Logger.LogError($"Error reading tag {tag.Name} from OPC server {PlcName}", ex);
+                UpdateConnectionStatus(ConnectionStatus.Disconnected);
                 throw;
             }
         }
@@ -277,40 +243,40 @@ namespace OptimaValue
                 var temp = Client.Read<object>(address);
                 return new ReadValue(this, temp);
             }
-            catch (OpcException)
+            catch (OpcException ex)
             {
-                ConnectionStatus = ConnectionStatus.Disconnected;
+                Logger.LogError($"Error reading address {address} from OPC server {PlcName}", ex);
+                UpdateConnectionStatus(ConnectionStatus.Disconnected);
                 throw;
             }
         }
-
 
         public async Task<ReadValue> ReadAsync(PlcTag tag, CancellationToken cancellationToken = default)
         {
             try
             {
-                var value = await Client.ReadAsync<object>(tag.Name);
+                var value = await Client.ReadAsync<object>(tag.Name).ConfigureAwait(false);
                 return new ReadValue(this, value);
             }
-            catch (OpcException)
+            catch (OpcException ex)
             {
-                ConnectionStatus = ConnectionStatus.Disconnected;
+                Logger.LogError($"Error reading tag {tag.Name} from OPC server {PlcName}", ex);
+                UpdateConnectionStatus(ConnectionStatus.Disconnected);
                 throw;
             }
         }
-
 
         public async Task<ReadValue> ReadAsync(string address, CancellationToken cancellationToken = default)
         {
             try
             {
-                var readEvent = await Client.ReadAsync<object>(address);
-                var readValue = new ReadValue(this, readEvent.Value);
-                return readValue;
+                var readEvent = await Client.ReadAsync<object>(address).ConfigureAwait(false);
+                return new ReadValue(this, readEvent.Value);
             }
-            catch (OpcException)
+            catch (OpcException ex)
             {
-                ConnectionStatus = ConnectionStatus.Disconnected;
+                Logger.LogError($"Error reading address {address} from OPC server {PlcName}", ex);
+                UpdateConnectionStatus(ConnectionStatus.Disconnected);
                 throw;
             }
         }
@@ -327,12 +293,12 @@ namespace OptimaValue
 
         public async Task WriteAsync(string address, object value, CancellationToken cancellationToken = default)
         {
-            await Client.WriteAsync(address, value);
+            await Client.WriteAsync(address, value).ConfigureAwait(false);
         }
 
         public async Task WriteAsync(PlcTag tag, object value, CancellationToken cancellationToken = default)
         {
-            await Client.WriteAsync(tag.Name, value);
+            await Client.WriteAsync(tag.Name, value).ConfigureAwait(false);
         }
 
         public IEnumerable<Node> ExploreOpc(string filter = "", bool onlyFolders = false, bool includeSubVariables = false)
@@ -342,12 +308,17 @@ namespace OptimaValue
 
         public void Dispose()
         {
+            if (disposed)
+                return;
+
             if (Client is UaClient uaClient)
             {
                 uaClient.ServerConnectionLost -= OpcClient_ServerConnectionLost;
                 uaClient.ServerConnectionRestored -= OpcClient_ServerConnectionRestored;
             }
-            Client.Dispose();
+            Client?.Dispose();
+            disposed = true;
+
             GC.SuppressFinalize(this);
         }
 
@@ -360,6 +331,7 @@ namespace OptimaValue
             return null;
         }
 
+        // Unimplemented methods
         public void WriteBytes(PlcTag tag, byte[] value)
         {
             throw new NotImplementedException();
@@ -399,7 +371,32 @@ namespace OptimaValue
         {
             //TODO: Implement this method
             return Task.FromResult(true);
-            //throw new NotImplementedException();
+        }
+
+        private void UpdateConnectionStatus(ConnectionStatus newStatus)
+        {
+            if (status != newStatus)
+            {
+                status = newStatus;
+                OnConnectionChanged?.Invoke(newStatus);
+            }
+        }
+
+        private string GetUptimeString()
+        {
+            if (UpTimeStart == DateTime.MaxValue)
+                return "0s";
+
+            var tid = DateTime.Now - UpTimeStart;
+
+            if (tid < TimeSpan.FromMinutes(1))
+                return tid.ToString("s's'");
+            if (tid < TimeSpan.FromHours(1))
+                return tid.ToString("m'm 's's'");
+            if (tid > TimeSpan.FromHours(1) && (tid < TimeSpan.FromDays(1)))
+                return tid.ToString("h'h 'm'm 's's'");
+
+            return tid.ToString("d'd 'h'h 'm'm 's's'");
         }
     }
 }

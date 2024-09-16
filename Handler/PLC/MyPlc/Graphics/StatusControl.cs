@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
+using System.Text;
 using System.Windows.Forms;
 
 namespace OptimaValue.Handler.PLC.MyPlc.Graphics
@@ -65,15 +67,35 @@ namespace OptimaValue.Handler.PLC.MyPlc.Graphics
             }
             if (e.PlcName == PlcName)
             {
-                if (e.connectionStatus == ConnectionStatus.Connected && !txtUpTime.Visible)
-                    txtUpTime.Visible = true;
-                else if (e.connectionStatus != ConnectionStatus.Connected)
-                    txtUpTime.Visible = false;
-                txtUpTime.Text = e.ElapsedTime;
+                // Hantera anslutningsstatus och driftstid
+                txtUpTime.Visible = e.ConnectionStatus == ConnectionStatus.Connected;
+                txtMisc.Visible = e.ConnectionStatus == ConnectionStatus.Connected;
+                txtUpTime.Text = $"Kontinuerlig drift: {e.ElapsedTime}";
                 txtPlc.Text = e.PlcName;
                 panelStatus.BackColor = e.Color;
+
+                // Kombinera statistiken i en enda textsträng för txtMisc
+                var miscInfo = new StringBuilder();
+                miscInfo.AppendLine($"Anslutningsförsök: {e.TotalConnectionAttempts}");
+                miscInfo.AppendLine($"Misslyckade anslutningsförsök: {e.FailedConnectionAttempts}");
+
+                // Hantera anslutningstid i millisekunder
+                try
+                {
+                    miscInfo.AppendLine($"Anslutningstid snitt: {Math.Floor(e.TotalReconnectTime.TotalMilliseconds / e.TotalConnectionAttempts)} ms");
+                }
+                catch (FormatException ex)
+                {
+                    miscInfo.AppendLine("Anslutningstid snitt: Formatfel");
+                    Console.WriteLine($"FormatException: {ex.Message}");
+                }
+
+                // Tilldela den kombinerade texten till txtMisc
+                txtMisc.Text = miscInfo.ToString();
             }
         }
+
+
 
         private void PlcStatusEvent_NewMessage(object sender, PlcStatusEventArgs e)
         {

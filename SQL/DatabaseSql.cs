@@ -15,6 +15,13 @@ public static class DatabaseSql
 {
     public static bool isConnected;
 
+    // Centrera anslutningshantering
+    private static SqlConnection GetOpenConnection()
+    {
+        var connection = new SqlConnection(Settings.ConnectionString);
+        connection.Open();
+        return connection;
+    }
 
     /// <summary>
     /// Creates a SQL connection string

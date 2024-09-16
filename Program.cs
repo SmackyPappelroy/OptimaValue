@@ -32,7 +32,8 @@ namespace OptimaValue
                 System.Threading.Tasks.TaskScheduler.UnobservedTaskException += TaskScheduler_UnobservedTaskException;
 #endif
                 Settings.Load();
-            //    LoggerInstance = CreateFileLogger();
+                if(DatabaseSql.TableExist())
+                    LoggerInstance = CreateFileLogger();
                 Settings.OptimaValueFilePath = Application.ExecutablePath;
 
                 ApplicationConfiguration.Initialize();

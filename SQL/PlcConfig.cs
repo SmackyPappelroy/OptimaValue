@@ -1,4 +1,5 @@
-﻿using S7.Net;
+﻿using FileLogger;
+using S7.Net;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -49,22 +50,35 @@ namespace OptimaValue
             }
 
             PlcList = tblPlcConfig.AsEnumerable()
-                .Select(row => new PlcConfiguration(
-                    plcName: row.Field<string>("name"),
-                    cpuType: Enum.Parse<CpuType>(row.Field<string>("cpuType")),
-                    ip: row.Field<string>("ipAddress"),
-                    rack: row.Field<short>("rack"),
-                    slot: row.Field<short>("slot"),
-                    activePlcId: row.Field<int>("id"),
-                    active: row.Field<bool>("Active"),
-                    syncTimeDbNr: row.Field<int>("syncTimeDbNr"),
-                    syncTimeOffset: row.Field<int>("syncTimeOffset"),
-                    syncBoolAddress: row.Field<string>("syncBoolAddress"),
-                    syncActive: row.Field<bool>("syncActive"),
-                    lastSyncTime: row.Field<DateTime>("lastSyncTime")
-                ))
+                .Select(row =>
+                {
+                    string cpuTypeString = row.Field<string>("cpuType")?.Trim();
+
+                    if (!Enum.TryParse<CpuType>(cpuTypeString, true, out var parsedCpuType))
+                    {
+                        Logger.LogWarning($"Failed to parse CpuType: '{cpuTypeString}', defaulting to Unknown.");
+                        parsedCpuType = CpuType.Unknown;
+                    }
+
+                    return new PlcConfiguration(
+                        plcName: row.Field<string>("name"),
+                        cpuType: parsedCpuType,
+                        ip: row.Field<string>("ipAddress"),
+                        rack: row.Field<short>("rack"),
+                        slot: row.Field<short>("slot"),
+                        activePlcId: row.Field<int>("id"),
+                        active: row.Field<bool>("Active"),
+                        syncTimeDbNr: row.Field<int>("syncTimeDbNr"),
+                        syncTimeOffset: row.Field<int>("syncTimeOffset"),
+                        syncBoolAddress: row.Field<string>("syncBoolAddress"),
+                        syncActive: row.Field<bool>("syncActive"),
+                        lastSyncTime: row.Field<DateTime>("lastSyncTime")
+                    );
+                })
                 .Select(plcConfig => new ExtendedPlc(plcConfig))
                 .ToList();
+
+
 
             return PlcList.Count > 0;
         }

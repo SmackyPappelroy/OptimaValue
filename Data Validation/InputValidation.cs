@@ -13,16 +13,15 @@ namespace OptimaValue
 
         public static bool IsValidIpAddress(this string ip)
         {
-            var ipChars = ip.ToCharArray();
-            return IPAddress.TryParse(ipChars, out var _);
+            return IPAddress.TryParse(ip, out _);
         }
 
         public static bool IsValidOpcConnectionString(this string connectionString)
         {
-            var normalizedString = connectionString.ToLower();
-            return normalizedString.StartsWith("opc.tcp://")
-                || normalizedString.StartsWith("opc.http://");
+            return connectionString.StartsWith("opc.tcp://", StringComparison.OrdinalIgnoreCase)
+                || connectionString.StartsWith("opc.http://", StringComparison.OrdinalIgnoreCase);
         }
+
 
 
     }

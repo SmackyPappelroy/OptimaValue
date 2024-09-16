@@ -10,9 +10,6 @@ namespace OptimaValue
     /// </summary>
     public static class OptimaExtensions
     {
-
-
-
         /// <summary>
         /// Returns True if valid <see cref="CpuType"/>
         /// </summary>
@@ -48,18 +45,19 @@ namespace OptimaValue
 
         public static void SendPlcStatusMessage(this ExtendedPlc plc, string message, Status status)
         {
-            PlcStatusEvent.RaiseMessage(message, plc.PlcName, status);
+            PlcStatusEvent.OnNewMessageRaised(message, plc.PlcName, status);
         }
 
         public static void SendPlcStatusMessage(this IPlc plc, string message, Status status)
         {
-            PlcStatusEvent.RaiseMessage(message, plc.PlcName, status);
+            PlcStatusEvent.OnNewMessageRaised(message, plc.PlcName, status);
         }
 
-        public static void SendPlcOnlineMessage(this ExtendedPlc plc, ConnectionStatus connectionStatus, string elapsedTime = "")
+        public static void SendPlcOnlineMessage(this ExtendedPlc plc, ConnectionStatus connectionStatus, int totalConnectionAttempts, int failedConnectionAttempts, TimeSpan totalReconnectTime, string elapsedTime = "")
         {
-            OnlineStatusEvent.RaiseMessage(connectionStatus, plc.PlcName, elapsedTime);
+            OnlineStatusEvent.RaiseNewMessage(connectionStatus, plc.PlcName, totalConnectionAttempts, failedConnectionAttempts, totalReconnectTime, elapsedTime);
         }
+
 
     }
 }

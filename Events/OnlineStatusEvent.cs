@@ -1,34 +1,57 @@
-﻿using System;
+﻿using FileLogger;
+using System;
 using System.Drawing;
 
-namespace OptimaValue
+namespace OptimaValue;
+
+public static class OnlineStatusEvent
 {
-    public static class OnlineStatusEvent
+    public static event EventHandler<OnlineStatusEventArgs> NewMessage;
+
+    public static void RaiseNewMessage(ConnectionStatus connectionStatus, string plcName, 
+        int totalConnectionAttempts, int failedConnectionAttempts, TimeSpan totalReconnectTime, string elapsedTime = "")
     {
-        public static event EventHandler<OnlineStatusEventArgs> NewMessage;
-        public static void RaiseMessage(ConnectionStatus connectionStatus, string plcName, string elapsedTime = "")
-        {
-            OnlineStatusEventArgs args = CreateEventArgs(connectionStatus, plcName, elapsedTime);
-            OnNewMessage(args);
-        }
+        var args = CreateEventArgs(connectionStatus, plcName, totalConnectionAttempts, 
+            failedConnectionAttempts, totalReconnectTime, elapsedTime);
+        OnNewMessage(args);
+    }
 
-        private static OnlineStatusEventArgs CreateEventArgs(ConnectionStatus connectionStatus, string plcName, string elapsedTime)
+    private static OnlineStatusEventArgs CreateEventArgs(ConnectionStatus connectionStatus, string plcName, 
+        int totalConnectionAttempts, int failedConnectionAttempts, TimeSpan totalReconnectTime, string elapsedTime)
+    {
+        return new OnlineStatusEventArgs(
+            connectionStatus,
+            GetStatusMessage(connectionStatus),
+            GetStatusColor(connectionStatus),
+            elapsedTime,
+            plcName,
+            totalConnectionAttempts,
+            failedConnectionAttempts,
+            totalReconnectTime
+        );
+    }
+
+    private static string GetStatusMessage(ConnectionStatus connectionStatus) =>
+        connectionStatus == ConnectionStatus.Connected ? "Ansluten" : "Ej Ansluten";
+
+    private static Color GetStatusColor(ConnectionStatus connectionStatus) =>
+        connectionStatus == ConnectionStatus.Connected ? UIColors.Active : UIColors.GreyColor;
+
+    private static void OnNewMessage(OnlineStatusEventArgs e)
+    {
+        var handler = NewMessage;
+        if (handler != null)
         {
-            OnlineStatusEventArgs args = new OnlineStatusEventArgs
+            try
             {
-                Message = connectionStatus == ConnectionStatus.Connected ? "Ansluten" : "Ej Ansluten",
-                connectionStatus = connectionStatus,
-                Color = connectionStatus == ConnectionStatus.Connected ? UIColors.Active : UIColors.GreyColor,
-                ElapsedTime = elapsedTime,
-                PlcName = plcName
-            };
-
-            return args;
-        }
-
-        private static void OnNewMessage(OnlineStatusEventArgs e)
-        {
-            NewMessage?.Invoke(typeof(StatusEvent), e);
+                handler.Invoke(typeof(OnlineStatusEvent), e);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Fel vid anrop av NewMessage-event: {ex.Message}");
+            }
         }
     }
 }
+
+

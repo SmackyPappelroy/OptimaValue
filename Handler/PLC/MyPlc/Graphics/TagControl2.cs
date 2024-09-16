@@ -5,7 +5,6 @@ using S7.Net;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -13,12 +12,13 @@ using System.Windows.Forms;
 using OptimaValue.Config;
 using System.Threading.Tasks;
 using System.Text.Json;
-using System.Runtime.CompilerServices;
-using S7.Net.Types;
 using System.Reflection;
 using System.Data.SqlTypes;
 using FileLogger;
 using ClosedXML.Excel;
+using System.Text;
+using System.Data.SqlClient;
+using MethodInvoker = System.Windows.Forms.MethodInvoker;
 
 namespace OptimaValue;
 
@@ -71,7 +71,7 @@ public partial class TagControl2 : UserControl
         if (e.Data.GetDataPresent(DataFormats.FileDrop))
         {
             string[] FileList = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            if (FileList[0].Substring(FileList[0].Length - 3, 3).ToLower() == "csv")
+            if (FileList[0].Substring(FileList[0].Length - 3, 3).Equals("csv", StringComparison.OrdinalIgnoreCase))
             {
                 e.Effect = DragDropEffects.Copy;
                 this.flowLayoutPanel.BackColor = UIColors.GreyLightColor;
@@ -88,57 +88,27 @@ public partial class TagControl2 : UserControl
         }
     }
 
-    private void TagControl2_DragDrop(object sender, DragEventArgs e)
+    private async void TagControl2_DragDrop(object sender, DragEventArgs e)
     {
+        // ändra muspekaren till en timelass
+        Cursor.Current = Cursors.WaitCursor;
+
         string[] FileList = (string[])e.Data.GetData(DataFormats.FileDrop, false);
         this.flowLayoutPanel.BackColor = UIColors.GreyColor;
 
         fileName = FileList[0];
         var fileEnding = fileName.Substring(fileName.Length - 4, 4).ToLower();
 
-        if (fileEnding != ".csv".ToLower() && fileEnding != "json".ToLower())
+        if (!fileEnding.Equals(".csv", StringComparison.OrdinalIgnoreCase))
         {
             Logger.LogError("Fel fil-format");
+            Cursor.Current = Cursors.Default;
             return;
         }
-        if (fileEnding == "json")
-        {
-            ReadJsonFile(fileName);
-        }
-        else
-            ImportFile(fileName);
-    }
 
-    private void ReadJsonFile(string fileName)
-    {
-        //try
-        //{
-        //    var json = File.ReadAllText(fileName);
-        //    var tiaPortalTags = System.Text.Json.JsonSerializer.Deserialize<List<TiaPortalTag>>(json);
-        //    if (tiaPortalTags != null)
-        //    {
-        //        var tagDefs = new List<TagDefinitions>();
-        //        foreach (var tag in tiaPortalTags)
-        //        {
-        //            var tagdef = new TagDefinitions()
-        //            {
-        //                Active = true,
-        //                Name = tag.TagName,
-        //                DataType = Enum.Parse<DataType>(tag.DataType, true),
-        //                BlockNr = int.Parse(tag.DbNr),
-        //                StartByte = int.Parse(tag.Offset),
-        //                LogType= LogType.Cyclic,
-        //                LogFreq = LogFrequency._1s,
-        //            };
-        //            tagDefs.Add(tagdef);
-        //        }
-        //        AddTag(tagDefs);
-        //    }
-        //}
-        //catch (Exception ex)
-        //{
-        //    MessageBox.Show(ex.Message);
-        //}
+        await ImportFileAsync(fileName);
+        //Logger.LogSuccess($"Importerade taggar från {fileName}");
+        Cursor.Current = Cursors.Default;
     }
 
     private async void TagControl2_Load(object sender, EventArgs e)
@@ -161,7 +131,7 @@ public partial class TagControl2 : UserControl
                                 var newTag = new SingleTagControl(tag, myPlc, myTreeView);
                                 newTag.TagChanged -= NewTag_TagChanged;
                                 newTag.TagChanged += NewTag_TagChanged;
-                                flowLayoutPanel.Invoke((System.Windows.Forms.MethodInvoker)delegate
+                                flowLayoutPanel.Invoke((MethodInvoker)delegate
                                 {
                                     flowLayoutPanel.Controls.Add(newTag);
                                 });
@@ -182,7 +152,7 @@ public partial class TagControl2 : UserControl
                             var newTag = new SingleTagControl(tag, myPlc, myTreeView);
                             newTag.TagChanged -= NewTag_TagChanged;
                             newTag.TagChanged += NewTag_TagChanged;
-                            flowLayoutPanel.Invoke((System.Windows.Forms.MethodInvoker)delegate
+                            flowLayoutPanel.Invoke((MethodInvoker)delegate
                             {
                                 flowLayoutPanel.Controls.Add(newTag);
                             });
@@ -190,23 +160,31 @@ public partial class TagControl2 : UserControl
                     }
                 }
             });
-
     }
 
     private void Redraw()
     {
-        myTable.Clear();
-        FetchTagsFromSql();
-        flowLayoutPanel.Controls.Clear();
-        if (myTable != null)
+        if (flowLayoutPanel.InvokeRequired)
         {
-            if (myTable.Rows.Count > 0)
+            // Om vi inte är på UI-tråden, använd Invoke för att köra koden på UI-tråden.
+            flowLayoutPanel.Invoke(new MethodInvoker(Redraw));
+        }
+        else
+        {
+            myTable.Clear();
+            FetchTagsFromSql();
+            flowLayoutPanel.Controls.Clear();
+            if (myTable != null)
             {
-                foreach (TagDefinitions tag in tags)
+                if (myTable.Rows.Count > 0)
                 {
-                    var newTag = new SingleTagControl(tag, myPlc, myTreeView);
-                    newTag.TagChanged += NewTag_TagChanged;
-                    flowLayoutPanel.Controls.Add(newTag);
+                    foreach (TagDefinitions tag in tags)
+                    {
+                        var newTag = new SingleTagControl(tag, myPlc, myTreeView);
+                        newTag.TagChanged += NewTag_TagChanged;
+
+                        flowLayoutPanel.Controls.Add(newTag);
+                    }
                 }
             }
         }
@@ -409,7 +387,7 @@ public partial class TagControl2 : UserControl
                     {
                         row[prop.Name] = DBNull.Value;
                     }
-                    else if (prop.PropertyType == typeof(System.DateTime))
+                    else if (prop.PropertyType == typeof(DateTime))
                     {
                         // If value is DateTime.MinValue set it to Sql datetime.minvalue
                         if ((System.DateTime)prop.GetValue(obj, null) == System.DateTime.MinValue)
@@ -429,9 +407,15 @@ public partial class TagControl2 : UserControl
                 dt.Rows.Add(row);
             }
         }
+        catch (IOException ex)
+        {
+            Logger.LogError($"Felinläsning av fil: {ex.Message}", ex);
+            MessageBox.Show("Ett filfel inträffade, kontrollera att filen är korrekt.", "Filfel", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
         catch (Exception ex)
         {
-            throw;
+            Logger.LogError($"Allmänt fel: {ex.Message}", ex);
+            MessageBox.Show("Ett oväntat fel inträffade.", "Oväntat fel", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         using (var workbook = new XLWorkbook())
@@ -477,20 +461,30 @@ public partial class TagControl2 : UserControl
         }
     }
 
-    private void click_Import(object sender, EventArgs e)
+    private async void click_Import(object sender, EventArgs e)
     {
         OpenFileDialog dialog = new OpenFileDialog();
         DialogResult result = dialog.ShowDialog();
         if (result == DialogResult.OK)
         {
             string file = dialog.FileName;
-            ImportFile(file);
+            await ImportFileAsync(file);
         }
     }
+
+    private async Task ImportFileAsync(string fileName)
+    {
+        await Task.Run(() =>
+        {
+            ImportFile(fileName);
+        });
+    }
+
 
     private void ImportFile(string fileName)
     {
         bool intouchCsv = false;
+        var nrOfTagsAdded = 0;
         try
         {
             using (var sr = new StreamReader(fileName))
@@ -511,9 +505,16 @@ public partial class TagControl2 : UserControl
                             return;
                         }
 
-                        AddTag(records);
+                        nrOfTagsAdded = AddTag(records);
                         UpdateTag(records);
-                        Logger.LogSuccess($"Importerade {myPlc.PlcName}s taggar från {fileName}");
+                        if (nrOfTagsAdded > 0)
+                        {
+                            Logger.LogSuccess($"Importerade {nrOfTagsAdded} taggar från {fileName}");
+                        }
+                        else
+                        {
+                            Logger.LogInfo($"Inga taggar importerades från {fileName}");
+                        }
                         return;
                     }
                     catch (HeaderValidationException)
@@ -525,12 +526,11 @@ public partial class TagControl2 : UserControl
 
 
             }
-            using (var sr = new StreamReader(fileName))
+            using (var sr = new StreamReader(fileName, Encoding.GetEncoding("ISO-8859-1")))
             {
                 var intouchInt = new List<IntouchInt>();
                 var intouchReal = new List<IntouchReal>();
                 var intouchBool = new List<IntouchBool>();
-
                 if (intouchCsv)
                 {
                     var config = new CsvConfiguration(CultureInfo.InvariantCulture);
@@ -623,11 +623,18 @@ public partial class TagControl2 : UserControl
 
                 if (allTags.Count > 0)
                 {
-                    AddTag(allTags);
+                    nrOfTagsAdded = AddTag(allTags);
                     Redraw();
                 }
             }
-
+            if (nrOfTagsAdded > 0)
+            {
+                Logger.LogSuccess($"Importerade {nrOfTagsAdded} taggar från {fileName}");
+            }
+            else
+            {
+                Logger.LogInfo($"Inga taggar importerades från {fileName}");
+            }
         }
         catch (IOException)
         {
@@ -733,56 +740,145 @@ public partial class TagControl2 : UserControl
         return boolList;
     }
 
-    private void AddTag(List<TagDefinitions> newList)
+    /// <summary>
+    /// Adds a list of tags to the SQL database
+    /// </summary>
+    /// <param name="tags">List of TagDefinitions</param>
+    public static int AddTag(List<TagDefinitions> tags)
     {
-
-        newList = newList.OrderBy(x => x.Name).ToList();
-        List<TagDefinitions> newTags = new();
-
-        if (tags != null)
+        try
         {
-            newTags = newList.Except(tags).ToList();
-            newTags.RemoveAll(a => tags.Contains(a));
+            using SqlConnection con = new SqlConnection(Config.Settings.ConnectionString);
+            con.Open();
+            var nrOfTagsAdded = 0;
+            foreach (var tag in tags)
+            {
+                // Kolla så inte taggen redan finns
+                bool exist = false;
+                var query = $"SELECT COUNT(*) FROM {Settings.Databas}.dbo.tagConfig WHERE name = @Name AND plcName = @PlcName";
+                using SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Name", tag.Name);
+                cmd.Parameters.AddWithValue("@PlcName", tag.PlcName);
+                using SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    if (reader.GetInt32(0) > 0)
+                    {
+                        exist = true;
+                    }
+                }
+
+                if (exist)
+                {
+                    continue;
+                }
+                reader.Close();
+
+                query = $"INSERT INTO {Settings.Databas}.dbo.tagConfig ";
+                query += "(active, name, description, logType, timeOfDay, deadband, plcName, varType, blockNr, dataType, startByte, nrOfElements, bitAddress, logFreq, ";
+                query += "tagUnit, eventId, isBooleanTrigger, boolTrigger, analogTrigger, analogValue, scaleMin, scaleMax, scaleOffset, calculation, rawMin, rawMax) ";
+                query += "VALUES (@Active, @Name, @Description, @LogType, @TimeOfDay, @Deadband, @PlcName, @VarType, @BlockNr, @DataType, @StartByte, @NrOfElements, ";
+                query += "@BitAddress, @LogFreq, @TagUnit, @EventId, @IsBooleanTrigger, @BoolTrigger, @AnalogTrigger, @AnalogValue, @ScaleMin, @ScaleMax, @ScaleOffset, @Calculation, @RawMin, @RawMax)";
+
+                using SqlCommand cmd2 = new SqlCommand(query, con);
+
+                // Lägg till parametrar för varje tag
+                cmd2.Parameters.AddWithValue("@Active", tag.Active ? 1 : 0); // Konverterar bool till bit
+                cmd2.Parameters.AddWithValue("@Name", tag.Name);
+                cmd2.Parameters.AddWithValue("@Description", tag.Description ?? (object)DBNull.Value);
+                cmd2.Parameters.AddWithValue("@LogType", tag.LogType);
+                cmd2.Parameters.AddWithValue("@TimeOfDay", tag.TimeOfDay);
+                cmd2.Parameters.AddWithValue("@Deadband", tag.Deadband);
+                cmd2.Parameters.AddWithValue("@PlcName", tag.PlcName);
+                cmd2.Parameters.AddWithValue("@VarType", tag.VarType);
+                cmd2.Parameters.AddWithValue("@BlockNr", tag.BlockNr);
+                cmd2.Parameters.AddWithValue("@DataType", tag.DataType);
+                cmd2.Parameters.AddWithValue("@StartByte", tag.StartByte);
+                cmd2.Parameters.AddWithValue("@NrOfElements", tag.NrOfElements);
+                cmd2.Parameters.AddWithValue("@BitAddress", tag.BitAddress);
+                cmd2.Parameters.AddWithValue("@LogFreq", tag.LogFreq);
+                cmd2.Parameters.AddWithValue("@TagUnit", tag.TagUnit);
+                cmd2.Parameters.AddWithValue("@EventId", tag.EventId);
+                cmd2.Parameters.AddWithValue("@IsBooleanTrigger", tag.IsBooleanTrigger ? 1 : 0);
+                cmd2.Parameters.AddWithValue("@BoolTrigger", BooleanTrigger.OnFalse);
+                cmd2.Parameters.AddWithValue("@AnalogTrigger", AnalogTrigger.Equal);
+                cmd2.Parameters.AddWithValue("@AnalogValue", tag.AnalogValue);
+                cmd2.Parameters.AddWithValue("@ScaleMin", tag.scaleMin);
+                cmd2.Parameters.AddWithValue("@ScaleMax", tag.scaleMax);
+                cmd2.Parameters.AddWithValue("@ScaleOffset", tag.scaleOffset);
+                cmd2.Parameters.AddWithValue("@Calculation", tag.Calculation ?? (object)DBNull.Value);
+                cmd2.Parameters.AddWithValue("@RawMin", tag.rawMin);
+                cmd2.Parameters.AddWithValue("@RawMax", tag.rawMax);
+
+                // Utför frågan
+                cmd2.ExecuteNonQuery();
+                nrOfTagsAdded++;
+            }
+            return nrOfTagsAdded;
         }
-        else
-            newTags = newList;
-
-
-        if (newTags.Count == 0)
-            return;
-
-        foreach (var tag in newTags)
+        catch (SqlException ex)
         {
-            var query = $"INSERT INTO {Settings.Databas}.dbo.tagConfig ";
-            query += $"(active,name,description,logType,timeOfDay,deadband,plcName,varType,blockNr,dataType,startByte,nrOfElements,bitAddress,logFreq,";
-            query += $"tagUnit,eventId,isBooleanTrigger,boolTrigger,analogTrigger,analogValue,scaleMin,scaleMax,scaleOffset,calculation) ";
-            query += $"VALUES ('{tag.Active}','{tag.Name}','{tag.Description}','{tag.LogType}','{tag.TimeOfDay}',";
-            query += $"{tag.Deadband},'{tag.PlcName}','{tag.VarType}',{tag.BlockNr}, ";
-            query += $"'{tag.DataType}',{tag.StartByte},{tag.NrOfElements},";
-            query += $"{tag.BitAddress},'{tag.LogFreq}','{tag.TagUnit}',{tag.EventId},'{tag.IsBooleanTrigger}','";
-            query += $"{tag.BoolTrigger}','{tag.AnalogTrigger}',{tag.AnalogValue},{tag.scaleMin},{tag.scaleMax},{tag.scaleOffset},'{tag.Calculation}')";
-
-            DatabaseSql.AddTag(query);
-
+            "Lyckas ej lägga till tag".SendStatusMessage(Severity.Error, ex);
         }
-
+        return 0;
     }
+
 
     private void UpdateTag(List<TagDefinitions> list)
     {
         foreach (var tag in list)
         {
-            var query = $"UPDATE {Settings.Databas}.dbo.tagConfig ";
-            query += $"SET active='{tag.Active}',name='{tag.Name}',logType='{tag.LogType}',timeOfDay='{tag.TimeOfDay}'";
-            query += $",deadband={tag.Deadband},plcName='{tag.PlcName}',description='{tag.Description}',varType='{tag.VarType}',blockNr={tag.BlockNr}" +
-                $",dataType='{tag.DataType}',startByte={tag.StartByte},nrOfElements={tag.NrOfElements}" +
-                $",bitAddress={tag.BitAddress},logFreq='{tag.LogFreq}',";
-            query += $"tagUnit='{tag.TagUnit}',eventId={tag.EventId},isBooleanTrigger='{tag.IsBooleanTrigger}'" +
-                $",boolTrigger='{tag.BoolTrigger}',analogTrigger='{tag.AnalogTrigger}',analogValue={tag.AnalogValue}, " +
-                $"scaleMin={tag.scaleMin},scaleMax={tag.scaleMax},scaleOffset={tag.scaleOffset},calculation='{tag.Calculation}'" +
-                $" WHERE id = {tag.Id}";
+            using SqlConnection con = new SqlConnection(Settings.ConnectionString);
+            con.Open();
 
-            DatabaseSql.UpdateTag(query);
+            var query = $"UPDATE {Settings.Databas}.dbo.tagConfig ";
+            query += "SET active = @Active, name = @Name, logType = @LogType, timeOfDay = @TimeOfDay, ";
+            query += "deadband = @Deadband, plcName = @PlcName, description = @Description, varType = @VarType, blockNr = @BlockNr, ";
+            query += "dataType = @DataType, startByte = @StartByte, nrOfElements = @NrOfElements, bitAddress = @BitAddress, logFreq = @LogFreq, ";
+            query += "tagUnit = @TagUnit, eventId = @EventId, isBooleanTrigger = @IsBooleanTrigger, boolTrigger = @BoolTrigger, ";
+            query += "analogTrigger = @AnalogTrigger, analogValue = @AnalogValue, scaleMin = @ScaleMin, scaleMax = @ScaleMax, ";
+            query += "scaleOffset = @ScaleOffset, calculation = @Calculation, rawMin = @RawMin, rawMax = @RawMax ";
+            query += "WHERE id = @Id";
+
+            using SqlCommand cmd = new SqlCommand(query, con);
+
+            // Lägg till parametrar
+            cmd.Parameters.AddWithValue("@Active", tag.Active ? 1 : 0);  // Bool konverteras till bit
+            cmd.Parameters.AddWithValue("@Name", tag.Name);
+            cmd.Parameters.AddWithValue("@LogType", tag.LogType);
+            cmd.Parameters.AddWithValue("@TimeOfDay", tag.TimeOfDay);
+            cmd.Parameters.AddWithValue("@Deadband", tag.Deadband);
+            cmd.Parameters.AddWithValue("@PlcName", tag.PlcName);
+            cmd.Parameters.AddWithValue("@Description", tag.Description ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@VarType", tag.VarType);
+            cmd.Parameters.AddWithValue("@BlockNr", tag.BlockNr);
+            cmd.Parameters.AddWithValue("@DataType", tag.DataType);
+            cmd.Parameters.AddWithValue("@StartByte", tag.StartByte);
+            cmd.Parameters.AddWithValue("@NrOfElements", tag.NrOfElements);
+            cmd.Parameters.AddWithValue("@BitAddress", tag.BitAddress);
+            cmd.Parameters.AddWithValue("@LogFreq", tag.LogFreq);
+            cmd.Parameters.AddWithValue("@TagUnit", tag.TagUnit);
+            cmd.Parameters.AddWithValue("@EventId", tag.EventId);
+            cmd.Parameters.AddWithValue("@IsBooleanTrigger", tag.IsBooleanTrigger ? 1 : 0);
+            cmd.Parameters.AddWithValue("@BoolTrigger", BooleanTrigger.OnFalse);
+            cmd.Parameters.AddWithValue("@AnalogTrigger", AnalogTrigger.Equal);
+            cmd.Parameters.AddWithValue("@AnalogValue", tag.AnalogValue);
+            cmd.Parameters.AddWithValue("@ScaleMin", tag.scaleMin);
+            cmd.Parameters.AddWithValue("@ScaleMax", tag.scaleMax);
+            cmd.Parameters.AddWithValue("@ScaleOffset", tag.scaleOffset);
+            cmd.Parameters.AddWithValue("@Calculation", tag.Calculation ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@RawMin", tag.rawMin != 0 ? tag.rawMin : 0);  // Använd ett standardvärde om null
+            cmd.Parameters.AddWithValue("@RawMax", tag.rawMax != 0 ? tag.rawMax : 0);  // Använd ett standardvärde om null
+
+
+            // Id-parametern för WHERE-satsen
+            cmd.Parameters.AddWithValue("@Id", tag.Id);
+
+            // Exekvera uppdateringen
+            cmd.ExecuteNonQuery();
+
+            //   DatabaseSql.UpdateTag(query);
 
         }
         Redraw();

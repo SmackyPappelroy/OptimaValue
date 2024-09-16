@@ -1,21 +1,19 @@
 ﻿using FileLogger;
 using S7.Net;
 using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace OptimaValue
 {
-    public class SiemensPlc : IPlc
+    public class SiemensPlc : IPlc, IDisposable
     {
         private S7.Net.Plc myPlc;
         private CpuType cpuType;
-
-        private System.Windows.Forms.Timer onlineTimer = new System.Windows.Forms.Timer()
-        {
-            Interval = 500,
-        };
+        private bool disposed = false;
 
         public Image Image { get; set; }
         public event Action<ConnectionStatus> OnConnectionChanged;
@@ -27,12 +25,9 @@ namespace OptimaValue
             get => status;
             set
             {
-                if (status == ConnectionStatus.Disconnected || status == ConnectionStatus.Connecting)
+                if ((status == ConnectionStatus.Disconnected || status == ConnectionStatus.Connecting) && value == ConnectionStatus.Connected)
                 {
-                    if (value == ConnectionStatus.Connected)
-                    {
-                        UpTimeStart = DateTime.UtcNow;
-                    }
+                    UpTimeStart = DateTime.UtcNow;
                 }
 
                 status = value;
@@ -40,10 +35,7 @@ namespace OptimaValue
             }
         }
 
-
-        public SiemensPlc()
-        {
-        }
+        public SiemensPlc() { }
 
         public SiemensPlc(S7.Net.CpuType cpuType, string ip, short rack, short slot)
         {
@@ -52,7 +44,7 @@ namespace OptimaValue
         }
 
         public string PlcName { get; set; }
-        public bool IsConnected 
+        public bool IsConnected
         {
             get
             {
@@ -60,31 +52,32 @@ namespace OptimaValue
                     ConnectionStatus = ConnectionStatus.Disconnected;
                 return ConnectionStatus == ConnectionStatus.Connected;
             }
-        } 
+        }
 
         public bool IsStreamConnected => myPlc.IsConnected;
         public CpuType CpuType => cpuType;
         public int Id { get; set; } = 0;
         public DateTime UpTimeStart { get; set; } = DateTime.MaxValue;
 
-        public TimeSpan UpTime => UpTimeStart == DateTime.MaxValue ? TimeSpan.FromSeconds(0) : DateTime.UtcNow - UpTimeStart;
+        public TimeSpan UpTime => UpTimeStart == DateTime.MaxValue ? TimeSpan.Zero : DateTime.UtcNow - UpTimeStart;
         public string UpTimeString => GetUptimeString();
+
         private string GetUptimeString()
         {
             if (UpTimeStart == DateTime.MaxValue)
                 return "0s";
 
-            var tid = DateTime.UtcNow - UpTimeStart;
+            var tid = UpTime;
+            var sb = new StringBuilder();
 
-            if (tid < TimeSpan.FromMinutes(1))
-                return tid.ToString("s's'");
-            if (tid < TimeSpan.FromHours(1))
-                return tid.ToString("m'm 's's'");
-            if (tid > TimeSpan.FromHours(1) && (tid < TimeSpan.FromDays(1)))
-                return tid.ToString("h'h 'm'm 's's'");
+            if (tid.Days > 0) sb.Append($"{tid.Days}d ");
+            if (tid.Hours > 0 || sb.Length > 0) sb.Append($"{tid.Hours}h ");
+            if (tid.Minutes > 0 || sb.Length > 0) sb.Append($"{tid.Minutes}m ");
+            sb.Append($"{tid.Seconds}s");
 
-            return tid.ToString("d'd 'h'h 'm'm 's's'");
+            return sb.ToString();
         }
+
         public bool Active { get; set; } = false;
         public DateTime LastReconnect { get; set; } = DateTime.MinValue;
 
@@ -93,12 +86,11 @@ namespace OptimaValue
         {
             get
             {
-                watchDog++;
-                if (watchDog > 5000)
-                    watchDog = 0;
+                watchDog = (short)((watchDog + 1) % 5001);
                 return watchDog;
             }
         }
+
         public bool Alarm { get; set; } = false;
         public bool isNotPlc { get; } = false;
 
@@ -111,6 +103,9 @@ namespace OptimaValue
         public string ExternalOnlineMessage { get; set; } = "Ej ansluten";
         public string ConnectionString { get; set; }
         public DateTime LastPlcStatusCheck { get; set; }
+        public int TotalConnectionAttempts { get; set; }
+        public int FailedConnectionAttempts { get; set; }
+        public TimeSpan TotalReconnectTime { get; set; }
         #endregion
 
         #region Sync Plc
@@ -123,57 +118,72 @@ namespace OptimaValue
 
         public bool Connect()
         {
+            var stopwatch = Stopwatch.StartNew();
+            TotalConnectionAttempts++;
             myPlc.Open();
-            ConnectionStatus = myPlc.IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
+            SetConnectionStatus();
+            TotalReconnectTime += stopwatch.Elapsed;
             return myPlc.IsConnected;
         }
 
         public async Task ConnectAsync(int timeOut = 1000)
         {
+            var stopwatch = Stopwatch.StartNew();
+            TotalConnectionAttempts++;
+
             try
             {
                 using CancellationTokenSource cts = new CancellationTokenSource(timeOut);
-
-                await myPlc.OpenAsync(cts.Token);
-                ConnectionStatus = myPlc.IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
+                await myPlc.OpenAsync(cts.Token).ConfigureAwait(false);
+                SetConnectionStatus();
             }
             catch (OperationCanceledException ex)
             {
                 Logger.LogError("Timeout when connecting to PLC", ex);
                 throw new TimeoutException($"Timeout when connecting to PLC {PlcName}", ex);
             }
+            finally
+            {
+                stopwatch.Stop();
+                TotalReconnectTime += stopwatch.Elapsed;
+            }
         }
 
         public void Disconnect()
         {
             myPlc.Close();
-            ConnectionStatus = myPlc.IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
+            SetConnectionStatus();
         }
 
         public async Task<bool> TestConnectionAsync()
         {
             try
             {
-                await myPlc.OpenAsync();
+                await myPlc.OpenAsync().ConfigureAwait(false);
                 return IsConnected;
             }
-            catch (Exception ex) { Logger.LogError($"Misslyckades att ansluta till {PlcName}", ex); }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Misslyckades att ansluta till {PlcName}", ex);
+                return false;
+            }
             finally
             {
                 myPlc.Close();
             }
-            return false;
         }
 
         public async Task<bool> IsCpuInRunAsync()
         {
-            byte result = 0;
             try
             {
-                result = await myPlc.ReadStatusAsync();
+                byte result = await myPlc.ReadStatusAsync().ConfigureAwait(false);
                 return result == 0x08;
             }
-            catch (Exception) { return false; }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public ReadValue Read(PlcTag tag)
@@ -185,6 +195,7 @@ namespace OptimaValue
             }
             catch (Exception ex)
             {
+                Logger.LogError($"Error reading tag {tag.Name} from PLC {PlcName}", ex);
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
@@ -199,6 +210,7 @@ namespace OptimaValue
             }
             catch (Exception ex)
             {
+                Logger.LogError($"Error reading address {address} from PLC {PlcName}", ex);
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
@@ -208,12 +220,12 @@ namespace OptimaValue
         {
             try
             {
-                var temp = await myPlc.ReadAsync(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.NrOfElements, tag.BitAddress, cancellationToken);
+                var temp = await myPlc.ReadAsync(tag.DataType, tag.BlockNr, tag.StartByte, (S7.Net.VarType)tag.VarType, tag.NrOfElements, tag.BitAddress, cancellationToken).ConfigureAwait(false);
                 return new ReadValue(this, temp);
-
             }
             catch (Exception ex)
             {
+                Logger.LogError($"Error reading tag {tag.Name} from PLC {PlcName}", ex);
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
@@ -223,11 +235,12 @@ namespace OptimaValue
         {
             try
             {
-                var temp = await myPlc.ReadAsync(address, cancellationToken);
+                var temp = await myPlc.ReadAsync(address, cancellationToken).ConfigureAwait(false);
                 return new ReadValue(this, temp);
             }
             catch (Exception ex)
             {
+                Logger.LogError($"Error reading address {address} from PLC {PlcName}", ex);
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
@@ -241,6 +254,7 @@ namespace OptimaValue
             }
             catch (Exception ex)
             {
+                Logger.LogError($"Error reading bytes for tag {tag.Name} from PLC {PlcName}", ex);
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
@@ -250,10 +264,11 @@ namespace OptimaValue
         {
             try
             {
-                return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, tag.NrOfElements, cancellationToken);
+                return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, tag.NrOfElements, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
+                Logger.LogError($"Error reading bytes for tag {tag.Name} from PLC {PlcName}", ex);
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
@@ -267,6 +282,7 @@ namespace OptimaValue
             }
             catch (Exception ex)
             {
+                Logger.LogError($"Error reading bytes for tag {tag.Name} from PLC {PlcName}", ex);
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
@@ -276,48 +292,115 @@ namespace OptimaValue
         {
             try
             {
-                return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, nrOfElements, cancellationToken);
+                return await myPlc.ReadBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, nrOfElements, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
+                Logger.LogError($"Error reading bytes for tag {tag.Name} from PLC {PlcName}", ex);
                 ConnectionStatus = ConnectionStatus.Disconnected;
                 throw;
             }
         }
+
         public void Write(PlcTag tag, object value)
         {
-            myPlc.Write(tag.DataType, tag.BlockNr, tag.StartByte, value, tag.BitAddress);
+            try
+            {
+                myPlc.Write(tag.DataType, tag.BlockNr, tag.StartByte, value, tag.BitAddress);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error writing value to tag {tag.Name} in PLC {PlcName}", ex);
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public void Write(string address, object value)
         {
-            myPlc.Write(address, value);
+            try
+            {
+                myPlc.Write(address, value);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error writing value to address {address} in PLC {PlcName}", ex);
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task WriteAsync(string address, object value, CancellationToken cancellationToken = default)
         {
-            await myPlc.WriteAsync(address, value, cancellationToken);
+            try
+            {
+                await myPlc.WriteAsync(address, value, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error writing value to address {address} in PLC {PlcName}", ex);
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task WriteAsync(PlcTag tag, object value, CancellationToken cancellationToken = default)
         {
-            await myPlc.WriteAsync(tag.DataType, tag.BlockNr, tag.StartByte, value);
+            try
+            {
+                await myPlc.WriteAsync(tag.DataType, tag.BlockNr, tag.StartByte, value).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error writing value to tag {tag.Name} in PLC {PlcName}", ex);
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public void WriteBytes(PlcTag tag, byte[] value)
         {
-            myPlc.WriteBytes(tag.DataType, tag.BlockNr, tag.StartByte, value);
+            try
+            {
+                myPlc.WriteBytes(tag.DataType, tag.BlockNr, tag.StartByte, value);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error writing bytes to tag {tag.Name} in PLC {PlcName}", ex);
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public async Task WriteBytesAsync(PlcTag tag, byte[] value, CancellationToken cancellationToken = default)
         {
-            await myPlc.WriteBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, value);
+            try
+            {
+                await myPlc.WriteBytesAsync(tag.DataType, tag.BlockNr, tag.StartByte, value).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Error writing bytes to tag {tag.Name} in PLC {PlcName}", ex);
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                throw;
+            }
         }
 
         public void Dispose()
         {
+            if (disposed)
+                return;
+
             myPlc.Close();
+            myPlc = null;
+
+            disposed = true;
             GC.SuppressFinalize(this);
+        }
+
+        private void SetConnectionStatus()
+        {
+            ConnectionStatus = myPlc.IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
         }
     }
 }

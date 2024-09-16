@@ -71,10 +71,17 @@ public class ExtendedPlc
     private void OnlineTimer_Tick(object sender, EventArgs e)
     {
         if (this != null)
-            this.SendPlcOnlineMessage(this.ConnectionStatus, this.UpTimeString);
+        {
+            // Skicka med statistik för anslutningsförsök, misslyckade försök och återanslutningstid
+            this.SendPlcOnlineMessage(this.ConnectionStatus, this.TotalConnectionAttempts, this.FailedConnectionAttempts, this.TotalReconnectTime, this.UpTimeString);
+        }
         else
-            this.SendPlcOnlineMessage(ConnectionStatus.Disconnected, string.Empty);
+        {
+            // Om objektet är null, skicka med standardvärden
+            this.SendPlcOnlineMessage(ConnectionStatus.Disconnected, 0, 0, TimeSpan.Zero, string.Empty);
+        }
     }
+
 
 
     #region Messages
@@ -172,6 +179,9 @@ public class ExtendedPlc
     public ConnectionStatus ConnectionStatus => Plc.ConnectionStatus;
     public TimeSpan UpTime => Plc.UpTime;
     public string UpTimeString => Plc.UpTimeString;
+    public int TotalConnectionAttempts => Plc.TotalConnectionAttempts;
+    public int FailedConnectionAttempts => Plc.FailedConnectionAttempts;
+    public TimeSpan TotalReconnectTime => Plc.TotalReconnectTime;
 
     #endregion
 
@@ -199,7 +209,7 @@ public class ExtendedPlc
             ExternalElapsedTime = e.ElapsedTime;
             ExternalOnlineColor = e.Color;
             ExternalOnlineMessage = e.Message;
-            ExternalCommunicationStatus = e.connectionStatus;
+            ExternalCommunicationStatus = e.ConnectionStatus;
         }
     }
 
