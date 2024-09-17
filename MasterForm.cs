@@ -107,7 +107,6 @@ public partial class MasterForm : Form
 
         SqlForm = new sqlForm();
         SqlForm.FormClosing += SqlForm_FormClosing;
-        debugMenu.Checked = Properties.Settings.Default.Debug;
         notifyIcon.Visible = true;
         notifyIcon.Icon = Resources.icons8_gas_idle;
 
@@ -209,12 +208,6 @@ public partial class MasterForm : Form
             this.WindowState = FormWindowState.Normal;
             this.BringToFront();
         }
-    }
-
-    private void debugMeny_CheckedChanged(object sender, EventArgs e)
-    {
-        Properties.Settings.Default.Debug = debugMenu.Checked;
-        Properties.Settings.Default.Save();
     }
 
     private void toolStripMenuItem1_Click(object sender, EventArgs e)

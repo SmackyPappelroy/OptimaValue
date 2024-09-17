@@ -51,7 +51,6 @@
             menuStrip = new System.Windows.Forms.MenuStrip();
             menuSettings = new System.Windows.Forms.ToolStripMenuItem();
             databasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            debugMenu = new System.Windows.Forms.ToolStripMenuItem();
             notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
             autoStartTool = new System.Windows.Forms.ToolStripMenuItem();
             serviceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -152,10 +151,10 @@
             // 
             serviceImage.BackColor = System.Drawing.Color.Transparent;
             serviceImage.Image = (System.Drawing.Image)resources.GetObject("serviceImage.Image");
-            serviceImage.Location = new System.Drawing.Point(805, 76);
+            serviceImage.Location = new System.Drawing.Point(818, 71);
             serviceImage.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             serviceImage.Name = "serviceImage";
-            serviceImage.Size = new System.Drawing.Size(48, 48);
+            serviceImage.Size = new System.Drawing.Size(32, 32);
             serviceImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             serviceImage.TabIndex = 16;
             serviceImage.TabStop = false;
@@ -317,7 +316,7 @@
             // 
             // menuSettings
             // 
-            menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { databasToolStripMenuItem, debugMenu, notifyMenu, autoStartTool, serviceToolStripMenuItem });
+            menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { databasToolStripMenuItem, notifyMenu, autoStartTool, serviceToolStripMenuItem });
             menuSettings.Name = "menuSettings";
             menuSettings.Size = new System.Drawing.Size(84, 28);
             menuSettings.Text = "Inställningar";
@@ -325,23 +324,15 @@
             // databasToolStripMenuItem
             // 
             databasToolStripMenuItem.Name = "databasToolStripMenuItem";
-            databasToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
+            databasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             databasToolStripMenuItem.Text = "Databas...";
             databasToolStripMenuItem.Click += databasToolStripMenuItem_Click;
-            // 
-            // debugMenu
-            // 
-            debugMenu.CheckOnClick = true;
-            debugMenu.Name = "debugMenu";
-            debugMenu.Size = new System.Drawing.Size(133, 22);
-            debugMenu.Text = "Debug";
-            debugMenu.CheckedChanged += debugMeny_CheckedChanged;
             // 
             // notifyMenu
             // 
             notifyMenu.CheckOnClick = true;
             notifyMenu.Name = "notifyMenu";
-            notifyMenu.Size = new System.Drawing.Size(133, 22);
+            notifyMenu.Size = new System.Drawing.Size(180, 22);
             notifyMenu.Text = "Notify Ikon";
             notifyMenu.CheckedChanged += notifyMenu_CheckedChanged;
             // 
@@ -349,15 +340,15 @@
             // 
             autoStartTool.CheckOnClick = true;
             autoStartTool.Name = "autoStartTool";
-            autoStartTool.Size = new System.Drawing.Size(133, 22);
+            autoStartTool.Size = new System.Drawing.Size(180, 22);
             autoStartTool.Text = "Autostart";
             autoStartTool.CheckedChanged += autoStartTool_CheckedChanged;
             // 
             // serviceToolStripMenuItem
             // 
             serviceToolStripMenuItem.Name = "serviceToolStripMenuItem";
-            serviceToolStripMenuItem.Size = new System.Drawing.Size(133, 22);
-            serviceToolStripMenuItem.Text = "Service";
+            serviceToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            serviceToolStripMenuItem.Text = "Installera service";
             serviceToolStripMenuItem.Click += serviceToolStripMenuItem_Click;
             // 
             // menuQuestion
@@ -449,7 +440,6 @@
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem menuSettings;
         private System.Windows.Forms.ToolStripMenuItem databasToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem debugMenu;
         private System.Windows.Forms.ToolStripMenuItem menuQuestion;
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.PictureBox pictureBox1;
