@@ -13,10 +13,14 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace OptimaValue;
-
-
 public static class LoggerHandler
 {
+    // Konstanter för konfigurationsvärden
+    private const int RestartIntervalMilliseconds = 5000;
+    private const int ReconnectIntervalSeconds = 3;
+    private const int OnlineTimerIntervalMilliseconds = 500;
+    private const int MinimumDelayMilliseconds = 10;
+
     public static int FastestLogTime = int.MaxValue;
 
     /// <summary>
@@ -30,7 +34,7 @@ public static class LoggerHandler
     public static event EventHandler RestartEvent;
     public static System.Timers.Timer RestartTimer = new()
     {
-        Interval = 5000,
+        Interval = RestartIntervalMilliseconds,
     };
 
     public static LoggingStats LoggingStats = new LoggingStats(1, 5000);
@@ -40,9 +44,11 @@ public static class LoggerHandler
     private static Task logTask;
     private static CancellationTokenSource cancelTokenSource = new();
     private static System.Timers.Timer onlineTimer;
+    private static System.Timers.Timer indexSizeTimer;
 
-    public static bool startClosing = false;
-    private static bool AppIsShuttingDown = false;
+
+    public static volatile bool startClosing = false;
+    private static volatile bool AppIsShuttingDown = false;
 
     public static void OnStartedEvent(EventArgs e)
     {
@@ -53,6 +59,36 @@ public static class LoggerHandler
     {
         RestartEvent?.Invoke(typeof(LoggerHandler), e);
     }
+
+    private static void ConfigureIndexSizeTimer()
+    {
+        indexSizeTimer = new System.Timers.Timer
+        {
+            Interval = TimeSpan.FromDays(1).TotalMilliseconds, // En gång per dag
+            AutoReset = true,
+        };
+
+        indexSizeTimer.Elapsed += async (sender, e) =>
+        {
+            await KontrolleraIndexStorlek();
+        };
+
+        indexSizeTimer.Start();
+    }
+
+    private static async Task KontrolleraIndexStorlek()
+    {
+        try
+        {
+            var returnValue = await IndexMaintenance.KontrolleraIndexStorlek();
+            Logger.LogInfo(returnValue);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError("Fel vid kontroll av indexstorlekar", ex);
+        }
+    }
+
 
     public static void Start()
     {
@@ -66,6 +102,8 @@ public static class LoggerHandler
         InitializeActivePlcs();
 
         StartLoggingTask();
+        ConfigureIndexSizeTimer();
+
     }
 
     private static bool AreActivePlcsAndTags()
@@ -102,12 +140,23 @@ public static class LoggerHandler
         }, cancelTokenSource.Token)
         .ContinueWith(t =>
         {
-            t.Exception?.Handle(e => true);
+            if (t.IsFaulted)
+            {
+                // Handle faulted task
+                foreach (var ex in t.Exception.Flatten().InnerExceptions)
+                {
+                    Logger.LogError("Fel i loggning", ex);
+                }
+            }
+            else if (t.IsCanceled)
+            {
+                Logger.LogInfo("Loggning avslutad");
+            }
             AbortLogThread(string.Empty);
-            Console.WriteLine("You have canceled the task");
-            Logger.LogInfo("Loggningscykel avslutad");
             cancelTokenSource = new CancellationTokenSource();
-        }, TaskContinuationOptions.OnlyOnCanceled);
+        }, TaskContinuationOptions.ExecuteSynchronously);
+
+
     }
 
     public static void RequestDisconnect()
@@ -131,6 +180,7 @@ public static class LoggerHandler
         if (applicationShutdown)
             AppIsShuttingDown = true;
         startClosing = true;
+        indexSizeTimer?.Stop();
     }
 
     static DateTime startDateTime = DateTime.Now;
@@ -138,7 +188,7 @@ public static class LoggerHandler
     {
         InitializeOnlineTimer();
         InitializeLastLogValue();
-        await CheckConnectionsAsync();
+        await CheckConnectionsAsync().ConfigureAwait(false);
         Logger.LogInfo("Loggning startad");
         long minReadTime = TagsToLog.AllLogValues.Min(x => (long)x.LogFreq);
 
@@ -165,7 +215,7 @@ public static class LoggerHandler
     {
         onlineTimer ??= new System.Timers.Timer()
         {
-            Interval = 500
+            Interval = OnlineTimerIntervalMilliseconds
         };
     }
 
@@ -245,9 +295,9 @@ public static class LoggerHandler
         {
             if (!MyPlc.Active)
                 continue;
-            await CheckPlcStatusAsync(MyPlc);
-            await CheckReconnectAsync(MyPlc);
-            await ProcessPlcTags(MyPlc);
+            await CheckPlcStatusAsync(MyPlc).ConfigureAwait(false);
+            await CheckReconnectAsync(MyPlc).ConfigureAwait(false);
+            await ProcessPlcTags(MyPlc).ConfigureAwait(false);
 
             if (startClosing)
             {
@@ -379,6 +429,12 @@ public static class LoggerHandler
         Logger.LogError($"Misslyckades att ansluta till {MyPlc.PlcName}\r\n{MyPlc.PlcConfiguration.Ip}", ex);
     }
 
+    /// <summary>
+    /// Läser värdet från en given tagg om PLC är ansluten.
+    /// </summary>
+    /// <param name="MyPlc">Den PLC som taggen tillhör.</param>
+    /// <param name="logTag">Taggens definitioner.</param>
+    /// <param name="ct">CancellationToken för att avbryta operationen.</param>
     private static async Task ReadValue(ExtendedPlc MyPlc, TagDefinitions logTag)
     {
         if (!MyPlc.IsConnected || logTag.Active != true || MyPlc.PlcName != logTag.PlcName)
@@ -401,283 +457,20 @@ public static class LoggerHandler
 
             // Synkronisera klockan
             if (tiden > MyPlc.lastSyncTime + TimeSpan.FromDays(1) && MyPlc.SyncActive && !MyPlc.isOpc)
-                await SyncPlc(MyPlc, tiden);
+                await SyncPlc(MyPlc, tiden).ConfigureAwait(false);
 
             ReadValue readValue = null;
             if (logTag.LogType != LogType.Calculated)
             {
-                readValue = await ReadTagValueAsync(MyPlc, logTag, plcTag);
-              
+                readValue = await ReadTagValueAsync(MyPlc, logTag, plcTag).ConfigureAwait(false);
+
                 logTag.LastLogTime = tiden;
                 logTag.NrSuccededReadAttempts++;
 
                 if (!MyPlc.IsConnected)
                     return;
 
-                switch (logTag.LogType)
-                {
-                    case LogType.Delta:
-                        {
-                            LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
-                            if (lastKnownLogValue == null)
-                            {
-                                AddValueToSql(logTag, readValue);
-                                return;
-                            }
-
-                            CheckDeadbandAndAddToSql(logTag, readValue, lastKnownLogValue);
-                            break;
-                        }
-                    case LogType.RateOfChange:
-                        {
-                            LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
-                            if (lastKnownLogValue == null)
-                            {
-                                AddValueToSql(logTag, readValue);
-                                return;
-                            }
-
-                            CheckRateOfChangeAndAddToSql(logTag, readValue, lastKnownLogValue);
-
-                            void CheckRateOfChangeAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
-                            {
-                                double rateOfChangeThreshold = logTag.Deadband; // Define your rate of change threshold here
-                                DateTime currentTime = DateTime.UtcNow;
-
-                                double valueDifference = Math.Abs(readValue.ValueAsFloat - Convert.ToSingle(lastKnownLogValue.value));
-                                double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.lastTimeLoggedToSql).TotalSeconds;
-
-                                if (timeDifferenceInSeconds == 0) // Prevent division by zero
-                                {
-                                    return;
-                                }
-
-                                double rateOfChange = valueDifference / timeDifferenceInSeconds;
-
-                                if (rateOfChange >= rateOfChangeThreshold)
-                                {
-                                    AddValueToSql(logTag, readValue);
-                                }
-                            }
-
-                            break;
-                        }
-                    case LogType.Cyclic:
-                        AddValueToSql(logTag, readValue);
-                        break;
-                    case LogType.WriteWatchDogInt16 when !MyPlc.isOpc:
-                        {
-                            var oldWd = await MyPlc.Plc.ReadAsync(plcTag);
-                            var intValue = Convert.ToInt16(oldWd.Value) + 1;
-                            await MyPlc.Plc.WriteAsync(plcTag, (short)intValue);
-                            break;
-                        }
-                    case LogType.TimeOfDay:
-                        {
-                            var localTime = TimeZoneInfo.ConvertTimeFromUtc(tiden, TimeZoneInfo.Local);
-
-                            bool timeMatches = localTime.Hour == logTag.TimeOfDay.Hours &&
-                                               localTime.Minute == logTag.TimeOfDay.Minutes &&
-                                               (logTag.TimeOfDay.Seconds == 0 || localTime.Second == logTag.TimeOfDay.Seconds);
-
-                            if (timeMatches)
-                            {
-                                bool alreadyLoggedToday = lastLogValues.Any(n => n.tag_id == logTag.Id &&
-                                                             n.lastTimeLoggedToSql.Date == tiden.Date);
-
-                                if (!alreadyLoggedToday)
-                                {
-                                    AddValueToSql(logTag, readValue);
-                                }
-                            }
-
-                            break;
-                        }
-                    case LogType.Calculated:
-                        {
-                            var tagIdsAndOperators = ExtractTagIdsAndOperators(logTag.Calculation);
-                            var allTagsInCalculation = GetTagsFromIds(tagIdsAndOperators.TagIds);
-
-                            var allValues = await ReadAllTagValuesAsync(allTagsInCalculation);
-                            var calculatedValue = CalculateValue(allValues, tagIdsAndOperators.Operators);
-                            var calculateReadValue = new ReadValue(MyPlc.Plc, calculatedValue);
-                            AddValueToSql(logTag, calculateReadValue);
-
-                            (List<string> TagIds, List<string> Operators) ExtractTagIdsAndOperators(string calculation)
-                            {
-                                var tagIds = new List<string>();
-                                var operators = new List<string>();
-                                var currentTagId = new StringBuilder();
-
-                                foreach (char c in calculation)
-                                {
-                                    if (char.IsDigit(c))
-                                    {
-                                        currentTagId.Append(c);
-                                    }
-                                    else
-                                    {
-                                        if (currentTagId.Length > 0)
-                                        {
-                                            tagIds.Add(currentTagId.ToString());
-                                            currentTagId.Clear();
-                                        }
-
-                                        if (!char.IsWhiteSpace(c))
-                                        {
-                                            operators.Add(c.ToString());
-                                        }
-                                    }
-                                }
-
-                                if (currentTagId.Length > 0)
-                                {
-                                    tagIds.Add(currentTagId.ToString());
-                                }
-
-                                return (TagIds: tagIds, Operators: operators);
-                            }
-
-
-
-                            List<TagDefinitions> GetTagsFromIds(List<string> tagIds)
-                            {
-                                var tags = new List<TagDefinitions>();
-                                foreach (var tagId in tagIds)
-                                {
-                                    var tagIdInt = Convert.ToInt32(tagId);
-                                    var tagToAdd = TagHelpers.GetTagFromId(tagIdInt);
-                                    tags.Add(tagToAdd);
-                                }
-                                return tags;
-                            }
-
-                            async Task<List<ReadValue>> ReadAllTagValuesAsync(List<TagDefinitions> tags)
-                            {
-                                var values = new List<ReadValue>();
-                                foreach (var tag in tags)
-                                {
-                                    var plcTag = new PlcTag(tag);
-                                    var value = await MyPlc.Plc.ReadAsync(plcTag);
-                                    values.Add(value);
-                                }
-                                return values;
-                            }
-
-                            float CalculateValue(List<ReadValue> allValues, List<string> operators)
-                            {
-                                var infix = new StringBuilder();
-                                var allValuesCount = allValues.Count;
-                                var operatorIndex = 0;
-
-                                for (int i = 0; i < allValuesCount; i++)
-                                {
-                                    while (operatorIndex < operators.Count && operators[operatorIndex] == "(")
-                                    {
-                                        infix.Append(operators[operatorIndex]);
-                                        operatorIndex++;
-                                    }
-
-                                    var value = allValues[i];
-                                    var valueFloat = Convert.ToSingle(value.Value);
-                                    infix.Append(valueFloat);
-
-                                    while (operatorIndex < operators.Count && (operators[operatorIndex] == ")" || i == allValuesCount - 1))
-                                    {
-                                        infix.Append(operators[operatorIndex]);
-                                        operatorIndex++;
-                                    }
-
-                                    if (i < allValuesCount - 1)
-                                    {
-                                        infix.Append(operators[operatorIndex]);
-                                        operatorIndex++;
-                                    }
-                                }
-
-                                string postfix = ConvertToPostfix(infix.ToString());
-                                return EvaluatePostfix(postfix);
-                            }
-                            break;
-                        }
-                    case LogType.Adaptive:
-                        {
-                            LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
-                            if (lastKnownLogValue == null)
-                            {
-                                AddValueToSql(logTag, readValue);
-                                return;
-                            }
-
-                            CheckAdaptiveRateOfChangeAndAddToSql(logTag, readValue, lastKnownLogValue);
-                            void CheckAdaptiveRateOfChangeAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
-                            {
-                                SetDefaultScale(logTag);
-                                SetDefaultRaw(logTag);
-
-                                double lowThreshold = logTag.scaleMin;
-                                double highThreshold = logTag.scaleMax;
-                                DateTime currentTime = DateTime.UtcNow;
-
-                                double valueDifference = Math.Abs(readValue.ValueAsFloat - lastKnownLogValue.ReadValue.ValueAsFloat);
-                                double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.lastTimeLoggedToSql).TotalSeconds;
-
-                                if (timeDifferenceInSeconds == 0) // Prevent division by zero
-                                {
-                                    return;
-                                }
-
-                                double rateOfChange = valueDifference / timeDifferenceInSeconds;
-
-                                double lowChangeInterval = logTag.rawMax;
-                                double highChangeInterval = logTag.rawMin;
-
-                                UpdateCustomLogFrequency(logTag, rateOfChange, lowThreshold, highThreshold, lowChangeInterval, highChangeInterval);
-                                AddValueToSql(logTag, readValue);
-
-                            }
-                            void SetDefaultScale(TagDefinitions logTag)
-                            {
-                                if (logTag.scaleMin == 0) logTag.scaleMin = 0.1f;
-                                if (logTag.scaleMax == 0) logTag.scaleMax = 1;
-                                if (logTag.scaleMin > logTag.scaleMax)
-                                {
-                                    logTag.scaleMin = 0.1f;
-                                    logTag.scaleMax = 1;
-                                }
-                            }
-
-                            void SetDefaultRaw(TagDefinitions logTag)
-                            {
-                                if (logTag.rawMin == 0) logTag.rawMin = 1000;
-                                if (logTag.rawMax == 0) logTag.rawMax = 10000;
-                                if (logTag.rawMin > logTag.rawMax)
-                                {
-                                    logTag.rawMin = 1000;
-                                    logTag.rawMax = 10000;
-                                }
-                            }
-                            void UpdateCustomLogFrequency(TagDefinitions logTag, double rateOfChange, double lowThreshold, double highThreshold, double lowChangeInterval, double highChangeInterval)
-                            {
-                                if (rateOfChange <= lowThreshold)
-                                {
-                                    logTag.CustomLogFrequency = (int)lowChangeInterval;
-                                }
-                                else if (rateOfChange >= highThreshold)
-                                {
-                                    logTag.CustomLogFrequency = (int)highChangeInterval;
-                                }
-                                else
-                                {
-                                    // Linear interpolation between lowChangeInterval and highChangeInterval
-                                    double slope = (highChangeInterval - lowChangeInterval) / (highThreshold - lowThreshold);
-                                    double intercept = lowChangeInterval - slope * lowThreshold;
-                                    logTag.CustomLogFrequency = (int)(slope * rateOfChange + intercept);
-                                }
-                            }
-                            break;
-                        }
-                }
+                await HandleLogTypeAsync(MyPlc, logTag, tiden, plcTag, readValue).ConfigureAwait(false);
 
                 // Check if tag has any subscribed event tags
                 if (logTag.SubscribedTags.Count <= 0)
@@ -790,6 +583,274 @@ public static class LoggerHandler
             Logger.LogError(fullMessage, ex);
             logTag.NrFailedReadAttempts++;
             logTag.LastErrorMessage = ex.Message;
+        }
+    }
+
+    private static async Task HandleLogTypeAsync(ExtendedPlc MyPlc, TagDefinitions logTag, DateTime tiden, PlcTag plcTag, ReadValue readValue)
+    {
+        switch (logTag.LogType)
+        {
+            case LogType.Delta:
+                {
+                    LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
+                    if (lastKnownLogValue == null)
+                    {
+                        AddValueToSql(logTag, readValue);
+                        return;
+                    }
+
+                    CheckDeadbandAndAddToSql(logTag, readValue, lastKnownLogValue);
+                    break;
+                }
+            case LogType.RateOfChange:
+                {
+                    LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
+                    if (lastKnownLogValue == null)
+                    {
+                        AddValueToSql(logTag, readValue);
+                        return;
+                    }
+
+                    CheckRateOfChangeAndAddToSql(logTag, readValue, lastKnownLogValue);
+
+                    void CheckRateOfChangeAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
+                    {
+                        double rateOfChangeThreshold = logTag.Deadband; // Define your rate of change threshold here
+                        DateTime currentTime = DateTime.UtcNow;
+
+                        double valueDifference = Math.Abs(readValue.ValueAsFloat - Convert.ToSingle(lastKnownLogValue.value));
+                        double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.lastTimeLoggedToSql).TotalSeconds;
+
+                        if (timeDifferenceInSeconds == 0) // Prevent division by zero
+                        {
+                            return;
+                        }
+
+                        double rateOfChange = valueDifference / timeDifferenceInSeconds;
+
+                        if (rateOfChange >= rateOfChangeThreshold)
+                        {
+                            AddValueToSql(logTag, readValue);
+                        }
+                    }
+
+                    break;
+                }
+            case LogType.Cyclic:
+                AddValueToSql(logTag, readValue);
+                break;
+            case LogType.WriteWatchDogInt16 when !MyPlc.isOpc:
+                {
+                    var oldWd = await MyPlc.Plc.ReadAsync(plcTag);
+                    var intValue = Convert.ToInt16(oldWd.Value) + 1;
+                    await MyPlc.Plc.WriteAsync(plcTag, (short)intValue);
+                    break;
+                }
+            case LogType.TimeOfDay:
+                {
+                    var localTime = TimeZoneInfo.ConvertTimeFromUtc(tiden, TimeZoneInfo.Local);
+
+                    bool timeMatches = localTime.Hour == logTag.TimeOfDay.Hours &&
+                                       localTime.Minute == logTag.TimeOfDay.Minutes &&
+                                       (logTag.TimeOfDay.Seconds == 0 || localTime.Second == logTag.TimeOfDay.Seconds);
+
+                    if (timeMatches)
+                    {
+                        bool alreadyLoggedToday = lastLogValues.Any(n => n.tag_id == logTag.Id &&
+                                                     n.lastTimeLoggedToSql.Date == tiden.Date);
+
+                        if (!alreadyLoggedToday)
+                        {
+                            AddValueToSql(logTag, readValue);
+                        }
+                    }
+
+                    break;
+                }
+            case LogType.Calculated:
+                {
+                    var tagIdsAndOperators = ExtractTagIdsAndOperators(logTag.Calculation);
+                    var allTagsInCalculation = GetTagsFromIds(tagIdsAndOperators.TagIds);
+
+                    var allValues = await ReadAllTagValuesAsync(allTagsInCalculation);
+                    var calculatedValue = CalculateValue(allValues, tagIdsAndOperators.Operators);
+                    var calculateReadValue = new ReadValue(MyPlc.Plc, calculatedValue);
+                    AddValueToSql(logTag, calculateReadValue);
+
+                    (List<string> TagIds, List<string> Operators) ExtractTagIdsAndOperators(string calculation)
+                    {
+                        var tagIds = new List<string>();
+                        var operators = new List<string>();
+                        var currentTagId = new StringBuilder();
+
+                        foreach (char c in calculation)
+                        {
+                            if (char.IsDigit(c))
+                            {
+                                currentTagId.Append(c);
+                            }
+                            else
+                            {
+                                if (currentTagId.Length > 0)
+                                {
+                                    tagIds.Add(currentTagId.ToString());
+                                    currentTagId.Clear();
+                                }
+
+                                if (!char.IsWhiteSpace(c))
+                                {
+                                    operators.Add(c.ToString());
+                                }
+                            }
+                        }
+
+                        if (currentTagId.Length > 0)
+                        {
+                            tagIds.Add(currentTagId.ToString());
+                        }
+
+                        return (TagIds: tagIds, Operators: operators);
+                    }
+
+
+
+                    List<TagDefinitions> GetTagsFromIds(List<string> tagIds)
+                    {
+                        var tags = new List<TagDefinitions>();
+                        foreach (var tagId in tagIds)
+                        {
+                            var tagIdInt = Convert.ToInt32(tagId);
+                            var tagToAdd = TagHelpers.GetTagFromId(tagIdInt);
+                            tags.Add(tagToAdd);
+                        }
+                        return tags;
+                    }
+
+                    async Task<List<ReadValue>> ReadAllTagValuesAsync(List<TagDefinitions> tags)
+                    {
+                        var values = new List<ReadValue>();
+                        foreach (var tag in tags)
+                        {
+                            var plcTag = new PlcTag(tag);
+                            var value = await MyPlc.Plc.ReadAsync(plcTag);
+                            values.Add(value);
+                        }
+                        return values;
+                    }
+
+                    float CalculateValue(List<ReadValue> allValues, List<string> operators)
+                    {
+                        var infix = new StringBuilder();
+                        var allValuesCount = allValues.Count;
+                        var operatorIndex = 0;
+
+                        for (int i = 0; i < allValuesCount; i++)
+                        {
+                            while (operatorIndex < operators.Count && operators[operatorIndex] == "(")
+                            {
+                                infix.Append(operators[operatorIndex]);
+                                operatorIndex++;
+                            }
+
+                            var value = allValues[i];
+                            var valueFloat = Convert.ToSingle(value.Value);
+                            infix.Append(valueFloat);
+
+                            while (operatorIndex < operators.Count && (operators[operatorIndex] == ")" || i == allValuesCount - 1))
+                            {
+                                infix.Append(operators[operatorIndex]);
+                                operatorIndex++;
+                            }
+
+                            if (i < allValuesCount - 1)
+                            {
+                                infix.Append(operators[operatorIndex]);
+                                operatorIndex++;
+                            }
+                        }
+
+                        string postfix = ConvertToPostfix(infix.ToString());
+                        return EvaluatePostfix(postfix);
+                    }
+                    break;
+                }
+            case LogType.Adaptive:
+                {
+                    LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
+                    if (lastKnownLogValue == null)
+                    {
+                        AddValueToSql(logTag, readValue);
+                        return;
+                    }
+
+                    CheckAdaptiveRateOfChangeAndAddToSql(logTag, readValue, lastKnownLogValue);
+                    void CheckAdaptiveRateOfChangeAndAddToSql(TagDefinitions logTag, ReadValue readValue, LastValue lastKnownLogValue)
+                    {
+                        SetDefaultScale(logTag);
+                        SetDefaultRaw(logTag);
+
+                        double lowThreshold = logTag.scaleMin;
+                        double highThreshold = logTag.scaleMax;
+                        DateTime currentTime = DateTime.UtcNow;
+
+                        double valueDifference = Math.Abs(readValue.ValueAsFloat - lastKnownLogValue.ReadValue.ValueAsFloat);
+                        double timeDifferenceInSeconds = (currentTime - lastKnownLogValue.lastTimeLoggedToSql).TotalSeconds;
+
+                        if (timeDifferenceInSeconds == 0) // Prevent division by zero
+                        {
+                            return;
+                        }
+
+                        double rateOfChange = valueDifference / timeDifferenceInSeconds;
+
+                        double lowChangeInterval = logTag.rawMax;
+                        double highChangeInterval = logTag.rawMin;
+
+                        UpdateCustomLogFrequency(logTag, rateOfChange, lowThreshold, highThreshold, lowChangeInterval, highChangeInterval);
+                        AddValueToSql(logTag, readValue);
+
+                    }
+                    void SetDefaultScale(TagDefinitions logTag)
+                    {
+                        if (logTag.scaleMin == 0) logTag.scaleMin = 0.1f;
+                        if (logTag.scaleMax == 0) logTag.scaleMax = 1;
+                        if (logTag.scaleMin > logTag.scaleMax)
+                        {
+                            logTag.scaleMin = 0.1f;
+                            logTag.scaleMax = 1;
+                        }
+                    }
+
+                    void SetDefaultRaw(TagDefinitions logTag)
+                    {
+                        if (logTag.rawMin == 0) logTag.rawMin = 1000;
+                        if (logTag.rawMax == 0) logTag.rawMax = 10000;
+                        if (logTag.rawMin > logTag.rawMax)
+                        {
+                            logTag.rawMin = 1000;
+                            logTag.rawMax = 10000;
+                        }
+                    }
+                    void UpdateCustomLogFrequency(TagDefinitions logTag, double rateOfChange, double lowThreshold, double highThreshold, double lowChangeInterval, double highChangeInterval)
+                    {
+                        if (rateOfChange <= lowThreshold)
+                        {
+                            logTag.CustomLogFrequency = (int)lowChangeInterval;
+                        }
+                        else if (rateOfChange >= highThreshold)
+                        {
+                            logTag.CustomLogFrequency = (int)highChangeInterval;
+                        }
+                        else
+                        {
+                            // Linear interpolation between lowChangeInterval and highChangeInterval
+                            double slope = (highChangeInterval - lowChangeInterval) / (highThreshold - lowThreshold);
+                            double intercept = lowChangeInterval - slope * lowThreshold;
+                            logTag.CustomLogFrequency = (int)(slope * rateOfChange + intercept);
+                        }
+                    }
+                    break;
+                }
         }
     }
 
@@ -937,26 +998,18 @@ public static class LoggerHandler
     }
 
 
-
-
     private static async Task<ReadValue> ReadTagValueAsync(ExtendedPlc myPlc, TagDefinitions logTag, PlcTag plcTag)
     {
-        switch (logTag.VarType)
+        return logTag.VarType switch
         {
-            case VarType.S7String when !myPlc.isOpc:
-                return await ReadS7StringAsync(myPlc, plcTag);
-            case VarType.String:
-                return await ReadStringAsync(myPlc, plcTag);
-            case VarType.DateTime:
-                return await ReadDateTimeAsync(myPlc, plcTag);
-            case VarType.DateTimeLong when !myPlc.isOpc:
-                return await ReadDateTimeLongAsync(myPlc, plcTag);
-            default:
-                if (logTag.LogType != LogType.WriteWatchDogInt16)
-                    return await myPlc.Plc.ReadAsync(plcTag);
-                return null;
-        }
+            VarType.S7String when !myPlc.isOpc => await ReadS7StringAsync(myPlc, plcTag),
+            VarType.String => await ReadStringAsync(myPlc, plcTag),
+            VarType.DateTime => await ReadDateTimeAsync(myPlc, plcTag),
+            VarType.DateTimeLong when !myPlc.isOpc => await ReadDateTimeLongAsync(myPlc, plcTag),
+            _ => logTag.LogType != LogType.WriteWatchDogInt16 ? await myPlc.Plc.ReadAsync(plcTag) : null,
+        };
     }
+
 
     private static async Task<ReadValue> ReadS7StringAsync(ExtendedPlc MyPlc, PlcTag plcTag)
     {

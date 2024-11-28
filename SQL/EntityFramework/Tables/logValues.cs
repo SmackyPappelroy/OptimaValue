@@ -6,24 +6,26 @@ namespace OptimaValue
 {
     public class logValues
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public decimal index { get; set; }
 
+        // Foreign Key till tagConfig
+        [ForeignKey("tag")]
+        public int tag_id { get; set; }
+
+        // Navigation property till tagConfig
         public tagConfig tag { get; set; }
 
-        [Column(TypeName = "datetime")]
+        [Column(TypeName = "datetime2")] // Bättre precision än datetime
         public DateTime logTime { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(30)]
+        [StringLength(30)] // nvarchar(30)
         public string value { get; set; }
 
-        [Column(TypeName = "float")]
-        public float? numericValue { get; set; }
+        public float? numericValue { get; set; } // Float är redan rätt datatyp i EF Core
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(10)]
+        [StringLength(10)] // nvarchar(10)
         public string opcQuality { get; set; }
     }
 }

@@ -76,7 +76,7 @@ namespace OptimaValue
                 //{
                 try
                 {
-                    var created = await contextInstance.CreateDb();
+                    var created = await contextInstance.CreateDbAsync();
                     var result1 = await DatabaseSql.TestConnectionAsync();
                     if (result1)
                     {

@@ -176,7 +176,7 @@ public partial class MasterForm : Form
         if (autoStartTool.Checked)
             await AutoStart();
 
-
+        serviceToolStripMenuItem.Text = ServiceInstallerAppForm.ServiceExists() ? "Avinstallera tjänst" : "Installera tjänst";
     }
 
     private async Task AutoStart()
@@ -864,7 +864,7 @@ public partial class MasterForm : Form
     {
         if (!IsUserAdministrator())
         {
-            MessageBox.Show("Du måste köra programmet som administratör för att kunna installera tjänsten","Fel",MessageBoxButtons.OK,MessageBoxIcon.Error);
+            MessageBox.Show("Du måste köra programmet som administratör för att kunna installera tjänsten", "Fel", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
         if (!serviceFormOpen)
@@ -874,6 +874,7 @@ public partial class MasterForm : Form
             {
                 serviceFormOpen = false;
                 serviceImage.Visible = ServiceInstallerAppForm.ServiceExists();
+                serviceToolStripMenuItem.Text = ServiceInstallerAppForm.ServiceExists() ? "Avinstallera tjänst" : "Installera tjänst";
             };
             serviceForm.Show();
         }
@@ -886,7 +887,25 @@ public partial class MasterForm : Form
         WindowsPrincipal principal = new WindowsPrincipal(identity);
         return principal.IsInRole(WindowsBuiltInRole.Administrator);
     }
-  
 
-
+    private void rebuildIndexDatabasToolStripMenuItem_Click(object sender, EventArgs e)
+    {
+        // Check connection to database
+        if (!DatabaseSql.isConnected)
+        {
+            "Ingen anslutning till SQL-server".SendStatusMessage(Severity.Warning);
+            return;
+        }
+        var connectionString = $"Server={Config.Settings.Server};Database={Config.Settings.Databas};User Id={Config.Settings.User};Password={Config.Settings.Password};TrustServerCertificate=True; ";
+        var indexMaintenance = new IndexMaintenance();
+        try
+        {
+            var returnString = indexMaintenance.OptimizeIndexes();
+            Logger.LogInfo(returnString);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError("", ex);
+        }
+    }
 }

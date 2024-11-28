@@ -6,98 +6,72 @@ namespace OptimaValue
 {
     public class tagConfig
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
 
-        [Column(TypeName = "bit")]
-        public bool active { get; set; }
+        public bool active { get; set; } // `bit` hanteras automatiskt av EF Core för bool
 
-        [Column(TypeName = "nvarchar(MAX)")]
-        //[Column(TypeName = "nvarchar")]
-        //[StringLength(50)]
+        [Required] // Kolumnen är obligatorisk
+        [MaxLength(255)] // Begränsa "name" till 255 tecken för att undvika onödigt nvarchar(MAX)
         public string name { get; set; }
 
-        [Column(TypeName = "nvarchar(MAX)")]
+        [MaxLength(1000)] // Begränsa beskrivningens längd för att förbättra prestanda
         public string description { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(50)]
+        [MaxLength(50)]
         public string logType { get; set; }
 
-        [Column(TypeName = "time")]
-        public TimeSpan timeOfDay { get; set; }
+        public TimeSpan timeOfDay { get; set; } // EF Core hanterar TimeSpan som `time`
 
-        [Column(TypeName = "float")]
-        public float deadband { get; set; }
+        public float deadband { get; set; } // Float mappas automatiskt till rätt SQL-typ
 
-        //[Column(TypeName = "nvarchar")]
-        //[StringLength(50)]
-        [Column(TypeName = "nvarchar(MAX)")]
+        [MaxLength(255)]
         public string plcName { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(30)]
+        [MaxLength(30)]
         public string varType { get; set; }
 
-        [Column(TypeName = "int")]
         public int blockNr { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(30)]
+        [MaxLength(30)]
         public string dataType { get; set; }
 
-        [Column(TypeName = "int")]
         public int startByte { get; set; }
 
-        [Column(TypeName = "int")]
         public int nrOfElements { get; set; }
 
-        [Column(TypeName = "tinyint")]
-        public byte bitAddress { get; set; }
+        public byte bitAddress { get; set; } // Tinyint hanteras korrekt med byte
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(30)]
+        [MaxLength(30)]
         public string logFreq { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(30)]
+        [MaxLength(30)]
         public string tagUnit { get; set; }
 
         public int eventId { get; set; }
 
-        [Column(TypeName = "bit")]
         public bool isBooleanTrigger { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(30)]
+        [MaxLength(30)]
         public string boolTrigger { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(30)]
+        [MaxLength(30)]
         public string analogTrigger { get; set; }
 
-        [Column(TypeName = "float")]
         public float analogValue { get; set; }
 
-        [Column(TypeName = "float")]
         public float scaleMin { get; set; }
 
-        [Column(TypeName = "float")]
         public float scaleMax { get; set; }
 
-        [Column(TypeName = "float")]
         public float rawMin { get; set; }
 
-        [Column(TypeName = "float")]
         public float rawMax { get; set; }
 
-        [Column(TypeName = "float")]
         public float scaleOffset { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(2000)]
+        [MaxLength(2000)] // Lämna "calculation" som nvarchar(2000)
         public string calculation { get; set; }
-
     }
 }

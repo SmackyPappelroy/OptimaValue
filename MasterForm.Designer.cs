@@ -54,6 +54,7 @@
             notifyMenu = new System.Windows.Forms.ToolStripMenuItem();
             autoStartTool = new System.Windows.Forms.ToolStripMenuItem();
             serviceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            rebuildIndexDatabasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             menuQuestion = new System.Windows.Forms.ToolStripMenuItem();
             comboTrend = new System.Windows.Forms.ToolStripComboBox();
             btnStartTrend = new System.Windows.Forms.ToolStripMenuItem();
@@ -316,7 +317,7 @@
             // 
             // menuSettings
             // 
-            menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { databasToolStripMenuItem, notifyMenu, autoStartTool, serviceToolStripMenuItem });
+            menuSettings.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { databasToolStripMenuItem, notifyMenu, autoStartTool, serviceToolStripMenuItem, rebuildIndexDatabasToolStripMenuItem });
             menuSettings.Name = "menuSettings";
             menuSettings.Size = new System.Drawing.Size(84, 28);
             menuSettings.Text = "Inställningar";
@@ -350,6 +351,13 @@
             serviceToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             serviceToolStripMenuItem.Text = "Installera service";
             serviceToolStripMenuItem.Click += serviceToolStripMenuItem_Click;
+            // 
+            // rebuildIndexDatabasToolStripMenuItem
+            // 
+            rebuildIndexDatabasToolStripMenuItem.Name = "rebuildIndexDatabasToolStripMenuItem";
+            rebuildIndexDatabasToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            rebuildIndexDatabasToolStripMenuItem.Text = "Optimera databas";
+            rebuildIndexDatabasToolStripMenuItem.Click += rebuildIndexDatabasToolStripMenuItem_Click;
             // 
             // menuQuestion
             // 
@@ -454,5 +462,6 @@
         private System.Windows.Forms.ToolStripMenuItem btnStartTrend;
         private System.Windows.Forms.ToolStripMenuItem serviceToolStripMenuItem;
         private System.Windows.Forms.PictureBox serviceImage;
+        private System.Windows.Forms.ToolStripMenuItem rebuildIndexDatabasToolStripMenuItem;
     }
 }

@@ -49,6 +49,11 @@ public class ExtendedPlc
         {
             Plc = new OpcPlc(PlcConfiguration.Ip, OpcType.OpcDa, Id);
         }
+        else if (PlcConfiguration.CpuType == CpuType.Mqtt)
+        {
+            Plc = new MqttPlc(brokerAddress: PlcConfiguration.BrokerAddress, brokerPort: PlcConfiguration.BrokerPort);
+        }
+        
     }
 
 

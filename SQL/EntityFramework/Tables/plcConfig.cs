@@ -1,51 +1,42 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OptimaValue
 {
     public class plcConfig
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int id { get; set; }
 
-        [Column(TypeName = "bit")]
-        public bool active { get; set; }
+        public bool active { get; set; } // `bit` hanteras automatiskt av EF Core för bool
 
-        //[Column(TypeName = "nvarchar")]
-        //[StringLength(50)]
-        [Column(TypeName = "nvarchar(MAX)")]
+        [Required] // Gör kolumnen obligatorisk
+        [MaxLength(255)] // Begränsa till maximalt 255 tecken (standard för EF Core nvarchar)
         public string name { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(200)]
+        [Required]
+        [MaxLength(200)]
         public string ipAddress { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(10)]
+        [MaxLength(10)]
         public string cpuType { get; set; }
 
-        [Column(TypeName = "smallint")]
-        public short rack { get; set; }
+        public short rack { get; set; } // smallint hanteras direkt av EF Core
 
-        [Column(TypeName = "smallint")]
         public short slot { get; set; }
 
-        [Column(TypeName = "int")]
         public int syncTimeDbNr { get; set; }
 
-        [Column(TypeName = "int")]
         public int syncTimeOffset { get; set; }
 
-        [Column(TypeName = "bit")]
         public bool syncActive { get; set; }
 
-        [Column(TypeName = "nvarchar")]
-        [StringLength(20)]
+        [MaxLength(20)]
         public string syncBoolAddress { get; set; }
 
-        [Column(TypeName = "datetime")]
-        public System.DateTime lastSyncTime { get; set; }
-
+        [Column(TypeName = "datetime2")] // Bättre precision för tidsfält
+        public DateTime lastSyncTime { get; set; }
     }
 }

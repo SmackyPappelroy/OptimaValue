@@ -45,6 +45,10 @@ namespace OptimaValue
         //
         OpcDa = 1100,
         //
+        // MQTT
+        //
+        Mqtt = 1200,
+        //
         // Unknown
         //
         Unknown = 9999

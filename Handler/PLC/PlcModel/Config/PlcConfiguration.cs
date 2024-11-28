@@ -16,6 +16,8 @@ namespace OptimaValue
 
         public int ActivePlcId { get; set; }
         public bool Active { get; set; }
+        public string BrokerAddress { get; set; }
+        public int BrokerPort { get; set; }
 
         #region Plc time synchronization
         public int SyncTimeDbNr { get; set; }

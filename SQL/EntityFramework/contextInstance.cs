@@ -10,19 +10,19 @@ namespace OptimaValue
         {
             if (instance == null)
             {
-                instance = new LoggingDBContext();
+                instance = new LoggingDBContext(); // Skapa en ny standardinstans
             }
         }
 
-        public static async Task<bool> CreateDb()
+        public static async Task<bool> CreateDbAsync()
         {
             if (instance == null)
                 Instantiate();
 
-            var result = await Task.FromResult(instance.Database.CreateIfNotExists());
+            // Kontrollera om databasen existerar och skapa den om inte
+            var result = await instance.Database.EnsureCreatedAsync();
             DatabaseCreationNotifier.OnDatabaseCreated(result);
             return result;
         }
-
     }
 }
