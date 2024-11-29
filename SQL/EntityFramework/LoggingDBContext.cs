@@ -30,10 +30,13 @@ namespace OptimaValue
             // Konfigurera precision för decimalvärden
             modelBuilder.Entity<logValues>()
                 .Property(l => l.index)
-                .HasPrecision(18, 0);
+                .HasColumnType("decimal(18, 0)");
 
             // Konfigurera TimeSpan precision (om tillämpligt)
             // EF Core hanterar dock TimeSpan automatiskt bättre än EF6.
+            modelBuilder.Entity<tagConfig>()
+                .Property(t => t.timeOfDay)
+                .HasColumnType("time");
 
             // Lägg till index för snabbare sökning efter loggar baserat på tid
             modelBuilder.Entity<logValues>()

@@ -151,7 +151,7 @@ namespace OptimaValue
 
         public void Disconnect()
         {
-            myPlc.Close();
+            myPlc?.Close();
             SetConnectionStatus();
         }
 
@@ -400,6 +400,11 @@ namespace OptimaValue
 
         private void SetConnectionStatus()
         {
+            if (myPlc is null)
+            {
+                ConnectionStatus = ConnectionStatus.Disconnected;
+                return;
+            }
             ConnectionStatus = myPlc.IsConnected ? ConnectionStatus.Connected : ConnectionStatus.Disconnected;
         }
     }

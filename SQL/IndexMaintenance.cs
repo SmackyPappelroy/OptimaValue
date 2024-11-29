@@ -7,7 +7,7 @@ namespace OptimaValue;
 
 public class IndexMaintenance
 {
-    private static string _connectionString = $"Server={Config.Settings.Server};Database={Config.Settings.Databas};User={Config.Settings.User};Password={Config.Settings.Password};TrustServerCertificate=True;";
+    private static string _connectionString = $"Server={Config.Settings.Server};Database={Config.Settings.Databas};User={Config.Settings.User};Password={Config.Settings.Password};TrustServerCertificate=True;MultipleActiveResultSets=True;";
 
     public IndexMaintenance( )
     {
@@ -76,13 +76,14 @@ public class IndexMaintenance
 
     private void RebuildIndex(SqlConnection connection, string tableName, string indexName)
     {
-        var rebuildQuery = $"ALTER INDEX [{indexName}] ON [{tableName}] REBUILD;";
+        var rebuildQuery = $"ALTER INDEX [{indexName}] ON [{tableName}] REBUILD WITH (FILLFACTOR = 80);";
         using (var command = new SqlCommand(rebuildQuery, connection))
         {
-            Console.WriteLine($"Rebuilding index: {indexName} on table: {tableName}");
+            Console.WriteLine($"Rebuilding index: {indexName} on table: {tableName} with FILLFACTOR = 80");
             command.ExecuteNonQuery();
         }
     }
+
 
     private void ReorganizeIndex(SqlConnection connection, string tableName, string indexName)
     {
