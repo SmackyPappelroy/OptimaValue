@@ -4,6 +4,7 @@ using OpcUaHm;
 using OpcUaHm.Common;
 using S7.Net;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -39,7 +40,7 @@ public static class LoggerHandler
 
     public static LoggingStats LoggingStats = new LoggingStats(1, 5000);
 
-    private static List<LastValue> lastLogValues;
+    private static ConcurrentQueue<LastValue> lastLogValues;
 
     private static Task logTask;
     private static CancellationTokenSource cancelTokenSource = new();
@@ -201,7 +202,16 @@ public static class LoggerHandler
 
             sw.Stop();
             long executionTime = sw.ElapsedMilliseconds;
-            var delay = executionTime > minReadTime ? 10 : minReadTime - executionTime;
+            //var delay = executionTime > minReadTime ? 10 : minReadTime - executionTime;
+            // Hantera MinCycleTime för första varvet
+            var effectiveMinCycleTimeMs = LoggingStats.MinCycleTime == TimeSpan.MaxValue
+                ? minReadTime
+                : LoggingStats.MinCycleTime.TotalMilliseconds;
+
+            var delay = Math.Max(MinimumDelayMilliseconds,
+                     Math.Max(0, effectiveMinCycleTimeMs - executionTime));
+
+            Debug.WriteLine($"Delay: {delay}");
             LoggingStats.Update(DateTime.Now - startDateTime);
 
             await Task.Delay((int)delay, ct);
@@ -221,7 +231,7 @@ public static class LoggerHandler
 
     private static void InitializeLastLogValue()
     {
-        lastLogValues ??= new List<LastValue>();
+        lastLogValues ??= new ConcurrentQueue<LastValue>();
     }
 
     private static async Task CheckConnectionsAsync()
@@ -289,22 +299,95 @@ public static class LoggerHandler
         Logger.LogError($"Lyckas ej ansluta till {plc.PlcName}", ex);
     }
 
+    //private static async Task ProcessAllPlcTagsAndHandleClosing()
+    //{
+    //    foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
+    //    {
+    //        if (!MyPlc.Active)
+    //            continue;
+    //        await CheckPlcStatusAsync(MyPlc).ConfigureAwait(false);
+    //        await CheckReconnectAsync(MyPlc).ConfigureAwait(false);
+    //        await ProcessPlcTags(MyPlc).ConfigureAwait(false);
+
+    //        if (startClosing)
+    //        {
+    //            RequestDisconnect();
+    //        }
+    //    }
+    //}
+
+    /// <summary>
+    /// Processar varje PLC och dess taggar asynkront.
+    /// </summary>
+    /// <returns></returns>
     private static async Task ProcessAllPlcTagsAndHandleClosing()
     {
-        foreach (ExtendedPlc MyPlc in PlcConfig.PlcList)
-        {
-            if (!MyPlc.Active)
-                continue;
-            await CheckPlcStatusAsync(MyPlc).ConfigureAwait(false);
-            await CheckReconnectAsync(MyPlc).ConfigureAwait(false);
-            await ProcessPlcTags(MyPlc).ConfigureAwait(false);
+        var tasks = new List<Task>();
+        var semaphore = new SemaphoreSlim(4); // Begränsar till 4 samtidiga uppgifter
+        var timeout = TimeSpan.FromSeconds(30); // Timeout för varje uppgift
 
-            if (startClosing)
+        foreach (ExtendedPlc myPlc in PlcConfig.PlcList)
+        {
+            if (!myPlc.Active)
+                continue;
+
+            // Starta en asynkron uppgift för varje PLC
+            tasks.Add(Task.Run(async () =>
             {
-                RequestDisconnect();
-            }
+                await semaphore.WaitAsync(); // Begränsa antalet samtidiga uppgifter
+
+                CancellationTokenSource timeoutCts = null; // Definiera utanför try-blocket
+                try
+                {
+                    timeoutCts = new CancellationTokenSource(timeout); // Timeout token
+                    using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, cancelTokenSource.Token);
+
+                    await CheckPlcStatusAsync(myPlc).ConfigureAwait(false);
+                    await CheckReconnectAsync(myPlc).ConfigureAwait(false);
+                    await ProcessPlcTags(myPlc).ConfigureAwait(false);
+
+                    linkedCts.Token.ThrowIfCancellationRequested();
+                }
+                catch (OperationCanceledException) when (timeoutCts != null && timeoutCts.IsCancellationRequested)
+                {
+                    Logger.LogError($"Timeout inträffade för {myPlc.PlcName} ({myPlc.PlcConfiguration.Ip})");
+                }
+                catch (OperationCanceledException)
+                {
+                    Logger.LogInfo($"Bearbetningen avbröts för {myPlc.PlcName}");
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"Fel vid bearbetning av {myPlc.PlcName} ({myPlc.PlcConfiguration.Ip})", ex);
+                }
+                finally
+                {
+                    semaphore.Release();
+                    timeoutCts?.Dispose(); // Städa upp timeoutCts om den är skapad
+                }
+            }, cancelTokenSource.Token));
+
+        }
+
+        try
+        {
+            // Vänta på att alla uppgifter ska bli klara
+            await Task.WhenAll(tasks);
+            //Logger.LogInfo("Alla PLC:er bearbetades utan fel.");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError("Ett eller flera fel inträffade vid parallell bearbetning av PLC:er.", ex);
+        }
+
+        if (startClosing)
+        {
+            RequestDisconnect();
         }
     }
+
+
+
 
     private static async Task CheckPlcStatusAsync(ExtendedPlc myPlc)
     {
@@ -487,7 +570,7 @@ public static class LoggerHandler
                         continue;
 
                     subbedTag.LastLogTime = tiden;
-                    var lastValue = lastLogValues.Find(l => l.tag_id == logTag.Id);
+                    var lastValue = lastLogValues.ToList().Find(l => l.tag_id == logTag.Id);
 
                     async Task LogSubscribedTagAsync()
                     {
@@ -592,7 +675,7 @@ public static class LoggerHandler
         {
             case LogType.Delta:
                 {
-                    LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
+                    LastValue lastKnownLogValue = lastLogValues.ToList().FindLast(l => l.tag_id == logTag.Id);
                     if (lastKnownLogValue == null)
                     {
                         AddValueToSql(logTag, readValue);
@@ -604,7 +687,7 @@ public static class LoggerHandler
                 }
             case LogType.RateOfChange:
                 {
-                    LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
+                    LastValue lastKnownLogValue = lastLogValues.ToList().FindLast(l => l.tag_id == logTag.Id);
                     if (lastKnownLogValue == null)
                     {
                         AddValueToSql(logTag, readValue);
@@ -776,7 +859,7 @@ public static class LoggerHandler
                 }
             case LogType.Adaptive:
                 {
-                    LastValue lastKnownLogValue = lastLogValues.FindLast(l => l.tag_id == logTag.Id);
+                    LastValue lastKnownLogValue = lastLogValues.ToList().FindLast(l => l.tag_id == logTag.Id);
                     if (lastKnownLogValue == null)
                     {
                         AddValueToSql(logTag, readValue);
@@ -1222,7 +1305,7 @@ public static class LoggerHandler
                 return;
 
             logTag.TimesLogged++;
-            lastLogValues.Add(new LastValue()
+            lastLogValues.Enqueue(new LastValue()
             {
                 tag_id = logTag.Id,
                 ReadValue = readValue,
@@ -1253,14 +1336,37 @@ public static class LoggerHandler
 
     private static void RemoveOldLogValues(int tagId)
     {
-        var allOccurrencesOfTagInList = lastLogValues.FindAll(n => n.tag_id == tagId).OrderBy(dat => dat.ReadValue.LogTime).ToList();
-        var nrOfItemsInLastLog = lastLogValues.FindAll(n => n.tag_id == tagId);
+        var newQueue = new ConcurrentQueue<LastValue>();
+        LastValue latestValue = null;
 
-        // Garantera att det bara finns ett värde bakåt
-        if (nrOfItemsInLastLog.Count > 2)
+        // Extrahera det senaste värdet för det givna tagId
+        while (lastLogValues.TryDequeue(out var item))
         {
-            var removeDate = allOccurrencesOfTagInList[nrOfItemsInLastLog.Count - 3].ReadValue.LogTime;
-            lastLogValues.RemoveAll(i => i.tag_id == tagId && i.ReadValue.LogTime <= removeDate);
+            if (item.tag_id == tagId)
+            {
+                // Behåll endast det senaste värdet
+                if (latestValue == null || item.ReadValue.LogTime > latestValue.ReadValue.LogTime)
+                {
+                    latestValue = item;
+                }
+            }
+            else
+            {
+                // Behåll värden för andra taggar
+                newQueue.Enqueue(item);
+            }
         }
+
+        // Lägg tillbaka det senaste värdet för tagId
+        if (latestValue != null)
+        {
+            newQueue.Enqueue(latestValue);
+        }
+
+        // Uppdatera kön
+        lastLogValues = newQueue;
     }
+
+
+
 }

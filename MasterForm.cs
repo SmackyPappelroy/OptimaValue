@@ -756,12 +756,18 @@ public partial class MasterForm : Form
     #endregion
 
 
-    private void SqlForm_FormClosing(object sender, FormClosingEventArgs e)
+    private async void SqlForm_FormClosing(object sender, FormClosingEventArgs e)
     {
         IsOpenSqlForm = false;
         if (SqlForm.DatabaseCreated == true || DatabaseStatus.isConnected)
         {
             //databaseImage.Image = okDatabase;
+            // Kontrollera att databasen finns
+            while (!DatabaseSql.DatabaseExist())
+            {
+                await Task.Delay(1000);
+            }
+            await Task.Delay(50);
             PopulateTree();
         }
 
